@@ -78,12 +78,20 @@
         #errorModal.show {
             display: flex;
         }
+
+        .bg-white-solid {
+            background-color: #ffffff !important;
+        }
+
+        .content-wrapper {
+            background-color: #ffffff !important;
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-primary-50 via-white to-primary-100 min-h-screen font-inter">
+<body class="bg-white font-inter text-textDark">
     <!-- Contenedor Principal -->
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-5xl bg-white/85 backdrop-blur-lg rounded-2xl shadow-elegant overflow-hidden border border-white/20">
+    <div class="min-h-screen flex items-center justify-center p-4 bg-white-solid">
+        <div class="w-full max-w-5xl bg-white rounded-2xl shadow-elegant overflow-hidden border border-gray-200">
             <div class="grid lg:grid-cols-2 min-h-[500px]">
                 <!-- Sección del Carousel -->
                 <div class="hidden lg:block relative overflow-hidden rounded-l-2xl">
@@ -153,7 +161,7 @@
                 </div>
 
                 <!-- Contenido dinámico del panel derecho -->
-                <div id="dynamicContainer" class="p-6 lg:p-10 flex flex-col justify-center bg-transparent min-h-[500px]">
+                <div id="dynamicContainer" class="p-6 lg:p-10 flex flex-col justify-center bg-white min-h-[500px] content-wrapper">
                     @yield('content')
                 </div>
             </div>
