@@ -1,65 +1,106 @@
 @props(['title' => 'Domicilio'])
 
-<div class="space-y-8">
-    <input type="hidden" name="action" value="next">
-    <input type="hidden" name="seccion" value="2">
+<div class="space-y-6">
+    <h4 class="text-lg font-semibold text-gray-800 mb-6 pb-3 border-b border-gray-200 flex items-center">
+        <i class="fas fa-map-marker-alt text-red-800 mr-2"></i> Domicilio
+    </h4>
 
-    <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-gray-200">
-        <div class="flex items-center mb-6">
-            <svg class="w-6 h-6 text-[#9D2449] mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            <h3 class="text-lg font-semibold text-gray-800">Dirección</h3>
+    <!-- Código Postal -->
+    <div class="form-group">
+        <label for="codigo_postal" class="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
+        <input type="text" id="codigo_postal" name="codigo_postal" 
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500" 
+               placeholder="Ej: 12345" 
+               pattern="[0-9]{4,5}" 
+               maxlength="5"
+               required>
+        <p class="mt-1 text-sm text-gray-500">Al ingresar el código postal se llenarán automáticamente el estado y municipio</p>
+    </div>
+
+    <!-- Estado y Municipio -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-group">
+            <label for="estado" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <input type="text" id="estado" name="estado" 
+                   class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" 
+                   placeholder="Ej: Jalisco" 
+                   readonly 
+                   required>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Calle
-                </label>
-                <input type="text" name="calle" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200">
-            </div>
+        <div class="form-group">
+            <label for="municipio" class="block text-sm font-medium text-gray-700 mb-1">Municipio</label>
+            <input type="text" id="municipio" name="municipio" 
+                   class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" 
+                   placeholder="Ej: Guadalajara" 
+                   readonly 
+                   required>
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Número Exterior
-                </label>
-                <input type="text" name="numero_exterior" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200">
-            </div>
+    <!-- Colonia -->
+    <div class="form-group">
+        <label for="colonia" class="block text-sm font-medium text-gray-700 mb-1">Asentamiento</label>
+        <select id="colonia" name="colonia" 
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500" 
+                required>
+            <option value="">Seleccione un Asentamiento</option>
+        </select>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Número Interior
-                </label>
-                <input type="text" name="numero_interior" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200">
-            </div>
+    <!-- Calle -->
+    <div class="form-group">
+        <label for="calle" class="block text-sm font-medium text-gray-700 mb-1">Calle</label>
+        <input type="text" id="calle" name="calle" 
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500" 
+               placeholder="Ej: Av. Principal" 
+               maxlength="100"
+               required>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Colonia
-                </label>
-                <input type="text" name="colonia" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200">
-            </div>
+    <!-- Números -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-group">
+            <label for="numero_exterior" class="block text-sm font-medium text-gray-700 mb-1">Número Exterior</label>
+            <input type="text" id="numero_exterior" name="numero_exterior" 
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500" 
+                   placeholder="Ej: 123 o S/N" 
+                   maxlength="10" 
+                   pattern="[A-Za-z0-9\/]+"
+                   required>
+        </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Código Postal
-                </label>
-                <input type="text" name="codigo_postal" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200">
-            </div>
+        <div class="form-group">
+            <label for="numero_interior" class="block text-sm font-medium text-gray-700 mb-1">Número Interior</label>
+            <input type="text" id="numero_interior" name="numero_interior" 
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500" 
+                   placeholder="Ej: 5A" 
+                   maxlength="10" 
+                   pattern="[A-Za-z0-9]+">
+            <p class="mt-1 text-sm text-gray-500">Opcional</p>
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Estado
-                </label>
-                <select name="estado" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200">
-                    <option value="">Seleccione un estado</option>
-                    @foreach(config('estados.mexico') as $estado)
-                        <option value="{{ $estado }}">{{ $estado }}</option>
-                    @endforeach
-                </select>
-            </div>
+    <!-- Entre Calles -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-group">
+            <label for="entre_calle_1" class="block text-sm font-medium text-gray-700 mb-1">Entre Calle</label>
+            <input type="text" id="entre_calle_1" name="entre_calle_1" 
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500" 
+                   placeholder="Ej: Calle Independencia" 
+                   maxlength="100" 
+                   pattern="[A-Za-z0-9\s]+"
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label for="entre_calle_2" class="block text-sm font-medium text-gray-700 mb-1">Y Calle</label>
+            <input type="text" id="entre_calle_2" name="entre_calle_2" 
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500" 
+                   placeholder="Ej: Calle Morelos" 
+                   maxlength="100" 
+                   pattern="[A-Za-z0-9\s]+"
+                   required>
         </div>
     </div>
 </div> 
