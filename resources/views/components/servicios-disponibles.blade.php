@@ -1,3 +1,12 @@
+@props(['rfc' => null, 'estado' => null, 'fecha_vencimiento' => null])
+
+@php
+    $puedeInscribirse = !$rfc || ($estado === 'Inactivo');
+    $puedeActualizar = $estado === 'Activo';
+    $puedeRenovar = $estado === 'Activo' && $fecha_vencimiento && 
+                    now()->diffInDays(\Carbon\Carbon::parse($fecha_vencimiento)) <= 7;
+@endphp
+
 <!-- Contenedor de Servicios -->
 <div class="mt-6 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden border border-gray-200/80">
     <div class="p-5">
@@ -18,6 +27,7 @@
 
         <!-- Grid de servicios -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            @if($puedeInscribirse)
             <!-- Inscripción -->
             <div class="group relative bg-gradient-to-br from-white to-gray-50/50 rounded-xl border-2 border-gray-200/50 hover:border-[#9d2449]/30 transition-all duration-300 overflow-hidden hover:shadow-xl hover:-translate-y-1 cursor-pointer">
                 <div class="absolute inset-0 bg-gradient-to-br from-[#9d2449]/5 to-[#7a1d37]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -45,7 +55,9 @@
                     </div>
                 </div>
             </div>
+            @endif
 
+            @if($puedeRenovar)
             <!-- Renovación -->
             <div class="group relative bg-gradient-to-br from-white to-gray-50/50 rounded-xl border-2 border-gray-200/50 hover:border-[#9d2449]/30 transition-all duration-300 overflow-hidden hover:shadow-xl hover:-translate-y-1 cursor-pointer">
                 <div class="absolute inset-0 bg-gradient-to-br from-[#9d2449]/5 to-[#7a1d37]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -73,7 +85,9 @@
                     </div>
                 </div>
             </div>
+            @endif
 
+            @if($puedeActualizar)
             <!-- Actualización -->
             <div class="group relative bg-gradient-to-br from-white to-gray-50/50 rounded-xl border-2 border-gray-200/50 hover:border-[#9d2449]/30 transition-all duration-300 overflow-hidden hover:shadow-xl hover:-translate-y-1 cursor-pointer">
                 <div class="absolute inset-0 bg-gradient-to-br from-[#9d2449]/5 to-[#7a1d37]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -101,9 +115,11 @@
                     </div>
                 </div>
             </div>
+            @endif
         </div>
 
-        <!-- Información adicional -->
+        @if(!$rfc)
+        <!-- Información adicional cuando no hay RFC -->
         <div class="mt-6 bg-gradient-to-r from-[#9d2449]/5 to-[#7a1d37]/5 rounded-xl border border-[#9d2449]/10 p-4">
             <div class="flex items-start gap-3">
                 <div class="bg-gradient-to-br from-[#9d2449] to-[#7a1d37] rounded-lg p-1.5 shadow-md mt-0.5">
@@ -120,5 +136,6 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 </div> 
