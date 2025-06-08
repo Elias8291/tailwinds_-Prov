@@ -104,36 +104,31 @@
                 </div>
             </div>
 
-            <!-- Botón Ver Datos del SAT -->
-            <div class="mt-4">
-                <button type="button" 
-                        id="verDatosBtn"
-                        onclick="qrReader.showSatData()"
-                        class="hidden inline-flex items-center text-sm bg-white hover:bg-[#B4325E]/5 text-[#B4325E] font-medium py-2 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-[#B4325E]/20 hover:border-[#B4325E]/40">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                    Ver Datos del SAT
-                </button>
-            </div>
-
-            <!-- Loading indicator -->
-            <div id="loading-indicator" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                <div class="bg-white rounded-2xl p-6 shadow-xl">
-                    <div class="flex items-center space-x-4">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B4325E]"></div>
-                        <p class="text-gray-700 font-medium">Procesando documento...</p>
+            <!-- Contenedor de Datos SAT -->
+            <div id="satDataContainer" class="mt-8 hidden">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Datos del SAT</h3>
+                            <button onclick="showSatModal()" 
+                                    class="inline-flex items-center text-sm bg-white hover:bg-[#B4325E]/5 text-[#B4325E] font-medium py-2 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-[#B4325E]/20 hover:border-[#B4325E]/40">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Ver más datos
+                            </button>
+                        </div>
+                        <div id="satDataContent" class="space-y-6">
+                            <!-- Los datos del SAT se insertarán aquí -->
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Modal para mostrar datos del SAT -->
-        <div id="satDataModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4 overflow-y-auto">
-            <div class="relative w-full max-w-2xl mx-auto">
-                <!-- Modal content -->
-                <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <!-- Modal para mostrar datos completos del SAT -->
+            <div id="satDataModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+                <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
                     <!-- Modal header -->
                     <div class="px-6 py-4 bg-gradient-to-br from-[#B4325E] to-[#93264B] border-b border-[#B4325E]/10">
                         <div class="flex items-center justify-between">
@@ -143,9 +138,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-bold text-white">
-                                    Datos del SAT
-                                </h3>
+                                <h3 class="text-xl font-bold text-white">Datos Completos del SAT</h3>
                             </div>
                             <button onclick="closeSatModal()" class="text-white/80 hover:text-white transition-colors duration-200">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,15 +149,15 @@
                     </div>
 
                     <!-- Modal body -->
-                    <div class="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
-                        <div id="satDataContent" class="space-y-6">
-                            <!-- Los datos del SAT se insertarán aquí -->
+                    <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 150px);">
+                        <div id="satDataModalContent" class="space-y-6">
+                            <!-- Los datos completos del SAT se insertarán aquí -->
                         </div>
                     </div>
 
                     <!-- Modal footer -->
                     <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
-                        <div class="flex justify-end space-x-3">
+                        <div class="flex justify-end">
                             <button onclick="closeSatModal()" 
                                     class="inline-flex items-center px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 font-medium rounded-lg border border-gray-300 transition-colors duration-200 text-sm">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,6 +166,16 @@
                                 Cerrar
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading indicator -->
+            <div id="loading-indicator" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-2xl p-6 shadow-xl">
+                    <div class="flex items-center space-x-4">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B4325E]"></div>
+                        <p class="text-gray-700 font-medium">Procesando documento...</p>
                     </div>
                 </div>
             </div>
@@ -286,6 +289,7 @@
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
 
+// Funciones de utilidad
 function showLoading(show = true) {
     const loadingIndicator = document.getElementById('loading-indicator');
     if (loadingIndicator) {
@@ -295,159 +299,218 @@ function showLoading(show = true) {
 
 function showError(message) {
     showLoading(false);
-    alert(message);
+    // Crear notificación de error
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm notification-slide-in';
+    notification.innerHTML = `
+        <div class="card-custom rounded-lg shadow-lg border-l-4 border-red-500 p-4 bg-white">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">
+                        ${message}
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(notification);
+
+    // Remover la notificación después de 3 segundos
+    setTimeout(() => {
+        notification.classList.replace('notification-slide-in', 'notification-slide-out');
+        setTimeout(() => notification.remove(), 500);
+    }, 3000);
 }
 
-// Evento change del input file
-document.getElementById('document').addEventListener('change', async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    try {
-        // Validar el tipo de archivo
-        const isPDF = file.type === 'application/pdf';
-        const isImage = file.type.startsWith('image/');
-        
-        if (!isPDF && !isImage) {
-            throw new Error('El archivo debe ser un PDF o una imagen (JPG, PNG).');
-        }
-
-        // Validar el tamaño del archivo (5MB)
-        const maxSize = 5 * 1024 * 1024;
-        if (file.size > maxSize) {
-            throw new Error('El archivo no debe exceder los 5MB.');
-        }
-
-        // Actualizar la etiqueta con el nombre del archivo
-        const fileName = document.getElementById('fileName');
-        if (fileName) {
-            fileName.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-        }
-
-        showLoading(true);
-        console.log('Iniciando procesamiento del archivo:', file.name);
-
-        // Procesar el archivo
-        if (!window.qrReader) {
-            console.error('QRReader no inicializado');
-            throw new Error('El lector QR no está inicializado');
-        }
-
-        console.log('QRReader encontrado, procesando archivo...');
-        const result = await window.qrReader.handleFile(file);
-        console.log('Datos extraídos del QR:', result);
-        
-        if (result && result.success) {
-            console.log('Procesamiento exitoso, datos obtenidos:', result.data);
-            const verDatosBtn = document.getElementById('verDatosBtn');
-            if (verDatosBtn) {
-                verDatosBtn.classList.remove('hidden');
-                console.log('Botón "Ver Datos" mostrado');
-            }
-            // Mostrar datos automáticamente
-            console.log('Intentando mostrar modal con datos...');
-            window.qrReader.showSatData();
-        } else {
-            console.error('Fallo en el procesamiento:', result);
-            throw new Error('No se pudieron extraer los datos del documento');
-        }
-
-    } catch (error) {
-        console.error('Error detallado:', error);
-        showError(error.message || 'Error al procesar el documento');
-        // Resetear el input file
-        event.target.value = '';
-        const fileName = document.getElementById('fileName');
-        if (fileName) {
-            fileName.textContent = 'PDF o Imagen con QR (Máximo 5MB)';
-        }
-        // Ocultar botón de ver datos
-        const verDatosBtn = document.getElementById('verDatosBtn');
-        if (verDatosBtn) {
-            verDatosBtn.classList.add('hidden');
-        }
-    } finally {
-        showLoading(false);
+function resetUpload() {
+    const fileInput = document.getElementById('document');
+    if (fileInput) {
+        fileInput.value = '';
     }
-});
 
+    const fileName = document.getElementById('fileName');
+    if (fileName) {
+        fileName.textContent = 'PDF o Imagen con QR (Máximo 5MB)';
+    }
+
+    const satDataContainer = document.getElementById('satDataContainer');
+    if (satDataContainer) {
+        satDataContainer.classList.add('hidden');
+    }
+
+    if (window.qrHandler) {
+        window.qrHandler.reset();
+    }
+
+    showLoading(false);
+}
+
+// Funciones para el modal
 function showSatModal() {
     const modal = document.getElementById('satDataModal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        // Prevenir scroll del body
-        document.body.style.overflow = 'hidden';
+    const modalContent = document.getElementById('satDataModalContent');
+    
+    if (modal && modalContent && window.qrHandler) {
+        const result = window.qrHandler.showSatData();
+        if (result.success) {
+            modalContent.innerHTML = result.content;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        } else {
+            showError('Error al mostrar los datos: ' + result.error);
+        }
     }
 }
 
 function closeSatModal() {
     const modal = document.getElementById('satDataModal');
     if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        // Restaurar scroll del body
+        modal.style.display = 'none';
         document.body.style.overflow = '';
     }
 }
+
+// Cerrar modal al hacer clic fuera de él
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('satDataModal');
+    const modalContent = modal?.querySelector('.bg-white');
+    if (modal && event.target === modal && modalContent && !modalContent.contains(event.target)) {
+        closeSatModal();
+    }
+});
 </script>
 
 <script type="module">
+    import QRHandler from '/js/components/qr-handler.js';
     import QRReader from '/js/components/qr-reader.js';
     import SATValidator from '/js/validators/sat-validator.js';
     import SATScraper from '/js/scrapers/sat-scraper.js';
     
     // Esperar a que el DOM esté listo
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         try {
-            console.log('Inicializando QRReader...');
-            // Inicializar QRReader
-            window.qrReader = new QRReader(SATValidator, SATScraper);
-            console.log('QRReader inicializado correctamente');
+            console.log('Inicializando QRHandler...');
+            
+            // Crear e inicializar QRHandler
+            const qrHandler = new QRHandler();
+            await qrHandler.initialize(QRReader, SATValidator, SATScraper);
 
-            // Asegurarse de que el modal esté configurado correctamente
-            const modal = document.getElementById('satDataModal');
-            if (!modal) {
-                console.error('Modal no encontrado en el DOM');
-            }
-
-            // Exponer funciones de modal globalmente
-            window.showSatModal = function() {
-                console.log('Mostrando modal SAT');
-                const modal = document.getElementById('satDataModal');
-                if (modal) {
-                    modal.style.display = 'flex';
-                    modal.classList.remove('hidden');
-                } else {
-                    console.error('Modal no encontrado al intentar mostrarlo');
+            // Configurar callbacks
+            qrHandler.setOnDataScanned((data) => {
+                console.log('Datos escaneados:', data);
+                const satDataContainer = document.getElementById('satDataContainer');
+                const satDataContent = document.getElementById('satDataContent');
+                
+                if (satDataContainer && satDataContent) {
+                    const result = qrHandler.showSatData();
+                    if (result.success) {
+                        // Mostrar resumen en el contenedor
+                        const resumen = generarResumen(data);
+                        satDataContent.innerHTML = resumen;
+                        satDataContainer.classList.remove('hidden');
+                        showLoading(false);
+                    } else {
+                        showError('Error al mostrar los datos: ' + result.error);
+                    }
                 }
-            };
+            });
 
-            window.closeSatModal = function() {
-                console.log('Cerrando modal SAT');
-                const modal = document.getElementById('satDataModal');
-                if (modal) {
-                    modal.style.display = 'none';
-                    modal.classList.add('hidden');
-                }
-            };
+            qrHandler.setOnError((error) => {
+                console.error('Error en QRHandler:', error);
+                showError(error);
+                resetUpload();
+            });
 
-            // Sobrescribir la función showSatData del QRReader
-            const originalShowSatData = window.qrReader.showSatData;
-            window.qrReader.showSatData = function() {
-                console.log('Llamada a showSatData');
-                try {
-                    const result = originalShowSatData.call(this);
-                    console.log('Resultado de showSatData:', result);
-                    window.showSatModal();
-                    return result;
-                } catch (error) {
-                    console.error('Error en showSatData:', error);
-                    throw error;
-                }
-            };
+            // Asignar a window para acceso global
+            window.qrHandler = qrHandler;
+            console.log('QRHandler inicializado correctamente');
+
         } catch (error) {
             console.error('Error durante la inicialización:', error);
+            showError('Error al inicializar el lector QR');
+        }
+    });
+
+    // Función para generar un resumen de los datos
+    function generarResumen(data) {
+        if (!data || !data.details) return '';
+        
+        const details = data.details;
+        return `
+            <div class="space-y-4">
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gradient-to-br from-[#B4325E] to-[#93264B] rounded-xl flex items-center justify-center shadow-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-1">
+                            ${details.tipoPersona === 'Moral' ? 
+                                (details.razonSocial || 'Razón Social No Disponible') : 
+                                (details.nombreCompleto || 'Nombre No Disponible')}
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-[#B4325E]/10 text-[#B4325E]">
+                                RFC: ${details.rfc || 'No disponible'}
+                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-[#B4325E]/10 text-[#B4325E]">
+                                ${details.tipoPersona || 'Tipo no especificado'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Evento change del input file
+    document.getElementById('document').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            // Validar el tipo de archivo
+            const isPDF = file.type === 'application/pdf';
+            const isImage = file.type.startsWith('image/');
+            
+            if (!isPDF && !isImage) {
+                throw new Error('El archivo debe ser un PDF o una imagen (JPG, PNG).');
+            }
+
+            // Validar el tamaño del archivo (5MB)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                throw new Error('El archivo no debe exceder los 5MB.');
+            }
+
+            // Actualizar la etiqueta con el nombre del archivo
+            const fileName = document.getElementById('fileName');
+            if (fileName) {
+                fileName.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            }
+
+            showLoading(true);
+            console.log('Iniciando procesamiento del archivo:', file.name);
+
+            // Procesar el archivo con QRHandler
+            if (!window.qrHandler) {
+                throw new Error('El lector QR no está inicializado');
+            }
+
+            await window.qrHandler.handleFile(file);
+
+        } catch (error) {
+            console.error('Error detallado:', error);
+            showError(error.message || 'Error al procesar el documento');
+            resetUpload();
         }
     });
 </script>

@@ -3,6 +3,48 @@
 @section('title', 'Registro - Padrón de Proveedores de Oaxaca')
 
 @section('content')
+<!-- Modal para mostrar datos del SAT (Fuera del formulario principal) -->
+<div id="satDataModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+        <!-- Modal header -->
+        <div class="px-6 py-4 bg-gradient-to-br from-primary to-primary-dark border-b border-primary/10">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-white/10 rounded-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Datos del SAT</h3>
+                </div>
+                <button onclick="closeSatModal()" class="text-white/80 hover:text-white transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <!-- Modal body -->
+        <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 150px);">
+            <div id="satDataContent" class="space-y-6">
+                <!-- Los datos del SAT se insertarán aquí -->
+            </div>
+        </div>
+        <!-- Modal footer -->
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
+            <div class="flex justify-end">
+                <button onclick="closeSatModal()" 
+                        class="inline-flex items-center px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 font-medium rounded-lg border border-gray-300 transition-colors duration-200 text-sm">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <form method="POST" action="{{ route('register') }}" class="space-y-6" enctype="multipart/form-data">
     @csrf
     <!-- Header con Logo -->
@@ -84,7 +126,7 @@
         <!-- Botón Ver Datos del SAT -->
         <button type="button" 
                 id="verDatosBtn"
-                onclick="qrReader.showSatData()"
+                onclick="showSatModal()"
                 class="hidden inline-flex items-center text-sm bg-white hover:bg-primary-50 text-primary font-medium py-2 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-primary/20 hover:border-primary/40 mb-2">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -166,56 +208,246 @@
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js"></script>
 <script type="module">
+    import QRHandler from '/js/components/qr-handler.js';
     import QRReader from '/js/components/qr-reader.js';
     import SATValidator from '/js/validators/sat-validator.js';
     import SATScraper from '/js/scrapers/sat-scraper.js';
     
-    const qrReader = new QRReader(SATValidator, SATScraper);
-    window.qrReader = qrReader; // Hacer accesible para el botón Ver Datos
+    // Esperar a que el DOM esté listo
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            console.log('Inicializando QRHandler para registro...');
+            
+            // Crear e inicializar QRHandler
+            const qrHandler = new QRHandler();
+            await qrHandler.initialize(QRReader, SATValidator, SATScraper);
+
+            // Configurar callbacks
+            qrHandler.setOnDataScanned((data) => {
+                console.log('Datos escaneados:', data);
+                
+                // Ocultar área de subida
+                const uploadArea = document.getElementById('uploadArea');
+                if (uploadArea) {
+                    uploadArea.classList.add('hidden');
+                }
+
+                // Mostrar formulario de registro
+                const registrationForm = document.getElementById('registrationForm');
+                if (registrationForm) {
+                    registrationForm.classList.remove('hidden');
+                }
+
+                // Mostrar botón de ver datos
+                const verDatosBtn = document.getElementById('verDatosBtn');
+                if (verDatosBtn) {
+                    verDatosBtn.classList.remove('hidden');
+                }
+
+                // Autocompletar email si está disponible
+                if (data.details && data.details.email) {
+                    const emailInput = document.getElementById('email');
+                    if (emailInput) {
+                        emailInput.value = data.details.email;
+                    }
+                }
+
+                // Ocultar botón de enviar hasta que el formulario esté completo
+                const submitButton = document.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.classList.add('hidden');
+                }
+
+                // Agregar validación en tiempo real
+                const form = document.querySelector('form');
+                const inputs = form.querySelectorAll('input[required]');
+                inputs.forEach(input => {
+                    input.addEventListener('input', validateForm);
+                });
+            });
+
+            qrHandler.setOnError((error) => {
+                console.error('Error en QRHandler:', error);
+                showError(error);
+                resetUpload();
+            });
+
+            // Asignar a window para acceso global
+            window.qrHandler = qrHandler;
+            console.log('QRHandler inicializado correctamente');
+
+        } catch (error) {
+            console.error('Error durante la inicialización:', error);
+            showError('Error al inicializar el lector QR');
+        }
+    });
+
+    // Función para validar el formulario
+    function validateForm() {
+        const form = document.querySelector('form');
+        const submitButton = document.querySelector('button[type="submit"]');
+        const inputs = form.querySelectorAll('input[required]');
+        
+        let allFilled = true;
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                allFilled = false;
+            }
+        });
+
+        // Validar que las contraseñas coincidan
+        const password = document.getElementById('password');
+        const passwordConfirmation = document.getElementById('password_confirmation');
+        const passwordsMatch = password.value === passwordConfirmation.value;
+
+        if (submitButton) {
+            if (allFilled && passwordsMatch) {
+                submitButton.classList.remove('hidden');
+            } else {
+                submitButton.classList.add('hidden');
+            }
+        }
+    }
+
+    // Función para mostrar el modal con datos del SAT
+    window.showSatModal = function() {
+        const modal = document.getElementById('satDataModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            const result = window.qrHandler.showSatData();
+            if (result.success) {
+                const satDataContent = document.getElementById('satDataContent');
+                if (satDataContent) {
+                    satDataContent.innerHTML = result.content;
+                }
+            } else {
+                showError('Error al mostrar los datos: ' + result.error);
+            }
+        }
+    };
+
+    // Función para cerrar el modal
+    window.closeSatModal = function() {
+        const modal = document.getElementById('satDataModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    };
+
+    // Cerrar modal al hacer clic fuera de él
+    document.addEventListener('click', function(event) {
+        const modal = document.getElementById('satDataModal');
+        const modalContent = modal?.querySelector('.bg-white');
+        if (modal && event.target === modal && modalContent && !modalContent.contains(event.target)) {
+            closeSatModal();
+        }
+    });
+
+    // Evento change del input file
+    document.getElementById('document').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            // Validar el tipo de archivo
+            const isPDF = file.type === 'application/pdf';
+            const isImage = file.type.startsWith('image/');
+            
+            if (!isPDF && !isImage) {
+                throw new Error('El archivo debe ser un PDF o una imagen (JPG, PNG).');
+            }
+
+            // Validar el tamaño del archivo (5MB)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                throw new Error('El archivo no debe exceder los 5MB.');
+            }
+
+            // Actualizar la etiqueta con el nombre del archivo
+            const fileName = document.getElementById('fileName');
+            if (fileName) {
+                fileName.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            }
+
+            showLoading(true);
+            console.log('Iniciando procesamiento del archivo:', file.name);
+
+            // Procesar el archivo con QRHandler
+            if (!window.qrHandler) {
+                throw new Error('El lector QR no está inicializado');
+            }
+
+            await window.qrHandler.handleFile(file);
+
+        } catch (error) {
+            console.error('Error detallado:', error);
+            showError(error.message || 'Error al procesar el documento');
+            resetUpload();
+        }
+    });
 </script>
 <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
 
-    function showError(message) {
-        // Obtener el modal y el contenedor del mensaje
-        const modal = document.getElementById('errorModal');
-        const errorMessage = document.getElementById('errorMessage');
-        
-        if (errorMessage && modal) {
-            // Establecer el mensaje de error
-            errorMessage.textContent = message;
-            
-            // Mostrar el modal
-            modal.style.display = 'flex';
-            modal.classList.remove('hidden');
-        } else {
-            // Fallback si no se encuentra el modal
-            console.error('Modal de error no encontrado');
-            alert(message);
+    // Funciones de utilidad
+    function showLoading(show = true) {
+        const loadingIndicator = document.getElementById('loading-indicator');
+        if (loadingIndicator) {
+            loadingIndicator.classList.toggle('hidden', !show);
         }
-        
-        // Resetear el formulario
-        resetUpload();
+    }
+
+    function showError(message) {
+        showLoading(false);
+        // Crear notificación de error
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm notification-slide-in';
+        notification.innerHTML = `
+            <div class="card-custom rounded-lg shadow-lg border-l-4 border-red-500 p-4 bg-white">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">
+                            ${message}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(notification);
+
+        // Remover la notificación después de 3 segundos
+        setTimeout(() => {
+            notification.classList.replace('notification-slide-in', 'notification-slide-out');
+            setTimeout(() => notification.remove(), 500);
+        }, 3000);
     }
 
     function resetUpload() {
-        // Limpiar el input de archivo
         const fileInput = document.getElementById('document');
         if (fileInput) {
             fileInput.value = '';
         }
 
-        // Mostrar área de subida si existe
+        const fileName = document.getElementById('fileName');
+        if (fileName) {
+            fileName.textContent = 'PDF o Imagen con QR (Máximo 5MB)';
+        }
+
+        // Mostrar área de subida
         const uploadArea = document.getElementById('uploadArea');
         if (uploadArea) {
-            uploadArea.style.display = 'block';
-            const fileName = document.getElementById('fileName');
-            if (fileName) {
-                fileName.textContent = 'PDF o Imagen con QR (Máximo 5MB)';
-            }
+            uploadArea.classList.remove('hidden');
         }
         
-        // Ocultar formulario de registro si está visible
+        // Ocultar formulario de registro
         const registrationForm = document.getElementById('registrationForm');
         if (registrationForm) {
             registrationForm.classList.add('hidden');
@@ -225,6 +457,12 @@
         const verDatosBtn = document.getElementById('verDatosBtn');
         if (verDatosBtn) {
             verDatosBtn.classList.add('hidden');
+        }
+        
+        // Ocultar botón de enviar
+        const submitButton = document.querySelector('button[type="submit"]');
+        if (submitButton) {
+            submitButton.classList.add('hidden');
         }
         
         // Limpiar campos
@@ -240,52 +478,13 @@
         if (passwordConfirmInput) {
             passwordConfirmInput.value = '';
         }
+
+        if (window.qrHandler) {
+            window.qrHandler.reset();
+        }
+
+        showLoading(false);
     }
-
-    // Modificar el script existente para manejar el cambio de archivo
-    document.getElementById('document').addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (!file) {
-            resetUpload();
-            return;
-        }
-
-        try {
-            // Validar el tipo de archivo
-            const isPDF = file.type === 'application/pdf';
-            const isImage = file.type.startsWith('image/');
-            
-            if (!isPDF && !isImage) {
-                showError('El archivo debe ser un PDF o una imagen (JPG, PNG).');
-                return;
-            }
-
-            // Validar el tamaño del archivo (5MB)
-            const maxSize = 5 * 1024 * 1024; // 5MB en bytes
-            if (file.size > maxSize) {
-                showError('El archivo no debe exceder los 5MB.');
-                return;
-            }
-
-            // Actualizar el nombre del archivo en la UI
-            const fileName = document.getElementById('fileName');
-            if (fileName) {
-                fileName.textContent = file.name;
-            }
-
-            // Procesar el archivo
-            const result = await qrReader.handleFile(file);
-            
-            // Si el procesamiento no fue exitoso, no necesitamos hacer nada más
-            // ya que el QRReader ya manejó el error
-            if (!result || !result.success) {
-                return;
-            }
-
-        } catch (error) {
-            showError(error.message || 'Error inesperado al procesar el documento.');
-        }
-    });
 </script>
 <script>
 function togglePassword(inputId) {
