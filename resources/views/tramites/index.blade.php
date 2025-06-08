@@ -133,7 +133,7 @@
 
                     <!-- Opción de Carga de Documento -->
                     <div class="group bg-gradient-to-br from-white to-gray-50 rounded-xl p-5 border border-gray-100 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
-                        <div class="relative">
+                    <div class="relative">
                             <div class="flex items-center space-x-3 mb-4">
                                 <div class="w-10 h-10 bg-[#B4325E]/10 rounded-xl flex items-center justify-center">
                                     <svg class="w-5 h-5 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,28 +143,52 @@
                                 <h4 class="text-lg font-medium text-gray-900">Cargar Constancia</h4>
                             </div>
 
-                            <!-- Área de carga simplificada -->
-                            <div class="bg-white/80 rounded-xl p-4 border border-[#B4325E]/20">
-                                <div class="flex flex-col items-center justify-center w-full min-h-[120px] relative">
-                                    <input type="file" 
-                                           id="documentInput" 
-                                           name="document" 
-                                           accept=".pdf,.png,.jpg,.jpeg" 
-                                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                           aria-label="Seleccionar archivo">
-                                    
-                                    <div class="text-center pointer-events-none">
-                                        <div class="p-3 bg-white rounded-xl shadow-sm inline-block mb-3">
-                                            <svg class="w-6 h-6 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <!-- Versión Desktop (con drag & drop) -->
+                            <div class="hidden md:block">
+                                <div class="bg-white/80 rounded-xl p-4 border border-[#B4325E]/20">
+                                    <div id="desktopUpload" class="flex flex-col items-center justify-center w-full min-h-[140px] border-2 border-dashed border-[#B4325E]/20 hover:border-[#B4325E] rounded-xl transition-all duration-300 cursor-pointer bg-white/80 hover:bg-[#B4325E]/5">
+                                        <input type="file" 
+                                               id="documentDesktop" 
+                                               name="document" 
+                                               accept=".pdf,.png,.jpg,.jpeg" 
+                                               class="hidden">
+                                        <div class="text-center">
+                                            <div class="p-3 bg-white rounded-xl shadow-sm inline-block mb-3">
+                                                <svg class="w-6 h-6 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                                </svg>
+                                            </div>
+                                            <p class="text-sm font-medium text-[#B4325E]" id="uploadTextDesktop">
+                                                Arrastre su constancia aquí
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1" id="fileNameDesktop">
+                                                PDF o Imagen con QR (Máx. 5MB)
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Versión Mobile (simplificada) -->
+                            <div class="md:hidden">
+                                <div class="bg-white/80 rounded-xl p-4">
+                                    <div class="space-y-3">
+                                        <button type="button" 
+                                                onclick="document.getElementById('documentMobile').click()" 
+                                                class="w-full flex items-center justify-center space-x-2 bg-[#B4325E]/10 hover:bg-[#B4325E]/20 text-[#B4325E] px-4 py-3 rounded-xl transition-all duration-200">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                             </svg>
-                                        </div>
-                                        <p class="text-sm font-medium text-[#B4325E]" id="uploadText">
-                                            Seleccione o arrastre su constancia aquí
-                                        </p>
-                                        <p class="text-xs text-gray-500 mt-1" id="fileName">
-                                            PDF o Imagen con QR (Máx. 5MB)
-                                        </p>
+                                            <span class="font-medium text-sm">Seleccionar archivo</span>
+                                        </button>
+                                        <input type="file" 
+                                               id="documentMobile" 
+                                               name="document" 
+                                               accept=".pdf,.png,.jpg,.jpeg" 
+                                               class="hidden">
+                                        <p class="text-xs text-center text-gray-500" id="fileNameMobile">
+                                        PDF o Imagen con QR (Máx. 5MB)
+                                    </p>
                                     </div>
                                 </div>
                             </div>
@@ -178,16 +202,16 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                    </div>
 
                 <!-- Área de previsualización - RESTAURADA A LA ESTRUCTURA ORIGINAL -->
-                <div id="previewArea" class="hidden">
-                    <div class="hidden">
-                        <div id="qrResult"></div>
-                        <canvas id="pdfCanvas"></canvas>
+                    <div id="previewArea" class="hidden">
+                        <div class="hidden">
+                            <div id="qrResult"></div>
+                            <canvas id="pdfCanvas"></canvas>
                     </div>
-                </div>
-            </div>
+                        </div>
+                    </div>
 
             <!-- Contenedor de Datos SAT y Trámites -->
             <div id="satDataContainer" class="hidden space-y-6">
@@ -203,17 +227,17 @@
                                 </div>
                                 <h3 class="text-xl font-semibold text-gray-900">Información Fiscal</h3>
                             </div>
-                            <button onclick="showSatModal()" 
+                                    <button onclick="showSatModal()" 
                                     class="inline-flex items-center text-sm bg-white hover:bg-[#B4325E]/5 text-[#B4325E] font-medium py-2 px-4 rounded-xl transition-all duration-300 border border-[#B4325E]/20 hover:border-[#B4325E]/40 shadow-sm hover:shadow">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
                                 Ver detalles completos
-                            </button>
-                        </div>
+                                    </button>
+                                </div>
                         <div id="satDataContent" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- Los datos del SAT se insertarán aquí -->
+                                    <!-- Los datos del SAT se insertarán aquí -->
                         </div>
                     </div>
                 </div>
@@ -227,44 +251,44 @@
                                 <svg class="w-5 h-5 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                 </svg>
-                            </div>
+            </div>
                             <h3 class="text-xl font-semibold text-gray-900">Trámites Disponibles</h3>
-                        </div>
+        </div>
                         <svg id="tramitesArrow" class="w-5 h-5 text-gray-500 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
-                    
+
                     <div id="tramitesList" class="hidden px-6 pb-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            @foreach($tramites as $tramite)
+            @foreach($tramites as $tramite)
                             <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 border border-gray-100 hover:shadow-md transition-all duration-300 group">
                                 <div class="flex items-center space-x-3 mb-3">
                                     <div class="w-8 h-8 bg-[#B4325E]/10 rounded-lg flex items-center justify-center">
-                                        @if($tramite['tipo'] === 'inscripcion')
+                            @if($tramite['tipo'] === 'inscripcion')
                                         <svg class="w-4 h-4 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                        </svg>
-                                        @elseif($tramite['tipo'] === 'renovacion')
+                            </svg>
+                            @elseif($tramite['tipo'] === 'renovacion')
                                         <svg class="w-4 h-4 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                        </svg>
-                                        @else
+                            </svg>
+                            @else
                                         <svg class="w-4 h-4 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                        </svg>
-                                        @endif
-                                    </div>
+                            </svg>
+                            @endif
+                        </div>
                                     <h4 class="text-sm font-medium text-gray-900">{{ $tramite['nombre'] }}</h4>
-                                </div>
+                            </div>
                                 <p class="text-xs text-gray-500 mb-3 line-clamp-2">{{ $tramite['descripcion'] }}</p>
-                                <a href="{{ route('tramites.create', ['tipo' => $tramite['tipo']]) }}" 
+                            <a href="{{ route('tramites.create', ['tipo' => $tramite['tipo']]) }}" 
                                    class="inline-flex items-center text-xs font-medium text-[#B4325E] hover:text-[#93264B] transition-colors duration-200">
                                     Iniciar trámite
                                     <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                </a>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
                             </div>
                             @endforeach
                         </div>
@@ -396,31 +420,15 @@ function showError(message) {
     }, 3000);
 }
 
-function resetUpload() {
-    const fileInput = document.getElementById('documentInput');
-    if (fileInput) {
-        fileInput.value = '';
+function resetUpload(isDesktop) {
+    if (isDesktop) {
+        document.getElementById('documentDesktop').value = '';
+        document.getElementById('uploadTextDesktop').textContent = 'Arrastre su constancia aquí';
+        document.getElementById('fileNameDesktop').textContent = 'PDF o Imagen con QR (Máx. 5MB)';
+    } else {
+        document.getElementById('documentMobile').value = '';
+        document.getElementById('fileNameMobile').textContent = 'PDF o Imagen con QR (Máx. 5MB)';
     }
-
-    const uploadText = document.getElementById('uploadText');
-    if (uploadText) {
-        uploadText.textContent = 'Seleccione o arrastre su constancia aquí';
-    }
-
-    const fileName = document.getElementById('fileName');
-    if (fileName) {
-        fileName.textContent = 'PDF o Imagen con QR (Máx. 5MB)';
-    }
-
-    const satDataContainer = document.getElementById('satDataContainer');
-    if (satDataContainer) {
-        satDataContainer.classList.add('hidden');
-    }
-
-    if (window.qrHandler) {
-        window.qrHandler.reset();
-    }
-
     showLoading(false);
 }
 
@@ -471,56 +479,91 @@ function toggleTramites() {
     }
 }
 
-// Manejar la carga de archivos tanto para desktop como mobile
+// Parche para el error de Preline
 document.addEventListener('DOMContentLoaded', function() {
-    const uploadArea = document.querySelector('.bg-white\\/80.rounded-xl');
-    const fileInput = document.getElementById('documentInput');
-    const uploadText = document.getElementById('uploadText');
-    const fileName = document.getElementById('fileName');
+    // Prevenir que Preline intente usar closest() en eventos no válidos
+    const originalAddEventListener = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function(type, listener, options) {
+        if (type === 'click' || type === 'touchstart') {
+            const wrappedListener = function(event) {
+                // Asegurarse de que el evento tenga el método closest
+                if (!event.target.closest && event.target instanceof Element) {
+                    event.target.closest = function(selector) {
+                        let element = this;
+                        while (element && element !== document) {
+                            if (element.matches(selector)) return element;
+                            element = element.parentElement;
+                        }
+                        return null;
+                    };
+                }
+                return listener.call(this, event);
+            };
+            return originalAddEventListener.call(this, type, wrappedListener, options);
+        }
+        return originalAddEventListener.call(this, type, listener, options);
+    };
+});
 
-    // Prevenir comportamiento por defecto del drag and drop
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        uploadArea.addEventListener(eventName, preventDefaults, false);
-        document.body.addEventListener(eventName, preventDefaults, false);
-    });
+// Resto del código de manejo de archivos
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos Desktop
+    const desktopUpload = document.getElementById('desktopUpload');
+    const documentDesktop = document.getElementById('documentDesktop');
+    const uploadTextDesktop = document.getElementById('uploadTextDesktop');
+    const fileNameDesktop = document.getElementById('fileNameDesktop');
 
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
+    // Elementos Mobile
+    const documentMobile = document.getElementById('documentMobile');
+    const fileNameMobile = document.getElementById('fileNameMobile');
+
+    // Configuración Desktop (solo si estamos en desktop)
+    if (window.innerWidth >= 768) {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            desktopUpload.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            desktopUpload.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            desktopUpload.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            desktopUpload.classList.add('border-[#B4325E]', 'bg-[#B4325E]/5');
+        }
+
+        function unhighlight(e) {
+            desktopUpload.classList.remove('border-[#B4325E]', 'bg-[#B4325E]/5');
+        }
+
+        desktopUpload.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const file = dt.files[0];
+            handleFile(file, true);
+        }
+
+        documentDesktop.addEventListener('change', function(e) {
+            handleFile(this.files[0], true);
+        });
     }
 
-    // Highlight drop zone cuando se arrastra un archivo
-    ['dragenter', 'dragover'].forEach(eventName => {
-        uploadArea.addEventListener(eventName, highlight, false);
+    // Configuración Mobile
+    documentMobile.addEventListener('change', function(e) {
+        handleFile(this.files[0], false);
     });
 
-    ['dragleave', 'drop'].forEach(eventName => {
-        uploadArea.addEventListener(eventName, unhighlight, false);
-    });
-
-    function highlight(e) {
-        uploadArea.classList.add('border-[#B4325E]', 'bg-[#B4325E]/5');
-    }
-
-    function unhighlight(e) {
-        uploadArea.classList.remove('border-[#B4325E]', 'bg-[#B4325E]/5');
-    }
-
-    // Manejar el drop
-    uploadArea.addEventListener('drop', handleDrop, false);
-
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const file = dt.files[0];
-        handleFile(file);
-    }
-
-    // Manejar selección de archivo
-    fileInput.addEventListener('change', function(e) {
-        handleFile(this.files[0]);
-    });
-
-    function handleFile(file) {
+    function handleFile(file, isDesktop) {
         if (!file) return;
 
         try {
@@ -538,9 +581,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('El archivo no debe exceder los 5MB.');
             }
 
-            // Actualizar UI
-            fileName.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-            uploadText.textContent = 'Archivo seleccionado';
+            // Actualizar UI según la versión
+            const fileName = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            if (isDesktop) {
+                fileNameDesktop.textContent = fileName;
+                uploadTextDesktop.textContent = 'Archivo seleccionado';
+            } else {
+                fileNameMobile.textContent = fileName;
+            }
             
             showLoading(true);
             console.log('Iniciando procesamiento del archivo:', file.name);
@@ -550,7 +598,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.qrHandler.handleFile(file).catch(error => {
                     console.error('Error en el procesamiento:', error);
                     showError(error.message || 'Error al procesar el documento');
-                    resetUpload();
+                    resetUpload(isDesktop);
                 });
             } else {
                 throw new Error('El sistema no está listo para procesar archivos');
@@ -559,12 +607,14 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error:', error);
             showError(error.message);
-            resetUpload();
+            resetUpload(isDesktop);
         }
     }
 
     // Exponer la función de reset para uso global
-    window.resetUpload = resetUpload;
+    window.resetUpload = function() {
+        resetUpload(window.innerWidth >= 768);
+    };
 });
 </script>
 
@@ -637,9 +687,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         <h4 class="text-sm font-medium text-gray-700">Contribuyente</h4>
                     </div>
                     <p class="text-base font-semibold text-gray-900 line-clamp-2">
-                        ${details.tipoPersona === 'Moral' ? 
-                            (details.razonSocial || 'Razón Social No Disponible') : 
-                            (details.nombreCompleto || 'Nombre No Disponible')}
+                            ${details.tipoPersona === 'Moral' ? 
+                                (details.razonSocial || 'Razón Social No Disponible') : 
+                                (details.nombreCompleto || 'Nombre No Disponible')}
                     </p>
                 </div>
 
@@ -655,8 +705,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <p class="text-base font-semibold text-gray-900">${details.rfc || 'No disponible'}</p>
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-[#B4325E]/10 text-[#B4325E] mt-2">
-                        ${details.tipoPersona || 'Tipo no especificado'}
-                    </span>
+                                ${details.tipoPersona || 'Tipo no especificado'}
+                            </span>
                 </div>
 
                 <!-- Estatus -->

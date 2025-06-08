@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\TramiteController;
 use App\Http\Controllers\DocumentoController;
+use App\Http\Controllers\ProveedorController;
 
 // Ruta principal
 Route::get('/', function () {
@@ -78,3 +79,6 @@ Route::get('/tramites/create', [TramiteController::class, 'create'])->name('tram
 Route::post('/tramites', [TramiteController::class, 'store'])->name('tramites.store');
 
 Route::resource('documentos', DocumentoController::class);
+
+// Rutas de proveedores
+Route::resource('proveedores', ProveedorController::class);
