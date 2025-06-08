@@ -45,6 +45,71 @@
 </div>
 
 <script>
+function calcularTiempoRestante(fechaVencimiento) {
+    if (!fechaVencimiento) return null;
+
+    const ahora = new Date();
+    const vencimiento = new Date(fechaVencimiento);
+    const diferencia = vencimiento - ahora;
+
+    // Si ya venció
+    if (diferencia < 0) {
+        const tiempoVencido = Math.abs(diferencia);
+        const diasVencidos = Math.floor(tiempoVencido / (1000 * 60 * 60 * 24));
+        return {
+            texto: `Vencido hace ${diasVencidos} días`,
+            clase: 'text-red-600',
+            vencido: true
+        };
+    }
+
+    // Calcular todas las unidades de tiempo
+    const milisegundosEnHora = 1000 * 60 * 60;
+    const milisegundosEnDia = milisegundosEnHora * 24;
+    const milisegundosEnMes = milisegundosEnDia * 30.44; // Promedio de días por mes
+
+    const mesesTotales = Math.floor(diferencia / milisegundosEnMes);
+    const restoDespuesMeses = diferencia % milisegundosEnMes;
+    
+    const diasTotales = Math.floor(restoDespuesMeses / milisegundosEnDia);
+    const restoDespuesDias = restoDespuesMeses % milisegundosEnDia;
+    
+    const horasTotales = Math.floor(restoDespuesDias / milisegundosEnHora);
+
+    // Determinar clase de color
+    let clase = '';
+    if (mesesTotales > 3) {
+        clase = 'text-green-600';
+    } else if (mesesTotales > 0 || diasTotales > 15) {
+        clase = 'text-yellow-600';
+    } else {
+        clase = 'text-red-600';
+    }
+
+    // Construir mensaje
+    const partesMensaje = [];
+    
+    // Siempre incluir los tres valores
+    partesMensaje.push(`${mesesTotales} ${mesesTotales === 1 ? 'mes' : 'meses'}`);
+    partesMensaje.push(`${diasTotales} ${diasTotales === 1 ? 'día' : 'días'}`);
+    partesMensaje.push(`${horasTotales} ${horasTotales === 1 ? 'hora' : 'horas'}`);
+
+    return {
+        texto: `Tiempo para vencer: ${partesMensaje.join(', ')}`,
+        clase,
+        vencido: false,
+        detalle: `Fecha de vencimiento: ${vencimiento.toLocaleDateString('es-MX', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        })} a las ${vencimiento.toLocaleTimeString('es-MX', {
+            hour: '2-digit',
+            minute: '2-digit'
+        })}`
+    };
+}
+
 async function showRfcHistoryModal(rfc) {
     try {
         const response = await fetch(`/api/rfc-history/${rfc}`);
@@ -56,24 +121,10 @@ async function showRfcHistoryModal(rfc) {
         
         if (historyContent && modal && data.history) {
             historyContent.querySelector('ol').innerHTML = data.history.map((item) => {
-                // Formatear fechas
                 const fechaRegistro = item.date ? new Date(item.date) : null;
                 const fechaVencimiento = item.expiration_date ? new Date(item.expiration_date) : null;
-
-                const fechaRegistroStr = fechaRegistro ? fechaRegistro.toLocaleDateString('es-MX', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                }) : 'No especificada';
-
-                const fechaVencimientoStr = fechaVencimiento ? fechaVencimiento.toLocaleDateString('es-MX', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                }) : 'No especificada';
-
-                // Determinar estado y clases
-                const estadoInfo = determinarEstadoYClases(item.status || 'Inactivo');
+                const tiempoRestante = calcularTiempoRestante(item.expiration_date);
+                const estadoInfo = determinarEstadoYClases(item.status || (tiempoRestante?.vencido ? 'Inactivo' : 'Activo'));
 
                 return `
                     <li class="mb-10 ms-6">
@@ -82,7 +133,12 @@ async function showRfcHistoryModal(rfc) {
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center space-x-2">
                                     <time class="text-sm font-normal text-gray-400">
-                                        Registro: ${fechaRegistroStr}
+                                        Registro: ${fechaRegistro ? fechaRegistro.toLocaleDateString('es-MX', {
+                                            weekday: 'long',
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        }) : 'No especificada'}
                                     </time>
                                     <span class="px-2.5 py-0.5 text-xs font-medium rounded-full ${estadoInfo.badge}">
                                         ${item.status || 'Estado no disponible'}
@@ -94,7 +150,6 @@ async function showRfcHistoryModal(rfc) {
                             </div>
 
                             <div class="space-y-4">
-                                <!-- Información Principal -->
                                 <div>
                                     <h3 class="text-lg font-semibold text-gray-900">
                                         ${item.title || 'Título no disponible'}
@@ -104,18 +159,24 @@ async function showRfcHistoryModal(rfc) {
                                     </p>
                                 </div>
 
-                                <!-- Fechas y Estado -->
-                                <div class="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                                <div class="grid grid-cols-1 gap-4 p-4 bg-gray-50 rounded-lg">
                                     <div>
-                                        <p class="text-sm font-medium text-gray-900">Fecha de Vencimiento</p>
-                                        <p class="text-sm text-gray-600 mt-1">${fechaVencimientoStr}</p>
-                                        ${item.dias_mensaje ? `
-                                            <p class="text-xs mt-1 ${estadoInfo.textColor} font-medium">
-                                                ${item.dias_mensaje}
+                                        <div class="flex items-center justify-between">
+                                            <p class="text-sm font-medium text-gray-900">Estado de Vencimiento</p>
+                                            <span class="px-2.5 py-0.5 text-xs font-medium rounded-full ${tiempoRestante?.clase || 'bg-gray-100 text-gray-800'}">
+                                                ${tiempoRestante?.vencido ? 'Vencido' : 'En Vigencia'}
+                                            </span>
+                                        </div>
+                                        ${tiempoRestante ? `
+                                            <p class="text-sm ${tiempoRestante.clase} font-medium mt-2">
+                                                ${tiempoRestante.texto}
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                ${tiempoRestante.detalle}
                                             </p>
                                         ` : ''}
                                     </div>
-                                    <div class="flex items-end justify-end">
+                                    <div class="flex justify-end pt-2 border-t border-gray-200">
                                         <button onclick="showRfcDetails('${item.pv}')" 
                                                 class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#B4325E]">
                                             Ver Detalles
@@ -130,6 +191,31 @@ async function showRfcHistoryModal(rfc) {
 
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
+
+            // Actualizar tiempos cada minuto
+            const intervalId = setInterval(() => {
+                const items = historyContent.querySelectorAll('li');
+                items.forEach(item => {
+                    const fechaVencimientoElement = item.querySelector('[data-fecha-vencimiento]');
+                    if (fechaVencimientoElement) {
+                        const fechaVencimiento = fechaVencimientoElement.dataset.fechaVencimiento;
+                        const tiempoRestante = calcularTiempoRestante(fechaVencimiento);
+                        if (tiempoRestante) {
+                            const tiempoElement = item.querySelector('.tiempo-restante');
+                            if (tiempoElement) {
+                                tiempoElement.textContent = tiempoRestante.texto;
+                                tiempoElement.className = `text-sm ${tiempoRestante.clase} font-medium tiempo-restante`;
+                            }
+                            const detalleElement = item.querySelector('.tiempo-detalle');
+                            if (detalleElement) {
+                                detalleElement.textContent = tiempoRestante.detalle;
+                            }
+                        }
+                    }
+                });
+            }, 60000);
+
+            modal.addEventListener('hidden.modal', () => clearInterval(intervalId));
         }
     } catch (error) {
         console.error('Error al mostrar el historial:', error);
@@ -187,5 +273,4 @@ document.addEventListener('click', function(event) {
         closeRfcHistoryModal();
     }
 });
-</script> 
 </script> 

@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RfcSearchController;
+use App\Http\Controllers\HistorialProveedorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,4 +22,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // RFC Search Routes
 Route::get('/rfc-search/{rfc}', [RfcSearchController::class, 'search']);
-Route::get('/rfc-history/{rfc}', [RfcSearchController::class, 'history']); 
+Route::get('/rfc-history/{rfc}', [RfcSearchController::class, 'history']);
+Route::get('/proveedor/historial', [HistorialProveedorController::class, 'buscarPorRFC']); 
