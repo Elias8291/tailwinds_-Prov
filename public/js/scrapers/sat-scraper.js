@@ -1,5 +1,6 @@
 class SATScraper {
     static async scrapeData(url) {
+        console.log('Iniciando scraping de datos del SAT:', url);
         try {
             const response = await fetch(url, {
                 headers: {
@@ -9,8 +10,15 @@ class SATScraper {
                 timeout: 15000
             });
 
+            console.log('Respuesta del servidor SAT:', {
+                status: response.status,
+                ok: response.ok,
+                headers: Object.fromEntries(response.headers)
+            });
+
             if (!response.ok) {
                 const text = await response.text();
+                console.error('Error en respuesta del SAT:', text);
                 if (response.status >= 500 || text.includes('Weblogic Bridge Message') || text.includes('No backend server available')) {
                     throw new Error('La página del SAT no está disponible temporalmente');
                 }
@@ -18,6 +26,8 @@ class SATScraper {
             }
 
             const html = await response.text();
+            console.log('HTML recibido del SAT:', html.substring(0, 200) + '...');
+
             if (html.includes('Weblogic Bridge Message') || html.includes('No backend server available')) {
                 throw new Error('La página del SAT no está disponible temporalmente');
             }
@@ -52,14 +62,19 @@ class SATScraper {
             // Extraer RFC y determinar tipo de persona
             const rfcMatch = html.match(/RFC:\s*([A-Z0-9]+)/i);
             if (!rfcMatch) {
+                console.error('No se encontró el RFC en el HTML');
                 throw new Error('No se pudo encontrar el RFC en el documento');
             }
 
             data.details.rfc = rfcMatch[1];
             data.details.tipoPersona = data.details.rfc.length === 12 ? 'Moral' : 'Física';
+            console.log('RFC extraído:', data.details.rfc, 'Tipo de persona:', data.details.tipoPersona);
 
             // Procesar secciones de datos
-            doc.querySelectorAll('[data-role="listview"]').forEach((section, index) => {
+            const sections = doc.querySelectorAll('[data-role="listview"]');
+            console.log('Secciones encontradas:', sections.length);
+
+            sections.forEach((section, index) => {
                 const title = section.querySelector('[data-role="list-divider"]')?.textContent.trim() || `Sección ${index + 1}`;
                 if (!section.querySelector('table')) return;
 
@@ -76,6 +91,7 @@ class SATScraper {
 
                     // Asignar valores específicos
                     this.assignSpecificValue(data.details, label, value);
+                    console.log(`Campo encontrado en ${title}:`, { label, value });
 
                     fields.push({ label, value });
                 });
@@ -85,16 +101,18 @@ class SATScraper {
                         title,
                         fields
                     });
+                    console.log(`Sección procesada: ${title} con ${fields.length} campos`);
                 }
             });
 
             // Procesar nombre completo
             this.processFullName(data.details);
+            console.log('Datos procesados:', data);
 
             return data;
         } catch (error) {
-            console.warn('Error al obtener datos del SAT:', error);
-            throw error; // Re-throw the error to be handled by the caller
+            console.error('Error detallado al obtener datos del SAT:', error);
+            throw error;
         }
     }
 

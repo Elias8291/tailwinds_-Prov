@@ -13,4 +13,10 @@
  * limitations under the License.
  */
 
-var pdfjsLib = (function(){var e={};return e.getDocument=function(e){return new Promise((function(n){console.log("Loading PDF...",e),n({numPages:1,getPage:function(e){return new Promise((function(e){e({getViewport:function(e){return{width:100,height:100}},render:function(e){return{promise:Promise.resolve()}}})}))}})}))},"undefined"!=typeof window&&(window.pdfjsLib=e),e})(); 
+// Import the PDF.js library
+import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.mjs';
+
+// Set worker path
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+export default pdfjsLib; 

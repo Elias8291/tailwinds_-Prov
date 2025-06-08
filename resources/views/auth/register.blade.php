@@ -71,11 +71,8 @@
         <!-- Área de previsualización (permanentemente oculta) -->
         <div id="previewArea" class="hidden">
             <div class="hidden">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <div id="qrResult"></div>
-                    </div>
-                </div>
+                <div id="qrResult"></div>
+                <canvas id="pdfCanvas"></canvas>
             </div>
         </div>
     </div>
