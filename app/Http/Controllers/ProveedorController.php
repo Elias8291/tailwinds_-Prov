@@ -13,14 +13,19 @@ class ProveedorController extends Controller
         $search = $request->get('search');
         $estado = $request->get('estado');
 
-        $query = Proveedor::query();
+        $query = Proveedor::query()
+            ->join('solicitante', 'proveedor.solicitante_id', '=', 'solicitante.id')
+            ->select('proveedor.*', 'solicitante.rfc', 'solicitante.tipo_persona');
 
         if ($search) {
-            $query->where('pv', 'LIKE', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('proveedor.pv', 'LIKE', "%{$search}%")
+                  ->orWhere('solicitante.rfc', 'LIKE', "%{$search}%");
+            });
         }
 
         if ($estado) {
-            $query->where('estado', $estado);
+            $query->where('proveedor.estado', $estado);
         }
 
         $proveedores = $query->paginate($perPage)->withQueryString();

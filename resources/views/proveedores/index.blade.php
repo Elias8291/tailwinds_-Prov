@@ -149,7 +149,8 @@
                             </div>
                             <div>
                                 <div class="font-semibold text-gray-900">{{ $proveedor->pv }}</div>
-                                <div class="text-sm text-gray-500">Vence: {{ $proveedor->fecha_vencimiento }}</div>
+                                <div class="text-sm text-gray-500">RFC: {{ $proveedor->rfc }}</div>
+                                <div class="text-sm text-gray-500">{{ $proveedor->tipo_persona }}</div>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -239,6 +240,8 @@
                     <thead>
                         <tr class="bg-[#B4325E] text-white">
                             <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider">PV</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider">RFC</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider">Tipo</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider">Fecha Registro</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider">Fecha Vencimiento</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider">Estado</th>
@@ -257,6 +260,12 @@
                                         <div class="text-sm font-medium text-gray-900">{{ $proveedor->pv }}</div>
                                     </div>
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ $proveedor->rfc }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ $proveedor->tipo_persona }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ $proveedor->fecha_registro }}</div>
