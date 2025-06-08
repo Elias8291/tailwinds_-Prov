@@ -6,6 +6,7 @@ class QRHandler {
         this.qrReader = null;
         this.validator = null;
         this.scraper = null;
+        this.scannedData = null;
     }
 
     async initialize(QRReader, SATValidator, SATScraper) {
@@ -142,6 +143,76 @@ class QRHandler {
 
     reset() {
         this.lastScannedData = null;
+    }
+
+    getRfcFromData() {
+        if (this.scannedData && this.scannedData.details) {
+            return this.scannedData.details.rfc || null;
+        }
+        return null;
+    }
+
+    generateSatDataHtml(details) {
+        return `
+            <div class="space-y-6">
+                <!-- Información General -->
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Información General</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">RFC</p>
+                            <p class="text-base font-medium text-gray-900">${details.rfc || 'No disponible'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Tipo de Persona</p>
+                            <p class="text-base font-medium text-gray-900">${details.tipoPersona || 'No especificado'}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-sm text-gray-500">${details.tipoPersona === 'Moral' ? 'Razón Social' : 'Nombre Completo'}</p>
+                            <p class="text-base font-medium text-gray-900">
+                                ${details.tipoPersona === 'Moral' ? 
+                                    (details.razonSocial || 'No disponible') : 
+                                    (details.nombreCompleto || 'No disponible')}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Domicilio Fiscal -->
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Domicilio Fiscal</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                            <p class="text-sm text-gray-500">Dirección</p>
+                            <p class="text-base font-medium text-gray-900">${details.direccion || 'No disponible'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Código Postal</p>
+                            <p class="text-base font-medium text-gray-900">${details.codigoPostal || 'No disponible'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Entidad Federativa</p>
+                            <p class="text-base font-medium text-gray-900">${details.entidadFederativa || 'No disponible'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Adicional -->
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Información Adicional</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Estatus</p>
+                            <p class="text-base font-medium text-gray-900">${details.estatus || 'No disponible'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Fecha de Registro</p>
+                            <p class="text-base font-medium text-gray-900">${details.fechaRegistro || 'No disponible'}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 }
 

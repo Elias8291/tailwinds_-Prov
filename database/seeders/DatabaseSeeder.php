@@ -23,15 +23,15 @@ class DatabaseSeeder extends Seeder
             EstadosTableSeeder::class,
             MunicipioSeeder::class,
             LocalidadSeeder::class,
-            TiposAsentamientoSeeder::class, 
+            TiposAsentamientoSeeder::class,
             AsentamientosSeeder::class,
             DocumentoSeeder::class,
             SectoresSeeder::class,
             ActividadesSeeder::class,
-           //// SolicitanteSeeder::class,
-           // TramiteSeeder::class,
-           // DetalleTramiteSeeder::class,
-           // ProveedorSeeder::class,
+            SolicitanteSeeder::class,
+            TramiteSeeder::class,
+            DetalleTramiteSeeder::class,
+            ProveedorSeeder::class,
         ]);
     }
 }

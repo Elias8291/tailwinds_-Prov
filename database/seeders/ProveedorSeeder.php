@@ -31,6 +31,7 @@ class ProveedorSeeder extends Seeder
         }
 
         $solicitanteIds = DB::table('solicitante')->pluck('id')->toArray();
+        $today = new DateTime();
 
         foreach ($proveedores as $proveedor) {
             // Skip entries missing required keys
@@ -52,24 +53,6 @@ class ProveedorSeeder extends Seeder
                 continue;
             }
 
-            // Debug estado value
-            $this->command->info('Processing estado: ' . ($proveedor['estado'] ?? 'N/A'));
-
-            // Normalize and map estado
-            $estadoRaw = isset($proveedor['estado']) ? trim(strtolower($proveedor['estado'])) : '';
-            $estado = match ($estadoRaw) {
-                'activo' => 'Activo',
-                'cancelado' => 'Inactivo',
-                'pendiente renovacion' => 'Pendiente Renovacion',
-                default => 'Inactivo',
-            };
-
-            // Validate pv (proveedor_id) length
-            if (strlen($proveedor['proveedor_id']) > 10) {
-                $this->command->warn('Invalid proveedor_id in JSON: ' . $proveedor['proveedor_id'] . ' exceeds 10 characters. Skipping entry.');
-                continue;
-            }
-
             // Validate fecha_registro
             $fechaRegistro = $proveedor['fecha_registro'];
             if ($fechaRegistro && !DateTime::createFromFormat('Y-m-d', $fechaRegistro)) {
@@ -77,12 +60,36 @@ class ProveedorSeeder extends Seeder
                 $fechaRegistro = null;
             }
 
-            // Validate fecha_vencimiento
+            // Validate fecha_vencimiento and determine estado
             $fechaVencimiento = $proveedor['fecha_vencimiento'];
-            if ($fechaVencimiento && !DateTime::createFromFormat('Y-m-d', $fechaVencimiento)) {
-                $this->command->warn('Invalid fecha_vencimiento in JSON: ' . $proveedor['fecha_vencimiento'] . '. Setting fecha_vencimiento to null.');
+            $estado = 'Inactivo'; // Default estado
+
+            if ($fechaVencimiento && DateTime::createFromFormat('Y-m-d', $fechaVencimiento)) {
+                $vencimientoDate = new DateTime($fechaVencimiento);
+                
+                if ($vencimientoDate > $today) {
+                    // Si la fecha de vencimiento es futura
+                    $diasParaVencer = $today->diff($vencimientoDate)->days;
+                    
+                    if ($diasParaVencer <= 7) {
+                        $estado = 'Pendiente Renovacion';
+                    } else {
+                        $estado = 'Activo';
+                    }
+                } else {
+                    // Si la fecha ya pasó
+                    $estado = 'Inactivo';
+                }
+            } else {
+                $this->command->warn('Invalid fecha_vencimiento in JSON: ' . $proveedor['fecha_vencimiento'] . '. Setting estado to Inactivo.');
                 $fechaVencimiento = null;
             }
+
+            // Debug information
+            $this->command->info("Processing proveedor: {$proveedor['proveedor_id']}");
+            $this->command->info("Original estado: {$proveedor['estado']}");
+            $this->command->info("Calculated estado: {$estado}");
+            $this->command->info("Vencimiento: {$fechaVencimiento}");
 
             DB::table('proveedor')->insert([
                 'pv' => $proveedor['proveedor_id'],

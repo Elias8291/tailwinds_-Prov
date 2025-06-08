@@ -117,16 +117,47 @@
                             <div class="space-y-4">
                                 <div class="relative">
                                     <input type="text" 
+                                           id="rfcSearchInput"
                                            placeholder="Ingrese el RFC a consultar" 
                                            class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#B4325E]/20 focus:border-[#B4325E] transition-all duration-200 text-sm bg-white/80"
+                                           pattern="^[A-ZÑ&]{3,4}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[A-Z0-9]{2}[0-9A]$"
+                                           title="Formato de RFC inválido"
                                     >
                                 </div>
-                                <button class="w-full bg-[#B4325E] hover:bg-[#93264B] text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-sm hover:shadow group">
-                                    <span>Consultar Trámites</span>
-                                    <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                <div class="flex gap-2">
+                                    <button onclick="searchRfc()" class="flex-1 bg-[#B4325E] hover:bg-[#93264B] text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-sm hover:shadow group">
+                                        <span>Consultar Trámites</span>
+                                        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </button>
+                                    <button onclick="viewRfcData()" 
+                                            id="viewRfcDataBtn"
+                                            class="hidden bg-white hover:bg-[#B4325E]/5 text-[#B4325E] px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 border border-[#B4325E]/20 hover:border-[#B4325E]/40">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        <span>Ver Datos RFC</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor de trámites disponibles -->
+                    <div id="tramitesDisponibles" class="hidden mt-6">
+                        <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-10 h-10 bg-[#B4325E]/10 rounded-xl flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                     </svg>
-                                </button>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-900">Trámites Disponibles</h3>
+                            </div>
+                            <div id="tramitesList" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Los trámites se insertarán aquí -->
                             </div>
                         </div>
                     </div>
@@ -144,36 +175,48 @@
                             </div>
 
                             <!-- Área de carga simplificada -->
-                            <div class="bg-white/80 rounded-xl p-4 border border-[#B4325E]/20">
-                                <div class="flex flex-col items-center justify-center w-full min-h-[120px] relative">
-                                    <input type="file" 
-                                           id="documentInput" 
-                                           name="document" 
-                                           accept=".pdf,.png,.jpg,.jpeg" 
-                                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                           aria-label="Seleccionar archivo">
-                                    
-                                    <div class="text-center pointer-events-none">
-                                        <div class="p-3 bg-white rounded-xl shadow-sm inline-block mb-3">
-                                            <svg class="w-6 h-6 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                                            </svg>
+                            <div class="space-y-4">
+                                <div class="bg-white/80 rounded-xl p-4 border border-[#B4325E]/20">
+                                    <div class="flex flex-col items-center justify-center w-full min-h-[120px] relative">
+                                        <input type="file" 
+                                               id="documentInput" 
+                                               name="document" 
+                                               accept=".pdf,.png,.jpg,.jpeg" 
+                                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                               aria-label="Seleccionar archivo">
+                                        
+                                        <div class="text-center pointer-events-none">
+                                            <div class="p-3 bg-white rounded-xl shadow-sm inline-block mb-3">
+                                                <svg class="w-6 h-6 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                                </svg>
+                                            </div>
+                                            <p class="text-sm font-medium text-[#B4325E]" id="uploadText">
+                                                Seleccione o arrastre su constancia aquí
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1" id="fileName">
+                                                PDF o Imagen con QR (Máx. 5MB)
+                                            </p>
                                         </div>
-                                        <p class="text-sm font-medium text-[#B4325E]" id="uploadText">
-                                            Seleccione o arrastre su constancia aquí
-                                        </p>
-                                        <p class="text-xs text-gray-500 mt-1" id="fileName">
-                                            PDF o Imagen con QR (Máx. 5MB)
-                                        </p>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- Área de previsualización (oculta) -->
-                            <div id="previewArea" class="hidden">
-                                <div class="hidden">
-                                    <div id="qrResult"></div>
-                                    <canvas id="pdfCanvas"></canvas>
+                                <div class="flex gap-2">
+                                    <button onclick="processConstancia()" 
+                                            class="flex-1 bg-[#B4325E] hover:bg-[#93264B] text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-sm hover:shadow group">
+                                        <span>Procesar Constancia</span>
+                                        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </button>
+                                    <button onclick="viewConstanciaData()" 
+                                            id="viewConstanciaDataBtn"
+                                            class="hidden bg-white hover:bg-[#B4325E]/5 text-[#B4325E] px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 border border-[#B4325E]/20 hover:border-[#B4325E]/40">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        <span>Ver Datos Constancia</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -352,6 +395,194 @@
     </div>
 </div>
 
+<!-- Agregar el componente del modal de historial -->
+@include('components.rfc-history-modal')
+
+<!-- Agregar el script de búsqueda de RFC -->
+<script>
+function showError(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm notification-slide-in';
+    notification.innerHTML = `
+        <div class="card-custom rounded-lg shadow-lg border-l-4 border-red-500 p-4 bg-white">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.classList.replace('notification-slide-in', 'notification-slide-out');
+        setTimeout(() => notification.remove(), 500);
+    }, 3000);
+}
+
+let currentRfc = null;
+let currentConstanciaData = null;
+
+async function searchRfc() {
+    const rfcInput = document.getElementById('rfcSearchInput');
+    const rfc = rfcInput.value.trim().toUpperCase();
+    
+    // Validar formato de RFC
+    const rfcPattern = /^[A-ZÑ&]{3,4}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[A-Z0-9]{2}[0-9A]$/;
+    if (!rfcPattern.test(rfc)) {
+        showError('El formato del RFC no es válido');
+        return;
+    }
+    
+    try {
+        showLoading(true);
+        
+        // Verificar si el RFC existe y obtener trámites disponibles
+        const response = await fetch(`/api/rfc-search/${rfc}`);
+        if (!response.ok) {
+            throw new Error('Error en la búsqueda del RFC');
+        }
+        
+        const data = await response.json();
+        console.log('Respuesta del servidor:', data);
+        
+        // Guardar el RFC actual y mostrar el botón de ver datos
+        currentRfc = rfc;
+        const viewRfcDataBtn = document.getElementById('viewRfcDataBtn');
+        if (viewRfcDataBtn) {
+            viewRfcDataBtn.classList.remove('hidden');
+        }
+        
+        // Mostrar trámites disponibles
+        const tramitesContainer = document.getElementById('tramitesDisponibles');
+        const tramitesList = document.getElementById('tramitesList');
+        
+        if (tramitesContainer && tramitesList && data.tramites) {
+            // Validar estado y fecha de vencimiento
+            const today = new Date();
+            const tramitesValidados = data.tramites.map(tramite => {
+                const fechaVencimiento = tramite.fecha_vencimiento ? new Date(tramite.fecha_vencimiento) : null;
+                let estado = 'Inactivo';
+                let disponible = false;
+
+                if (fechaVencimiento) {
+                    const diasParaVencer = Math.ceil((fechaVencimiento - today) / (1000 * 60 * 60 * 24));
+                    
+                    if (fechaVencimiento > today) {
+                        if (diasParaVencer <= 7) {
+                            estado = 'Pendiente Renovacion';
+                            disponible = true;
+                            tramite.tipo = 'renovacion';
+                            tramite.nombre = 'Renovación de Registro';
+                            tramite.descripcion = 'Su registro está próximo a vencer. Puede iniciar el trámite de renovación.';
+                        } else {
+                            estado = 'Activo';
+                            disponible = true;
+                            tramite.tipo = 'actualizacion';
+                            tramite.nombre = 'Actualización de Datos';
+                            tramite.descripcion = 'Puede actualizar sus datos si ha habido cambios.';
+                        }
+                    } else {
+                        estado = 'Inactivo';
+                        disponible = true;
+                        tramite.tipo = 'inscripcion';
+                        tramite.nombre = 'Nueva Inscripción';
+                        tramite.descripcion = 'Su registro ha vencido. Debe realizar una nueva inscripción.';
+                    }
+                } else {
+                    disponible = true;
+                    tramite.tipo = 'inscripcion';
+                    tramite.nombre = 'Inscripción Inicial';
+                    tramite.descripcion = 'Realice su primera inscripción como proveedor.';
+                }
+
+                return {
+                    ...tramite,
+                    estado,
+                    disponible
+                };
+            });
+
+            tramitesList.innerHTML = tramitesValidados.map(tramite => `
+                <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 border ${
+                    tramite.disponible ? 'border-[#B4325E]/20 hover:border-[#B4325E]/40' : 'border-gray-200'
+                } transition-all duration-300 ${
+                    tramite.disponible ? 'hover:shadow-md' : 'opacity-50 cursor-not-allowed'
+                }">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-8 h-8 ${
+                            tramite.disponible ? 'bg-[#B4325E]/10' : 'bg-gray-100'
+                        } rounded-lg flex items-center justify-center">
+                            ${getTramiteIcon(tramite.tipo)}
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium ${
+                                tramite.disponible ? 'text-gray-900' : 'text-gray-500'
+                            }">${tramite.nombre}</h4>
+                            <span class="text-xs ${
+                                tramite.estado === 'Activo' ? 'text-green-600' :
+                                tramite.estado === 'Pendiente Renovacion' ? 'text-yellow-600' :
+                                'text-red-600'
+                            }">${tramite.estado}</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3">${tramite.descripcion}</p>
+                    ${tramite.disponible ? `
+                        <a href="/tramites/${tramite.tipo}" 
+                           class="inline-flex items-center text-xs font-medium text-[#B4325E] hover:text-[#93264B] transition-colors duration-200">
+                            Iniciar trámite
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    ` : `
+                        <span class="text-xs text-gray-400">No disponible</span>
+                    `}
+                </div>
+            `).join('');
+            
+            tramitesContainer.classList.remove('hidden');
+        }
+        
+        if (data.found) {
+            showRfcHistoryModal(rfc);
+        }
+    } catch (error) {
+        console.error('Error al buscar RFC:', error);
+        showError('Error al buscar el RFC. Por favor, intente nuevamente.');
+    } finally {
+        showLoading(false);
+    }
+}
+
+function viewRfcData() {
+    if (currentRfc) {
+        showRfcHistoryModal(currentRfc);
+    }
+}
+
+function getTramiteIcon(tipo) {
+    const icons = {
+        inscripcion: `<svg class="w-4 h-4 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>`,
+        renovacion: `<svg class="w-4 h-4 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>`,
+        actualizacion: `<svg class="w-4 h-4 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+        </svg>`
+    };
+    
+    return icons[tipo] || icons.inscripcion;
+}
+</script>
+
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js"></script>
 
@@ -364,36 +595,6 @@ function showLoading(show = true) {
     if (loadingIndicator) {
         loadingIndicator.classList.toggle('hidden', !show);
     }
-}
-
-function showError(message) {
-    showLoading(false);
-    // Crear notificación de error
-    const notification = document.createElement('div');
-    notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm notification-slide-in';
-    notification.innerHTML = `
-        <div class="card-custom rounded-lg shadow-lg border-l-4 border-red-500 p-4 bg-white">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-gray-900">
-                        ${message}
-                    </p>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(notification);
-
-    // Remover la notificación después de 3 segundos
-    setTimeout(() => {
-        notification.classList.replace('notification-slide-in', 'notification-slide-out');
-        setTimeout(() => notification.remove(), 500);
-    }, 3000);
 }
 
 function resetUpload() {
@@ -520,7 +721,7 @@ document.addEventListener('DOMContentLoaded', function() {
         handleFile(this.files[0]);
     });
 
-    function handleFile(file) {
+    async function handleFile(file) {
         if (!file) return;
 
         try {
@@ -546,25 +747,112 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Iniciando procesamiento del archivo:', file.name);
 
             // Procesar con QRHandler
-            if (window.qrHandler) {
-                window.qrHandler.handleFile(file).catch(error => {
-                    console.error('Error en el procesamiento:', error);
-                    showError(error.message || 'Error al procesar el documento');
-                    resetUpload();
-                });
-            } else {
+            if (!window.qrHandler) {
                 throw new Error('El sistema no está listo para procesar archivos');
             }
 
+            const result = await window.qrHandler.handleFile(file);
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Error al procesar la constancia');
+            }
+
+            // Obtener los datos y el RFC
+            const scannedData = window.qrHandler.getLastScannedData();
+            const rfc = scannedData?.details?.rfc;
+
+            if (!rfc) {
+                throw new Error('No se pudo obtener el RFC de la constancia');
+            }
+
+            console.log('RFC obtenido de la constancia:', rfc);
+
+            // Mostrar el botón de ver datos de la constancia
+            const viewConstanciaDataBtn = document.getElementById('viewConstanciaDataBtn');
+            if (viewConstanciaDataBtn) {
+                viewConstanciaDataBtn.classList.remove('hidden');
+            }
+
+            // Realizar la búsqueda del RFC automáticamente
+            try {
+                // Verificar si el RFC existe y obtener trámites disponibles
+                const response = await fetch(`/api/rfc-search/${rfc}`);
+                if (!response.ok) {
+                    throw new Error('Error en la búsqueda del RFC');
+                }
+                
+                const data = await response.json();
+                console.log('Respuesta de búsqueda de RFC:', data);
+                
+                // Mostrar trámites disponibles
+                const tramitesContainer = document.getElementById('tramitesDisponibles');
+                const tramitesList = document.getElementById('tramitesList');
+                
+                if (tramitesContainer && tramitesList && data.tramites) {
+                    tramitesList.innerHTML = data.tramites.map(tramite => `
+                        <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 border ${
+                            tramite.disponible ? 'border-[#B4325E]/20 hover:border-[#B4325E]/40' : 'border-gray-200'
+                        } transition-all duration-300 ${
+                            tramite.disponible ? 'hover:shadow-md' : 'opacity-50 cursor-not-allowed'
+                        }">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-8 h-8 ${
+                                    tramite.disponible ? 'bg-[#B4325E]/10' : 'bg-gray-100'
+                                } rounded-lg flex items-center justify-center">
+                                    ${getTramiteIcon(tramite.tipo)}
+                                </div>
+                                <h4 class="text-sm font-medium ${
+                                    tramite.disponible ? 'text-gray-900' : 'text-gray-500'
+                                }">${tramite.nombre}</h4>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-3">${tramite.descripcion}</p>
+                            ${tramite.disponible ? `
+                                <a href="/tramites/${tramite.tipo}" 
+                                   class="inline-flex items-center text-xs font-medium text-[#B4325E] hover:text-[#93264B] transition-colors duration-200">
+                                    Iniciar trámite
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </a>
+                            ` : `
+                                <span class="text-xs text-gray-400">No disponible</span>
+                            `}
+                        </div>
+                    `).join('');
+                    
+                    tramitesContainer.classList.remove('hidden');
+                }
+                
+                // Mostrar el historial
+                if (data.found) {
+                    showRfcHistoryModal(rfc);
+                }
+
+                // Actualizar el input de RFC
+                const rfcInput = document.getElementById('rfcSearchInput');
+                if (rfcInput) {
+                    rfcInput.value = rfc;
+                }
+
+                // Mostrar el botón de ver datos del RFC
+                const viewRfcDataBtn = document.getElementById('viewRfcDataBtn');
+                if (viewRfcDataBtn) {
+                    viewRfcDataBtn.classList.remove('hidden');
+                }
+
+            } catch (error) {
+                console.error('Error al buscar RFC:', error);
+                showError('Error al buscar el RFC. Por favor, intente nuevamente.');
+            }
+
         } catch (error) {
-            console.error('Error:', error);
-            showError(error.message);
+            console.error('Error en el procesamiento:', error);
+            showError(error.message || 'Error al procesar el documento');
             resetUpload();
+        } finally {
+            showLoading(false);
         }
     }
-
-    // Exponer la función de reset para uso global
-    window.resetUpload = resetUpload;
 });
 </script>
 
@@ -677,6 +965,117 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
     }
+</script>
+
+<script>
+let currentRfc = null;
+let currentConstanciaData = null;
+
+async function processConstancia() {
+    const fileInput = document.getElementById('documentInput');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        showError('Por favor seleccione un archivo');
+        return;
+    }
+
+    try {
+        showLoading(true);
+
+        // Validar el tipo de archivo
+        const isPDF = file.type === 'application/pdf';
+        const isImage = file.type.startsWith('image/');
+        
+        if (!isPDF && !isImage) {
+            throw new Error('El archivo debe ser un PDF o una imagen (JPG, PNG).');
+        }
+
+        // Validar el tamaño del archivo (5MB)
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            throw new Error('El archivo no debe exceder los 5MB.');
+        }
+
+        // Procesar el archivo con QRHandler
+        if (!window.qrHandler) {
+            throw new Error('El lector QR no está inicializado');
+        }
+
+        const result = await window.qrHandler.handleFile(file);
+        
+        if (!result.success) {
+            throw new Error(result.error || 'Error al procesar la constancia');
+        }
+
+        // Obtener los datos y el RFC
+        currentConstanciaData = window.qrHandler.getLastScannedData();
+        const rfc = currentConstanciaData?.details?.rfc;
+
+        if (!rfc) {
+            throw new Error('No se pudo obtener el RFC de la constancia');
+        }
+
+        // Mostrar el botón de ver datos
+        const viewConstanciaDataBtn = document.getElementById('viewConstanciaDataBtn');
+        if (viewConstanciaDataBtn) {
+            viewConstanciaDataBtn.classList.remove('hidden');
+        }
+
+        // Realizar la búsqueda del RFC automáticamente
+        const rfcInput = document.getElementById('rfcSearchInput');
+        if (rfcInput) {
+            rfcInput.value = rfc;
+            await searchRfc();
+        }
+
+    } catch (error) {
+        console.error('Error al procesar la constancia:', error);
+        showError(error.message || 'Error al procesar la constancia');
+        resetUpload();
+    } finally {
+        showLoading(false);
+    }
+}
+
+function viewConstanciaData() {
+    if (!currentConstanciaData) {
+        showError('No hay datos de constancia disponibles');
+        return;
+    }
+
+    const modal = document.getElementById('satDataModal');
+    const modalContent = document.getElementById('satDataModalContent');
+    
+    if (modal && modalContent) {
+        const result = window.qrHandler.showSatData();
+        if (result.success) {
+            modalContent.innerHTML = result.content;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        } else {
+            showError('Error al mostrar los datos: ' + result.error);
+        }
+    }
+}
+
+function resetUpload() {
+    const fileInput = document.getElementById('documentInput');
+    const uploadText = document.getElementById('uploadText');
+    const fileName = document.getElementById('fileName');
+    const viewConstanciaDataBtn = document.getElementById('viewConstanciaDataBtn');
+
+    if (fileInput) fileInput.value = '';
+    if (uploadText) uploadText.textContent = 'Seleccione o arrastre su constancia aquí';
+    if (fileName) fileName.textContent = 'PDF o Imagen con QR (Máx. 5MB)';
+    if (viewConstanciaDataBtn) viewConstanciaDataBtn.classList.add('hidden');
+
+    currentConstanciaData = null;
+    
+    if (window.qrHandler) {
+        window.qrHandler.reset();
+    }
+}
 </script>
 
 @endsection 
