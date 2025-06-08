@@ -10,7 +10,21 @@ class ProveedorController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->get('perPage', 10);
-        $proveedores = Proveedor::paginate($perPage)->withQueryString();
+        $search = $request->get('search');
+        $estado = $request->get('estado');
+
+        $query = Proveedor::query();
+
+        if ($search) {
+            $query->where('pv', 'LIKE', "%{$search}%");
+        }
+
+        if ($estado) {
+            $query->where('estado', $estado);
+        }
+
+        $proveedores = $query->paginate($perPage)->withQueryString();
+        
         return view('proveedores.index', compact('proveedores'));
     }
 

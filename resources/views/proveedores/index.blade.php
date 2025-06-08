@@ -80,23 +80,61 @@
 
         <!-- Tabla -->
         <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-            <!-- Encabezado de la tabla con selector de cantidad -->
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <label for="perPage" class="text-sm text-gray-600">Mostrar:</label>
-                    <select id="perPage" 
-                            class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-[#B4325E] focus:border-[#B4325E] p-2.5 pr-8 transition-colors duration-200"
-                            onchange="window.location.href = this.value">
-                        @foreach([10, 25, 50, 100] as $option)
-                            <option value="{{ request()->fullUrlWithQuery(['perPage' => $option]) }}"
-                                    {{ request()->get('perPage', 10) == $option ? 'selected' : '' }}>
-                                {{ $option }} elementos
-                            </option>
-                        @endforeach
-                    </select>
+            <!-- Barra de herramientas de la tabla -->
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex flex-col lg:flex-row gap-4 justify-between">
+                    <!-- Formulario de búsqueda -->
+                    <form method="GET" action="{{ route('proveedores.index') }}" 
+                          class="flex flex-col md:flex-row gap-3 flex-grow">
+                        <div class="flex flex-grow">
+                            <input type="text" 
+                                   name="search" 
+                                   value="{{ request()->get('search') }}"
+                                   placeholder="Buscar por RFC..."
+                                   class="w-full px-3 h-10 rounded-l border-2 border-[#B4325E] focus:outline-none focus:border-[#B4325E]">
+                            <button type="submit" 
+                                    class="bg-gradient-to-r from-[#B4325E] to-[#93264B] text-white rounded-r px-2 md:px-3 py-0 md:py-1 hover:from-[#93264B] hover:to-[#B4325E] transition-all duration-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <select name="estado" 
+                                onchange="this.form.submit()"
+                                class="w-full md:w-48 h-10 border-2 border-gray-300 focus:outline-none focus:border-gray-400 text-gray-700 rounded px-2 md:px-3 py-0 md:py-1 tracking-wider hover:border-gray-400 transition-colors duration-200">
+                            <option value="" {{ !request()->get('estado') ? 'selected' : '' }}>Todos los estados</option>
+                            <option value="Activo" {{ request()->get('estado') == 'Activo' ? 'selected' : '' }}>Activo</option>
+                            <option value="Inactivo" {{ request()->get('estado') == 'Inactivo' ? 'selected' : '' }}>Inactivo</option>
+                            <option value="Pendiente Renovacion" {{ request()->get('estado') == 'Pendiente Renovacion' ? 'selected' : '' }}>Pendiente Renovación</option>
+                        </select>
+                    </form>
                 </div>
-                <div class="text-sm text-gray-600">
-                    Total: <span class="font-medium text-gray-900">{{ $proveedores->total() }}</span> elementos
+
+                <!-- Selector de cantidad por página y contador -->
+                <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <label for="perPage" class="text-sm text-gray-600">Mostrar:</label>
+                        <select id="perPage" 
+                                class="bg-white border-2 border-gray-300 text-gray-700 text-sm rounded px-2 py-1.5 focus:outline-none focus:border-gray-400 hover:border-gray-400 transition-colors duration-200"
+                                onchange="window.location.href = this.value">
+                            @foreach([10, 25, 50, 100] as $option)
+                                <option value="{{ request()->fullUrlWithQuery(['perPage' => $option]) }}"
+                                        {{ request()->get('perPage', 10) == $option ? 'selected' : '' }}>
+                                    {{ $option }} elementos
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        @if(request()->has('search'))
+                            Resultados para "{{ request()->get('search') }}"
+                            @if(request()->has('estado'))
+                                en estado "{{ request()->get('estado') }}"
+                            @endif
+                            : 
+                        @endif
+                        <span class="font-medium text-gray-900">{{ $proveedores->total() }}</span> elementos
+                    </div>
                 </div>
             </div>
 
@@ -142,6 +180,57 @@
                     </div>
                 </div>
                 @endforeach
+
+                <!-- Paginación móvil -->
+                @if ($proveedores->hasPages())
+                    <div class="px-4 py-3 border-t border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <!-- Botones Anterior/Siguiente -->
+                            <div class="flex items-center gap-2">
+                                @if ($proveedores->onFirstPage())
+                                    <span class="inline-flex items-center px-4 py-2 text-sm bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">
+                                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.5 19l-7-7 7-7"/>
+                                        </svg>
+                                        Anterior
+                                    </span>
+                                @else
+                                    <a href="{{ $proveedores->previousPageUrl() }}" 
+                                       class="inline-flex items-center px-4 py-2 text-sm bg-white text-gray-700 rounded-lg hover:bg-[#B4325E]/10 border border-gray-200">
+                                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.5 19l-7-7 7-7"/>
+                                        </svg>
+                                        Anterior
+                                    </a>
+                                @endif
+
+                                @if ($proveedores->hasMorePages())
+                                    <a href="{{ $proveedores->nextPageUrl() }}" 
+                                       class="inline-flex items-center px-4 py-2 text-sm bg-white text-gray-700 rounded-lg hover:bg-[#B4325E]/10 border border-gray-200">
+                                        Siguiente
+                                        <svg class="w-5 h-5 ml-1 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.5 19l-7-7 7-7"/>
+                                        </svg>
+                                    </a>
+                                @else
+                                    <span class="inline-flex items-center px-4 py-2 text-sm bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">
+                                        Siguiente
+                                        <svg class="w-5 h-5 ml-1 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.5 19l-7-7 7-7"/>
+                                        </svg>
+                                    </span>
+                                @endif
+                            </div>
+
+                            <!-- Indicador de página -->
+                            <div class="text-sm text-gray-600">
+                                <span class="font-medium">{{ $proveedores->currentPage() }}</span>
+                                de
+                                <span class="font-medium">{{ $proveedores->lastPage() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- Vista desktop -->
