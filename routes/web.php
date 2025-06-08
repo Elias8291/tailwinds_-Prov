@@ -9,6 +9,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\TramiteController;
+use App\Http\Controllers\DocumentoController;
 
 // Ruta principal
 Route::get('/', function () {
@@ -75,3 +76,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
 Route::get('/tramites/create', [TramiteController::class, 'create'])->name('tramites.create');
 Route::post('/tramites', [TramiteController::class, 'store'])->name('tramites.store');
+
+Route::resource('documentos', DocumentoController::class);

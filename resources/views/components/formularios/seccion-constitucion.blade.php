@@ -1,97 +1,160 @@
-@props(['title' => 'Datos de Constitución'])
+@props(['title' => 'Constitución'])
 
-<!-- Sección de Constitución -->
-<div class="space-y-6">
-    <h4 class="text-lg font-semibold text-gray-800 mb-6 pb-3 border-b border-gray-200 flex items-center">
-        <i class="fas fa-file-contract text-red-800 mr-2"></i> Constitución
-    </h4>
-
-    <!-- Datos de Constitución -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Fecha de Constitución -->
-        <div class="form-group">
-            <label for="fecha_constitucion" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Constitución</label>
-            <input type="date" id="fecha_constitucion" name="fecha_constitucion" 
-                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-                   required>
+<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+    <!-- Encabezado con icono -->
+    <div class="flex items-center space-x-4 mb-8 pb-6 border-b border-gray-100">
+        <div class="h-12 w-12 flex items-center justify-center rounded-xl bg-[#9d2449] text-white shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-[#8a203f]">
+            <i class="fas fa-file-contract text-xl"></i>
         </div>
-
-        <!-- Número de Escritura -->
-        <div class="form-group">
-            <label for="numero_escritura" class="block text-sm font-medium text-gray-700 mb-1">Número de Escritura</label>
-            <input type="text" id="numero_escritura" name="numero_escritura" 
-                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-                   pattern="[0-9]+"
-                   required>
+        <div>
+            <h2 class="text-xl font-bold text-gray-800">{{ $title }}</h2>
+            <p class="text-sm text-gray-500 mt-1">Información sobre la constitución de la empresa</p>
         </div>
     </div>
 
-    <!-- Notario -->
-    <div class="bg-gray-50 p-6 rounded-lg space-y-6">
-        <h5 class="font-medium text-gray-900">Datos del Notario</h5>
+    <form class="space-y-8">
+        <input type="hidden" name="action" value="next">
+        <input type="hidden" name="seccion" value="3">
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Número de Escritura -->
+            <div class="form-group">
+                <label for="numero_escritura" class="block text-sm font-medium text-gray-700 mb-2">
+                    Número de Escritura
+                    <span class="text-[#9d2449]">*</span>
+                </label>
+                <div class="relative group">
+                    <input type="text" id="numero_escritura" name="numero_escritura"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                           placeholder="Ej: 1234 o 1234/2024"
+                           maxlength="15">
+                </div>
+            </div>
+
+            <!-- Fecha de Constitución -->
+            <div class="form-group">
+                <label for="fecha_constitucion" class="block text-sm font-medium text-gray-700 mb-2">
+                    Fecha de Constitución
+                    <span class="text-[#9d2449]">*</span>
+                </label>
+                <div class="relative group">
+                    <input type="date" id="fecha_constitucion" name="fecha_constitucion"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                           required>
+                </div>
+            </div>
+
             <!-- Nombre del Notario -->
-            <div class="form-group">
-                <label for="notario_nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Notario</label>
-                <input type="text" id="notario_nombre" name="notario_nombre" 
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-                       pattern="[A-Za-z\s]+"
-                       required>
+            <div class="form-group md:col-span-2">
+                <label for="nombre_notario" class="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre del Notario
+                    <span class="text-[#9d2449]">*</span>
+                </label>
+                <div class="relative group">
+                    <input type="text" id="nombre_notario" name="nombre_notario"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                           placeholder="Ej: Lic. Juan Pérez González"
+                           maxlength="100">
+                </div>
             </div>
 
-            <!-- Número de Notaría -->
+            <!-- Entidad Federativa -->
             <div class="form-group">
-                <label for="notaria_numero" class="block text-sm font-medium text-gray-700 mb-1">Número de Notaría</label>
-                <input type="text" id="notaria_numero" name="notaria_numero" 
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-                       pattern="[0-9]+"
-                       required>
+                <label for="entidad_federativa" class="block text-sm font-medium text-gray-700 mb-2">
+                    Entidad Federativa
+                    <span class="text-[#9d2449]">*</span>
+                </label>
+                <div class="relative group">
+                    <select id="entidad_federativa" name="entidad_federativa"
+                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                            required>
+                        <option value="">Seleccione un estado</option>
+                        @foreach(config('estados.mexico') as $estado)
+                            <option value="{{ $estado }}">{{ $estado }}</option>
+                        @endforeach
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Número de Notario -->
+            <div class="form-group">
+                <label for="numero_notario" class="block text-sm font-medium text-gray-700 mb-2">
+                    Número de Notario
+                    <span class="text-[#9d2449]">*</span>
+                </label>
+                <div class="relative group">
+                    <input type="text" id="numero_notario" name="numero_notario"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                           placeholder="Ej: 123"
+                           maxlength="10">
+                </div>
+            </div>
+
+            <!-- Número de Registro -->
+            <div class="form-group">
+                <label for="numero_registro" class="block text-sm font-medium text-gray-700 mb-2">
+                    Número de Registro
+                    <span class="text-[#9d2449]">*</span>
+                </label>
+                <div class="relative group">
+                    <input type="text" id="numero_registro" name="numero_registro"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                           placeholder="Ej: 0123456789 o FME123456789"
+                           maxlength="14">
+                </div>
+            </div>
+
+            <!-- Fecha de Inscripción -->
+            <div class="form-group">
+                <label for="fecha_inscripcion" class="block text-sm font-medium text-gray-700 mb-2">
+                    Fecha de Inscripción
+                    <span class="text-[#9d2449]">*</span>
+                </label>
+                <div class="relative group">
+                    <input type="date" id="fecha_inscripcion" name="fecha_inscripcion"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                           required>
+                </div>
             </div>
         </div>
+    </form>
+</div>
 
-        <!-- Estado de la Notaría -->
-        <div class="form-group">
-            <label for="notaria_estado" class="block text-sm font-medium text-gray-700 mb-1">Estado de la Notaría</label>
-            <select id="notaria_estado" name="notaria_estado" 
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-                    required>
-                <option value="">Seleccione un estado</option>
-                <!-- Los estados se cargarán dinámicamente -->
-            </select>
-        </div>
-    </div>
+<style>
+/* Animación suave para los inputs */
+input, select, textarea {
+    @apply transition-all duration-300 bg-white shadow-sm;
+}
 
-    <!-- Documentos -->
-    <div class="space-y-6">
-        <!-- Acta Constitutiva -->
-        <div class="form-group">
-            <label for="acta_constitutiva" class="block text-sm font-medium text-gray-700 mb-1">Acta Constitutiva</label>
-            <input type="file" id="acta_constitutiva" name="acta_constitutiva" 
-                   class="mt-1 block w-full text-sm text-gray-500
-                          file:mr-4 file:py-2 file:px-4
-                          file:rounded-md file:border-0
-                          file:text-sm file:font-semibold
-                          file:bg-red-50 file:text-red-700
-                          hover:file:bg-red-100"
-                   accept="application/pdf"
-                   required>
-            <p class="mt-1 text-sm text-gray-500">Archivo PDF, máximo 5MB</p>
-        </div>
+input:focus, select:focus, textarea:focus {
+    @apply transform -translate-y-px shadow-md bg-white;
+}
 
-        <!-- Poder Notarial -->
-        <div class="form-group">
-            <label for="poder_notarial" class="block text-sm font-medium text-gray-700 mb-1">Poder Notarial</label>
-            <input type="file" id="poder_notarial" name="poder_notarial" 
-                   class="mt-1 block w-full text-sm text-gray-500
-                          file:mr-4 file:py-2 file:px-4
-                          file:rounded-md file:border-0
-                          file:text-sm file:font-semibold
-                          file:bg-red-50 file:text-red-700
-                          hover:file:bg-red-100"
-                   accept="application/pdf"
-                   required>
-            <p class="mt-1 text-sm text-gray-500">Archivo PDF, máximo 5MB</p>
-        </div>
-    </div>
-</div> 
+/* Animaciones para los iconos de sección */
+.h-12 {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(157, 36, 73, 0.1), 
+                0 2px 4px -1px rgba(157, 36, 73, 0.06);
+}
+
+/* Nuevos estilos para mejorar la apariencia de los inputs */
+.form-group {
+    @apply relative;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    @apply border-[#4F46E5]/20;
+}
+
+.form-group:hover input,
+.form-group:hover select,
+.form-group:hover textarea {
+    @apply border-[#4F46E5]/40;
+}
+</style> 

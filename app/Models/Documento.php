@@ -13,15 +13,16 @@ class Documento extends Model
 
     protected $fillable = [
         'nombre',
+        'tipo',
         'descripcion',
-        'requerido',
-        'formato_permitido',
-        'tamano_maximo',
+        'fecha_expiracion',
+        'es_visible',
+        'tipo_persona'
     ];
 
     protected $casts = [
-        'requerido' => 'boolean',
-        'tamano_maximo' => 'integer',
+        'fecha_expiracion' => 'date',
+        'es_visible' => 'boolean'
     ];
 
     public function tramites()
