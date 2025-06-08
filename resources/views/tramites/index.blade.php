@@ -64,146 +64,6 @@
 
 <div class="min-h-screen py-6 bg-gray-50/30">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Área de procesamiento de documentos -->
-        <div id="uploadArea" class="transition-all duration-300 ease-in-out">
-            <div class="mt-6">
-                <label for="document" class="block text-sm md:text-base font-medium text-gray-700 mb-3">
-                    <span class="block md:inline">Constancia de Situación Fiscal</span>
-                    <span class="text-sm text-gray-500 block md:inline md:ml-1">(PDF o Imagen)</span>
-                </label>
-                <div class="relative">
-                    <input type="file" id="document" name="document" accept=".pdf,.png,.jpg,.jpeg" required
-                           class="hidden">
-                    <label for="document" class="group flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-[#B4325E]/20 hover:border-[#B4325E] rounded-xl transition-all duration-300 cursor-pointer bg-[#B4325E]/5 hover:bg-[#B4325E]/10">
-                        <div class="flex flex-col md:flex-row items-center space-y-3 md:space-y-0 md:space-x-4 px-4">
-                            <!-- Icono -->
-                            <div class="transform group-hover:scale-110 transition-transform duration-300">
-                                <svg class="w-8 h-8 text-[#B4325E]/70 group-hover:text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                            </div>
-                            <!-- Texto -->
-                            <div class="text-center md:text-left">
-                                <p class="text-[#B4325E]/70 group-hover:text-[#B4325E] font-medium mb-1 transition-colors duration-300">
-                                    Haga clic para seleccionar archivo
-                                </p>
-                                <p class="text-sm text-gray-500" id="fileName">
-                                    PDF o Imagen con QR (Máximo 5MB)
-                                </p>
-                            </div>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Área de previsualización -->
-            <div id="previewArea" class="hidden">
-                <div class="hidden">
-                    <div id="qrResult"></div>
-                    <canvas id="pdfCanvas"></canvas>
-                </div>
-            </div>
-
-            <!-- Contenedor de Datos SAT -->
-            <div id="satDataContainer" class="mt-8 hidden">
-                <div class="bg-white rounded-2xl shadow-lg border border-gray-100">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-xl font-bold text-gray-900">Datos del SAT</h3>
-                            <button onclick="showSatModal()" 
-                                    class="inline-flex items-center text-sm bg-white hover:bg-[#B4325E]/5 text-[#B4325E] font-medium py-2 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-[#B4325E]/20 hover:border-[#B4325E]/40">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                Ver más datos
-                            </button>
-                        </div>
-                        <div id="satDataContent" class="space-y-6">
-                            <!-- Los datos del SAT se insertarán aquí -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal para mostrar datos completos del SAT -->
-            <div id="satDataModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-                <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
-                    <!-- Modal header -->
-                    <div class="px-6 py-4 bg-gradient-to-br from-[#B4325E] to-[#93264B] border-b border-[#B4325E]/10">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="p-2 bg-white/10 rounded-lg">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                </div>
-                                <h3 class="text-xl font-bold text-white">Datos Completos del SAT</h3>
-                            </div>
-                            <button onclick="closeSatModal()" class="text-white/80 hover:text-white transition-colors duration-200">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Modal body -->
-                    <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 150px);">
-                        <div id="satDataModalContent" class="space-y-6">
-                            <!-- Los datos completos del SAT se insertarán aquí -->
-                        </div>
-                    </div>
-
-                    <!-- Modal footer -->
-                    <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
-                        <div class="flex justify-end">
-                            <button onclick="closeSatModal()" 
-                                    class="inline-flex items-center px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 font-medium rounded-lg border border-gray-300 transition-colors duration-200 text-sm">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                                Cerrar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Loading indicator -->
-            <div id="loading-indicator" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                <div class="bg-white rounded-2xl p-6 shadow-xl">
-                    <div class="flex items-center space-x-4">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B4325E]"></div>
-                        <p class="text-gray-700 font-medium">Procesando documento...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Notificaciones -->
-        <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
-            @if(session('success'))
-            <div x-data="{ show: true }" 
-                 x-show="show" 
-                 x-init="setTimeout(() => show = false, 3000)"
-                 class="card-custom rounded-lg shadow-lg border-l-4 border-[#B4325E] p-4">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium text-gray-900">
-                            {{ session('success') }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            @endif
-        </div>
-
         <!-- Encabezado -->
         <div class="card-custom rounded-2xl shadow-md p-6 md:p-8 mb-8 transform transition-all duration-300 border border-gray-100/50">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
@@ -218,6 +78,76 @@
                             Trámites Disponibles
                         </h2>
                         <p class="text-gray-500 mt-1 text-sm md:text-base">Seleccione el tipo de trámite que desea realizar</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área de carga de Constancia (más compacta) -->
+        <div class="mb-8">
+            <div class="card-custom rounded-xl shadow-sm p-4 border border-gray-100/50">
+                <div class="flex items-center space-x-4 mb-4">
+                    <div class="bg-gradient-to-br from-[#B4325E]/10 to-[#93264B]/10 rounded-lg p-2.5">
+                        <svg class="w-5 h-5 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900">Constancia de Situación Fiscal</h3>
+                        <p class="text-sm text-gray-500">Cargue su documento para validación</p>
+                    </div>
+                </div>
+
+                <div id="uploadArea" class="transition-all duration-300 ease-in-out">
+                    <div class="relative">
+                        <input type="file" id="document" name="document" accept=".pdf,.png,.jpg,.jpeg" required class="hidden">
+                        <label for="document" class="group flex items-center justify-center w-full h-20 border border-dashed border-[#B4325E]/20 hover:border-[#B4325E] rounded-lg transition-all duration-300 cursor-pointer bg-[#B4325E]/5 hover:bg-[#B4325E]/10">
+                            <div class="flex items-center space-x-3 px-4">
+                                <div class="transform group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-5 h-5 text-[#B4325E]/70 group-hover:text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-sm font-medium text-[#B4325E]/70 group-hover:text-[#B4325E] transition-colors duration-300">
+                                        Seleccionar archivo
+                                    </p>
+                                    <p class="text-xs text-gray-500" id="fileName">
+                                        PDF o Imagen con QR (Máx. 5MB)
+                                    </p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Área de previsualización -->
+                    <div id="previewArea" class="hidden">
+                        <div class="hidden">
+                            <div id="qrResult"></div>
+                            <canvas id="pdfCanvas"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor de Datos SAT -->
+                    <div id="satDataContainer" class="mt-4 hidden">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-100">
+                            <div class="p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-sm font-semibold text-gray-900">Datos del SAT</h3>
+                                    <button onclick="showSatModal()" 
+                                            class="inline-flex items-center text-xs bg-white hover:bg-[#B4325E]/5 text-[#B4325E] font-medium py-1.5 px-3 rounded-md transition-all duration-300 border border-[#B4325E]/20 hover:border-[#B4325E]/40">
+                                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        Ver detalles
+                                    </button>
+                                </div>
+                                <div id="satDataContent" class="space-y-4">
+                                    <!-- Los datos del SAT se insertarán aquí -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -279,6 +209,83 @@
                 </div>
             </div>
             @endforeach
+        </div>
+
+        <!-- Notificaciones -->
+        <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
+            @if(session('success'))
+            <div x-data="{ show: true }" 
+                 x-show="show" 
+                 x-init="setTimeout(() => show = false, 3000)"
+                 class="card-custom rounded-lg shadow-lg border-l-4 border-[#B4325E] p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">
+                            {{ session('success') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            @endif
+        </div>
+
+        <!-- Modal para mostrar datos completos del SAT -->
+        <div id="satDataModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+                <!-- Modal header -->
+                <div class="px-6 py-4 bg-gradient-to-br from-[#B4325E] to-[#93264B] border-b border-[#B4325E]/10">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-white/10 rounded-lg">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-white">Datos Completos del SAT</h3>
+                        </div>
+                        <button onclick="closeSatModal()" class="text-white/80 hover:text-white transition-colors duration-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal body -->
+                <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 150px);">
+                    <div id="satDataModalContent" class="space-y-6">
+                        <!-- Los datos completos del SAT se insertarán aquí -->
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
+                    <div class="flex justify-end">
+                        <button onclick="closeSatModal()" 
+                                class="inline-flex items-center px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 font-medium rounded-lg border border-gray-300 transition-colors duration-200 text-sm">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div id="loading-indicator" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-6 shadow-xl">
+                <div class="flex items-center space-x-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B4325E]"></div>
+                    <p class="text-gray-700 font-medium">Procesando documento...</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
