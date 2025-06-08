@@ -12,12 +12,11 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
     <!-- Scripts -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Alpine.js -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
     <!-- Styles -->
+    @livewireStyles
     <style>
         [x-cloak] { display: none !important; }
         
@@ -41,9 +40,8 @@
             pointer-events: none;
         }
     </style>
-  
 </head>
-<body class="font-sans antialiased">
+<body class="font-sans antialiased bg-gray-100">
     <div class="min-h-screen relative" x-data="{ sidebarOpen: false, sidebarHovered: false }">
         <div class="bg-logo-pattern"></div>
         <!-- Header (fixed) -->
@@ -76,6 +74,7 @@
         </div>
     </div>
 
-    @stack('modals')
+    @livewireScripts
+    @stack('scripts')
 </body>
 </html> 

@@ -13,15 +13,12 @@ class Documento extends Model
 
     protected $fillable = [
         'nombre',
-        'tipo',
+        'tipo_persona',
         'descripcion',
-        'fecha_expiracion',
-        'es_visible',
-        'tipo_persona'
+        'es_visible'
     ];
 
     protected $casts = [
-        'fecha_expiracion' => 'date',
         'es_visible' => 'boolean'
     ];
 

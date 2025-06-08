@@ -22,11 +22,9 @@ class DocumentoController extends Controller
     {
         $request->validate([
             'nombre' => 'required|string|max:255',
-            'tipo' => 'required|in:Certificado,Copia,Formulario,Carta,Comprobante,Acta,Otro',
-            'descripcion' => 'required|string',
-            'fecha_expiracion' => 'required|date',
-            'es_visible' => 'boolean',
             'tipo_persona' => 'required|in:Física,Moral,Ambas',
+            'descripcion' => 'nullable|string|max:1000',
+            'es_visible' => 'boolean',
         ]);
 
         Documento::create($request->all());
@@ -44,11 +42,9 @@ class DocumentoController extends Controller
     {
         $request->validate([
             'nombre' => 'required|string|max:255',
-            'tipo' => 'required|in:Certificado,Copia,Formulario,Carta,Comprobante,Acta,Otro',
-            'descripcion' => 'required|string',
-            'fecha_expiracion' => 'required|date',
-            'es_visible' => 'boolean',
             'tipo_persona' => 'required|in:Física,Moral,Ambas',
+            'descripcion' => 'nullable|string|max:1000',
+            'es_visible' => 'boolean',
         ]);
 
         $documento->update($request->all());

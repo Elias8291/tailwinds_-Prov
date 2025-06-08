@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Documento;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -15,159 +16,59 @@ class DocumentoSeeder extends Seeder
      */
     public function run()
     {
-        $documents = [
+        $documentos = [
             [
                 'nombre' => 'Constancia de Situación Fiscal',
-                'tipo' => 'Certificado',
                 'descripcion' => 'Original, vigente, emitido por el SAT, no mayor a 3 meses',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
                 'tipo_persona' => 'Moral',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'es_visible' => true,
             ],
             [
                 'nombre' => 'Identificación Oficial',
-                'tipo' => 'Copia',
                 'descripcion' => 'Original vigente (INE, pasaporte o cédula profesional)',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
                 'tipo_persona' => 'Física',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'es_visible' => true,
             ],
             [
-                'nombre' => 'Curriculum Actualizado',
-                'tipo' => 'Otro',
+                'nombre' => 'Currículum Empresarial',
                 'descripcion' => 'Original, con giro, experiencia, clientes y recursos',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
                 'tipo_persona' => 'Física',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'es_visible' => true,
             ],
             [
                 'nombre' => 'Comprobante de Domicilio',
-                'tipo' => 'Comprobante',
                 'descripcion' => 'Copia simple, no mayor a 3 meses',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
                 'tipo_persona' => 'Ambas',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'nombre' => 'Croquis de Localización y Fotografías',
-                'tipo' => 'Otro',
-                'descripcion' => 'Original, del domicilio del proveedor',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
                 'es_visible' => true,
-                'tipo_persona' => 'Moral',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'nombre' => 'Carta Poder Simple',
-                'tipo' => 'Carta',
-                'descripcion' => 'Original, con identificación del aceptante, si aplica',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
-                'tipo_persona' => 'Ambas',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'nombre' => 'Acuse de Recibo',
-                'tipo' => 'Copia',
-                'descripcion' => 'Copia simple, última declaración anual y provisionales',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
-                'tipo_persona' => 'Moral',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
             [
                 'nombre' => 'Acta Constitutiva',
-                'tipo' => 'Acta',
+                'descripcion' => 'Original, del domicilio del proveedor',
+                'tipo_persona' => 'Moral',
+                'es_visible' => true,
+            ],
+            [
+                'nombre' => 'Carta Poder',
+                'descripcion' => 'Original, con identificación del aceptante, si aplica',
+                'tipo_persona' => 'Ambas',
+                'es_visible' => true,
+            ],
+            [
+                'nombre' => 'Declaraciones Fiscales',
+                'descripcion' => 'Copia simple, última declaración anual y provisionales',
+                'tipo_persona' => 'Moral',
+                'es_visible' => true,
+            ],
+            [
+                'nombre' => 'Acta de Asamblea',
                 'descripcion' => 'Copia simple, notariada',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
                 'tipo_persona' => 'Moral',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'nombre' => 'Registro Público de Comercio - Acta Constitutiva',
-                'tipo' => 'Copia',
-                'descripcion' => 'Copia simple, documento inscrito en el Registro Público de Comercio correspondiente al Acta Constitutiva',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
                 'es_visible' => true,
-                'tipo_persona' => 'Moral',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'nombre' => 'Modificaciones al Acta',
-                'tipo' => 'Acta',
-                'descripcion' => 'Copia simple, si aplica',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
-                'tipo_persona' => 'Moral',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'nombre' => 'Registro Público de Comercio - Modificaciones al Acta',
-                'tipo' => 'Copia',
-                'descripcion' => 'Copia simple, documento inscrito en el Registro Público de Comercio correspondiente a las Modificaciones al Acta, si aplica',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
-                'tipo_persona' => 'Moral',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'nombre' => 'Poder Notariado',
-                'tipo' => 'Copia',
-                'descripcion' => 'Copia simple, para actos de administración',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
-                'tipo_persona' => 'Moral',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'nombre' => 'Registro Público de Comercio - Poder Notariado',
-                'tipo' => 'Copia',
-                'descripcion' => 'Copia simple, documento inscrito en el Registro Público de Comercio correspondiente al Poder Notariado',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
-                'tipo_persona' => 'Moral',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'nombre' => 'Acta de Nacimiento',
-                'tipo' => 'Acta',
-                'descripcion' => 'Original, no mayor a 3 meses',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
-                'tipo_persona' => 'Física',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'nombre' => 'CURP',
-                'tipo' => 'Copia',
-                'descripcion' => 'Copia simple, formato actualizado',
-                'fecha_expiracion' => Carbon::create(2025, 8, 14),
-                'es_visible' => true,
-                'tipo_persona' => 'Física',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
         ];
 
-        DB::table('documento')->insert($documents);
+        foreach ($documentos as $documento) {
+            Documento::create($documento);
+        }
     }
 }

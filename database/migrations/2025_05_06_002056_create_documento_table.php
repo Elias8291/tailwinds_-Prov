@@ -6,16 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateDocumentoTable extends Migration
 {
-     public function up()
+    public function up()
     {
         Schema::create('documento', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('nombre', 255);
-            $table->enum('tipo', ['Certificado', 'Copia', 'Formulario', 'Carta', 'Comprobante', 'Acta', 'Otro']);
-            $table->text('descripcion');
-            $table->date('fecha_expiracion');
-            $table->boolean('es_visible')->default(true); // Campo para visibilidad (true = visible, false = no visible)
-            $table->enum('tipo_persona', ['Física', 'Moral', 'Ambas']); // Campo para tipo de persona, incluye 'Ambas'
+            $table->string('nombre');
+            $table->enum('tipo_persona', ['Física', 'Moral', 'Ambas']);
+            $table->text('descripcion')->nullable();
+            $table->boolean('es_visible')->default(true);
             $table->timestamps();
         });
     }
