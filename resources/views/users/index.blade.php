@@ -97,12 +97,11 @@
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center space-x-3">
                             <div class="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-[#B4325E] to-[#93264B] text-white rounded-xl shadow-md flex items-center justify-center font-bold text-xl">
-                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                                {{ strtoupper(substr($user->nombre, 0, 1)) }}
                             </div>
                             <div>
-                                <div class="font-semibold text-gray-900">{{ $user->name }}</div>
-                                <div class="text-sm text-gray-500">{{ $user->email }}</div>
-                                <div class="text-xs text-gray-400">Creado {{ $user->created_at->diffForHumans() }}</div>
+                                <div class="font-semibold text-gray-900">{{ $user->nombre }}</div>
+                                <div class="text-sm text-gray-500">{{ $user->correo }}</div>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -159,16 +158,16 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-[#B4325E] to-[#93264B] text-white rounded-xl shadow-md flex items-center justify-center font-bold text-xl">
-                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                        {{ strtoupper(substr($user->nombre, 0, 1)) }}
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
-                                        <div class="text-sm text-gray-500">Creado {{ $user->created_at->diffForHumans() }}</div>
+                                        <div class="text-sm font-medium text-gray-900">{{ $user->nombre }}</div>
+                                        <div class="text-sm text-gray-500">{{ $user->correo }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ $user->email }}</div>
+                                <div class="text-sm text-gray-900">{{ $user->correo }}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-wrap gap-2">
@@ -239,7 +238,7 @@
                         Confirmar Eliminación
                     </h3>
                     <p class="mt-2 text-sm text-gray-500">
-                        ¿Estás seguro de que deseas eliminar al usuario "{{ $user->name }}"? Esta acción no se puede deshacer.
+                        ¿Estás seguro de que deseas eliminar al usuario "{{ $user->nombre }}"? Esta acción no se puede deshacer.
                     </p>
                 </div>
             </div>

@@ -46,16 +46,15 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'email_verification_token' => Str::random(60)
         ]);
 
-        $user->syncRoles($request->roles);
+        $user->assignRole($request->roles);
 
         // Trigger verification email
         event(new Registered($user));
 
         return redirect()->route('users.index')
-            ->with('success', '¡Usuario creado exitosamente! Se ha enviado un correo de verificación.');
+            ->with('success', 'Usuario creado exitosamente.');
     }
 
     public function edit(User $user)
@@ -68,35 +67,39 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'roles' => 'required|array'
         ]);
 
-        $user->update([
+        $data = [
             'name' => $request->name,
             'email' => $request->email,
-        ]);
+        ];
 
         if ($request->filled('password')) {
-            $user->update(['password' => Hash::make($request->password)]);
+            $request->validate([
+                'password' => 'required|string|min:8|confirmed',
+            ]);
+            $data['password'] = Hash::make($request->password);
         }
 
+        $user->update($data);
         $user->syncRoles($request->roles);
 
         return redirect()->route('users.index')
-            ->with('success', '¡Usuario actualizado exitosamente!');
+            ->with('success', 'Usuario actualizado exitosamente.');
     }
 
     public function destroy(User $user)
     {
         if ($user->id === auth()->id()) {
             return redirect()->route('users.index')
-                ->with('error', 'No puedes eliminar tu propio usuario');
+                ->with('error', 'No puedes eliminar tu propio usuario.');
         }
 
         $user->delete();
+
         return redirect()->route('users.index')
-            ->with('success', '¡Usuario eliminado exitosamente!');
+            ->with('success', 'Usuario eliminado exitosamente.');
     }
 } 
