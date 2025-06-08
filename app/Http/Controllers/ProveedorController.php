@@ -6,6 +6,7 @@ use App\Models\Proveedor;
 use App\Models\Solicitante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class ProveedorController extends Controller
@@ -17,43 +18,57 @@ class ProveedorController extends Controller
     {
         $query = Proveedor::with(['solicitante', 'detallesTramite']);
 
-        // Búsqueda por RFC o razón social
-        if ($request->has('search')) {
-            $search = $request->get('search');
+        // Búsqueda general (barra de búsqueda principal)
+        if ($request->filled('search')) {
+            $search = trim($request->get('search'));
             $query->where(function($q) use ($search) {
-                $q->whereHas('solicitante', function ($q) use ($search) {
-                    $q->where('rfc', 'LIKE', "%{$search}%");
-                })
-                ->orWhereHas('detallesTramite', function ($q) use ($search) {
-                    $q->where('razon_social', 'LIKE', "%{$search}%");
+                // Búsqueda por PV
+                $q->where('pv', 'LIKE', '%' . $search . '%');
+                // Búsqueda por RFC
+                $q->orWhereHas('solicitante', function($sq) use ($search) {
+                    $sq->where('rfc', 'LIKE', '%' . $search . '%');
+                });
+                // Búsqueda por razón social
+                $q->orWhereHas('detallesTramite', function($sq) use ($search) {
+                    $sq->where('razon_social', 'LIKE', '%' . $search . '%');
                 });
             });
         }
 
-        // Búsqueda específica por RFC o razón social
-        if ($request->has('rfc')) {
-            $rfc = $request->get('rfc');
+        // Búsqueda específica por RFC (barra de búsqueda superior)
+        if ($request->filled('rfc')) {
+            $rfc = trim($request->get('rfc'));
             $query->where(function($q) use ($rfc) {
-                $q->whereHas('solicitante', function ($q) use ($rfc) {
-                    $q->where('rfc', $rfc);
-                })
-                ->orWhereHas('detallesTramite', function ($q) use ($rfc) {
-                    $q->where('razon_social', 'LIKE', "%{$rfc}%");
+                // Búsqueda por PV
+                $q->where('pv', 'LIKE', '%' . $rfc . '%');
+                // Búsqueda por RFC
+                $q->orWhereHas('solicitante', function($sq) use ($rfc) {
+                    $sq->where('rfc', 'LIKE', '%' . $rfc . '%');
+                });
+                // Búsqueda por razón social
+                $q->orWhereHas('detallesTramite', function($sq) use ($rfc) {
+                    $sq->where('razon_social', 'LIKE', '%' . $rfc . '%');
                 });
             });
         }
 
         // Filtro por estado
-        if ($request->has('estado') && $request->get('estado') !== '') {
+        if ($request->filled('estado')) {
             $query->where('estado', $request->get('estado'));
         }
 
-        $perPage = $request->get('perPage', 10);
-        $proveedores = $query->paginate($perPage);
+        // Para debug - Imprimir la consulta SQL generada
+        \Log::info('SQL Query:', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings()
+        ]);
 
-        // Si hay una búsqueda por RFC o razón social, determinar los trámites disponibles
+        $perPage = $request->get('perPage', 10);
+        $proveedores = $query->paginate($perPage)->withQueryString();
+
+        // Si hay una búsqueda por RFC, determinar los trámites disponibles
         $tramitesDisponibles = [];
-        if ($request->has('rfc')) {
+        if ($request->filled('rfc')) {
             $proveedor = $proveedores->first();
             if ($proveedor) {
                 $tramitesDisponibles = $this->determinarTramitesDisponibles($proveedor);
