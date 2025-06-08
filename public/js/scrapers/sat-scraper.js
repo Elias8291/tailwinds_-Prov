@@ -256,6 +256,11 @@ class SATScraper {
 
             content += '</div>';
             console.log('Contenido generado correctamente');
+
+            // Después de mostrar el modal y llenar los datos:
+            const verBtn = document.getElementById('verSatModalBtn');
+            if (verBtn) verBtn.classList.add('hidden');
+
             return content;
 
         } catch (error) {
