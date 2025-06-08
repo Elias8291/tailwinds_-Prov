@@ -1,21 +1,33 @@
 class QRReader {
-    constructor(validator = null, scraper = null) {
+    constructor(validator = null, scraper = null, config = {}) {
         this.html5QrcodeScanner = new Html5Qrcode("qrResult");
         this.canvas = document.getElementById('pdfCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.validator = validator;
         this.scraper = scraper;
         this.satData = null;
+        this.config = {
+            fileNameElement: 'fileName',
+            previewAreaElement: 'previewArea',
+            uploadAreaElement: 'uploadArea',
+            registrationFormElement: 'registrationForm',
+            verDatosBtnElement: 'verDatosBtn',
+            qrUrlElement: 'qrUrl',
+            ...config
+        };
     }
 
     async handleFile(file) {
-        const fileName = file.name;
-        document.getElementById('fileName').textContent = fileName;
-        const previewArea = document.getElementById('previewArea');
-        const qrResult = document.getElementById('qrResult');
-        previewArea.classList.remove('hidden');
-
         try {
+            // Actualizar UI de manera segura
+            this.updateUIElement(this.config.fileNameElement, file.name);
+            this.showElement(this.config.previewAreaElement);
+
+            const qrResult = document.getElementById('qrResult');
+            if (!qrResult) {
+                throw new Error('Elemento QR no encontrado');
+            }
+
             if (file.type === 'application/pdf') {
                 await this.processPDF(file, qrResult);
             } else {
@@ -26,6 +38,26 @@ class QRReader {
             this.showError(error.message);
             this.resetUI();
             return { success: false, error: error.message };
+        }
+    }
+
+    // Método de utilidad para actualizar elementos UI de manera segura
+    updateUIElement(elementId, text) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = text;
+        }
+    }
+
+    // Método para mostrar/ocultar elementos
+    showElement(elementId, show = true) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            if (show) {
+                element.classList.remove('hidden');
+            } else {
+                element.classList.add('hidden');
+            }
         }
     }
 
@@ -135,65 +167,41 @@ class QRReader {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         }
         
-        // Ocultar área de previsualización
-        const previewArea = document.getElementById('previewArea');
-        if (previewArea) {
-            previewArea.classList.add('hidden');
-        }
+        // Resetear elementos según configuración
+        this.updateUIElement(this.config.fileNameElement, 'PDF o Imagen con QR (Máximo 5MB)');
+        this.showElement(this.config.previewAreaElement, false);
         
-        // Resetear el texto del archivo
-        const fileName = document.getElementById('fileName');
-        if (fileName) {
-            fileName.textContent = 'PDF o Imagen con QR (Máximo 5MB)';
-        }
         this.satData = null;
     }
 
     async onValidQRFound(qrCode) {
         try {
-            // Eliminar completamente el área de subida de PDF
-            const uploadArea = document.getElementById('uploadArea');
-            if (uploadArea) {
-                uploadArea.remove();
-            }
-            
-            // Eliminar el área de previsualización/información del QR
-            const previewArea = document.getElementById('previewArea');
-            if (previewArea) {
-                previewArea.remove();
-            }
+            // Ocultar áreas según configuración
+            this.showElement(this.config.uploadAreaElement, false);
+            this.showElement(this.config.previewAreaElement, false);
             
             // Si hay un scraper, obtener los datos
             if (this.scraper) {
-                this.satData = await this.scraper.scrapeData(qrCode);
-                if (!this.satData) {
-                    throw new Error('No se pudieron obtener los datos del SAT');
+                const response = await this.scraper.scrapeData(qrCode);
+                if (!response || !response.success) {
+                    throw new Error(response.error || 'No se pudieron obtener los datos del SAT');
                 }
                 
-                // Preparar el contenido del modal pero NO mostrarlo
-                const modalContent = this.scraper.generateModalContent(this.satData);
-                const satDataContent = document.getElementById('satDataContent');
-                if (satDataContent) {
-                    satDataContent.innerHTML = modalContent;
-                }
+                this.satData = response.data;
                 
-                // Mostrar el botón de "Ver Datos"
-                const verDatosBtn = document.getElementById('verDatosBtn');
-                if (verDatosBtn) {
-                    verDatosBtn.classList.remove('hidden');
+                // Mostrar el botón de "Ver Datos" si existe
+                this.showElement(this.config.verDatosBtnElement, true);
+                
+                // Mostrar formulario de registro si existe
+                this.showElement(this.config.registrationFormElement, true);
+                
+                // Guardar URL del QR si el elemento existe
+                const qrUrlInput = document.getElementById(this.config.qrUrlElement);
+                if (qrUrlInput) {
+                    qrUrlInput.value = qrCode;
                 }
-            }
 
-            // Mostrar formulario de registro
-            const registrationForm = document.getElementById('registrationForm');
-            if (registrationForm) {
-                registrationForm.classList.remove('hidden');
-            }
-            
-            // Guardar URL del QR
-            const qrUrlInput = document.getElementById('qrUrl');
-            if (qrUrlInput) {
-                qrUrlInput.value = qrCode;
+                return { success: true, data: this.satData };
             }
         } catch (error) {
             throw new Error('Error al procesar los datos: ' + error.message);

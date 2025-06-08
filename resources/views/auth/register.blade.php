@@ -213,13 +213,23 @@
     import SATValidator from '/js/validators/sat-validator.js';
     import SATScraper from '/js/scrapers/sat-scraper.js';
     
+    // Configuración específica para register.blade.php
+    const config = {
+        fileNameElement: 'fileName',
+        previewAreaElement: 'previewArea',
+        uploadAreaElement: 'uploadArea',
+        registrationFormElement: 'registrationForm',
+        verDatosBtnElement: 'verDatosBtn',
+        qrUrlElement: 'qrUrl'
+    };
+
     // Esperar a que el DOM esté listo
     document.addEventListener('DOMContentLoaded', async () => {
         try {
             console.log('Inicializando QRHandler para registro...');
             
-            // Crear e inicializar QRHandler
-            const qrHandler = new QRHandler();
+            // Crear e inicializar QRHandler con configuración
+            const qrHandler = new QRHandler(config);
             await qrHandler.initialize(QRReader, SATValidator, SATScraper);
 
             // Configurar callbacks
@@ -252,18 +262,8 @@
                     }
                 }
 
-                // Ocultar botón de enviar hasta que el formulario esté completo
-                const submitButton = document.querySelector('button[type="submit"]');
-                if (submitButton) {
-                    submitButton.classList.add('hidden');
-                }
-
-                // Agregar validación en tiempo real
-                const form = document.querySelector('form');
-                const inputs = form.querySelectorAll('input[required]');
-                inputs.forEach(input => {
-                    input.addEventListener('input', validateForm);
-                });
+                // Validar formulario
+                validateForm();
             });
 
             qrHandler.setOnError((error) => {
@@ -278,7 +278,7 @@
 
         } catch (error) {
             console.error('Error durante la inicialización:', error);
-            showError('Error al inicializar el lector QR');
+            showError('Error al inicializar el lector QR: ' + error.message);
         }
     });
 

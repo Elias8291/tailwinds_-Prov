@@ -1,5 +1,5 @@
 class QRHandler {
-    constructor() {
+    constructor(config = {}) {
         this.lastScannedData = null;
         this.onDataScanned = null;
         this.onError = null;
@@ -7,12 +7,23 @@ class QRHandler {
         this.validator = null;
         this.scraper = null;
         this.scannedData = null;
+        this.isProcessing = false;
+        this.config = config;
     }
 
     async initialize(QRReader, SATValidator, SATScraper) {
         try {
             console.log('Inicializando QRHandler...');
-            this.qrReader = new QRReader(SATValidator, SATScraper);
+            
+            // Verificar elementos necesarios
+            const requiredElements = ['qrResult', 'pdfCanvas'];
+            const missingElements = requiredElements.filter(id => !document.getElementById(id));
+            
+            if (missingElements.length > 0) {
+                throw new Error(`Elementos faltantes: ${missingElements.join(', ')}`);
+            }
+
+            this.qrReader = new QRReader(SATValidator, SATScraper, this.config);
             this.validator = SATValidator;
             this.scraper = SATScraper;
 
@@ -23,6 +34,9 @@ class QRHandler {
             return true;
         } catch (error) {
             console.error('Error al inicializar QRHandler:', error);
+            if (this.onError) {
+                this.onError(error.message);
+            }
             return false;
         }
     }
@@ -124,17 +138,51 @@ class QRHandler {
     }
 
     async handleFile(file) {
+        if (this.isProcessing) {
+            console.log('Ya hay un archivo en proceso');
+            return;
+        }
+
         if (!this.qrReader) {
             throw new Error('QRHandler no ha sido inicializado');
         }
-        return await this.qrReader.handleFile(file);
+
+        try {
+            this.isProcessing = true;
+            const result = await this.qrReader.handleFile(file);
+            return result;
+        } catch (error) {
+            console.error('Error en handleFile:', error);
+            if (this.onError) {
+                this.onError(error.message);
+            }
+            return { success: false, error: error.message };
+        } finally {
+            this.isProcessing = false;
+        }
     }
 
     showSatData() {
-        if (!this.qrReader) {
-            throw new Error('QRHandler no ha sido inicializado');
+        try {
+            if (!this.lastScannedData) {
+                console.error('No hay datos disponibles');
+                return { success: false, error: 'No hay datos disponibles' };
+            }
+
+            console.log('Generando contenido con datos:', this.lastScannedData);
+            const content = this.scraper.generateModalContent(this.lastScannedData);
+            
+            // Actualizar contenido del modal
+            const satDataContent = document.getElementById('satDataContent');
+            if (satDataContent) {
+                satDataContent.innerHTML = content;
+            }
+
+            return { success: true, content: content };
+        } catch (error) {
+            console.error('Error en showSatData:', error);
+            return { success: false, error: error.message };
         }
-        return this.qrReader.showSatData();
     }
 
     getLastScannedData() {
