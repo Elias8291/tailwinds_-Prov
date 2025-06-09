@@ -29,14 +29,21 @@ class ForgotPasswordController extends Controller
      */
     public function sendResetLinkEmail(Request $request)
     {
-        $this->validateEmail($request);
+        $request->validate(['email' => 'required|email']);
 
-        $response = $this->broker()->sendResetLink(
-            $request->only('email')
-        );
+        // Find user by correo field
+        $user = \App\Models\User::where('correo', $request->email)->first();
+        
+        if (!$user) {
+            return back()->withErrors(['email' => 'No pudimos encontrar un usuario con ese correo electrónico.']);
+        }
 
-        return $response == Password::RESET_LINK_SENT
-            ? back()->with('status', 'Te hemos enviado un correo con las instrucciones para restablecer tu contraseña.')
-            : back()->withErrors(['email' => 'No pudimos encontrar un usuario con ese correo electrónico.']);
+        // Generate token
+        $token = app('auth.password.tokens')->create($user);
+        
+        // Send email manually
+        \Illuminate\Support\Facades\Mail::to($user->correo)->send(new \App\Mail\ResetPassword($token, $user->correo));
+
+        return back()->with('status', 'Te hemos enviado un correo con las instrucciones para restablecer tu contraseña.');
     }
 } 

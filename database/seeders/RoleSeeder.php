@@ -32,15 +32,15 @@ class RoleSeeder extends Seeder
         $solicitanteRole->givePermissionTo('dashboard.solicitante');
 
         // Permisos para documentos
-        Permission::create(['name' => 'documentos.index'])->syncRoles([$adminRole, $revisorRole]);
-        Permission::create(['name' => 'documentos.create'])->syncRoles([$adminRole]);
-        Permission::create(['name' => 'documentos.edit'])->syncRoles([$adminRole]);
-        Permission::create(['name' => 'documentos.destroy'])->syncRoles([$adminRole]);
+        Permission::firstOrCreate(['name' => 'documentos.index'])->syncRoles([$adminRole, $revisorRole]);
+        Permission::firstOrCreate(['name' => 'documentos.create'])->syncRoles([$adminRole]);
+        Permission::firstOrCreate(['name' => 'documentos.edit'])->syncRoles([$adminRole]);
+        Permission::firstOrCreate(['name' => 'documentos.destroy'])->syncRoles([$adminRole]);
 
         // Otros permisos existentes...
-        Permission::create(['name' => 'usuarios.index'])->syncRoles([$adminRole, $revisorRole]);
-        Permission::create(['name' => 'usuarios.create'])->assignRole($adminRole);
-        Permission::create(['name' => 'usuarios.edit'])->assignRole($adminRole);
-        Permission::create(['name' => 'usuarios.destroy'])->assignRole($adminRole);
+        Permission::firstOrCreate(['name' => 'usuarios.index'])->syncRoles([$adminRole, $revisorRole]);
+        Permission::firstOrCreate(['name' => 'usuarios.create'])->assignRole($adminRole);
+        Permission::firstOrCreate(['name' => 'usuarios.edit'])->assignRole($adminRole);
+        Permission::firstOrCreate(['name' => 'usuarios.destroy'])->assignRole($adminRole);
     }
 }

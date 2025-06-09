@@ -14,15 +14,25 @@ class VerifyEmail extends Mailable
     public $user;
     public $verificationUrl;
 
-    public function __construct(User $user, string $verificationUrl)
+    /** Constructor para inicializar datos del correo */
+    public function __construct(User $user)
     {
         $this->user = $user;
-        $this->verificationUrl = $verificationUrl;
+        $this->verificationUrl = route('verification.verify', [
+            'id' => $user->id,
+            'token' => $user->verification_token
+        ]);
     }
 
+    /** Construir el mensaje de correo */
     public function build()
     {
-        return $this->view('emails.verify')
-            ->subject('Verifica tu correo electrónico');
+        return $this->subject('Verificación de Cuenta - Padrón de Proveedores')
+                    ->view('emails.verify-email')
+                    ->with([
+                        'user' => $this->user,
+                        'verificationUrl' => $this->verificationUrl,
+                        'expirationHours' => 72
+                    ]);
     }
 } 

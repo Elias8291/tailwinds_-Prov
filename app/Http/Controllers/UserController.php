@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Auth\Events\Registered;
@@ -101,5 +102,70 @@ class UserController extends Controller
 
         return redirect()->route('users.index')
             ->with('success', 'Usuario eliminado exitosamente.');
+    }
+
+    /** Create user for registration process */
+    public function createForRegistration(array $data): User
+    {
+        try {
+            $user = User::create([
+                'nombre' => $data['nombre'],
+                'correo' => $data['correo'],
+                'rfc' => $data['rfc'],
+                'password' => Hash::make($data['password']),
+                'estado' => $data['estado'] ?? 'pendiente',
+                'verification_token' => Str::random(64),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            Log::info('Usuario creado exitosamente', ['user_id' => $user->id]);
+            return $user;
+
+        } catch (\Exception $e) {
+            Log::error('Error al crear usuario', ['error' => $e->getMessage()]);
+            throw new \Exception('Error al crear el usuario: ' . $e->getMessage());
+        }
+    }
+
+    /** Update user with array data */
+    public function updateWithData(User $user, array $data): User
+    {
+        try {
+            $user->update($data);
+            Log::info('Usuario actualizado exitosamente', ['user_id' => $user->id]);
+            return $user;
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar usuario', ['error' => $e->getMessage()]);
+            throw new \Exception('Error al actualizar el usuario: ' . $e->getMessage());
+        }
+    }
+
+    /** Find user by RFC */
+    public function findByRfc(string $rfc): ?User
+    {
+        return User::where('rfc', $rfc)->first();
+    }
+
+    /** Find user by email */
+    public function findByEmail(string $email): ?User
+    {
+        return User::where('correo', $email)->first();
+    }
+
+    /** Validate user registration data */
+    public function validateRegistrationData(array $data): array
+    {
+        return \Illuminate\Support\Facades\Validator::make($data, [
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,correo'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El correo electrónico no es válido.',
+            'email.unique' => 'El correo electrónico ya está registrado.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
+        ])->validate();
     }
 } 

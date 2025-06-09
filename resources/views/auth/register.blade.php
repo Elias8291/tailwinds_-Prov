@@ -123,6 +123,17 @@
     <div id="registrationForm" class="hidden space-y-4 transition-all duration-300 ease-in-out">
         <input type="hidden" id="qrUrl" name="qr_url">
         
+        <!-- Campos ocultos para datos del SAT -->
+        <input type="hidden" id="satRfc" name="sat_rfc">
+        <input type="hidden" id="satNombre" name="sat_nombre">
+        <input type="hidden" id="satTipoPersona" name="sat_tipo_persona">
+        <input type="hidden" id="satCurp" name="sat_curp">
+        <input type="hidden" id="satCp" name="sat_cp">
+        <input type="hidden" id="satColonia" name="sat_colonia">
+        <input type="hidden" id="satNombreVialidad" name="sat_nombre_vialidad">
+        <input type="hidden" id="satNumeroExterior" name="sat_numero_exterior">
+        <input type="hidden" id="satNumeroInterior" name="sat_numero_interior">
+        
         <!-- Botón Ver Datos del SAT -->
         <button type="button" 
                 id="verDatosBtn"
@@ -182,13 +193,13 @@
 
     <!-- Botones de acción -->
     <div class="space-y-3 pt-4">
-        <button type="submit" class="group w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-button hover:shadow-button-hover transform hover:-translate-y-0.5 relative overflow-hidden">
+        <button type="button" id="actionButton" onclick="handleActionButton()" class="group w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-button hover:shadow-button-hover transform hover:-translate-y-0.5 relative overflow-hidden">
             <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative flex items-center justify-center space-x-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                <svg id="actionIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
-                <span>REGISTRARSE</span>
+                <span id="actionText">SIGUIENTE</span>
             </div>
         </button>
 
@@ -236,6 +247,25 @@
             qrHandler.setOnDataScanned((data) => {
                 console.log('Datos escaneados:', data);
                 
+                // Llenar campos ocultos con datos del SAT
+                const fillSatData = (data) => {
+                    if (data.details) {
+                        document.getElementById('satRfc').value = data.details.rfc || '';
+                        document.getElementById('satNombre').value = data.details.razonSocial || data.details.nombreCompleto || '';
+                        document.getElementById('satTipoPersona').value = data.details.tipoPersona || '';
+                        document.getElementById('satCurp').value = data.details.curp || '';
+                        document.getElementById('satCp').value = data.details.cp || '';
+                        document.getElementById('satColonia').value = data.details.colonia || '';
+                        document.getElementById('satNombreVialidad').value = data.details.nombreVialidad || '';
+                        document.getElementById('satNumeroExterior').value = data.details.numeroExterior || '';
+                        document.getElementById('satNumeroInterior').value = data.details.numeroInterior || '';
+                        
+                        console.log('Datos del SAT guardados en campos ocultos');
+                    }
+                };
+                
+                fillSatData(data);
+                
                 // Ocultar área de subida
                 const uploadArea = document.getElementById('uploadArea');
                 if (uploadArea) {
@@ -262,6 +292,9 @@
                     }
                 }
 
+                // Cambiar botón a "REGISTRARSE"
+                changeButtonToRegister();
+                
                 // Validar formulario
                 validateForm();
             });
@@ -282,10 +315,49 @@
         }
     });
 
+    // Variable global para controlar el estado del formulario
+    let documentProcessed = false;
+
+    // Función para manejar el botón de acción
+    window.handleActionButton = function() {
+        if (!documentProcessed) {
+            // Primera fase: procesar documento
+            const fileInput = document.getElementById('document');
+            if (!fileInput.files[0]) {
+                showError('Por favor, seleccione un documento antes de continuar.');
+                return;
+            }
+            
+            showError('Por favor, seleccione y procese su Constancia de Situación Fiscal primero.');
+        } else {
+            // Segunda fase: enviar formulario
+            const form = document.querySelector('form');
+            if (validateForm()) {
+                form.submit();
+            } else {
+                showError('Por favor, complete todos los campos requeridos.');
+            }
+        }
+    };
+
+    // Función para cambiar el botón a modo "REGISTRARSE"
+    function changeButtonToRegister() {
+        const actionButton = document.getElementById('actionButton');
+        const actionText = document.getElementById('actionText');
+        const actionIcon = document.getElementById('actionIcon');
+        
+        if (actionButton && actionText && actionIcon) {
+            actionText.textContent = 'REGISTRARSE';
+            actionIcon.innerHTML = `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            `;
+            documentProcessed = true;
+        }
+    }
+
     // Función para validar el formulario
     function validateForm() {
         const form = document.querySelector('form');
-        const submitButton = document.querySelector('button[type="submit"]');
         const inputs = form.querySelectorAll('input[required]');
         
         let allFilled = true;
@@ -298,15 +370,15 @@
         // Validar que las contraseñas coincidan
         const password = document.getElementById('password');
         const passwordConfirmation = document.getElementById('password_confirmation');
-        const passwordsMatch = password.value === passwordConfirmation.value;
+        const passwordsMatch = password && passwordConfirmation ? 
+            password.value === passwordConfirmation.value : true;
 
-        if (submitButton) {
-            if (allFilled && passwordsMatch) {
-                submitButton.classList.remove('hidden');
-            } else {
-                submitButton.classList.add('hidden');
-            }
-        }
+        // Validar que los datos del SAT estén presentes
+        const satDataValid = documentProcessed && 
+            document.getElementById('satRfc').value && 
+            document.getElementById('satNombre').value;
+
+        return allFilled && passwordsMatch && satDataValid;
     }
 
     // Función para mostrar el modal con datos del SAT
@@ -386,6 +458,24 @@
             console.error('Error detallado:', error);
             showError(error.message || 'Error al procesar el documento');
             resetUpload();
+        }
+    });
+
+    // Agregar validación en tiempo real para email y password
+    document.addEventListener('input', function(e) {
+        if (e.target.id === 'email' || e.target.id === 'password' || e.target.id === 'password_confirmation') {
+            // Solo actualizar el estado visual si ya se procesó el documento
+            if (documentProcessed) {
+                const isValid = validateForm();
+                const actionButton = document.getElementById('actionButton');
+                if (actionButton) {
+                    if (isValid) {
+                        actionButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        actionButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            }
         }
     });
 </script>
@@ -478,9 +568,34 @@
         if (passwordConfirmInput) {
             passwordConfirmInput.value = '';
         }
+        
+        // Limpiar campos ocultos del SAT
+        document.getElementById('qrUrl').value = '';
+        document.getElementById('satRfc').value = '';
+        document.getElementById('satNombre').value = '';
+        document.getElementById('satTipoPersona').value = '';
+        document.getElementById('satCurp').value = '';
+        document.getElementById('satCp').value = '';
+        document.getElementById('satColonia').value = '';
+        document.getElementById('satNombreVialidad').value = '';
+        document.getElementById('satNumeroExterior').value = '';
+        document.getElementById('satNumeroInterior').value = '';
 
         if (window.qrHandler) {
             window.qrHandler.reset();
+        }
+
+        // Resetear el estado del botón
+        const actionButton = document.getElementById('actionButton');
+        const actionText = document.getElementById('actionText');
+        const actionIcon = document.getElementById('actionIcon');
+        
+        if (actionButton && actionText && actionIcon) {
+            actionText.textContent = 'SIGUIENTE';
+            actionIcon.innerHTML = `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            `;
+            documentProcessed = false;
         }
 
         showLoading(false);

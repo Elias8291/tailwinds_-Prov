@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+// use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
+use App\Auth\CustomEloquentUserProvider;
+use App\Auth\CustomTokenRepository;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,6 +24,14 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->registerPolicies();
+        // Register custom user provider
+        Auth::provider('custom-eloquent', function ($app, array $config) {
+            return new CustomEloquentUserProvider($app['hash'], $config['model']);
+        });
+
+        // Register custom token repository in the service container
+        $this->app->singleton('auth.password.tokens', function () {
+            return new CustomTokenRepository();
+        });
     }
 } 

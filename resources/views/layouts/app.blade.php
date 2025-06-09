@@ -53,11 +53,7 @@
         <div class="flex pt-16">
             <!-- Desktop sidebar -->
             <div class="hidden md:block">
-                <div class="fixed top-16 bottom-0 left-0 transition-all duration-300 ease-in-out w-[50px] hover:w-56 bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 shadow-lg overflow-hidden hover:overflow-y-auto z-30"
-                     @mouseenter="sidebarHovered = true"
-                     @mouseleave="sidebarHovered = false">
-                    @include('layouts.sidebar')
-                </div>
+                @include('layouts.sidebar')
             </div>
 
             <!-- Mobile sidebar -->
@@ -66,7 +62,10 @@
             </div>
 
             <!-- Main content area -->
-            <div class="flex-1 transition-all duration-300" :class="{ 'md:ml-56': sidebarHovered, 'md:ml-[50px]': !sidebarHovered }">
+            <div class="flex-1 transition-all duration-300 md:ml-[65px]" 
+                 x-data="{ sidebarHovered: false }"
+                 @sidebar-hover.window="sidebarHovered = $event.detail"
+                 :class="{ 'md:ml-72': sidebarHovered, 'md:ml-[65px]': !sidebarHovered }">
                 <main class="w-full mx-auto px-4 md:px-6">
                     @yield('content')
                 </main>
@@ -75,5 +74,44 @@
     </div>
 
     @stack('scripts')
+    
+    <script>
+        // Prevenir el uso de los botones atrás/adelante del navegador
+        (function() {
+            // Agregar una entrada al historial del navegador
+            history.pushState(null, null, location.href);
+            
+            // Escuchar el evento popstate (botón atrás)
+            window.addEventListener('popstate', function(event) {
+                // Redirigir al usuario a la página actual
+                history.pushState(null, null, location.href);
+                
+                // Mostrar mensaje opcional
+                console.log('Navegación con botones del navegador no permitida en esta sesión.');
+            });
+            
+            // Prevenir teclas de navegación comunes
+            document.addEventListener('keydown', function(e) {
+                // Alt + Flecha izquierda (Atrás)
+                if (e.altKey && e.keyCode === 37) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Alt + Flecha derecha (Adelante)
+                if (e.altKey && e.keyCode === 39) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Backspace fuera de inputs (IE/Edge comportamiento de atrás)
+                if (e.keyCode === 8) {
+                    var target = e.target || e.srcElement;
+                    if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+            });
+        })();
+    </script>
 </body>
 </html> 

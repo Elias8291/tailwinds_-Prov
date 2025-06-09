@@ -21,7 +21,7 @@
                         <div class="ml-5 w-0 flex-1">
                             <dl>
                                 <dt class="text-sm font-medium text-gray-500 truncate">Mis Trámites</dt>
-                                <dd class="text-lg font-medium text-gray-900">{{ auth()->user()->tramites_count ?? 0 }}</dd>
+                                <dd class="text-lg font-medium text-gray-900">{{ $solicitante ? $solicitante->tramites_count : 0 }}</dd>
                             </dl>
                         </div>
                     </div>
@@ -47,7 +47,7 @@
                         <div class="ml-5 w-0 flex-1">
                             <dl>
                                 <dt class="text-sm font-medium text-gray-500 truncate">Próximas Citas</dt>
-                                <dd class="text-lg font-medium text-gray-900">{{ auth()->user()->citas_pendientes_count ?? 0 }}</dd>
+                                <dd class="text-lg font-medium text-gray-900">{{ $solicitante ? $solicitante->citas_pendientes_count : 0 }}</dd>
                             </dl>
                         </div>
                     </div>
@@ -73,7 +73,7 @@
                         <div class="ml-5 w-0 flex-1">
                             <dl>
                                 <dt class="text-sm font-medium text-gray-500 truncate">Documentos Pendientes</dt>
-                                <dd class="text-lg font-medium text-gray-900">{{ auth()->user()->documentos_pendientes_count ?? 0 }}</dd>
+                                <dd class="text-lg font-medium text-gray-900">{{ $documentos_pendientes_count }}</dd>
                             </dl>
                         </div>
                     </div>
@@ -94,8 +94,11 @@
                 </h3>
             </div>
             <div class="px-4 py-5 sm:p-6">
-                <!-- Aquí irá la lista de trámites activos -->
-                <p class="text-gray-500 text-sm">No hay trámites activos en este momento.</p>
+                @if($solicitante && $solicitante->tramites_count > 0)
+                    <p class="text-gray-500 text-sm">Tienes {{ $solicitante->tramites_count }} trámite(s) en proceso.</p>
+                @else
+                    <p class="text-gray-500 text-sm">No hay trámites activos en este momento.</p>
+                @endif
             </div>
         </div>
        

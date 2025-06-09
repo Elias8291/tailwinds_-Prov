@@ -50,7 +50,19 @@ class Tramite extends Model
         return $this->hasOne(DetalleTramite::class);
     }
 
+    /** Get detalle tramite relation */
+    public function detalleTramite()
+    {
+        return $this->hasOne(DetalleTramite::class);
+    }
+
     public function documentos()
+    {
+        return $this->hasMany(DocumentoSolicitante::class);
+    }
+
+    /** Get documentos solicitante relation */
+    public function documentosSolicitante()
     {
         return $this->hasMany(DocumentoSolicitante::class);
     }

@@ -330,32 +330,39 @@
             hayTramite = true;
             if (tramite.tipo === 'inscripcion') {
                 html += `
-                <div class="group relative bg-gradient-to-br from-white to-gray-50/50 rounded-xl border-2 border-gray-200/50 hover:border-[#9d2449]/30 transition-all duration-300 overflow-hidden hover:shadow-xl hover:-translate-y-1 cursor-pointer">
-                    <div class="absolute inset-0 bg-gradient-to-br from-[#9d2449]/5 to-[#7a1d37]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="relative p-6">
-                        <div class="mb-4">
-                            <div class="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                <form method="POST" action="/tramites/iniciar-inscripcion" class="group relative bg-gradient-to-br from-white to-gray-50/50 rounded-xl border-2 border-gray-200/50 hover:border-[#9d2449]/30 transition-all duration-300 overflow-hidden hover:shadow-xl hover:-translate-y-1 cursor-pointer p-0 m-0">
+                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
+                    <input type="hidden" name="rfc" value="${rfc || ''}">
+                    <input type="hidden" name="nombre" value="${window.proveedorNombre || ''}">
+                    <input type="hidden" name="correo" value="${window.proveedorCorreo || ''}">
+                    <input type="hidden" name="tipo_persona" value="${window.proveedorTipoPersona || ''}">
+                    <button type="submit" style="all:unset;display:block;width:100%;height:100%;cursor:pointer;">
+                        <div class="absolute inset-0 bg-gradient-to-br from-[#9d2449]/5 to-[#7a1d37]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="relative p-6">
+                            <div class="mb-4">
+                                <div class="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800 mb-2 group-hover:text-[#9d2449] transition-colors duration-300">
+                                Inscripción
+                            </h3>
+                            <p class="text-sm text-gray-600 leading-relaxed mb-4">
+                                Registre su primera vez al padrón de contribuyentes con todos los requisitos necesarios.
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                                    Nuevo registro
+                                </span>
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-[#9d2449] group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
                             </div>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2 group-hover:text-[#9d2449] transition-colors duration-300">
-                            Inscripción
-                        </h3>
-                        <p class="text-sm text-gray-600 leading-relaxed mb-4">
-                            Registre su primera vez al padrón de contribuyentes con todos los requisitos necesarios.
-                        </p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
-                                Nuevo registro
-                            </span>
-                            <svg class="w-4 h-4 text-gray-400 group-hover:text-[#9d2449] group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
+                    </button>
+                </form>
                 `;
             }
             if (tramite.tipo === 'renovacion') {

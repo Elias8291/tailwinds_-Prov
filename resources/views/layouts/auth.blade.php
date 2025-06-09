@@ -432,6 +432,43 @@
             `;
             document.head.appendChild(style);
         });
+        
+        // Prevenir el uso de los botones atrás/adelante del navegador en páginas de autenticación
+        (function() {
+            // Agregar una entrada al historial del navegador
+            history.pushState(null, null, location.href);
+            
+            // Escuchar el evento popstate (botón atrás)
+            window.addEventListener('popstate', function(event) {
+                // Redirigir al usuario a la página actual
+                history.pushState(null, null, location.href);
+                
+                // Mostrar mensaje opcional
+                console.log('Navegación con botones del navegador no permitida.');
+            });
+            
+            // Prevenir teclas de navegación comunes
+            document.addEventListener('keydown', function(e) {
+                // Alt + Flecha izquierda (Atrás)
+                if (e.altKey && e.keyCode === 37) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Alt + Flecha derecha (Adelante)
+                if (e.altKey && e.keyCode === 39) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Backspace fuera de inputs (IE/Edge comportamiento de atrás)
+                if (e.keyCode === 8) {
+                    var target = e.target || e.srcElement;
+                    if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+            });
+        })();
     </script>
 </body>
 </html> 

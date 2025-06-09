@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
@@ -12,10 +13,12 @@ use App\Http\Controllers\TramiteController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\ProveedorController;
 
-// Ruta principal
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+// Ruta principal - solo para usuarios no autenticados
+Route::middleware(['web', 'guest'])->group(function () {
+    Route::get('/', function () {
+        return view('welcome');
+    })->name('welcome');
+});
 
 // Grupo de rutas para usuarios no autenticados
 Route::middleware(['web', 'guest'])->group(function () {
@@ -32,6 +35,12 @@ Route::middleware(['web', 'guest'])->group(function () {
         ->name('password.request');
     Route::post('/recuperar-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
         ->name('password.email');
+        
+    // Rutas de reset de contraseña
+    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])
+        ->name('password.reset');
+    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
+        ->name('password.update');
 });
 
 // Ruta de logout (requiere autenticación)
@@ -39,8 +48,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/cerrar-sesion', [LoginController::class, 'logout'])->name('logout');
 });
 
-// Rutas de dashboard protegidas por autenticación y permisos
-Route::middleware(['auth'])->group(function () {
+// Rutas de dashboard protegidas por autenticación y verificación de email
+Route::middleware(['auth', \App\Http\Middleware\VerifyUserStatus::class])->group(function () {
     // Dashboard administrativo
     Route::get('/dashboard', [DashboardController::class, 'adminDashboard'])
         ->middleware(['can:dashboard.admin'])
@@ -56,31 +65,29 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('roles', RoleController::class);
     });
 
-    Route::get('/email/verify', [VerificationController::class, 'notice'])
-        ->name('verification.notice');
-    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
-        ->middleware(['signed'])
-        ->name('verification.verify');
-    Route::post('/email/verification-notification', [VerificationController::class, 'send'])
-        ->middleware(['throttle:6,1'])
-        ->name('verification.send');
 });
+
+// Rutas de verificación de email (sin autenticación)
+Route::get('/verificar-email/{id}/{token}', [VerificationController::class, 'verify'])
+    ->name('verification.verify');
+Route::post('/reenviar-verificacion', [VerificationController::class, 'resend'])
+    ->name('verification.resend');
 
 Route::get('/provider-dashboard', function () {
     return view('provider-dashboard');
 })->name('provider.dashboard');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\VerifyUserStatus::class])->group(function () {
     Route::resource('users', UserController::class);
 });
 
-Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
-Route::get('/tramites/create', [TramiteController::class, 'create'])->name('tramites.create');
-Route::post('/tramites', [TramiteController::class, 'store'])->name('tramites.store');
-
-Route::resource('documentos', DocumentoController::class);
-
-// Rutas de Proveedores
 Route::middleware(['auth'])->group(function () {
+    Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
+    Route::get('/tramites/create', [TramiteController::class, 'create'])->name('tramites.create');
+    Route::post('/tramites', [TramiteController::class, 'store'])->name('tramites.store');
+    
+    Route::resource('documentos', DocumentoController::class);
+    
+    // Rutas de Proveedores
     Route::resource('proveedores', ProveedorController::class);
 });
