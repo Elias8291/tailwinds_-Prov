@@ -10,146 +10,193 @@
             line-height: 1.6;
             color: #333;
             margin: 0;
-            padding: 0;
-            background-color: #f8fafc;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 12px 30px rgba(128, 0, 0, 0.15);
         }
         .header {
-            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
             color: white;
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
+            position: relative;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5z' fill='rgba(255,255,255,0.05)' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
         .logo {
+            width: 90px;
+            height: 90px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
+        .logo::after {
+            content: '🔒';
+            font-size: 32px;
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            background: #990000;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 15px;
-        }
-        .logo-text {
-            text-align: left;
-        }
-        .logo-title {
-            font-size: 18px;
-            font-weight: bold;
-            line-height: 1.2;
-            margin: 0;
-        }
-        .logo-subtitle {
-            font-size: 12px;
-            opacity: 0.8;
-            margin: 0;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 600;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         .content {
             padding: 40px 30px;
+            background: linear-gradient(180deg, #ffffff 0%, #fff5f5 100%);
         }
         .greeting {
-            font-size: 18px;
-            color: #1e40af;
-            margin-bottom: 20px;
+            font-size: 28px;
+            color: #800000;
+            margin-bottom: 25px;
+            text-align: center;
             font-weight: 600;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
         }
         .message {
+            color: #4a4a4a;
+            font-size: 16px;
+            line-height: 1.8;
             margin-bottom: 30px;
-            color: #6b7280;
-            line-height: 1.7;
         }
         .reset-button {
-            display: block;
-            width: fit-content;
-            margin: 30px auto;
-            padding: 15px 40px;
-            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            display: inline-block;
+            background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
             color: white;
+            padding: 18px 45px;
+            border-radius: 50px;
             text-decoration: none;
-            border-radius: 10px;
             font-weight: 600;
             font-size: 16px;
             text-align: center;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
+            box-shadow: 0 8px 20px rgba(128, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
         }
         .reset-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
+            box-shadow: 0 12px 25px rgba(128, 0, 0, 0.25);
         }
-        .security-notice {
-            background-color: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 20px;
-            margin: 30px 0;
-            border-radius: 6px;
+        .reset-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
         }
-        .security-notice h3 {
-            color: #92400e;
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            font-weight: 600;
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
         }
-        .security-notice p {
-            color: #92400e;
-            margin: 0;
-            font-size: 14px;
-        }
-        .footer {
-            background-color: #f8fafc;
+        .security-box {
+            background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
+            border-radius: 16px;
             padding: 30px;
+            color: white;
+            margin: 35px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .security-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5z' fill='rgba(255,255,255,0.05)' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.1;
+        }
+        .security-box h3 {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            margin: 0 0 20px 0;
+        }
+        .security-box h3 svg {
+            margin-right: 10px;
+            width: 24px;
+            height: 24px;
+        }
+        .security-points {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 25px;
+        }
+        .security-point {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
             text-align: center;
-            border-top: 1px solid #e5e7eb;
         }
-        .footer p {
-            color: #6b7280;
-            font-size: 14px;
-            margin: 5px 0;
-        }
-        .footer .government-info {
-            color: #1e40af;
-            font-weight: 600;
+        .security-point svg {
+            width: 24px;
+            height: 24px;
             margin-bottom: 10px;
         }
         .link-fallback {
-            background-color: #f3f4f6;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
+            background: #fff5f5;
+            border: 1px dashed #cc0000;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
             word-break: break-all;
             font-size: 14px;
-            color: #6b7280;
+            color: #800000;
         }
-        @media only screen and (max-width: 600px) {
-            .container {
-                margin: 10px;
-                border-radius: 8px;
-            }
-            .header, .content, .footer {
-                padding: 20px;
-            }
-            .reset-button {
-                padding: 12px 30px;
-                font-size: 14px;
-            }
+        .link-fallback strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #4a0000;
+        }
+        .footer {
+            background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.5), rgba(255,255,255,0.1));
         }
     </style>
 </head>
@@ -158,17 +205,12 @@
         <!-- Header -->
         <div class="header">
             <div class="logo">
-                <div class="logo-icon">
-                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 0L3 7v10c0 5.55 3.84 9.739 9 9.739s9-4.189 9-9.739V7L12 0z"/>
-                    </svg>
-                </div>
-                <div class="logo-text">
-                    <div class="logo-title">ADMINISTRACIÓN</div>
-                    <div class="logo-subtitle">Gobierno de Oaxaca</div>
-                </div>
+                <svg width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0L3 7v10c0 5.55 3.84 9.739 9 9.739s9-4.189 9-9.739V7L12 0z"/>
+                </svg>
             </div>
-            <h1>Restablecer Contraseña</h1>
+            <h1 style="font-size: 32px; font-weight: 600; margin: 0 0 10px 0;">Restablecer Contraseña</h1>
+            <p style="margin: 0; opacity: 0.9; font-size: 18px;">Padrón de Proveedores - Gobierno de Oaxaca</p>
         </div>
 
         <!-- Content -->
@@ -176,43 +218,77 @@
             <div class="greeting">¡Hola!</div>
             
             <div class="message">
-                <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en el <strong>Padrón de Proveedores de Oaxaca</strong>.</p>
+                <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en el <strong>Padrón de Proveedores de Oaxaca</strong>. Tu seguridad es importante para nosotros, por lo que hemos generado un enlace seguro para que puedas crear una nueva contraseña.</p>
+            </div>
+
+            <div style="text-align: center; margin: 35px 0;">
+                <a href="{{ $resetUrl }}" class="reset-button">
+                    Restablecer Contraseña
+                </a>
+            </div>
+
+            <div class="security-box">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Información de Seguridad
+                </h3>
+                <p style="margin: 0 0 20px 0; font-size: 16px;">Por tu seguridad, este enlace expirará en <strong>60 minutos</strong>. Si no solicitaste este cambio, puedes ignorar este mensaje de forma segura.</p>
                 
-                <p>Si solicitaste restablecer tu contraseña, haz clic en el siguiente botón:</p>
-            </div>
-
-            <a href="{{ $resetUrl }}" class="reset-button">
-                🔑 RESTABLECER CONTRASEÑA
-            </a>
-
-            <div class="security-notice">
-                <h3>⚠️ Información de Seguridad</h3>
-                <p><strong>Este enlace expirará en 60 minutos</strong> por seguridad. Si no solicitaste restablecer tu contraseña, puedes ignorar este correo de forma segura.</p>
-            </div>
-
-            <div class="message">
-                <p><strong>Para tu seguridad:</strong></p>
-                <ul>
-                    <li>Este enlace solo puede ser usado una vez</li>
-                    <li>Nunca compartas este enlace con otras personas</li>
-                    <li>Si no fuiste tú quien solicitó el cambio, ignora este correo</li>
-                </ul>
+                <div class="security-points">
+                    <div class="security-point">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <p style="margin: 0; font-size: 14px;">Uso único</p>
+                    </div>
+                    <div class="security-point">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <p style="margin: 0; font-size: 14px;">Enlace personal</p>
+                    </div>
+                    <div class="security-point">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <p style="margin: 0; font-size: 14px;">Expira pronto</p>
+                    </div>
+                </div>
             </div>
 
             <div class="link-fallback">
-                <strong>¿Problemas con el botón?</strong><br>
-                Copia y pega este enlace en tu navegador:<br>
-                <a href="{{ $resetUrl }}" style="color: #1e40af;">{{ $resetUrl }}</a>
+                <strong>¿Problemas con el botón?</strong>
+                Copia y pega este enlace en tu navegador:
+                <br>
+                <a href="{{ $resetUrl }}" style="color: #800000; word-break: break-all;">{{ $resetUrl }}</a>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p class="government-info">Gobierno del Estado de Oaxaca</p>
-            <p>Padrón de Proveedores - Sistema Oficial</p>
-            <p>Este es un correo automático, por favor no responder.</p>
-            <p style="margin-top: 15px; font-size: 12px; color: #9ca3af;">
-                Si tienes problemas técnicos, contacta al administrador del sistema.
+            <div style="margin-bottom: 20px;">
+                <svg width="40" height="40" fill="rgba(255,255,255,0.9)" viewBox="0 0 24 24" style="margin: 0 auto;">
+                    <path d="M12 0L3 7v10c0 5.55 3.84 9.739 9 9.739s9-4.189 9-9.739V7L12 0z"/>
+                </svg>
+            </div>
+
+            <h2 style="color: white; font-size: 20px; font-weight: 600; margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 1px;">
+                Padrón de Proveedores
+            </h2>
+            <p style="color: white; font-size: 16px; margin: 0 0 5px 0; font-weight: 500;">
+                Gobierno del Estado de Oaxaca
+            </p>
+            
+            <div style="width: 60px; height: 2px; background: rgba(255,255,255,0.3); margin: 20px auto;"></div>
+            
+            <p style="color: rgba(255,255,255,0.8); font-size: 14px; margin: 15px 0;">
+                Este es un correo automático. Por favor, no responda a este mensaje.
+            </p>
+            
+            <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin: 0;">
+                © {{ date('Y') }} Gobierno del Estado de Oaxaca. Todos los derechos reservados.
             </p>
         </div>
     </div>

@@ -70,7 +70,9 @@
             </div>
         </div>
         <div class="hidden lg:block w-2/5 bg-[#fff5f8]/90 p-6 flex items-center justify-center">
-            <img src="{{ asset('images/mujer_bienvenida.png') }}" alt="Asistente" class="w-3/4 h-auto max-h-[400px] object-contain">
+            <div class="flex items-center justify-center h-full">
+                <img src="{{ asset('images/mujer_bienvenida.png') }}" alt="Asistente" class="w-3/4 h-auto max-h-[400px] object-contain mx-auto my-auto">
+            </div>
         </div>
     </div>
 </div>
