@@ -1,181 +1,318 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Encabezado -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-8">
-            <div class="flex items-center space-x-4">
-                <div class="bg-gradient-to-br from-[#B4325E] to-[#93264B] rounded-xl p-3 shadow-md">
-                    <svg class="w-7 h-7 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="text-2xl font-bold bg-gradient-to-r from-[#B4325E] to-[#93264B] bg-clip-text text-transparent">
-                        Editar Proveedor
-                    </h2>
-                    <p class="text-sm text-gray-500">Modifique la información del proveedor</p>
-                </div>
+<div class="min-h-screen w-full overflow-x-hidden">
+    <div class="py-6 px-3 sm:px-4">
+        <div class="w-full max-w-3xl mx-auto">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100/50">
+                <form method="POST" action="{{ route('proveedores.update', $proveedor->pv) }}" class="divide-y divide-gray-100">
+                    @csrf
+                    @method('PUT')
+
+                    <!-- Encabezado -->
+                    <div class="p-4">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="bg-gradient-to-br from-[#9d2449] to-[#8a203f] rounded-xl p-3 shadow-lg mb-3">
+                                <i class="fas fa-user-edit text-white text-xl"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold bg-gradient-to-r from-[#9d2449] to-[#8a203f] bg-clip-text text-transparent mb-2">
+                                Editar Proveedor
+                            </h2>
+                            <p class="text-sm text-gray-600">Modifique la información del proveedor</p>
+                        </div>
+                    </div>
+
+                    <!-- Información del Solicitante -->
+                    <div class="p-4">
+                        <div class="flex flex-col items-center mb-6">
+                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#9d2449] to-[#8a203f] bg-clip-text text-transparent">
+                                Información del Solicitante
+                            </h3>
+                            <div class="w-32 h-0.5 bg-gradient-to-r from-[#9d2449] to-[#8a203f] mt-2 rounded-full opacity-50"></div>
+                        </div>
+
+                        <div class="w-full max-w-lg mx-auto space-y-6">
+                            <!-- RFC -->
+                            <div class="form-group">
+                                <div class="relative group">
+                                    <input type="text" 
+                                           id="rfc"
+                                           name="rfc"
+                                           value="{{ old('rfc', $proveedor->solicitante->rfc) }}"
+                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('rfc') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                           placeholder=" "
+                                           required>
+                                    <label for="rfc" 
+                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
+                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
+                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
+                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
+                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
+                                        RFC<span class="text-[#9d2449] ml-1">*</span>
+                                    </label>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        <i class="fas fa-fingerprint text-lg transition-colors duration-300"></i>
+                                    </div>
+                                    @error('rfc')
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
+                                        <i class="fas fa-exclamation-circle text-red-500"></i>
+                                    </div>
+                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $message }}
+                                    </p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Tipo de Persona -->
+                            <div class="form-group">
+                                <div class="relative group">
+                                    <select name="tipo_persona" 
+                                            id="tipo_persona"
+                                            class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 [&>option]:py-2 [&>option]:px-4 [&>option]:cursor-pointer [&>option]:transition-colors [&>option:hover]:bg-[#9d2449] [&>option:hover]:text-white @error('tipo_persona') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                            required>
+                                        <option value="" disabled>Seleccione una opción</option>
+                                        <option value="Fisica" {{ old('tipo_persona', $proveedor->solicitante->tipo_persona) == 'Fisica' ? 'selected' : '' }}>Persona Física</option>
+                                        <option value="Moral" {{ old('tipo_persona', $proveedor->solicitante->tipo_persona) == 'Moral' ? 'selected' : '' }}>Persona Moral</option>
+                                    </select>
+                                    <label for="tipo_persona" 
+                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
+                                                  peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        Tipo de Persona<span class="text-[#9d2449] ml-1">*</span>
+                                    </label>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        <i class="fas fa-user-tag text-lg transition-colors duration-300"></i>
+                                    </div>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        <i class="fas fa-chevron-down text-sm transition-colors duration-300"></i>
+                                    </div>
+                                    @error('tipo_persona')
+                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $message }}
+                                    </p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Nombre -->
+                            <div id="nombre_container" class="form-group hidden">
+                                <div class="relative group">
+                                    <input type="text" 
+                                           id="nombre"
+                                           name="nombre"
+                                           value="{{ old('nombre', $proveedor->solicitante->nombre) }}"
+                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('nombre') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                           placeholder=" ">
+                                    <label for="nombre" 
+                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
+                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
+                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
+                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
+                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
+                                        Nombre Completo<span class="text-[#9d2449] ml-1">*</span>
+                                    </label>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        <i class="fas fa-user text-lg transition-colors duration-300"></i>
+                                    </div>
+                                    @error('nombre')
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
+                                        <i class="fas fa-exclamation-circle text-red-500"></i>
+                                    </div>
+                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $message }}
+                                    </p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Razón Social -->
+                            <div id="razon_social_container" class="form-group hidden">
+                                <div class="relative group">
+                                    <input type="text" 
+                                           id="razon_social"
+                                           name="razon_social"
+                                           value="{{ old('razon_social', $proveedor->solicitante->razon_social) }}"
+                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('razon_social') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                           placeholder=" ">
+                                    <label for="razon_social" 
+                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
+                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
+                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
+                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
+                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
+                                        Razón Social<span class="text-[#9d2449] ml-1">*</span>
+                                    </label>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        <i class="fas fa-building text-lg transition-colors duration-300"></i>
+                                    </div>
+                                    @error('razon_social')
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
+                                        <i class="fas fa-exclamation-circle text-red-500"></i>
+                                    </div>
+                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $message }}
+                                    </p>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información del Proveedor -->
+                    <div class="p-4">
+                        <div class="flex flex-col items-center mb-6">
+                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#9d2449] to-[#8a203f] bg-clip-text text-transparent">
+                                Información del Proveedor
+                            </h3>
+                            <div class="w-32 h-0.5 bg-gradient-to-r from-[#9d2449] to-[#8a203f] mt-2 rounded-full opacity-50"></div>
+                        </div>
+
+                        <div class="w-full max-w-lg mx-auto space-y-6">
+                            <!-- PV -->
+                            <div class="form-group">
+                                <div class="relative group">
+                                    <input type="text" 
+                                           id="pv"
+                                           value="{{ $proveedor->pv }}"
+                                           class="peer w-full h-12 px-12 bg-gray-50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none cursor-not-allowed"
+                                           placeholder=" "
+                                           disabled>
+                                    <label for="pv" 
+                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600">
+                                        PV<span class="text-[#9d2449] ml-1">*</span>
+                                    </label>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
+                                        <i class="fas fa-id-badge text-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Estado -->
+                            <div class="form-group">
+                                <div class="relative group">
+                                    <select name="estado" 
+                                            id="estado"
+                                            class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 [&>option]:py-2 [&>option]:px-4 [&>option]:cursor-pointer [&>option]:transition-colors [&>option:hover]:bg-[#9d2449] [&>option:hover]:text-white @error('estado') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                            required>
+                                        <option value="" disabled>Seleccione una opción</option>
+                                        <option value="Activo" {{ old('estado', $proveedor->estado) == 'Activo' ? 'selected' : '' }}>Activo</option>
+                                        <option value="Inactivo" {{ old('estado', $proveedor->estado) == 'Inactivo' ? 'selected' : '' }}>Inactivo</option>
+                                        <option value="Pendiente Renovacion" {{ old('estado', $proveedor->estado) == 'Pendiente Renovacion' ? 'selected' : '' }}>Pendiente Renovación</option>
+                                    </select>
+                                    <label for="estado" 
+                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
+                                                  peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        Estado<span class="text-[#9d2449] ml-1">*</span>
+                                    </label>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        <i class="fas fa-toggle-on text-lg transition-colors duration-300"></i>
+                                    </div>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        <i class="fas fa-chevron-down text-sm transition-colors duration-300"></i>
+                                    </div>
+                                    @error('estado')
+                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $message }}
+                                    </p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Fechas -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <!-- Fecha de Registro -->
+                                <div class="form-group">
+                                    <div class="relative group">
+                                        <input type="date" 
+                                               id="fecha_registro"
+                                               name="fecha_registro"
+                                               value="{{ old('fecha_registro', $proveedor->fecha_registro->format('Y-m-d')) }}"
+                                               class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('fecha_registro') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                               required>
+                                        <label for="fecha_registro" 
+                                               class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
+                                                      peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                            Fecha de Registro<span class="text-[#9d2449] ml-1">*</span>
+                                        </label>
+                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                            <i class="fas fa-calendar-plus text-lg transition-colors duration-300"></i>
+                                        </div>
+                                        @error('fecha_registro')
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
+                                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                                        </div>
+                                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                            <i class="fas fa-info-circle"></i>
+                                            {{ $message }}
+                                        </p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Fecha de Vencimiento -->
+                                <div class="form-group">
+                                    <div class="relative group">
+                                        <input type="date" 
+                                               id="fecha_vencimiento"
+                                               name="fecha_vencimiento"
+                                               value="{{ old('fecha_vencimiento', $proveedor->fecha_vencimiento->format('Y-m-d')) }}"
+                                               class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('fecha_vencimiento') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                               required>
+                                        <label for="fecha_vencimiento" 
+                                               class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
+                                                      peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                            Fecha de Vencimiento<span class="text-[#9d2449] ml-1">*</span>
+                                        </label>
+                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                            <i class="fas fa-calendar-times text-lg transition-colors duration-300"></i>
+                                        </div>
+                                        @error('fecha_vencimiento')
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
+                                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                                        </div>
+                                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                            <i class="fas fa-info-circle"></i>
+                                            {{ $message }}
+                                        </p>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="p-4">
+                        <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            <a href="{{ route('proveedores.index') }}" 
+                               class="w-full sm:w-auto group inline-flex items-center justify-center px-6 py-3 rounded-xl border-2 border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300">
+                                <i class="fas fa-times mr-2 text-gray-400 group-hover:text-gray-600"></i>
+                                <span class="text-sm font-semibold text-gray-600 group-hover:text-gray-900">Cancelar</span>
+                            </a>
+                            <button type="submit"
+                                    class="w-full sm:w-auto group inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#8a203f] hover:to-[#9d2449] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] transition-all duration-300 shadow-md hover:shadow-lg">
+                                <i class="fas fa-save mr-2 text-white/90 group-hover:text-white"></i>
+                                <span class="text-sm font-semibold text-white group-hover:text-white/90">Actualizar Proveedor</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </div>
-
-        <!-- Formulario -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6">
-            <form method="POST" action="{{ route('proveedores.update', $proveedor->pv) }}" class="space-y-6">
-                @csrf
-                @method('PUT')
-
-                <!-- Información del Solicitante -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Información del Solicitante</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="rfc" class="block text-sm font-medium text-gray-700">RFC</label>
-                            <input type="text" 
-                                   name="rfc" 
-                                   id="rfc" 
-                                   value="{{ old('rfc', $proveedor->solicitante->rfc) }}"
-                                   class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#B4325E] focus:ring-[#B4325E]"
-                                   required>
-                            @error('rfc')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="tipo_persona" class="block text-sm font-medium text-gray-700">Tipo de Persona</label>
-                            <select name="tipo_persona" 
-                                    id="tipo_persona"
-                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#B4325E] focus:ring-[#B4325E]"
-                                    required>
-                                <option value="">Seleccione...</option>
-                                <option value="Fisica" {{ old('tipo_persona', $proveedor->solicitante->tipo_persona) == 'Fisica' ? 'selected' : '' }}>Física</option>
-                                <option value="Moral" {{ old('tipo_persona', $proveedor->solicitante->tipo_persona) == 'Moral' ? 'selected' : '' }}>Moral</option>
-                            </select>
-                            @error('tipo_persona')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div id="nombre_container" class="hidden">
-                            <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
-                            <input type="text" 
-                                   name="nombre" 
-                                   id="nombre" 
-                                   value="{{ old('nombre', $proveedor->solicitante->nombre) }}"
-                                   class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#B4325E] focus:ring-[#B4325E]">
-                            @error('nombre')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div id="razon_social_container" class="hidden">
-                            <label for="razon_social" class="block text-sm font-medium text-gray-700">Razón Social</label>
-                            <input type="text" 
-                                   name="razon_social" 
-                                   id="razon_social" 
-                                   value="{{ old('razon_social', $proveedor->solicitante->razon_social) }}"
-                                   class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#B4325E] focus:ring-[#B4325E]">
-                            @error('razon_social')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Información del Proveedor -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Información del Proveedor</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="pv" class="block text-sm font-medium text-gray-700">PV</label>
-                            <input type="text" 
-                                   value="{{ $proveedor->pv }}"
-                                   class="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 cursor-not-allowed"
-                                   disabled>
-                        </div>
-
-                        <div>
-                            <label for="estado" class="block text-sm font-medium text-gray-700">Estado</label>
-                            <select name="estado" 
-                                    id="estado"
-                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#B4325E] focus:ring-[#B4325E]"
-                                    required>
-                                <option value="">Seleccione...</option>
-                                <option value="Activo" {{ old('estado', $proveedor->estado) == 'Activo' ? 'selected' : '' }}>Activo</option>
-                                <option value="Inactivo" {{ old('estado', $proveedor->estado) == 'Inactivo' ? 'selected' : '' }}>Inactivo</option>
-                                <option value="Pendiente Renovacion" {{ old('estado', $proveedor->estado) == 'Pendiente Renovacion' ? 'selected' : '' }}>Pendiente Renovación</option>
-                            </select>
-                            @error('estado')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="fecha_registro" class="block text-sm font-medium text-gray-700">Fecha de Registro</label>
-                            <input type="date" 
-                                   name="fecha_registro" 
-                                   id="fecha_registro" 
-                                   value="{{ old('fecha_registro', $proveedor->fecha_registro->format('Y-m-d')) }}"
-                                   class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#B4325E] focus:ring-[#B4325E]"
-                                   required>
-                            @error('fecha_registro')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="fecha_vencimiento" class="block text-sm font-medium text-gray-700">Fecha de Vencimiento</label>
-                            <input type="date" 
-                                   name="fecha_vencimiento" 
-                                   id="fecha_vencimiento" 
-                                   value="{{ old('fecha_vencimiento', $proveedor->fecha_vencimiento->format('Y-m-d')) }}"
-                                   class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#B4325E] focus:ring-[#B4325E]"
-                                   required>
-                            @error('fecha_vencimiento')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label for="observaciones" class="block text-sm font-medium text-gray-700">Observaciones</label>
-                            <textarea name="observaciones" 
-                                      id="observaciones" 
-                                      rows="3"
-                                      class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#B4325E] focus:ring-[#B4325E]">{{ old('observaciones', $proveedor->observaciones) }}</textarea>
-                            @error('observaciones')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Botones de acción -->
-                <div class="flex justify-end space-x-3">
-                    <a href="{{ route('proveedores.index') }}" 
-                       class="px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors duration-200">
-                        Cancelar
-                    </a>
-                    <button type="submit"
-                            class="px-4 py-2 bg-gradient-to-r from-[#B4325E] to-[#93264B] text-white rounded-lg hover:from-[#93264B] hover:to-[#B4325E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#B4325E] transition-all duration-300">
-                        Actualizar Proveedor
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
 
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const tipoPersonaSelect = document.getElementById('tipo_persona');
     const nombreContainer = document.getElementById('nombre_container');
     const razonSocialContainer = document.getElementById('razon_social_container');
-    const nombreInput = document.getElementById('nombre');
-    const razonSocialInput = document.getElementById('razon_social');
 
     function toggleFields() {
         const selectedValue = tipoPersonaSelect.value;
@@ -183,23 +320,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (selectedValue === 'Fisica') {
             nombreContainer.classList.remove('hidden');
             razonSocialContainer.classList.add('hidden');
-            nombreInput.required = true;
-            razonSocialInput.required = false;
         } else if (selectedValue === 'Moral') {
             nombreContainer.classList.add('hidden');
             razonSocialContainer.classList.remove('hidden');
-            nombreInput.required = false;
-            razonSocialInput.required = true;
         } else {
             nombreContainer.classList.add('hidden');
             razonSocialContainer.classList.add('hidden');
-            nombreInput.required = false;
-            razonSocialInput.required = false;
         }
     }
 
     tipoPersonaSelect.addEventListener('change', toggleFields);
-    toggleFields(); // Ejecutar al cargar para manejar valores iniciales
+    toggleFields(); // Run on initial load
 });
 </script>
+@endpush
+
 @endsection 

@@ -1,116 +1,176 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen py-6">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Encabezado -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 transform hover:scale-[1.01] transition-all duration-300 border border-gray-100">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div class="flex items-center space-x-4">
-                    <div class="bg-gradient-to-br from-[#9d2449] to-[#8a203f] rounded-xl p-3 shadow-md">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                        </svg>
+<div class="min-h-screen w-full overflow-x-hidden">
+    <div class="py-6 px-3 sm:px-4">
+        <div class="w-full max-w-3xl mx-auto">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100/50">
+                <form method="POST" action="{{ route('documentos.update', $documento) }}" class="divide-y divide-gray-100">
+                    @csrf
+                    @method('PUT')
+
+                    <!-- Encabezado -->
+                    <div class="p-4">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="bg-gradient-to-br from-[#9d2449] to-[#8a203f] rounded-xl p-3 shadow-lg mb-3">
+                                <i class="fas fa-edit text-white text-xl"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold bg-gradient-to-r from-[#9d2449] to-[#8a203f] bg-clip-text text-transparent mb-2">
+                                Editar Documento
+                            </h2>
+                            <p class="text-sm text-gray-600">Modifica los detalles del documento</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#9d2449] to-[#8a203f] bg-clip-text text-transparent">
-                            Editar Documento
-                        </h2>
-                        <p class="text-sm text-gray-500">Modifica los detalles del documento</p>
+
+                    <!-- Información del Documento -->
+                    <div class="p-4">
+                        <div class="flex flex-col items-center mb-6">
+                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#9d2449] to-[#8a203f] bg-clip-text text-transparent">
+                                Información del Documento
+                            </h3>
+                            <div class="w-32 h-0.5 bg-gradient-to-r from-[#9d2449] to-[#8a203f] mt-2 rounded-full opacity-50"></div>
+                        </div>
+
+                        <div class="w-full max-w-lg mx-auto space-y-6">
+                            <!-- Nombre del Documento -->
+                            <div class="form-group">
+                                <div class="relative group">
+                                    <input type="text" 
+                                           id="nombre"
+                                           name="nombre"
+                                           value="{{ old('nombre', $documento->nombre) }}"
+                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('nombre') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                           placeholder="Nombre del Documento"
+                                           required>
+                                    <label for="nombre" 
+                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
+                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
+                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
+                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
+                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
+                                        Nombre del Documento<span class="text-[#9d2449] ml-1">*</span>
+                                    </label>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        <i class="fas fa-file-signature text-lg transition-colors duration-300"></i>
+                                    </div>
+                                    @error('nombre')
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
+                                        <i class="fas fa-exclamation-circle text-red-500"></i>
+                                    </div>
+                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $message }}
+                                    </p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Tipo de Persona -->
+                            <div class="form-group">
+                                <div class="relative group">
+                                    <select name="tipo_persona" 
+                                            id="tipo_persona"
+                                            class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 [&>option]:py-2 [&>option]:px-4 [&>option]:cursor-pointer [&>option]:transition-colors [&>option:hover]:bg-[#9d2449] [&>option:hover]:text-white @error('tipo_persona') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                            required>
+                                        <option value="" disabled {{ !old('tipo_persona', $documento->tipo_persona) ? 'selected' : '' }}>Seleccione una opción</option>
+                                        <option value="Física" {{ old('tipo_persona', $documento->tipo_persona) == 'Física' ? 'selected' : '' }}>Persona Física</option>
+                                        <option value="Moral" {{ old('tipo_persona', $documento->tipo_persona) == 'Moral' ? 'selected' : '' }}>Persona Moral</option>
+                                        <option value="Ambas" {{ old('tipo_persona', $documento->tipo_persona) == 'Ambas' ? 'selected' : '' }}>Ambos Tipos</option>
+                                    </select>
+                                    <label for="tipo_persona" 
+                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
+                                                  peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        Tipo de Persona<span class="text-[#9d2449] ml-1">*</span>
+                                    </label>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        <i class="fas fa-user-tag text-lg transition-colors duration-300"></i>
+                                    </div>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        <i class="fas fa-chevron-down text-sm transition-colors duration-300"></i>
+                                    </div>
+                                    @error('tipo_persona')
+                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $message }}
+                                    </p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="form-group">
+                                <div class="relative group">
+                                    <textarea name="descripcion" 
+                                              id="descripcion" 
+                                              rows="4"
+                                              class="peer w-full px-12 py-3 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 placeholder-transparent focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 resize-none @error('descripcion') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                              placeholder="Descripción del Documento">{{ old('descripcion', $documento->descripcion) }}</textarea>
+                                    <label for="descripcion" 
+                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
+                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
+                                                  peer-placeholder-shown:top-3 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
+                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
+                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
+                                        Descripción<span class="text-[#9d2449] ml-1">*</span>
+                                    </label>
+                                    <div class="absolute top-3 left-0 flex items-start pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
+                                        <i class="fas fa-align-left text-lg transition-colors duration-300"></i>
+                                    </div>
+                                    @error('descripcion')
+                                    <div class="absolute top-3 right-0 flex items-start pr-3.5 pointer-events-none">
+                                        <i class="fas fa-exclamation-circle text-red-500"></i>
+                                    </div>
+                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $message }}
+                                    </p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Visibilidad -->
+                            <div class="form-group">
+                                <div class="relative">
+                                    <label class="inline-flex items-center w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white/50 backdrop-blur-sm hover:border-[#9d2449]/50 transition-all duration-300 group cursor-pointer">
+                                        <div class="flex items-center gap-3 flex-grow">
+                                            <i class="fas fa-eye text-[#9d2449] text-lg group-hover:scale-110 transition-transform duration-300"></i>
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-900 block leading-none mb-0.5">Visibilidad del Documento</span>
+                                                <span class="text-xs text-gray-500 block leading-none">Visible para usuarios autorizados</span>
+                                            </div>
+                                        </div>
+                                        <div class="relative">
+                                            <input type="checkbox" 
+                                                   name="es_visible" 
+                                                   id="es_visible" 
+                                                   value="1"
+                                                   {{ old('es_visible', $documento->es_visible) ? 'checked' : '' }}
+                                                   class="sr-only peer">
+                                            <div class="w-9 h-5 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-[#9d2449]/20 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#9d2449] group-hover:after:scale-95"></div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+
+                    <!-- Botones de acción -->
+                    <div class="p-4">
+                        <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            <a href="{{ route('documentos.index') }}" 
+                               class="w-full sm:w-auto group inline-flex items-center justify-center px-6 py-3 rounded-xl border-2 border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300">
+                                <i class="fas fa-times mr-2 text-gray-400 group-hover:text-gray-600"></i>
+                                <span class="text-sm font-semibold text-gray-600 group-hover:text-gray-900">Cancelar</span>
+                            </a>
+                            <button type="submit"
+                                    class="w-full sm:w-auto group inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#8a203f] hover:to-[#9d2449] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] transition-all duration-300 shadow-md hover:shadow-lg">
+                                <i class="fas fa-save mr-2 text-white/90 group-hover:text-white"></i>
+                                <span class="text-sm font-semibold text-white group-hover:text-white/90">Actualizar Documento</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </div>
-
-        <!-- Formulario -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            <form action="{{ route('documentos.update', $documento) }}" method="POST" class="p-4 sm:p-6 space-y-6">
-                @csrf
-                @method('PUT')
-
-                <!-- Nombre -->
-                <div>
-                    <label for="nombre" class="block text-sm font-medium text-gray-700">
-                        Nombre del Documento
-                    </label>
-                    <div class="mt-1">
-                        <input type="text" 
-                               name="nombre" 
-                               id="nombre" 
-                               value="{{ old('nombre', $documento->nombre) }}"
-                               class="shadow-sm focus:ring-[#9d2449] focus:border-[#9d2449] block w-full sm:text-sm border-gray-300 rounded-lg @error('nombre') border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500 @enderror"
-                               required>
-                        @error('nombre')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                <!-- Tipo Persona -->
-                <div>
-                    <label for="tipo_persona" class="block text-sm font-medium text-gray-700">
-                        Tipo de Persona
-                    </label>
-                    <div class="mt-1">
-                        <select name="tipo_persona" 
-                                id="tipo_persona"
-                                class="shadow-sm focus:ring-[#9d2449] focus:border-[#9d2449] block w-full sm:text-sm border-gray-300 rounded-lg @error('tipo_persona') border-red-300 text-red-900 focus:outline-none focus:ring-red-500 focus:border-red-500 @enderror"
-                                required>
-                            <option value="">Selecciona un tipo</option>
-                            <option value="Física" {{ old('tipo_persona', $documento->tipo_persona) == 'Física' ? 'selected' : '' }}>Física</option>
-                            <option value="Moral" {{ old('tipo_persona', $documento->tipo_persona) == 'Moral' ? 'selected' : '' }}>Moral</option>
-                            <option value="Ambas" {{ old('tipo_persona', $documento->tipo_persona) == 'Ambas' ? 'selected' : '' }}>Ambas</option>
-                        </select>
-                        @error('tipo_persona')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                <!-- Descripción -->
-                <div>
-                    <label for="descripcion" class="block text-sm font-medium text-gray-700">
-                        Descripción
-                    </label>
-                    <div class="mt-1">
-                        <textarea name="descripcion" 
-                                  id="descripcion" 
-                                  rows="4"
-                                  class="shadow-sm focus:ring-[#9d2449] focus:border-[#9d2449] block w-full sm:text-sm border-gray-300 rounded-lg @error('descripcion') border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500 @enderror">{{ old('descripcion', $documento->descripcion) }}</textarea>
-                        @error('descripcion')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                <!-- Visibilidad -->
-                <div class="flex items-start sm:items-center">
-                    <div class="flex items-center h-5">
-                        <input type="checkbox" 
-                               name="es_visible" 
-                               id="es_visible" 
-                               value="1"
-                               {{ old('es_visible', $documento->es_visible) ? 'checked' : '' }}
-                               class="focus:ring-[#9d2449] h-4 w-4 text-[#9d2449] border-gray-300 rounded">
-                    </div>
-                    <div class="ml-3">
-                        <label for="es_visible" class="font-medium text-gray-700">Visible</label>
-                        <p class="text-sm text-gray-500">El documento será visible para todos los usuarios</p>
-                    </div>
-                </div>
-
-                <!-- Botones -->
-                <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-6 border-t border-gray-200">
-                    <a href="{{ route('documentos.index') }}" 
-                       class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449]">
-                        Cancelar
-                    </a>
-                    <button type="submit"
-                            class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#8a203f] hover:to-[#9d2449] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] transform hover:scale-105 transition-all duration-300">
-                        Actualizar Documento
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
