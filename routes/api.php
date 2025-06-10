@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RfcSearchController;
 use App\Http\Controllers\HistorialProveedorController;
 use App\Http\Controllers\API\SectorController;
+use App\Http\Controllers\LocationDataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,3 +29,5 @@ Route::get('/proveedor/historial', [HistorialProveedorController::class, 'buscar
 
 // Sector Routes
 Route::get('/sectores/{sector}/actividades', [SectorController::class, 'getActividades']);
+
+Route::get('/location-data/{codigoPostal}', [LocationDataController::class, 'getLocationData']);

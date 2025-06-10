@@ -307,9 +307,9 @@
         const container = document.getElementById('serviciosDisponiblesContainer');
         if (!container) return;
 
-        // Obtener datos del trámite del sessionStorage
-        const tramiteData = sessionStorage.getItem('tramiteData');
-        const datosTramite = tramiteData ? JSON.parse(tramiteData) : null;
+        // Solo obtener datos del trámite si existe satData en sessionStorage
+        const satData = sessionStorage.getItem('satData');
+        const tramiteData = satData ? JSON.parse(sessionStorage.getItem('tramiteData')) : null;
         
         let html = `
         <div class="mt-6 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden border border-gray-200/80">
@@ -339,9 +339,13 @@
                 <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
                 <input type="hidden" name="tipo_tramite" value="${tramite.tipo}">
                 <input type="hidden" name="rfc" value="${rfc || ''}">
-                <input type="hidden" name="tipo_persona" value="${datosTramite?.tipo_persona || document.getElementById('proveedorTipo')?.textContent?.trim() || ''}">
-                ${datosTramite?.curp ? `<input type="hidden" name="curp" value="${datosTramite.curp}">` : ''}
-                ${datosTramite?.nombre_completo ? `<input type="hidden" name="nombre_completo" value="${datosTramite.nombre_completo}">` : ''}
+                <input type="hidden" name="tipo_persona" value="${document.getElementById('proveedorTipo')?.textContent?.trim() || ''}">
+                
+                <!-- Solo incluir datos adicionales si vienen de una constancia del SAT -->
+                ${tramiteData ? `
+                    ${tramiteData.curp ? `<input type="hidden" name="curp" value="${tramiteData.curp}">` : ''}
+                    ${tramiteData.nombre_completo ? `<input type="hidden" name="nombre_completo" value="${tramiteData.nombre_completo}">` : ''}
+                ` : ''}
                 
                 <button type="submit" class="w-full text-left">
                     <div class="relative p-6">
@@ -470,6 +474,9 @@
                             const data = await response.json();
                             if (data.success && data.proveedor) {
                                 window.actualizarResumenProveedor(data.proveedor, false);
+                                // Limpiar cualquier dato previo del SAT
+                                sessionStorage.removeItem('satData');
+                                sessionStorage.removeItem('tramiteData');
                             }
                         } catch (error) {
                             console.error('Error al buscar proveedor:', error);
