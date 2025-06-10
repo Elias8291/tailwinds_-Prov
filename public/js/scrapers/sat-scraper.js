@@ -127,19 +127,32 @@ class SATScraper {
         if (/apellido materno/i.test(label)) details.apellidoMaterno = value;
         if (/rfc/i.test(label)) details.rfc = value;
         if (/código postal|cp/i.test(label)) details.cp = value;
-        if (/colonia/i.test(label)) details.colonia = value;
+        if (/colonia|asentamiento/i.test(label)) details.colonia = value;
         if (/nombre de la vialidad|calle|vialidad/i.test(label)) details.nombreVialidad = value;
         if (/número exterior|numero exterior|no exterior/i.test(label)) details.numeroExterior = value;
         if (/número interior|numero interior|no interior/i.test(label)) details.numeroInterior = value;
         if (/curp/i.test(label)) details.curp = value;
+
+        // Asegurarse de que los valores estén presentes
+        if (details.razonSocial) {
+            console.log('Razón Social encontrada:', details.razonSocial);
+        }
+        if (details.cp) {
+            console.log('Código Postal encontrado:', details.cp);
+        }
     }
 
     static processFullName(details) {
         const nameParts = [details.nombre, details.apellidoPaterno, details.apellidoMaterno].filter(Boolean);
         details.nombreCompleto = nameParts.join(' ');
         
+        // Asegurarse de que la razón social esté establecida correctamente
         if (details.tipoPersona === 'Física') {
             details.razonSocial = details.nombreCompleto;
+            console.log('Nombre completo asignado a razón social:', details.razonSocial);
+        } else if (!details.razonSocial) {
+            // Si es persona moral y no se encontró la razón social, buscar en las secciones
+            console.warn('No se encontró razón social para persona moral');
         }
     }
 

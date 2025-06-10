@@ -48,29 +48,27 @@
 <form method="POST" action="{{ route('register') }}" class="space-y-6" enctype="multipart/form-data">
     @csrf
     <!-- Header con Logo -->
-    <div class="text-center mb-8">
-        <div class="flex items-center justify-center mb-4">
-            <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center mr-3 shadow-lg">
-                <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0L3 7v10c0 5.55 3.84 9.739 9 9.739s9-4.189 9-9.739V7L12 0z"/>
-                </svg>
+    <div class="text-center mb-3">
+        <div class="flex flex-col items-center justify-center mb-1">
+            <div class="w-14 h-14 flex items-center justify-center mb-1">
+                <img src="{{ asset('images/logoprin.jpg') }}" alt="Logo" class="w-full h-full object-contain">
             </div>
-            <div class="text-left">
-                <span class="text-primary font-bold text-lg block">ADMINISTRACIÓN</span>
-                <span class="text-gray-600 text-xs font-medium">Gobierno de Oaxaca</span>
+            <div class="text-center">
+                <span class="text-primary font-bold text-base block leading-tight">ADMINISTRACIÓN</span>
+                <span class="text-gray-600 text-xs font-medium -mt-0.5">Gobierno de Oaxaca</span>
             </div>
         </div>
         
-        <h1 class="text-2xl font-bold text-gray-800 mb-2">Registro de Proveedor</h1>
-        <p class="text-gray-600 text-sm leading-relaxed max-w-xs mx-auto">
+        <h1 class="text-lg font-bold text-gray-800 mb-0.5">Registro de Proveedor</h1>
+        <p class="text-gray-600 text-xs leading-tight max-w-xs mx-auto">
             Suba su Constancia de Situación Fiscal con QR
         </p>
     </div>
 
     <!-- Mensajes de error del servidor -->
     @if ($errors->any())
-        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            <ul class="list-disc list-inside">
+        <div class="bg-red-50 border border-red-200 text-red-700 px-2 py-1.5 rounded-lg mb-2">
+            <ul class="list-disc list-inside text-xs">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -80,28 +78,28 @@
 
     <!-- Área de subida de PDF -->
     <div id="uploadArea" class="transition-all duration-300 ease-in-out">
-        <div class="mt-6">
-            <label for="document" class="block text-sm md:text-base font-medium text-gray-700 mb-3">
+        <div class="mt-2">
+            <label for="document" class="block text-sm font-medium text-gray-700 mb-1">
                 <span class="block md:inline">Constancia de Situación Fiscal</span>
-                <span class="text-sm text-gray-500 block md:inline md:ml-1">(PDF o Imagen)</span>
+                <span class="text-xs text-gray-500 block md:inline md:ml-1">(PDF o Imagen)</span>
             </label>
             <div class="relative">
                 <input type="file" id="document" name="document" accept=".pdf,.png,.jpg,.jpeg" required
                        class="hidden">
-                <label for="document" class="group flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-primary/20 hover:border-primary rounded-xl transition-all duration-300 cursor-pointer bg-primary-50/30 hover:bg-primary-50">
-                    <div class="flex flex-col md:flex-row items-center space-y-3 md:space-y-0 md:space-x-4 px-4">
+                <label for="document" class="group flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-primary/20 hover:border-primary rounded-lg transition-all duration-300 cursor-pointer bg-primary-50/30 hover:bg-primary-50">
+                    <div class="flex flex-col md:flex-row items-center space-y-1 md:space-y-0 md:space-x-2 px-3">
                         <!-- Icono -->
                         <div class="transform group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-8 h-8 text-primary/70 group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-primary/70 group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
                         <!-- Texto -->
                         <div class="text-center md:text-left">
-                            <p class="text-primary/70 group-hover:text-primary font-medium mb-1 transition-colors duration-300">
+                            <p class="text-primary/70 group-hover:text-primary font-medium text-xs mb-0.5">
                                 Haga clic para seleccionar archivo
                             </p>
-                            <p class="text-sm text-gray-500" id="fileName">
+                            <p class="text-xs text-gray-500" id="fileName">
                                 PDF o Imagen con QR (Máximo 5MB)
                             </p>
                         </div>
@@ -120,7 +118,7 @@
     </div>
 
     <!-- Formulario de registro (inicialmente oculto) -->
-    <div id="registrationForm" class="hidden space-y-4 transition-all duration-300 ease-in-out">
+    <div id="registrationForm" class="hidden space-y-2 transition-all duration-300 ease-in-out">
         <input type="hidden" id="qrUrl" name="qr_url">
         
         <!-- Campos ocultos para datos del SAT -->
@@ -138,8 +136,8 @@
         <button type="button" 
                 id="verDatosBtn"
                 onclick="showSatModal()"
-                class="hidden inline-flex items-center text-sm bg-white hover:bg-primary-50 text-primary font-medium py-2 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-primary/20 hover:border-primary/40 mb-2">
-            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="hidden inline-flex items-center text-xs bg-white hover:bg-primary-50 text-primary font-medium py-1 px-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-primary/20 hover:border-primary/40">
+            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
             </svg>
@@ -147,22 +145,22 @@
         </button>
 
         <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+            <label for="email" class="block text-xs font-medium text-gray-700 mb-0.5">Correo Electrónico</label>
             <input type="email" id="email" name="email" required 
-                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300"
+                   class="w-full px-2.5 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 text-sm"
                    placeholder="ejemplo@correo.com">
         </div>
 
         <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+            <label for="password" class="block text-xs font-medium text-gray-700 mb-0.5">Contraseña</label>
             <div class="relative">
                 <input type="password" id="password" name="password" required 
-                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300"
+                       class="w-full px-2.5 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 text-sm"
                        placeholder="••••••••">
                 <button type="button" 
                         onclick="togglePassword('password')"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="password-toggle-icon">
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="password-toggle-icon">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
@@ -171,15 +169,15 @@
         </div>
 
         <div>
-            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+            <label for="password_confirmation" class="block text-xs font-medium text-gray-700 mb-0.5">Confirmar Contraseña</label>
             <div class="relative">
                 <input type="password" id="password_confirmation" name="password_confirmation" required 
-                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300"
+                       class="w-full px-2.5 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 text-sm"
                        placeholder="••••••••">
                 <button type="button" 
                         onclick="togglePassword('password_confirmation')"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="password_confirmation-toggle-icon">
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="password_confirmation-toggle-icon">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
@@ -192,24 +190,24 @@
     <canvas id="pdfCanvas" class="hidden"></canvas>
 
     <!-- Botones de acción -->
-    <div class="space-y-3 pt-4">
-        <button type="button" id="actionButton" onclick="handleActionButton()" class="group w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-button hover:shadow-button-hover transform hover:-translate-y-0.5 relative overflow-hidden">
+    <div class="space-y-1.5 pt-2">
+        <button type="button" id="actionButton" onclick="handleActionButton()" class="group w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 relative overflow-hidden text-sm">
             <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative flex items-center justify-center space-x-2">
-                <svg id="actionIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg id="actionIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
-                <span id="actionText">SIGUIENTE</span>
+                <span id="actionText">Siguiente</span>
             </div>
         </button>
 
-        <a href="{{ route('login') }}" class="group w-full bg-white hover:bg-primary-50 text-primary font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 border-2 border-primary/20 hover:border-primary/40 relative overflow-hidden inline-flex items-center justify-center">
+        <a href="{{ route('login') }}" class="group w-full bg-white text-primary font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 border border-primary/30 hover:border-primary/50 relative overflow-hidden inline-flex items-center justify-center text-sm">
             <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative flex items-center justify-center space-x-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
-                <span>VOLVER AL LOGIN</span>
+                <span>Volver al Login</span>
             </div>
         </a>
     </div>

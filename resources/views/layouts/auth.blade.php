@@ -332,24 +332,24 @@
                 <div class="hidden lg:block relative overflow-hidden rounded-l-2xl">
                     <!-- Carousel Container -->
                     <div id="carousel" class="relative w-full h-full">
-                        <!-- Slide 1 - Documentos -->
+                        <!-- Slide 1 -->
                         <div class="carousel-slide absolute inset-0 transition-all duration-700 opacity-100" data-slide="0">
-                            <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
-                                 alt="Documentos oficiales"
+                            <img src="{{ asset('images/carrousel_1.webp') }}" 
+                                 alt="Imagen de carrusel 1"
                                  class="w-full h-full object-cover">
                             <div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
                             <div class="absolute bottom-0 left-0 right-0 p-6">
                                 <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                                    <h3 class="text-white text-lg font-bold mb-2">Validación de Documentos</h3>
-                                    <p class="text-white/90 text-sm leading-relaxed">Nuestros operadores verifican tus documentos de manera rápida y segura.</p>
+                                    <h3 class="text-white text-lg font-bold mb-2">Padrón de Proveedores</h3>
+                                    <p class="text-white/90 text-sm leading-relaxed">Sistema integral para la gestión de proveedores del Gobierno de Oaxaca.</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Slide 2 - Registro -->
+                        <!-- Slide 2 -->
                         <div class="carousel-slide absolute inset-0 transition-all duration-700 opacity-0" data-slide="1">
-                            <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
-                                 alt="Registro digital"
+                            <img src="{{ asset('images/carrousel2.webp') }}" 
+                                 alt="Imagen de carrusel 2"
                                  class="w-full h-full object-cover">
                             <div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
                             <div class="absolute bottom-0 left-0 right-0 p-6">
@@ -360,10 +360,24 @@
                             </div>
                         </div>
 
-                        <!-- Slide 3 - Portal Oficial -->
+                        <!-- Slide 3 -->
                         <div class="carousel-slide absolute inset-0 transition-all duration-700 opacity-0" data-slide="2">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
-                                 alt="Portal gubernamental"
+                            <img src="{{ asset('images/carrousel3.webp') }}" 
+                                 alt="Imagen de carrusel 3"
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 right-0 p-6">
+                                <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                                    <h3 class="text-white text-lg font-bold mb-2">Gestión Eficiente</h3>
+                                    <p class="text-white/90 text-sm leading-relaxed">Administra tus documentos y trámites de manera eficiente y segura.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 4 -->
+                        <div class="carousel-slide absolute inset-0 transition-all duration-700 opacity-0" data-slide="3">
+                            <img src="{{ asset('images/carrousel4.webp') }}" 
+                                 alt="Imagen de carrusel 4"
                                  class="w-full h-full object-cover">
                             <div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
                             <div class="absolute bottom-0 left-0 right-0 p-6">
@@ -380,6 +394,7 @@
                         <button class="carousel-dot w-3 h-3 rounded-full transition-all duration-300 bg-white/90 shadow-lg" data-slide="0"></button>
                         <button class="carousel-dot w-3 h-3 rounded-full transition-all duration-300 bg-white/40 shadow-lg" data-slide="1"></button>
                         <button class="carousel-dot w-3 h-3 rounded-full transition-all duration-300 bg-white/40 shadow-lg" data-slide="2"></button>
+                        <button class="carousel-dot w-3 h-3 rounded-full transition-all duration-300 bg-white/40 shadow-lg" data-slide="3"></button>
                     </div>
 
                     <!-- Navigation Arrows -->
@@ -577,10 +592,11 @@
             dot.addEventListener('click', () => showSlide(index));
         });
 
-        // Auto-play continuo (no se detiene con hover)
-        let autoPlay = setInterval(nextSlide, 6000);
+        // Auto-play cada 5 segundos
+        let autoPlay = setInterval(nextSlide, 5000);
 
         // Touch/swipe support
+        const carousel = document.getElementById('carousel');
         let startX = 0;
         let endX = 0;
         let startY = 0;
@@ -615,7 +631,6 @@
 
         // Parallax effect
         document.addEventListener('mousemove', (e) => {
-            const carousel = document.getElementById('carousel');
             if (!carousel) return;
 
             const rect = carousel.getBoundingClientRect();
@@ -631,7 +646,7 @@
             }
         });
 
-        document.getElementById('carousel')?.addEventListener('mouseleave', () => {
+        carousel?.addEventListener('mouseleave', () => {
             const currentSlideElement = slides[currentSlide];
             const img = currentSlideElement.querySelector('img');
             if (img) {

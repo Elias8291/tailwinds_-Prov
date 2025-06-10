@@ -10,6 +10,10 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Scripts -->
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
@@ -25,25 +29,10 @@
             transition: padding-left 300ms ease-in-out;
             min-height: calc(100vh - 4rem);
         }
-
-        /* Fondo con logo repetido */
-        .bg-logo-pattern {
-            background-image: url('/images/logoNegro.png');
-            background-repeat: repeat;
-            background-size: 150px auto;
-            opacity: 0.05;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-        }
     </style>
 </head>
 <body class="font-sans antialiased bg-gray-100">
     <div class="min-h-screen relative" x-data="{ sidebarOpen: false, sidebarHovered: false }">
-        <div class="bg-logo-pattern"></div>
         <!-- Header (fixed) -->
         <header class="fixed top-0 inset-x-0 z-50">
             @include('layouts.header')
