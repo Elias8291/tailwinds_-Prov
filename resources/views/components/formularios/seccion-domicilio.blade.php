@@ -1,112 +1,106 @@
 @props(['title' => 'Domicilio', 'datosDomicilio' => []])
 
-<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" @guardar-domicilio="guardarDomicilio()" x-data="{
-    cp: '',
-    estado: '',
-    municipio: '',
-    colonia: '',
-    nombreVialidad: '',
-    numeroExterior: '',
-    numeroInterior: '',
-    asentamientos: [],
-    showSatModal: false,
-    satData: null,
-    
-    async loadLocationData() {
-        if (this.cp.length === 5) {
-            try {
-                const response = await fetch(`/api/location-data/${this.cp}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    this.estado = data.estado;
-                    this.municipio = data.municipio;
-                    this.asentamientos = data.asentamientos;
-                }
-            } catch (error) {
-                console.error('Error loading location data:', error);
-            }
-        }
-    },
-
-    init() {
-        // Cargar datos existentes si están disponibles
-        @if(isset($datosDomicilio['codigo_postal']) && $datosDomicilio['codigo_postal'])
-            this.cp = '{{ $datosDomicilio['codigo_postal'] }}';
-            this.nombreVialidad = '{{ $datosDomicilio['calle'] ?? '' }}';
-            this.numeroExterior = '{{ $datosDomicilio['numero_exterior'] ?? '' }}';
-            this.numeroInterior = '{{ $datosDomicilio['numero_interior'] ?? '' }}';
-            
+<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" 
+    x-data="{ 
+        cp: '{{ $datosDomicilio['codigo_postal'] ?? '' }}',
+        estado: '{{ $datosDomicilio['estado'] ?? '' }}',
+        municipio: '{{ $datosDomicilio['municipio'] ?? '' }}',
+        colonia: '{{ $datosDomicilio['colonia'] ?? '' }}',
+        nombreVialidad: '{{ $datosDomicilio['calle'] ?? '' }}',
+        numeroExterior: '{{ $datosDomicilio['numero_exterior'] ?? '' }}',
+        numeroInterior: '{{ $datosDomicilio['numero_interior'] ?? '' }}',
+        asentamientos: [],
+        showSatModal: false,
+        satData: null,
+        
+        async loadLocationData() {
             if (this.cp.length === 5) {
-                this.loadLocationData();
+                try {
+                    const response = await fetch(`/api/location-data/${this.cp}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.estado = data.estado;
+                        this.municipio = data.municipio;
+                        this.asentamientos = data.asentamientos;
+                    }
+                } catch (error) {
+                    console.error('Error loading location data:', error);
+                }
             }
-        @else
-            // Check if we have SAT data in sessionStorage
+        },
+
+        init() {
+            // Cargar datos existentes si están disponibles
             const satData = sessionStorage.getItem('satData');
             if (satData) {
-                const data = JSON.parse(satData);
-                this.satData = data;
-                this.cp = data.cp || '';
-                this.estado = data.estado || '';
-                this.municipio = data.municipio || '';
-                this.colonia = data.colonia || '';
-                this.nombreVialidad = data.calle || '';
-                this.numeroExterior = data.numeroExterior || '';
-                this.numeroInterior = data.numeroInterior || '';
-                
-                if (this.cp) {
+                try {
+                    const data = JSON.parse(satData);
+                    this.satData = data;
+                    this.cp = data.cp || this.cp;
+                    this.estado = data.estado || this.estado;
+                    this.municipio = data.municipio || this.municipio;
+                    this.colonia = data.colonia || this.colonia;
+                    this.nombreVialidad = data.calle || this.nombreVialidad;
+                    this.numeroExterior = data.numeroExterior || this.numeroExterior;
+                    this.numeroInterior = data.numeroInterior || this.numeroInterior;
+                    
+                    if (this.cp) {
+                        this.loadLocationData();
+                    }
+                } catch (error) {
+                    console.error('Error parsing SAT data:', error);
+                }
+            }
+            
+            // Watch for changes in código postal
+            this.$watch('cp', (value) => {
+                if (value.length === 5) {
                     this.loadLocationData();
                 }
-            }
-        @endif
-
-        // Watch for changes in código postal
-        this.$watch('cp', (value) => {
-            if (value.length === 5) {
-                this.loadLocationData();
-            }
-        });
-    },
-
-    async guardarDomicilio() {
-        const form = this.$refs.domicilioForm;
-        const formData = new FormData(form);
-        
-        // Agregar datos desde Alpine.js
-        formData.append('codigo_postal', this.cp);
-        formData.append('calle', this.nombreVialidad);
-        formData.append('numero_exterior', this.numeroExterior);
-        formData.append('numero_interior', this.numeroInterior);
-        formData.append('colonia', this.colonia);
-        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-        
-        try {
-            const response = await fetch('{{ route("tramites.guardar-domicilio-formulario") }}', {
-                method: 'POST',
-                body: formData
             });
+        },
+
+        async guardarDomicilio() {
+            const form = this.$refs.domicilioForm;
+            const formData = new FormData(form);
             
-            const result = await response.json();
+            // Agregar datos desde Alpine.js
+            formData.append('codigo_postal', this.cp);
+            formData.append('calle', this.nombreVialidad);
+            formData.append('numero_exterior', this.numeroExterior);
+            formData.append('numero_interior', this.numeroInterior);
+            formData.append('colonia', this.colonia);
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
             
-            if (result.success) {
-                // Mostrar mensaje de éxito
-                alert('Datos de domicilio guardados correctamente');
+            try {
+                const response = await fetch('{{ route("tramites.guardar-domicilio-formulario") }}', {
+                    method: 'POST',
+                    body: formData
+                });
                 
-                // Avanzar al siguiente paso si estamos en el formulario principal
-                if (window.Alpine && this.$dispatch) {
-                    this.$dispatch('next-step');
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Mostrar mensaje de éxito
+                    alert('Datos de domicilio guardados correctamente');
+                    
+                    // Avanzar al siguiente paso si estamos en el formulario principal
+                    if (window.Alpine && this.$dispatch) {
+                        this.$dispatch('next-step');
+                    }
+                } else {
+                    // Mostrar errores
+                    console.error('Errores:', result.errors || result.message);
+                    alert('Error al guardar: ' + (result.message || 'Error desconocido'));
                 }
-            } else {
-                // Mostrar errores
-                console.error('Errores:', result.errors || result.message);
-                alert('Error al guardar: ' + (result.message || 'Error desconocido'));
+            } catch (error) {
+                console.error('Error al guardar domicilio:', error);
+                alert('Error al guardar los datos');
             }
-        } catch (error) {
-            console.error('Error al guardar domicilio:', error);
-            alert('Error al guardar los datos');
         }
-    }
-}">
+    }"
+    @guardar-domicilio.window="guardarDomicilio()">
     <!-- Encabezado con icono -->
     <div class="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
         <div class="flex items-center space-x-4">
