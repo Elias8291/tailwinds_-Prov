@@ -22,7 +22,7 @@
                         'inter': ['Inter', 'sans-serif']
                     },
                     boxShadow: {
-                        'elegant': '0 20px 40px rgba(157, 36, 73, 0.15)',
+                        'elegant': '0 32px 64px rgba(0, 0, 0, 0.08), 0 16px 32px rgba(157, 36, 73, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.2)',
                         'button': '0 8px 25px rgba(157, 36, 73, 0.25)',
                         'button-hover': '0 12px 35px rgba(157, 36, 73, 0.35)'
                     },
@@ -65,6 +65,220 @@
             animation: fadeOut 0.3s ease-out;
         }
 
+        /* Fondo elegante profesional */
+        .bg-elegant-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, 
+                #ffffff 0%, 
+                #f8fafc 20%, 
+                #f1f5f9 40%, 
+                #e2e8f0 60%, 
+                #f8fafc 80%, 
+                #ffffff 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .bg-elegant-pattern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('/images/logoNegro.png');
+            background-repeat: repeat;
+            background-size: 180px auto;
+            opacity: 0.04;
+            z-index: 2;
+            animation: logoFloat 30s ease-in-out infinite;
+        }
+
+        .bg-elegant-pattern::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 25% 20%, rgba(157, 36, 73, 0.02) 0%, transparent 60%),
+                radial-gradient(ellipse at 75% 80%, rgba(59, 130, 246, 0.015) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 50%, rgba(157, 36, 73, 0.01) 0%, transparent 70%);
+            z-index: 3;
+        }
+
+        /* Elementos decorativos flotantes */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, 
+                rgba(157, 36, 73, 0.08), 
+                rgba(59, 130, 246, 0.06), 
+                rgba(157, 36, 73, 0.04));
+            backdrop-filter: blur(2px);
+            animation: float 25s infinite linear;
+            border: 1px solid rgba(157, 36, 73, 0.1);
+            box-shadow: 
+                0 4px 12px rgba(157, 36, 73, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .floating-element:nth-child(1) {
+            width: 120px;
+            height: 120px;
+            top: 15%;
+            left: 8%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 180px;
+            height: 180px;
+            top: 55%;
+            right: 10%;
+            animation-delay: -8s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 90px;
+            height: 90px;
+            top: 25%;
+            right: 35%;
+            animation-delay: -16s;
+        }
+
+        .floating-element:nth-child(4) {
+            width: 140px;
+            height: 140px;
+            bottom: 15%;
+            left: 15%;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0.6;
+            }
+            25% {
+                transform: translateY(-15px) translateX(10px) scale(1.05);
+                opacity: 0.4;
+            }
+            50% {
+                transform: translateY(-25px) translateX(-5px) scale(0.95);
+                opacity: 0.3;
+            }
+            75% {
+                transform: translateY(-10px) translateX(-10px) scale(1.02);
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes logoFloat {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: 0.04;
+            }
+            50% {
+                transform: translateY(-5px);
+                opacity: 0.06;
+            }
+        }
+
+        @keyframes sparkle {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Partículas decorativas */
+        .decorative-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: linear-gradient(45deg, rgba(157, 36, 73, 0.3), rgba(59, 130, 246, 0.2));
+            border-radius: 50%;
+            animation: sparkle 4s infinite;
+        }
+
+        .particle:nth-child(1) {
+            width: 3px;
+            height: 3px;
+            top: 20%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+
+        .particle:nth-child(2) {
+            width: 2px;
+            height: 2px;
+            top: 40%;
+            right: 20%;
+            animation-delay: 1s;
+        }
+
+        .particle:nth-child(3) {
+            width: 4px;
+            height: 4px;
+            top: 70%;
+            left: 25%;
+            animation-delay: 2s;
+        }
+
+        .particle:nth-child(4) {
+            width: 2px;
+            height: 2px;
+            top: 30%;
+            right: 40%;
+            animation-delay: 3s;
+        }
+
+        .particle:nth-child(5) {
+            width: 3px;
+            height: 3px;
+            bottom: 30%;
+            right: 15%;
+            animation-delay: 0.5s;
+        }
+
+        .particle:nth-child(6) {
+            width: 2px;
+            height: 2px;
+            bottom: 50%;
+            left: 30%;
+            animation-delay: 1.5s;
+        }
+
         #errorModal {
             position: fixed;
             top: 0;
@@ -80,7 +294,7 @@
         }
 
         .bg-white-solid {
-            background-color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.95) !important;
         }
 
         .content-wrapper {
@@ -88,10 +302,31 @@
         }
     </style>
 </head>
-<body class="bg-white font-inter text-textDark">
+<body class="font-inter text-textDark overflow-x-hidden">
+    <!-- Fondo elegante con degradado y logo -->
+    <div class="bg-elegant-pattern"></div>
+    
+    <!-- Elementos decorativos flotantes -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+    
+    <!-- Partículas decorativas -->
+    <div class="decorative-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
     <!-- Contenedor Principal -->
-    <div class="min-h-screen flex items-center justify-center p-4 bg-white-solid">
-        <div class="w-full max-w-5xl bg-white rounded-2xl shadow-elegant overflow-hidden border border-gray-200">
+    <div class="min-h-screen flex items-center justify-center p-4 relative z-10">
+        <div class="w-full max-w-5xl bg-white/98 backdrop-blur-lg rounded-3xl shadow-elegant overflow-hidden border border-white/30 relative">
             <div class="grid lg:grid-cols-2 min-h-[500px]">
                 <!-- Sección del Carousel -->
                 <div class="hidden lg:block relative overflow-hidden rounded-l-2xl">
@@ -342,16 +577,8 @@
             dot.addEventListener('click', () => showSlide(index));
         });
 
-        // Auto-play
+        // Auto-play continuo (no se detiene con hover)
         let autoPlay = setInterval(nextSlide, 6000);
-
-        const carousel = document.getElementById('carousel');
-        if (carousel) {
-            carousel.addEventListener('mouseenter', () => clearInterval(autoPlay));
-            carousel.addEventListener('mouseleave', () => {
-                autoPlay = setInterval(nextSlide, 6000);
-            });
-        }
 
         // Touch/swipe support
         let startX = 0;

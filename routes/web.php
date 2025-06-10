@@ -50,15 +50,9 @@ Route::middleware(['web', 'auth'])->group(function () {
 
 // Rutas de dashboard protegidas por autenticación y verificación de email
 Route::middleware(['auth', \App\Http\Middleware\VerifyUserStatus::class])->group(function () {
-    // Dashboard administrativo
+    // Dashboard principal - accesible para todos los usuarios autenticados
     Route::get('/dashboard', [DashboardController::class, 'adminDashboard'])
-        ->middleware(['can:dashboard.admin'])
         ->name('dashboard');
-
-    // Dashboard de solicitante
-    Route::get('/dashboard2', [DashboardController::class, 'solicitanteDashboard'])
-        ->middleware(['can:dashboard.solicitante'])
-        ->name('dashboard2');
 
     // Rutas de gestión de roles (solo para administradores)
     Route::middleware(['auth', 'can:dashboard.admin'])->group(function () {

@@ -65,18 +65,8 @@ class LoginController extends Controller
             'user_permissions' => $user->getAllPermissions()->pluck('name')->toArray()
         ]);
 
-        // Redirigir según los permisos
-        if ($user->can('dashboard.admin')) {
-            Log::info('Redirigiendo a dashboard admin');
-            return redirect()->route('dashboard');
-        }
-
-        if ($user->can('dashboard.solicitante')) {
-            Log::info('Redirigiendo a dashboard solicitante');
-            return redirect()->route('dashboard2');
-        }
-
-        Log::warning('Usuario sin permisos específicos, redirigiendo a dashboard por defecto');
+        // Redirigir al dashboard
+        Log::info('Redirigiendo a dashboard');
         return redirect()->route('dashboard');
     }
 

@@ -17,16 +17,9 @@
       
                     <nav class="px-3 space-y-2">
                         <!-- Dashboard -->
-                        @can('dashboard.admin')
-                            <a href="{{ route('dashboard') }}" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
-                                {{ request()->routeIs('dashboard') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
-                        @elsecan('dashboard.solicitante')
-                            <a href="{{ route('dashboard2') }}" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
-                                {{ request()->routeIs('dashboard2') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
-                        @else
-                            <a href="#" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 text-gray-700 hover:bg-white hover:shadow-md hover:text-primary">
-                        @endcan
-                            <svg class="{{ request()->routeIs(['dashboard', 'dashboard2']) ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <a href="{{ route('dashboard') }}" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                            {{ request()->routeIs('dashboard') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                            <svg class="{{ request()->routeIs('dashboard') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6a2 2 0 01-2 2H10a2 2 0 01-2-2V5z" />
                             </svg>

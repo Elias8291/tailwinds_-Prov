@@ -193,11 +193,7 @@
         </div>
 
         <div class="flex items-center justify-between">
-            <div class="flex items-center">
-                <input type="checkbox" id="remember" name="remember"
-                       class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20">
-                <label for="remember" class="ml-2 text-sm text-gray-600">Recordarme</label>
-            </div>
+           
             <a href="{{ route('password.request') }}" class="text-sm text-primary hover:text-primary-dark transition-colors duration-300">
                 ¿Olvidaste tu contraseña?
             </a>
