@@ -57,6 +57,7 @@
             </div>
 
             <!-- Razón Social -->
+            @if($datosTramite['tipo_persona'] === 'Moral' || ($datosTramite['tipo_tramite'] === 'actualizacion' && !empty($datosTramite['nombre_completo'])))
             <div class="form-group">
                 <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
                     Razón Social
@@ -66,12 +67,15 @@
                     <input type="text" id="razon_social" name="razon_social"
                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
                            placeholder="Nombre de la empresa"
-                           maxlength="100">
+                           maxlength="100"
+                           value="{{ $datosTramite['nombre_completo'] }}"
+                           {{ $datosTramite['tipo_tramite'] === 'inscripcion' ? 'readonly' : '' }}>
                 </div>
             </div>
+            @endif
 
             <!-- Objeto Social -->
-            <div class="form-group">
+            <div class="form-group mb-8">
                 <label for="objeto_social" class="block text-sm font-medium text-gray-700 mb-2">
                     Objeto Social
                     <span class="text-[#9d2449]">*</span>
@@ -88,58 +92,75 @@
             </div>
         </div>
 
-        <!-- Clasificación -->
-        <div class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Sectores -->
+        <!-- Sector y Actividad -->
+        <div class="space-y-8">
+            <!-- Sector con búsqueda -->
+            <div class="form-group">
+                <label for="sector_search" class="block text-sm font-medium text-gray-700 mb-2">
+                    Buscar Sector
+                </label>
+                <div class="relative group">
+                    <input type="text" id="sector_search" 
+                           class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                           placeholder="Escriba para buscar un sector...">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Sector -->
                 <div class="form-group">
-                    <label for="sectores" class="block text-sm font-medium text-gray-700 mb-2">
-                        Sectores
+                    <label for="sector_id" class="block text-sm font-medium text-gray-700 mb-2">
+                        Sector
                         <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
-                        <select id="sectores" name="sectores"
-                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50">
-                            <option value="">Seleccione un sector</option>
-                            <option value="1">Construcción</option>
-                            <option value="2">Servicios</option>
-                            <option value="3">Comercio</option>
+                        <select id="sector_id" name="sector_id"
+                                class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                                required>
+                            <option value="">Seleccione un Sector</option>
+                            @foreach(\App\Models\Sector::all() as $sector)
+                                <option value="{{ $sector->id }}" 
+                                        data-nombre="{{ $sector->nombre }}"
+                                        title="{{ $sector->nombre }}">
+                                    {{ \Illuminate\Support\Str::limit($sector->nombre, 40) }}
+                                </option>
+                            @endforeach
                         </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                             <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
                         </div>
                     </div>
                 </div>
 
-                <!-- Actividades -->
+                <!-- Actividad -->
                 <div class="form-group">
-                    <label for="actividad" class="block text-sm font-medium text-gray-700 mb-2">
-                        Actividades
+                    <label for="actividad_id" class="block text-sm font-medium text-gray-700 mb-2">
+                        Actividad
                         <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
-                        <select id="actividad" name="actividad"
-                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50">
-                            <option value="">Seleccione una actividad</option>
-                            <option value="1">Construcción de edificios</option>
-                            <option value="2">Mantenimiento de edificios</option>
+                        <select id="actividad_id" name="actividad_id"
+                                class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                                required disabled>
+                            <option value="">Primero seleccione un sector</option>
                         </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                             <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tags -->
-            <div class="flex flex-wrap gap-2 mt-3">
-                <div class="inline-flex items-center px-3 py-1.5 bg-gradient-to-br from-[#9d2449]/5 to-[#9d2449]/10 border border-[#9d2449]/20 rounded-lg group hover:shadow-sm transition-all duration-200">
-                    <span class="text-sm text-gray-700">Construcción de edificios</span>
-                    <button type="button" class="ml-2 p-1 text-[#9d2449] hover:text-[#9d2449]/70 transition-colors">
-                        <i class="fas fa-times text-xs"></i>
-                    </button>
+            <!-- Tags de Actividades Seleccionadas -->
+            <div id="actividades-seleccionadas" class="flex flex-wrap gap-3 p-4 bg-white rounded-xl border border-gray-100 shadow-sm min-h-[60px] transition-all duration-300">
+                <!-- Los tags se agregarán aquí dinámicamente -->
+                <div class="flex items-center justify-center w-full text-gray-400 text-sm italic" id="no-actividades-message">
+                    No hay actividades seleccionadas
                 </div>
             </div>
+
+            <!-- Input oculto para almacenar las actividades seleccionadas -->
+            <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="">
         </div>
 
         <!-- Datos de Contacto -->
@@ -261,6 +282,178 @@ input:focus, select:focus {
     @apply ring-2 ring-[#9d2449]/20 border-[#9d2449];
     box-shadow: 0 0 0 1px rgba(157, 36, 73, 0.1), 
                 0 2px 4px rgba(157, 36, 73, 0.05);
+}
+
+/* Estilos para los selects */
+select option {
+    padding: 8px;
+    font-size: 0.875rem;
+}
+
+select option:hover {
+    background-color: rgba(157, 36, 73, 0.1);
+}
+
+/* Tooltips personalizados */
+[title] {
+    position: relative;
+}
+
+[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 10;
+    margin-bottom: 4px;
+}
+
+/* Estilos para los tags de actividades */
+#actividades-seleccionadas {
+    position: relative;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(157, 36, 73, 0.1);
+}
+
+#actividades-seleccionadas .tag {
+    @apply px-4 py-2 rounded-xl text-sm font-medium;
+    background: linear-gradient(135deg, 
+        rgba(157, 36, 73, 0.08) 0%,
+        rgba(157, 36, 73, 0.12) 100%
+    );
+    border: 1px solid rgba(157, 36, 73, 0.15);
+    color: #8a203f;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 2px 4px rgba(157, 36, 73, 0.06),
+        0 1px 2px rgba(157, 36, 73, 0.04),
+        inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    animation: tagAppear 0.4s cubic-bezier(0.26, 0.53, 0.74, 1.48) forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+#actividades-seleccionadas .tag::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#actividades-seleccionadas .tag:hover {
+    transform: translateY(-2px) scale(1.02);
+    background: linear-gradient(135deg, 
+        rgba(157, 36, 73, 0.12) 0%,
+        rgba(157, 36, 73, 0.18) 100%
+    );
+    box-shadow: 
+        0 4px 8px rgba(157, 36, 73, 0.1),
+        0 2px 4px rgba(157, 36, 73, 0.06),
+        inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    border-color: rgba(157, 36, 73, 0.25);
+}
+
+#actividades-seleccionadas .tag:hover::before {
+    opacity: 1;
+}
+
+#actividades-seleccionadas .tag button {
+    @apply rounded-full;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(157, 36, 73, 0.1);
+    color: #9d2449;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+#actividades-seleccionadas .tag button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(157, 36, 73, 0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+#actividades-seleccionadas .tag button:hover {
+    background: rgba(157, 36, 73, 0.15);
+    color: #7a1d37;
+    transform: rotate(90deg) scale(1.1);
+}
+
+#actividades-seleccionadas .tag button:hover::before {
+    opacity: 1;
+}
+
+#actividades-seleccionadas .tag button:active {
+    transform: rotate(90deg) scale(0.95);
+}
+
+#actividades-seleccionadas .tag i {
+    font-size: 0.75rem;
+}
+
+@keyframes tagAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(10px);
+    }
+    70% {
+        transform: scale(1.05) translateY(-2px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+#actividades-seleccionadas:empty::before {
+    content: 'No hay actividades seleccionadas';
+    @apply text-gray-400 text-sm italic absolute inset-0 flex items-center justify-center;
+    background: linear-gradient(135deg, 
+        rgba(157, 36, 73, 0.02) 0%,
+        rgba(157, 36, 73, 0.05) 100%
+    );
+}
+
+/* Estilo para el mensaje de no actividades */
+#no-actividades-message {
+    background: linear-gradient(135deg, 
+        rgba(157, 36, 73, 0.02) 0%,
+        rgba(157, 36, 73, 0.05) 100%
+    );
+    border-radius: 0.75rem;
+    padding: 1rem;
+}
+
+/* Transiciones suaves */
+.transition-all {
+    transition: all 0.2s ease-in-out;
 }
 
 /* Estilos para los botones */
@@ -423,6 +616,19 @@ button:hover {
 .form-group:hover textarea {
     @apply border-[#9d2449]/40;
 }
+
+.tag {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800;
+}
+
+.tag button {
+    @apply ml-2 text-gray-400 hover:text-gray-600 focus:outline-none;
+}
+
+#sector_id option,
+#actividad_id option {
+    @apply py-1;
+}
 </style>
 
 <script>
@@ -430,6 +636,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Contador de caracteres
     const objetoSocial = document.getElementById('objeto_social');
     const charCount = document.querySelector('.char-count');
+    const noActividadesMessage = document.getElementById('no-actividades-message');
 
     if (objetoSocial && charCount) {
         objetoSocial.addEventListener('input', function() {
@@ -437,36 +644,125 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Efectos de hover y focus mejorados con animación
-    const inputs = document.querySelectorAll('input, select, textarea');
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            const iconWrapper = this.parentElement.querySelector('.icon-wrapper');
-            if (iconWrapper) {
-                iconWrapper.querySelector('i').style.opacity = '1';
-                iconWrapper.querySelector('i').style.transform = 'scale(1.1) translateY(-1px)';
+    // Manejo de sectores y actividades
+    const sectorSearch = document.getElementById('sector_search');
+    const sectorSelect = document.getElementById('sector_id');
+    const actividadSelect = document.getElementById('actividad_id');
+    const actividadesContainer = document.getElementById('actividades-seleccionadas');
+    const actividadesInput = document.getElementById('actividades_seleccionadas_input');
+    let actividadesSeleccionadas = new Set();
+
+    function actualizarMensajeNoActividades() {
+        if (noActividadesMessage) {
+            noActividadesMessage.style.display = actividadesSeleccionadas.size === 0 ? 'flex' : 'none';
+        }
+    }
+
+    // Función de búsqueda de sectores
+    if (sectorSearch) {
+        sectorSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const options = sectorSelect.options;
+
+            for (let i = 1; i < options.length; i++) {
+                const optionText = options[i].text.toLowerCase();
+                const optionTitle = options[i].title.toLowerCase();
+                const match = optionText.includes(searchTerm) || optionTitle.includes(searchTerm);
+                options[i].style.display = match ? '' : 'none';
+            }
+        });
+    }
+
+    function actualizarActividadesInput() {
+        actividadesInput.value = JSON.stringify(Array.from(actividadesSeleccionadas));
+        actualizarMensajeNoActividades();
+    }
+
+    function agregarTag(id, nombre, sectorNombre) {
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.setAttribute('title', `${sectorNombre} - ${nombre}`);
+        tag.innerHTML = `
+            ${nombre}
+            <button type="button" data-id="${id}" aria-label="Eliminar actividad">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        tag.querySelector('button').addEventListener('click', function() {
+            const id = this.dataset.id;
+            actividadesSeleccionadas.delete(id);
+            actualizarActividadesInput();
+            tag.remove();
+
+            // Restaurar la opción en el select si corresponde al sector actual
+            if (sectorSelect.value) {
+                cargarActividades(sectorSelect.value);
             }
         });
 
-        input.addEventListener('blur', function() {
-            const iconWrapper = this.parentElement.querySelector('.icon-wrapper');
-            if (iconWrapper) {
-                iconWrapper.querySelector('i').style.opacity = '0.7';
-                iconWrapper.querySelector('i').style.transform = 'scale(1) translateY(0)';
+        actividadesContainer.appendChild(tag);
+        actualizarMensajeNoActividades();
+    }
+
+    if (sectorSelect && actividadSelect) {
+        sectorSelect.addEventListener('change', async function() {
+            const sectorId = this.value;
+            actividadSelect.disabled = true;
+            actividadSelect.innerHTML = '<option value="">Cargando actividades...</option>';
+
+            if (!sectorId) {
+                actividadSelect.innerHTML = '<option value="">Primero seleccione un sector</option>';
+                actividadSelect.disabled = true;
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/sectores/${sectorId}/actividades`);
+                if (!response.ok) throw new Error('Error al cargar actividades');
+
+                const data = await response.json();
+                if (!data.success) throw new Error(data.message || 'Error al cargar actividades');
+
+                actividadSelect.innerHTML = '<option value="">Seleccione una actividad</option>';
+                data.data.forEach(actividad => {
+                    if (!actividadesSeleccionadas.has(actividad.id.toString())) {
+                        const option = document.createElement('option');
+                        option.value = actividad.id;
+                        option.textContent = actividad.nombre;
+                        option.title = actividad.nombre;
+                        actividadSelect.appendChild(option);
+                    }
+                });
+
+                actividadSelect.disabled = false;
+
+            } catch (error) {
+                console.error('Error:', error);
+                actividadSelect.innerHTML = '<option value="">Error al cargar actividades</option>';
+                actividadSelect.disabled = true;
             }
         });
-    });
 
-    // Efecto de ondulación para los iconos de sección
-    const sectionIcons = document.querySelectorAll('.h-12, .h-9, .h-10');
-    sectionIcons.forEach(icon => {
-        icon.addEventListener('mouseover', function() {
-            this.style.transform = 'scale(1.02)';
-        });
+        actividadSelect.addEventListener('change', function() {
+            const actividadId = this.value;
+            if (!actividadId) return;
 
-        icon.addEventListener('mouseout', function() {
-            this.style.transform = 'scale(1)';
+            const actividadNombre = this.options[this.selectedIndex].text;
+            const sectorNombre = sectorSelect.options[sectorSelect.selectedIndex].getAttribute('data-nombre');
+
+            if (!actividadesSeleccionadas.has(actividadId)) {
+                actividadesSeleccionadas.add(actividadId);
+                actualizarActividadesInput();
+                agregarTag(actividadId, actividadNombre, sectorNombre);
+            }
+
+            // Resetear el select
+            this.value = '';
         });
-    });
+    }
+
+    // Inicializar el mensaje
+    actualizarMensajeNoActividades();
 });
 </script> 

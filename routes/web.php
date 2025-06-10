@@ -85,3 +85,16 @@ Route::middleware(['auth'])->group(function () {
     // Rutas de Proveedores
     Route::resource('proveedores', ProveedorController::class);
 });
+
+// Rutas para trámites
+Route::prefix('tramites')->group(function () {
+    Route::get('/', [TramiteController::class, 'index'])->name('tramites.index');
+    Route::post('/iniciar', [TramiteController::class, 'iniciarTramite'])->name('tramites.iniciar');
+    
+    // Rutas específicas para cada tipo de trámite
+    Route::get('/{tipo_tramite}/{tramite}/create', [TramiteController::class, 'create'])
+        ->where('tipo_tramite', 'inscripcion|renovacion|actualizacion')
+        ->name('tramites.create');
+    
+    Route::post('/store', [TramiteController::class, 'store'])->name('tramites.store');
+});
