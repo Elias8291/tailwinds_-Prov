@@ -159,127 +159,96 @@ class SATScraper {
     static generateModalContent(data) {
         console.log('Generando contenido con datos:', data);
         
-        if (!data || typeof data !== 'object') {
-            console.error('Datos inválidos proporcionados a generateModalContent:', data);
-            return '<p class="text-red-600">No se pudieron obtener los datos del SAT</p>';
+        if (!data || !data.details) {
+            return '<div class="text-center text-gray-500">No hay datos disponibles</div>';
         }
 
-        try {
-            // Asegurarse de que los objetos necesarios existan
-            data.details = data.details || {};
-            data.sections = data.sections || [];
+        let content = '<div class="space-y-4">';
 
-            // Autocompletar el correo solo si existe y no está vacío
-            if (data.details.email && data.details.email.trim() !== '') {
-                const emailInput = document.getElementById('email');
-                if (emailInput) {
-                    emailInput.value = data.details.email;
-                }
-            }
-
-            let content = `
-                <div class="space-y-6">
-                    <!-- Sección de información principal -->
-                    <div class="bg-white rounded-xl p-6 border border-[#B4325E]/10 shadow-sm">
-                        <div class="flex items-start space-x-4">
-                            <div class="flex-shrink-0">
-                                <div class="w-14 h-14 bg-gradient-to-br from-[#B4325E] to-[#93264B] rounded-xl flex items-center justify-center shadow-lg">
-                                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-xl font-bold text-gray-900 mb-2">
-                                    ${data.details.tipoPersona === 'Moral' ? 
-                                        (data.details.razonSocial || 'Razón Social No Disponible') : 
-                                        (data.details.nombreCompleto || 'Nombre No Disponible')}
-                                </h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-[#B4325E]/10 text-[#B4325E]">
-                                        RFC: ${data.details.rfc || 'No disponible'}
-                                    </span>
-                                    ${data.details.curp ? `
-                                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-[#B4325E]/10 text-[#B4325E]">
-                                            CURP: ${data.details.curp}
-                                        </span>
-                                    ` : ''}
-                                    <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-[#B4325E]/10 text-[#B4325E]">
-                                        Persona ${data.details.tipoPersona || 'No especificada'}
-                                    </span>
-                                </div>
-                            </div>
+        // Información principal
+        content += `
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100">
+                <div class="px-4 py-3 border-b border-gray-100">
+                    <h4 class="text-base font-semibold text-gray-800">
+                        Información Principal
+                    </h4>
+                </div>
+                <div class="p-4 space-y-3">
+                    ${data.details.rfc ? `
+                        <div>
+                            <span class="text-xs font-medium text-gray-500">RFC</span>
+                            <p class="text-sm font-medium text-gray-900">${data.details.rfc}</p>
                         </div>
-                    </div>`;
-
-            // Agregar secciones si existen
-            if (data.sections && data.sections.length > 0) {
-                data.sections.forEach(section => {
-                    if (section.fields && section.fields.length > 0) {
-                        content += `
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                                <div class="px-6 py-4 border-b border-gray-100">
-                                    <h4 class="text-lg font-semibold text-gray-800">
-                                        ${section.title || 'Información Adicional'}
-                                    </h4>
-                                </div>
-                                <div class="divide-y divide-gray-100">
-                                    ${section.fields.map(field => `
-                                        <div class="px-6 py-4">
-                                            <div class="flex flex-col sm:flex-row sm:items-center">
-                                                <div class="sm:w-1/3">
-                                                    <span class="text-sm font-medium text-gray-500">${field.label || ''}</span>
-                                                </div>
-                                                <div class="sm:w-2/3 mt-1 sm:mt-0">
-                                                    <span class="text-sm text-gray-900">${field.value || ''}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>`;
-                    }
-                });
-            }
-
-            // Agregar información de dirección si existe
-            if (data.details.nombreVialidad || data.details.colonia || data.details.cp) {
-                content += `
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                        <div class="px-6 py-4 border-b border-gray-100">
-                            <h4 class="text-lg font-semibold text-gray-800">
-                                Dirección
-                            </h4>
+                    ` : ''}
+                    
+                    ${data.details.tipoPersona ? `
+                        <div>
+                            <span class="text-xs font-medium text-gray-500">Tipo de Persona</span>
+                            <p class="text-sm font-medium text-gray-900">${data.details.tipoPersona}</p>
                         </div>
-                        <div class="p-6">
-                            <div class="space-y-2">
-                                ${data.details.nombreVialidad ? `
-                                    <p class="text-sm text-gray-900">
-                                        ${data.details.nombreVialidad}
-                                        ${data.details.numeroExterior ? ` #${data.details.numeroExterior}` : ''}
-                                        ${data.details.numeroInterior ? ` Int. ${data.details.numeroInterior}` : ''}
-                                    </p>
-                                ` : ''}
-                                ${data.details.colonia ? `<p class="text-sm text-gray-600">Col. ${data.details.colonia}</p>` : ''}
-                                ${data.details.cp ? `<p class="text-sm text-gray-600">CP ${data.details.cp}</p>` : ''}
+                    ` : ''}
+                    
+                    ${data.details.nombreCompleto || data.details.razonSocial ? `
+                        <div>
+                            <span class="text-xs font-medium text-gray-500">${data.details.tipoPersona === 'Física' ? 'Nombre Completo' : 'Razón Social'}</span>
+                            <p class="text-sm font-medium text-gray-900">${data.details.nombreCompleto || data.details.razonSocial}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${data.details.curp && data.details.tipoPersona === 'Física' ? `
+                        <div>
+                            <span class="text-xs font-medium text-gray-500">CURP</span>
+                            <p class="text-sm font-medium text-gray-900">${data.details.curp}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>`;
+
+        // Información de dirección
+        if (data.details.nombreVialidad || data.details.colonia || data.details.cp) {
+            content += `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100">
+                    <div class="px-4 py-3 border-b border-gray-100">
+                        <h4 class="text-base font-semibold text-gray-800">
+                            Dirección
+                        </h4>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        ${data.details.nombreVialidad ? `
+                            <div>
+                                <span class="text-xs font-medium text-gray-500">Calle</span>
+                                <p class="text-sm font-medium text-gray-900">
+                                    ${data.details.nombreVialidad}
+                                    ${data.details.numeroExterior ? `#${data.details.numeroExterior}` : ''}
+                                    ${data.details.numeroInterior ? `Int. ${data.details.numeroInterior}` : ''}
+                                </p>
                             </div>
-                        </div>
-                    </div>`;
-            }
-
-            content += '</div>';
-            console.log('Contenido generado correctamente');
-
-            // Después de mostrar el modal y llenar los datos:
-            const verBtn = document.getElementById('verSatModalBtn');
-            if (verBtn) verBtn.classList.add('hidden');
-
-            return content;
-
-        } catch (error) {
-            console.error('Error al generar el contenido:', error);
-            return '<p class="text-red-600">Error al procesar los datos del SAT</p>';
+                        ` : ''}
+                        
+                        ${data.details.colonia ? `
+                            <div>
+                                <span class="text-xs font-medium text-gray-500">Colonia</span>
+                                <p class="text-sm font-medium text-gray-900">${data.details.colonia}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.cp ? `
+                            <div>
+                                <span class="text-xs font-medium text-gray-500">Código Postal</span>
+                                <p class="text-sm font-medium text-gray-900">${data.details.cp}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>`;
         }
+
+        content += '</div>';
+        console.log('Contenido generado correctamente');
+
+        const verBtn = document.getElementById('verSatModalBtn');
+        if (verBtn) verBtn.classList.add('hidden');
+
+        return content;
     }
 }
 

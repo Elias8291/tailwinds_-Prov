@@ -5,13 +5,11 @@
 @section('content')
 <!-- Header con Logo -->
 <div class="text-center mb-8">
-    <div class="flex items-center justify-center mb-4">
-        <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center mr-3 shadow-lg">
-            <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0L3 7v10c0 5.55 3.84 9.739 9 9.739s9-4.189 9-9.739V7L12 0z"/>
-            </svg>
+    <div class="flex flex-col items-center justify-center mb-4">
+        <div class="w-16 h-16 flex items-center justify-center mb-3">
+            <img src="{{ asset('images/logoprin.jpg') }}" alt="Logo" class="w-full h-full object-contain">
         </div>
-        <div class="text-left">
+        <div class="text-center">
             <span class="text-primary font-bold text-lg block">ADMINISTRACIÓN</span>
             <span class="text-gray-600 text-xs font-medium">Gobierno de Oaxaca</span>
         </div>
@@ -102,11 +100,10 @@
             </div>
         </div>
 
-        <!-- Botón de Submit -->
         <div class="pt-4">
             <button 
                 type="submit" 
-                class="group w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-button hover:shadow-button-hover transform hover:-translate-y-0.5 relative overflow-hidden"
+                class="group w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 relative overflow-hidden text-sm"
             >
                 <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div class="relative flex items-center justify-center space-x-2">
