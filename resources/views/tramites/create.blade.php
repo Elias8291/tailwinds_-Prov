@@ -25,7 +25,7 @@
     <!-- Form Container -->
     <div class="max-w-4xl mx-auto mt-4 sm:mt-8 md:mt-16 bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-8 relative z-10"
          x-data="{ 
-            currentStep: 1,
+            currentStep: {{ $datosTramite['paso_inicial'] ?? 1 }},
             totalSteps: {{ $datosTramite['tipo_persona'] === 'Física' ? 3 : 6 }},
             tipoPersona: '{{ $datosTramite['tipo_persona'] }}',
             isPersonaFisica: {{ $datosTramite['tipo_persona'] === 'Física' ? 'true' : 'false' }},
@@ -163,15 +163,22 @@
         <!-- Form Sections Container -->
         <div class="min-h-[400px] sm:min-h-[500px]">
             <!-- Form Sections -->
-            <form @submit.prevent="submitForm" class="max-w-3xl mx-auto">
+            <div class="max-w-3xl mx-auto">
                 <!-- Datos Generales -->
                 <div x-show="currentStep === 1" x-cloak>
-                    @include('components.formularios.seccion-datos-generales')
+                    @include('components.formularios.seccion-datos-generales', [
+                        'datosTramite' => [
+                            'tipo_tramite' => $datosTramite['tipo_tramite'],
+                            'tipo_persona' => $datosTramite['tipo_persona'],
+                            'rfc' => $datosTramite['rfc'],
+                            'tramite_id' => $datosTramite['tramite_id']
+                        ]
+                    ])
                 </div>
 
                 <!-- Domicilio -->
-                <div x-show="currentStep === 2" x-cloak>
-                    @include('components.formularios.seccion-domicilio')
+                <div x-show="currentStep === 2" x-cloak @next-step="currentStep++">
+                    @include('components.formularios.seccion-domicilio', ['datosDomicilio' => $datosTramite['datos_existentes']['direccion'] ?? ['tramite_id' => $datosTramite['tramite_id']]])
                 </div>
 
                 <!-- Constitución - Solo para Persona Moral -->
@@ -204,11 +211,19 @@
                         <i class="fas fa-arrow-left mr-1"></i> Anterior
                     </button>
                     <button type="button" 
-                            x-show="currentStep < totalSteps"
+                            x-show="currentStep < totalSteps && currentStep !== 2"
                             x-cloak
                             @click="currentStep++"
                             class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-red-800 text-white text-sm sm:text-base rounded-lg hover:bg-red-900 transition-all duration-300 transform-gpu hover:-translate-y-0.5">
                         Siguiente <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                    <!-- Botón especial para el paso de domicilio -->
+                    <button type="button" 
+                            x-show="currentStep === 2"
+                            x-cloak
+                            @click="$dispatch('guardar-domicilio')"
+                            class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-red-800 text-white text-sm sm:text-base rounded-lg hover:bg-red-900 transition-all duration-300 transform-gpu hover:-translate-y-0.5">
+                        Guardar y Continuar <i class="fas fa-arrow-right ml-1"></i>
                     </button>
                     <button type="submit" 
                             x-show="currentStep === totalSteps"
@@ -217,7 +232,7 @@
                         Finalizar <i class="fas fa-check ml-1"></i>
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>

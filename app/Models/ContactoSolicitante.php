@@ -13,7 +13,7 @@ class ContactoSolicitante extends Model
 
     protected $fillable = [
         'nombre',
-        'cargo',
+        'puesto',
         'email',
         'telefono',
     ];
