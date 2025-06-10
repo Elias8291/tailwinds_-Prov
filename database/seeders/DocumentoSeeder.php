@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Documento;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Models\Documento;
 
 class DocumentoSeeder extends Seeder
 {
@@ -18,53 +16,41 @@ class DocumentoSeeder extends Seeder
     {
         $documentos = [
             [
-                'nombre' => 'Constancia de Situación Fiscal',
-                'descripcion' => 'Original, vigente, emitido por el SAT, no mayor a 3 meses',
+                'nombre' => 'Acta Constitutiva',
                 'tipo_persona' => 'Moral',
-                'es_visible' => true,
+                'descripcion' => 'Documento que acredita la constitución legal de la empresa. PDF, máximo 10MB.',
+                'es_visible' => true
+            ],
+            [
+                'nombre' => 'Poder Notarial',
+                'tipo_persona' => 'Moral',
+                'descripcion' => 'Documento que acredita las facultades del representante legal. PDF, máximo 10MB.',
+                'es_visible' => true
             ],
             [
                 'nombre' => 'Identificación Oficial',
-                'descripcion' => 'Original vigente (INE, pasaporte o cédula profesional)',
-                'tipo_persona' => 'Física',
-                'es_visible' => true,
-            ],
-            [
-                'nombre' => 'Currículum Empresarial',
-                'descripcion' => 'Original, con giro, experiencia, clientes y recursos',
-                'tipo_persona' => 'Física',
-                'es_visible' => true,
+                'tipo_persona' => 'Ambas',
+                'descripcion' => 'INE, Pasaporte o Cédula Profesional vigente. PDF, máximo 10MB.',
+                'es_visible' => true
             ],
             [
                 'nombre' => 'Comprobante de Domicilio',
-                'descripcion' => 'Copia simple, no mayor a 3 meses',
                 'tipo_persona' => 'Ambas',
-                'es_visible' => true,
+                'descripcion' => 'No mayor a 3 meses de antigüedad. PDF, máximo 10MB.',
+                'es_visible' => true
             ],
             [
-                'nombre' => 'Acta Constitutiva',
-                'descripcion' => 'Original, del domicilio del proveedor',
-                'tipo_persona' => 'Moral',
-                'es_visible' => true,
-            ],
-            [
-                'nombre' => 'Carta Poder',
-                'descripcion' => 'Original, con identificación del aceptante, si aplica',
+                'nombre' => 'Constancia de Situación Fiscal',
                 'tipo_persona' => 'Ambas',
-                'es_visible' => true,
+                'descripcion' => 'Actualizada, no mayor a 3 meses. PDF, máximo 10MB.',
+                'es_visible' => true
             ],
             [
-                'nombre' => 'Declaraciones Fiscales',
-                'descripcion' => 'Copia simple, última declaración anual y provisionales',
-                'tipo_persona' => 'Moral',
-                'es_visible' => true,
-            ],
-            [
-                'nombre' => 'Acta de Asamblea',
-                'descripcion' => 'Copia simple, notariada',
-                'tipo_persona' => 'Moral',
-                'es_visible' => true,
-            ],
+                'nombre' => 'CURP',
+                'tipo_persona' => 'Física',
+                'descripcion' => 'Clave Única de Registro de Población actualizada. PDF, máximo 10MB.',
+                'es_visible' => true
+            ]
         ];
 
         foreach ($documentos as $documento) {

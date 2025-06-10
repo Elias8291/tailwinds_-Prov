@@ -2,11 +2,48 @@
 
 @section('content')
 <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+    <!-- Título del Trámite -->
+    <div class="max-w-4xl mx-auto mb-6">
+        <div class="bg-white rounded-2xl shadow-lg p-6 backdrop-blur-lg border border-gray-100">
+            <div class="flex items-center gap-4">
+                <div class="bg-gradient-to-br from-[#9d2449] to-[#7a1d37] rounded-xl p-3 shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+                    <svg class="w-6 h-6 text-white relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-[#9d2449] to-[#7a1d37] bg-clip-text text-transparent">
+                        {{ ucfirst($datosTramite['tipo_tramite']) }} al Padrón de Proveedores
+                    </h2>
+                    <p class="text-sm text-gray-600 mt-1">Complete el formulario con la información requerida</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Form Container -->
     <div class="max-w-4xl mx-auto mt-4 sm:mt-8 md:mt-16 bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-8 relative z-10"
          x-data="{ 
             currentStep: 1,
-            totalSteps: 6,
+            totalSteps: {{ $datosTramite['tipo_persona'] === 'Física' ? 3 : 6 }},
+            tipoPersona: '{{ $datosTramite['tipo_persona'] }}',
+            isPersonaFisica: {{ $datosTramite['tipo_persona'] === 'Física' ? 'true' : 'false' }},
+            steps: {{ $datosTramite['tipo_persona'] === 'Física' ? 
+                json_encode([
+                    ['number' => '01', 'label' => 'Datos Generales'],
+                    ['number' => '02', 'label' => 'Domicilio'],
+                    ['number' => '03', 'label' => 'Documentos']
+                ]) : 
+                json_encode([
+                    ['number' => '01', 'label' => 'Datos Generales'],
+                    ['number' => '02', 'label' => 'Domicilio'],
+                    ['number' => '03', 'label' => 'Constitución'],
+                    ['number' => '04', 'label' => 'Accionistas'],
+                    ['number' => '05', 'label' => 'Apoderado Legal'],
+                    ['number' => '06', 'label' => 'Documentos']
+                ]) 
+            }},
             formData: {},
             init() {
                 this.$nextTick(() => {
@@ -15,21 +52,44 @@
             }
          }"
          class="invisible">
+         
+        <!-- Información del Solicitante -->
+        <div class="mb-8 bg-gradient-to-r from-[#9d2449]/5 to-[#7a1d37]/5 rounded-lg border border-[#9d2449]/10 p-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/80 rounded-lg p-2">
+                        <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-xs font-medium text-gray-500">Tipo de Persona</span>
+                        <p class="text-sm font-semibold text-gray-800">{{ $datosTramite['tipo_persona'] }}</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/80 rounded-lg p-2">
+                        <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-xs font-medium text-gray-500">RFC</span>
+                        <p class="text-sm font-semibold text-gray-800 font-mono">{{ $datosTramite['rfc'] }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Mobile Progress Indicator -->
         <div class="md:hidden mb-4 text-center">
             <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-800 text-white shadow-lg">
                 <span class="text-xl font-bold" x-text="currentStep">1</span>
                 <span class="text-xs">/</span>
-                <span class="text-sm" x-text="totalSteps">6</span>
+                <span class="text-sm" x-text="totalSteps"></span>
             </div>
-            <div class="mt-1 text-xs text-gray-600 font-medium" x-text="[
-                'Datos Generales',
-                'Domicilio',
-                'Datos de Constitución',
-                'Accionistas',
-                'Apoderado Legal',
-                'Documentos'
-            ][currentStep - 1]"></div>
+            <div class="mt-1 text-xs text-gray-600 font-medium" x-text="steps[currentStep - 1].label"></div>
         </div>
 
         <!-- Desktop Progress Container -->
@@ -53,14 +113,7 @@
                 <div class="absolute top-4 left-10 right-10 h-0.5 bg-gray-200"></div>
                 <div class="absolute top-4 left-10 h-0.5 bg-red-800 transition-all duration-600 transform-gpu" x-bind:style="'width: ' + (currentStep / totalSteps * 100) + '%'"></div>
                 <div class="flex justify-between">
-                    <template x-for="(step, index) in [
-                        { number: '01', label: 'Datos Generales' },
-                        { number: '02', label: 'Domicilio' },
-                        { number: '03', label: 'Constitución' },
-                        { number: '04', label: 'Accionistas' },
-                        { number: '05', label: 'Apoderado Legal' },
-                        { number: '06', label: 'Documentos' }
-                    ]" :key="index">
+                    <template x-for="(step, index) in steps" :key="index">
                         <div class="flex flex-col items-center relative z-10 w-24">
                             <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 border-2 border-gray-200 text-gray-500 font-semibold text-sm transition-all duration-300 transform-gpu"
                                  :class="{
@@ -92,24 +145,24 @@
                     @include('components.formularios.seccion-domicilio')
                 </div>
 
-                <!-- Constitución -->
-                <div x-show="currentStep === 3" x-cloak>
+                <!-- Constitución - Solo para Persona Moral -->
+                <div x-show="currentStep === 3 && isPersonaFisica === false" x-cloak>
                     @include('components.formularios.seccion-constitucion')
                 </div>
 
-                <!-- Accionistas -->
-                <div x-show="currentStep === 4" x-cloak>
+                <!-- Documentos - Para Persona Física en paso 3, para Moral en paso 6 -->
+                <div x-show="(isPersonaFisica === true && currentStep === 3) || (isPersonaFisica === false && currentStep === 6)" x-cloak>
+                    <x-formularios.seccion-documentos :tipoPersona="$datosTramite['tipo_persona']" />
+                </div>
+
+                <!-- Accionistas - Solo para Persona Moral -->
+                <div x-show="isPersonaFisica === false && currentStep === 4" x-cloak>
                     @include('components.formularios.seccion-accionistas')
                 </div>
 
-                <!-- Apoderado Legal -->
-                <div x-show="currentStep === 5" x-cloak>
+                <!-- Apoderado Legal - Solo para Persona Moral -->
+                <div x-show="isPersonaFisica === false && currentStep === 5" x-cloak>
                     @include('components.formularios.seccion-apoderado')
-                </div>
-
-                <!-- Documentos -->
-                <div x-show="currentStep === 6" x-cloak>
-                    @include('components.formularios.seccion-documentos')
                 </div>
 
                 <!-- Navigation Buttons -->
@@ -262,6 +315,31 @@
     .form-group {
         @apply mb-4 last:mb-0;
     }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
+    }
+    
+    .animate-shimmer {
+        animation: shimmer 2s infinite;
+    }
+    
+    /* Mejoras para el contenedor del título */
+    .max-w-4xl.mx-auto.mb-6 .bg-white {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .max-w-4xl.mx-auto.mb-6 .bg-white:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(157, 36, 73, 0.1);
+    }
 </style>
 @endpush
 
@@ -270,7 +348,24 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('formData', () => ({
             currentStep: 1,
-            totalSteps: 6,
+            totalSteps: {{ $datosTramite['tipo_persona'] === 'Física' ? 3 : 6 }},
+            tipoPersona: '{{ $datosTramite['tipo_persona'] }}',
+            isPersonaFisica: {{ $datosTramite['tipo_persona'] === 'Física' ? 'true' : 'false' }},
+            steps: {{ $datosTramite['tipo_persona'] === 'Física' ? 
+                json_encode([
+                    ['number' => '01', 'label' => 'Datos Generales'],
+                    ['number' => '02', 'label' => 'Domicilio'],
+                    ['number' => '03', 'label' => 'Documentos']
+                ]) : 
+                json_encode([
+                    ['number' => '01', 'label' => 'Datos Generales'],
+                    ['number' => '02', 'label' => 'Domicilio'],
+                    ['number' => '03', 'label' => 'Constitución'],
+                    ['number' => '04', 'label' => 'Accionistas'],
+                    ['number' => '05', 'label' => 'Apoderado Legal'],
+                    ['number' => '06', 'label' => 'Documentos']
+                ]) 
+            }},
             formData: {},
             
             nextStep() {

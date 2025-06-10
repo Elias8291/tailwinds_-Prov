@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Solicitante;
 use App\Models\Tramite;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class TramiteController extends Controller
 {
@@ -39,15 +40,57 @@ class TramiteController extends Controller
         return view('tramites.index', compact('tramites'));
     }
 
-    public function create()
+    public function create($tipoTramite, $tramiteId)
     {
-        $tipos_tramite = [
-            'inscripcion' => 'Inscripción',
-            'renovacion' => 'Renovación',
-            'actualizacion' => 'Actualización'
-        ];
-        
-        return view('tramites.create', compact('tipos_tramite'));
+        try {
+            // Validar que el tipo de trámite sea válido
+            $tipos_tramite = [
+                'inscripcion' => 'Inscripción',
+                'renovacion' => 'Renovación',
+                'actualizacion' => 'Actualización'
+            ];
+
+            if (!array_key_exists($tipoTramite, $tipos_tramite)) {
+                abort(404, 'Tipo de trámite no válido');
+            }
+
+            // Buscar el trámite
+            $tramite = Tramite::findOrFail($tramiteId);
+            
+            // Verificar que el trámite corresponda al tipo
+            if (strtolower($tramite->tipo_tramite) !== $tipoTramite) {
+                abort(404, 'El tipo de trámite no corresponde');
+            }
+
+            // Obtener el solicitante y sus datos
+            $solicitante = $tramite->solicitante;
+            
+            // Preparar datos para la vista
+            $datosTramite = [
+                'tipo_tramite' => $tipoTramite,
+                'titulo' => $tipos_tramite[$tipoTramite],
+                'rfc' => $solicitante->rfc,
+                'tipo_persona' => $solicitante->tipo_persona,
+                'nombre_completo' => $solicitante->tipo_persona === 'Física' ? 
+                    $solicitante->nombre . ' ' . $solicitante->apellido_paterno . ' ' . $solicitante->apellido_materno :
+                    $solicitante->razon_social,
+                'mostrar_razon_social' => $tipoTramite !== 'inscripcion'
+            ];
+
+            return view("tramites.create", [
+                'tramite' => $tramite,
+                'solicitante' => $solicitante,
+                'datosTramite' => $datosTramite
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al cargar formulario de trámite:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->with('error', 'Error al cargar el formulario: ' . $e->getMessage());
+        }
     }
 
     public function store(Request $request)
@@ -73,55 +116,85 @@ class TramiteController extends Controller
      */
     public function iniciarTramite(Request $request)
     {
-        $request->validate([
-            'rfc' => 'required|string|max:255',
-            'tipo_tramite' => 'required|in:inscripcion,renovacion,actualizacion',
-            'nombre' => 'required|string|max:255',
-            'correo' => 'required|email|max:255',
-            'tipo_persona' => 'required|in:Física,Moral',
-        ]);
+        try {
+            Log::info('Iniciando trámite con datos:', $request->all());
 
-        $rfc = $request->input('rfc');
-        $tipoTramite = $request->input('tipo_tramite');
-        $nombre = $request->input('nombre');
-        $correo = $request->input('correo');
-        $tipoPersona = $request->input('tipo_persona');
-
-        // Buscar o crear usuario
-        $usuario = User::where('rfc', $rfc)->first();
-        if (!$usuario) {
-            $usuario = User::create([
-                'rfc' => $rfc,
-                'nombre' => $nombre,
-                'correo' => $correo,
-                'password' => bcrypt(Str::random(12)), // temporal
-                'estado' => 'pendiente',
+            $validated = $request->validate([
+                'rfc' => 'required|string|max:13',
+                'tipo_tramite' => 'required|in:inscripcion,renovacion,actualizacion',
+                'tipo_persona' => 'required|in:Física,Moral,Fisica,FÍSICA,MORAL,fisica,moral',
             ]);
-        }
 
-        // Buscar o crear solicitante
-        $solicitante = Solicitante::where('rfc', $rfc)->first();
-        if (!$solicitante) {
-            $solicitante = Solicitante::create([
-                'usuario_id' => $usuario->id,
-                'rfc' => $rfc,
-                'tipo_persona' => $tipoPersona,
+            // Normalize tipo_persona value
+            $validated['tipo_persona'] = ucfirst(strtolower($validated['tipo_persona']));
+            if ($validated['tipo_persona'] === 'Fisica') {
+                $validated['tipo_persona'] = 'Física';
+            }
+
+            Log::info('Datos validados correctamente', $validated);
+
+            // Buscar o crear solicitante sin usuario asociado
+            $solicitante = Solicitante::firstOrCreate(
+                ['rfc' => $validated['rfc']],
+                [
+                    'tipo_persona' => $validated['tipo_persona'],
+                ]
+            );
+
+            Log::info('Solicitante procesado:', ['solicitante_id' => $solicitante->id]);
+
+            // Crear trámite
+            $tramite = Tramite::create([
+                'solicitante_id' => $solicitante->id,
+                'tipo_tramite' => ucfirst($validated['tipo_tramite']),
+                'estado' => 'Pendiente',
+                'progreso_tramite' => 0,
             ]);
-        } else if (!$solicitante->usuario_id) {
-            $solicitante->usuario_id = $usuario->id;
-            $solicitante->save();
+
+            Log::info('Trámite creado:', ['tramite_id' => $tramite->id]);
+
+            $redirectUrl = route('tramites.create', [
+                'tipo_tramite' => $validated['tipo_tramite'],
+                'tramite' => $tramite->id
+            ]);
+            
+            Log::info('URL de redirección generada:', ['url' => $redirectUrl]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Trámite iniciado correctamente',
+                    'redirect' => $redirectUrl
+                ]);
+            }
+
+            return redirect($redirectUrl);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Error de validación:', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+            
+            $errorMessages = collect($e->errors())->flatten()->implode(', ');
+            
+            return $request->expectsJson()
+                ? response()->json(['error' => $errorMessages], 422)
+                : back()->withErrors($e->errors())->withInput();
+
+        } catch (\Exception $e) {
+            Log::error('Error al procesar el trámite:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+
+            $errorMessage = 'Error al procesar el trámite: ' . $e->getMessage();
+            
+            return $request->expectsJson()
+                ? response()->json(['error' => $errorMessage], 500)
+                : back()->with('error', $errorMessage)->withInput();
         }
-
-        // Crear trámite
-        $tramite = Tramite::create([
-            'solicitante_id' => $solicitante->id,
-            'tipo_tramite' => ucfirst($tipoTramite),
-            'estado' => 'Pendiente',
-            'progreso_tramite' => 0, // 0 = términos y condiciones
-        ]);
-
-        // Redirigir a la vista de términos y condiciones
-        return redirect()->route('tramites.terminos', ['tramite' => $tramite->id]);
     }
 
     /**
