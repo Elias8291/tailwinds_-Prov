@@ -24,6 +24,83 @@
                 </button>
             </div>
 
+            <!-- Estadísticas -->
+            <div class="mt-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Usuarios -->
+                    <div class="bg-white/50 backdrop-blur-sm rounded-lg p-4 shadow-sm hover:shadow transition-all border border-gray-100 group">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                <div class="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                                    <i class="fas fa-users text-indigo-500 text-lg group-hover:scale-110 transition-transform"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Usuarios</p>
+                                <div class="flex items-baseline space-x-2">
+                                    <p class="text-xl font-semibold text-gray-800">2,450</p>
+                                    <span class="text-xs font-medium text-green-500 bg-green-50 px-1.5 py-0.5 rounded-full">+12%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trámites por Revisar -->
+                    <div class="bg-white/50 backdrop-blur-sm rounded-lg p-4 shadow-sm hover:shadow transition-all border border-gray-100 group">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                <div class="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                                    <i class="fas fa-file-alt text-amber-500 text-lg group-hover:scale-110 transition-transform"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Trámites</p>
+                                <div class="flex items-baseline space-x-2">
+                                    <p class="text-xl font-semibold text-gray-800">145</p>
+                                    <span class="text-xs font-medium text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-full">8 nuevos</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Proveedores -->
+                    <div class="bg-white/50 backdrop-blur-sm rounded-lg p-4 shadow-sm hover:shadow transition-all border border-gray-100 group">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                <div class="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                                    <i class="fas fa-building text-emerald-500 text-lg group-hover:scale-110 transition-transform"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Proveedores</p>
+                                <div class="flex items-baseline space-x-2">
+                                    <p class="text-xl font-semibold text-gray-800">324</p>
+                                    <span class="text-xs font-medium text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">+15%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Citas -->
+                    <div class="bg-white/50 backdrop-blur-sm rounded-lg p-4 shadow-sm hover:shadow transition-all border border-gray-100 group">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                <div class="w-10 h-10 bg-rose-50 rounded-full flex items-center justify-center group-hover:bg-rose-100 transition-colors">
+                                    <i class="fas fa-calendar-check text-rose-500 text-lg group-hover:scale-110 transition-transform"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Citas</p>
+                                <div class="flex items-baseline space-x-2">
+                                    <p class="text-xl font-semibold text-gray-800">89</p>
+                                    <span class="text-xs font-medium text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded-full">4 hoy</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="mt-8">
                 <h3 class="text-lg font-semibold text-[#9d2449] mb-6">Descubre Proveedores de Oaxaca</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
