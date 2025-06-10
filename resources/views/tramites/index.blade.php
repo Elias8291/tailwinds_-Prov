@@ -306,6 +306,10 @@
     function renderServiciosDisponibles(tramites, rfc = null) {
         const container = document.getElementById('serviciosDisponiblesContainer');
         if (!container) return;
+
+        // Obtener datos del trámite del sessionStorage
+        const tramiteData = sessionStorage.getItem('tramiteData');
+        const datosTramite = tramiteData ? JSON.parse(tramiteData) : null;
         
         let html = `
         <div class="mt-6 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden border border-gray-200/80">
@@ -335,7 +339,9 @@
                 <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
                 <input type="hidden" name="tipo_tramite" value="${tramite.tipo}">
                 <input type="hidden" name="rfc" value="${rfc || ''}">
-                <input type="hidden" name="tipo_persona" value="${document.getElementById('proveedorTipo')?.textContent?.trim() || ''}">
+                <input type="hidden" name="tipo_persona" value="${datosTramite?.tipo_persona || document.getElementById('proveedorTipo')?.textContent?.trim() || ''}">
+                ${datosTramite?.curp ? `<input type="hidden" name="curp" value="${datosTramite.curp}">` : ''}
+                ${datosTramite?.nombre_completo ? `<input type="hidden" name="nombre_completo" value="${datosTramite.nombre_completo}">` : ''}
                 
                 <button type="submit" class="w-full text-left">
                     <div class="relative p-6">
@@ -391,7 +397,7 @@
                         jsonData[key] = value;
                     });
 
-                    console.log('Enviando datos:', jsonData); // Debug
+                    console.log('Enviando datos:', jsonData);
 
                     const response = await fetch(form.action, {
                         method: 'POST',
@@ -404,7 +410,7 @@
                     });
 
                     const data = await response.json();
-                    console.log('Respuesta:', data); // Debug
+                    console.log('Respuesta:', data);
 
                     if (!response.ok) {
                         throw data.error || 'Error al procesar el trámite';
@@ -417,7 +423,6 @@
                     }
                 } catch (error) {
                     console.error('Error detallado:', error);
-                    // Handle both string errors and Error objects
                     const errorMessage = typeof error === 'string' ? error : 
                                        error.message ? error.message : 
                                        'Ocurrió un error al procesar el trámite';
@@ -485,10 +490,29 @@
                 const file = event.target.files[0];
                 if (file) {
                     await window.satHandler.handleFile(file);
-                    window.actualizarResumenProveedor(window.satHandler.lastScannedData?.details, true);
-                    // Si se detecta RFC en el PDF, buscar y renderizar servicios disponibles
-                    const rfc = window.satHandler.lastScannedData?.details?.rfc;
-                    if (rfc) fetchAndRenderServicios(rfc);
+                    const satData = window.satHandler.lastScannedData?.details;
+                    if (satData) {
+                        // Actualizar el resumen del proveedor
+                        window.actualizarResumenProveedor(satData, true);
+                        
+                        // Preparar los datos para el trámite
+                        const tramiteData = {
+                            rfc: satData.rfc,
+                            tipo_persona: satData.tipoPersona,
+                            curp: satData.tipoPersona === 'Física' ? satData.curp : null,
+                            nombre_completo: satData.tipoPersona === 'Física' ? satData.nombreCompleto : satData.razonSocial
+                        };
+                        
+                        // Guardar datos completos del SAT en sessionStorage
+                        sessionStorage.setItem('satData', JSON.stringify(satData));
+                        // Guardar datos específicos para el trámite
+                        sessionStorage.setItem('tramiteData', JSON.stringify(tramiteData));
+                        
+                        // Si se detecta RFC, buscar y renderizar servicios disponibles
+                        if (satData.rfc) {
+                            fetchAndRenderServicios(satData.rfc);
+                        }
+                    }
                 }
             });
 

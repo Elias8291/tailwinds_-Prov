@@ -30,6 +30,7 @@
                            placeholder="Ej: 12345"
                            pattern="[0-9]{4,5}"
                            maxlength="5"
+                           x-model="cp"
                            required>
                 </div>
                 <p class="mt-1 text-sm text-gray-500">Al ingresar el código postal se llenarán automáticamente algunos campos</p>
@@ -45,6 +46,7 @@
                     <input type="text" id="estado" name="estado"
                            class="block w-full px-4 py-2.5 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
                            placeholder="Ej: Jalisco"
+                           x-model="estado"
                            readonly
                            required>
                 </div>
@@ -60,6 +62,7 @@
                     <input type="text" id="municipio" name="municipio"
                            class="block w-full px-4 py-2.5 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
                            placeholder="Ej: Guadalajara"
+                           x-model="municipio"
                            readonly
                            required>
                 </div>
@@ -74,6 +77,7 @@
                 <div class="relative group">
                     <select id="colonia" name="colonia"
                             class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                            x-model="colonia"
                             required>
                         <option value="">Seleccione un Asentamiento</option>
                     </select>
@@ -97,6 +101,7 @@
                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                            placeholder="Ej: Av. Principal"
                            maxlength="100"
+                           x-model="nombreVialidad"
                            required>
                 </div>
             </div>
@@ -113,6 +118,7 @@
                            placeholder="Ej: 123 o S/N"
                            pattern="[A-Za-z0-9\/]+"
                            maxlength="10"
+                           x-model="numeroExterior"
                            required>
                 </div>
             </div>
@@ -127,7 +133,8 @@
                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                            placeholder="Ej: 5A"
                            pattern="[A-Za-z0-9]+"
-                           maxlength="10">
+                           maxlength="10"
+                           x-model="numeroInterior">
                 </div>
             </div>
 

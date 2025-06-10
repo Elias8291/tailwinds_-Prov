@@ -30,7 +30,9 @@
                     </label>
                     <div class="relative group">
                         <select id="tipo_persona" name="tipo_persona" 
-                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50">
+                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
+                                x-model="tipoPersona"
+                                :value="tipoPersona">
                             <option value="">Seleccione un tipo</option>
                             <option value="Física">Física</option>
                             <option value="Moral">Moral</option>
@@ -51,8 +53,25 @@
                         <input type="text" id="rfc" name="rfc"
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
                                placeholder="Ej. XAXX010101000"
-                               maxlength="13">
+                               maxlength="13"
+                               x-model="rfc">
                     </div>
+                </div>
+            </div>
+
+            <!-- CURP - Solo visible para persona física -->
+            <div class="form-group" x-show="tipoPersona === 'Física'" x-transition>
+                <label for="curp" class="block text-sm font-medium text-gray-700 mb-2">
+                    CURP
+                    <span class="text-[#9d2449]">*</span>
+                </label>
+                <div class="relative group">
+                    <input type="text" id="curp" name="curp"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
+                           placeholder="Ej. XAXX010101HDFXXX01"
+                           maxlength="18"
+                           x-model="curp"
+                           x-bind:required="tipoPersona === 'Física'">
                 </div>
             </div>
 
@@ -60,14 +79,15 @@
             @if($datosTramite['tipo_persona'] === 'Moral' || ($datosTramite['tipo_tramite'] === 'actualizacion' && !empty($datosTramite['nombre_completo'])))
             <div class="form-group">
                 <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
-                    Razón Social
+                    <span x-text="tipoPersona === 'Moral' ? 'Razón Social' : 'Nombre Completo'"></span>
                     <span class="text-[#9d2449]">*</span>
                 </label>
                 <div class="relative group">
                     <input type="text" id="razon_social" name="razon_social"
                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
-                           placeholder="Nombre de la empresa"
+                           :placeholder="tipoPersona === 'Moral' ? 'Nombre de la empresa' : 'Nombre completo'"
                            maxlength="100"
+                           x-model="razonSocial"
                            value="{{ $datosTramite['nombre_completo'] }}"
                            {{ $datosTramite['tipo_tramite'] === 'inscripcion' ? 'readonly' : '' }}>
                 </div>
