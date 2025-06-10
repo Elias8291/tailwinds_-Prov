@@ -90,6 +90,12 @@ Route::middleware(['auth'])->group(function () {
 Route::prefix('tramites')->group(function () {
     Route::get('/', [TramiteController::class, 'index'])->name('tramites.index');
     Route::post('/iniciar', [TramiteController::class, 'iniciarTramite'])->name('tramites.iniciar');
+    Route::get('/datos-generales', [TramiteController::class, 'mostrarDatosGenerales'])->name('tramites.datos-generales');
+    Route::post('/guardar-datos-generales', [TramiteController::class, 'guardarDatosGenerales'])->name('tramites.guardar-datos-generales');
+    
+    Route::get('/domicilio', [TramiteController::class, 'mostrarDomicilio'])->name('tramites.domicilio');
+    Route::post('/guardar-domicilio', [TramiteController::class, 'guardarDomicilio'])->name('tramites.guardar-domicilio');
+    Route::post('/guardar-domicilio-formulario', [TramiteController::class, 'guardarDomicilioFormulario'])->name('tramites.guardar-domicilio-formulario');
     
     // Rutas específicas para cada tipo de trámite
     Route::get('/{tipo_tramite}/{tramite}/create', [TramiteController::class, 'create'])

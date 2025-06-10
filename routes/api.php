@@ -29,5 +29,6 @@ Route::get('/proveedor/historial', [HistorialProveedorController::class, 'buscar
 
 // Sector Routes
 Route::get('/sectores/{sector}/actividades', [SectorController::class, 'getActividades']);
+Route::get('/actividades/{actividad}', [SectorController::class, 'getActividad']);
 
 Route::get('/location-data/{codigoPostal}', [LocationDataController::class, 'getLocationData']);

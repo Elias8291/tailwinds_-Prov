@@ -1,6 +1,6 @@
-@props(['title' => 'Domicilio'])
+@props(['title' => 'Domicilio', 'datosDomicilio' => []])
 
-<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" x-data="{
+<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" @guardar-domicilio="guardarDomicilio()" x-data="{
     cp: '',
     estado: '',
     municipio: '',
@@ -30,23 +30,35 @@
     },
 
     init() {
-        // Check if we have SAT data in sessionStorage
-        const satData = sessionStorage.getItem('satData');
-        if (satData) {
-            const data = JSON.parse(satData);
-            this.satData = data;
-            this.cp = data.cp || '';
-            this.estado = data.estado || '';
-            this.municipio = data.municipio || '';
-            this.colonia = data.colonia || '';
-            this.nombreVialidad = data.calle || '';
-            this.numeroExterior = data.numeroExterior || '';
-            this.numeroInterior = data.numeroInterior || '';
+        // Cargar datos existentes si están disponibles
+        @if(isset($datosDomicilio['codigo_postal']) && $datosDomicilio['codigo_postal'])
+            this.cp = '{{ $datosDomicilio['codigo_postal'] }}';
+            this.nombreVialidad = '{{ $datosDomicilio['calle'] ?? '' }}';
+            this.numeroExterior = '{{ $datosDomicilio['numero_exterior'] ?? '' }}';
+            this.numeroInterior = '{{ $datosDomicilio['numero_interior'] ?? '' }}';
             
-            if (this.cp) {
+            if (this.cp.length === 5) {
                 this.loadLocationData();
             }
-        }
+        @else
+            // Check if we have SAT data in sessionStorage
+            const satData = sessionStorage.getItem('satData');
+            if (satData) {
+                const data = JSON.parse(satData);
+                this.satData = data;
+                this.cp = data.cp || '';
+                this.estado = data.estado || '';
+                this.municipio = data.municipio || '';
+                this.colonia = data.colonia || '';
+                this.nombreVialidad = data.calle || '';
+                this.numeroExterior = data.numeroExterior || '';
+                this.numeroInterior = data.numeroInterior || '';
+                
+                if (this.cp) {
+                    this.loadLocationData();
+                }
+            }
+        @endif
 
         // Watch for changes in código postal
         this.$watch('cp', (value) => {
@@ -54,6 +66,45 @@
                 this.loadLocationData();
             }
         });
+    },
+
+    async guardarDomicilio() {
+        const form = this.$refs.domicilioForm;
+        const formData = new FormData(form);
+        
+        // Agregar datos desde Alpine.js
+        formData.append('codigo_postal', this.cp);
+        formData.append('calle', this.nombreVialidad);
+        formData.append('numero_exterior', this.numeroExterior);
+        formData.append('numero_interior', this.numeroInterior);
+        formData.append('colonia', this.colonia);
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        
+        try {
+            const response = await fetch('{{ route("tramites.guardar-domicilio-formulario") }}', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Mostrar mensaje de éxito
+                alert('Datos de domicilio guardados correctamente');
+                
+                // Avanzar al siguiente paso si estamos en el formulario principal
+                if (window.Alpine && this.$dispatch) {
+                    this.$dispatch('next-step');
+                }
+            } else {
+                // Mostrar errores
+                console.error('Errores:', result.errors || result.message);
+                alert('Error al guardar: ' + (result.message || 'Error desconocido'));
+            }
+        } catch (error) {
+            console.error('Error al guardar domicilio:', error);
+            alert('Error al guardar los datos');
+        }
     }
 }">
     <!-- Encabezado con icono -->
@@ -80,9 +131,12 @@
         </button>
     </div>
 
-    <form class="space-y-8">
+    <form class="space-y-8" @submit.prevent="guardarDomicilio" x-ref="domicilioForm">
         <input type="hidden" name="action" value="next">
         <input type="hidden" name="seccion" value="2">
+        @if(isset($datosDomicilio['tramite_id']))
+            <input type="hidden" name="tramite_id" value="{{ $datosDomicilio['tramite_id'] }}">
+        @endif
         
         <!-- Código Postal y Ubicación -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -94,14 +148,19 @@
                 </label>
                 <div class="relative group">
                     <input type="text" id="codigo_postal" name="codigo_postal"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50 @error('codigo_postal') border-red-500 @enderror"
                            placeholder="Ej: 12345"
                            pattern="[0-9]{4,5}"
                            maxlength="5"
                            x-model="cp"
+                           value="{{ old('codigo_postal', $datosDomicilio['codigo_postal'] ?? '') }}"
                            required>
                 </div>
-                <p class="mt-1 text-sm text-gray-500">Al ingresar el código postal se llenarán automáticamente algunos campos</p>
+                @error('codigo_postal')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @else
+                    <p class="mt-1 text-sm text-gray-500">Al ingresar el código postal se llenarán automáticamente algunos campos</p>
+                @enderror
             </div>
 
             <!-- Estado -->
@@ -144,7 +203,7 @@
                 </label>
                 <div class="relative group">
                     <select id="colonia" name="colonia"
-                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50 @error('colonia') border-red-500 @enderror"
                             x-model="colonia"
                             required>
                         <option value="">Seleccione un Asentamiento</option>
@@ -156,6 +215,9 @@
                         <i class="fas fa-chevron-down text-gray-400"></i>
                     </div>
                 </div>
+                @error('colonia')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
         </div>
 
@@ -173,8 +235,12 @@
                            placeholder="Ej: Av. Principal"
                            maxlength="100"
                            x-model="nombreVialidad"
+                           value="{{ old('calle', $datosDomicilio['calle'] ?? '') }}"
                            required>
                 </div>
+                @error('calle')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- Número Exterior -->
@@ -190,8 +256,12 @@
                            pattern="[A-Za-z0-9\/]+"
                            maxlength="10"
                            x-model="numeroExterior"
+                           value="{{ old('numero_exterior', $datosDomicilio['numero_exterior'] ?? '') }}"
                            required>
                 </div>
+                @error('numero_exterior')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- Número Interior -->
@@ -205,8 +275,12 @@
                            placeholder="Ej: 5A"
                            pattern="[A-Za-z0-9]+"
                            maxlength="10"
-                           x-model="numeroInterior">
+                           x-model="numeroInterior"
+                           value="{{ old('numero_interior', $datosDomicilio['numero_interior'] ?? '') }}">
                 </div>
+                @error('numero_interior')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- Entre Calles -->
@@ -221,8 +295,12 @@
                            placeholder="Ej: Calle Independencia"
                            pattern="[A-Za-z0-9\s]+"
                            maxlength="100"
+                           value="{{ old('entre_calle_1', $datosDomicilio['entre_calle_1'] ?? '') }}"
                            required>
                 </div>
+                @error('entre_calle_1')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="form-group">
@@ -236,8 +314,12 @@
                            placeholder="Ej: Calle Morelos"
                            pattern="[A-Za-z0-9\s]+"
                            maxlength="100"
+                           value="{{ old('entre_calle_2', $datosDomicilio['entre_calle_2'] ?? '') }}"
                            required>
                 </div>
+                @error('entre_calle_2')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
         </div>
     </form>

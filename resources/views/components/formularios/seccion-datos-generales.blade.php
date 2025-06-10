@@ -15,9 +15,19 @@
         </div>
     </div>
 
-    <form class="space-y-8">
+    <form action="{{ route('tramites.guardar-datos-generales') }}" method="POST" class="space-y-8">
+        @csrf
         <input type="hidden" name="action" value="next">
         <input type="hidden" name="seccion" value="1">
+        
+        @if(isset($datosTramite['tramite_id']))
+            <input type="hidden" name="tramite_id" value="{{ $datosTramite['tramite_id'] }}">
+        @endif
+        
+        @if(isset($datosTramite['tipo_tramite']))
+            <input type="hidden" name="tipo_tramite" value="{{ $datosTramite['tipo_tramite'] }}">
+        @endif
+        
         <!-- Información Principal -->
         <div class="space-y-6">
             <!-- Tipo de Proveedor y RFC -->
@@ -30,17 +40,20 @@
                     </label>
                     <div class="relative group">
                         <select id="tipo_persona" name="tipo_persona" 
-                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
+                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('tipo_persona') border-red-500 @enderror"
                                 x-model="tipoPersona"
-                                :value="tipoPersona">
+                                :value="tipoPersona" required>
                             <option value="">Seleccione un tipo</option>
-                            <option value="Física">Física</option>
-                            <option value="Moral">Moral</option>
+                            <option value="Física" {{ old('tipo_persona', $datosTramite['tipo_persona'] ?? '') === 'Física' ? 'selected' : '' }}>Física</option>
+                            <option value="Moral" {{ old('tipo_persona', $datosTramite['tipo_persona'] ?? '') === 'Moral' ? 'selected' : '' }}>Moral</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <i class="fas fa-chevron-down text-[#9d2449]/50"></i>
                         </div>
                     </div>
+                    @error('tipo_persona')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- RFC -->
@@ -51,11 +64,15 @@
                     </label>
                     <div class="relative group">
                         <input type="text" id="rfc" name="rfc"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('rfc') border-red-500 @enderror"
                                placeholder="Ej. XAXX010101000"
                                maxlength="13"
-                               x-model="rfc">
+                               value="{{ old('rfc', $datosTramite['rfc'] ?? '') }}"
+                               x-model="rfc" required>
                     </div>
+                    @error('rfc')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -67,32 +84,39 @@
                 </label>
                 <div class="relative group">
                     <input type="text" id="curp" name="curp"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('curp') border-red-500 @enderror"
                            placeholder="Ej. XAXX010101HDFXXX01"
                            maxlength="18"
+                           value="{{ old('curp') }}"
                            x-model="curp"
                            x-bind:required="tipoPersona === 'Física'">
                 </div>
+                @error('curp')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
-            <!-- Razón Social -->
-            @if($datosTramite['tipo_persona'] === 'Moral' || ($datosTramite['tipo_tramite'] === 'actualizacion' && !empty($datosTramite['nombre_completo'])))
+            <!-- Razón Social / Nombre Completo -->
             <div class="form-group">
                 <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
-                    <span x-text="tipoPersona === 'Moral' ? 'Razón Social' : 'Nombre Completo'"></span>
+                    <span x-text="tipoPersona === 'Moral' ? 'Razón Social' : 'Nombre Completo'">
+                        {{ old('tipo_persona', $datosTramite['tipo_persona'] ?? '') === 'Moral' ? 'Razón Social' : 'Nombre Completo' }}
+                    </span>
                     <span class="text-[#9d2449]">*</span>
                 </label>
                 <div class="relative group">
                     <input type="text" id="razon_social" name="razon_social"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('razon_social') border-red-500 @enderror"
                            :placeholder="tipoPersona === 'Moral' ? 'Nombre de la empresa' : 'Nombre completo'"
+                           placeholder="{{ old('tipo_persona', $datosTramite['tipo_persona'] ?? '') === 'Moral' ? 'Nombre de la empresa' : 'Nombre completo' }}"
                            maxlength="100"
-                           x-model="razonSocial"
-                           value="{{ $datosTramite['nombre_completo'] }}"
-                           {{ $datosTramite['tipo_tramite'] === 'inscripcion' ? 'readonly' : '' }}>
+                           value="{{ old('razon_social') }}"
+                           x-model="razonSocial" required>
                 </div>
+                @error('razon_social')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
-            @endif
 
             <!-- Objeto Social -->
             <div class="form-group mb-8">
@@ -102,13 +126,16 @@
                 </label>
                 <div class="relative group">
                     <textarea id="objeto_social" name="objeto_social" rows="4"
-                              class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 resize-none"
+                              class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 resize-none @error('objeto_social') border-red-500 @enderror"
                               placeholder="Describa el objeto social de la empresa"
-                              maxlength="500"></textarea>
+                              maxlength="500" required>{{ old('objeto_social') }}</textarea>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
-                        <span class="char-count">0</span>/500
+                        <span class="char-count">{{ strlen(old('objeto_social', '')) }}</span>/500
                     </div>
                 </div>
+                @error('objeto_social')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
             </div>
         </div>
 
@@ -131,17 +158,16 @@
                 <div class="form-group">
                     <label for="sector_id" class="block text-sm font-medium text-gray-700 mb-2">
                         Sector
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <select id="sector_id" name="sector_id"
-                                class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                                required>
+                                class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50 @error('sector_id') border-red-500 @enderror">
                             <option value="">Seleccione un Sector</option>
                             @foreach(\App\Models\Sector::all() as $sector)
                                 <option value="{{ $sector->id }}" 
                                         data-nombre="{{ $sector->nombre }}"
-                                        title="{{ $sector->nombre }}">
+                                        title="{{ $sector->nombre }}"
+                                        {{ old('sector_id') == $sector->id ? 'selected' : '' }}>
                                     {{ \Illuminate\Support\Str::limit($sector->nombre, 40) }}
                                 </option>
                             @endforeach
@@ -150,24 +176,29 @@
                             <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
                         </div>
                     </div>
+                    @error('sector_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Actividad -->
                 <div class="form-group">
                     <label for="actividad_id" class="block text-sm font-medium text-gray-700 mb-2">
                         Actividad
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <select id="actividad_id" name="actividad_id"
-                                class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                                required disabled>
+                                class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50 @error('actividad_id') border-red-500 @enderror"
+                                disabled>
                             <option value="">Primero seleccione un sector</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                             <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
                         </div>
                     </div>
+                    @error('actividad_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -180,7 +211,10 @@
             </div>
 
             <!-- Input oculto para almacenar las actividades seleccionadas -->
-            <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="">
+            <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', '') }}">
+            @error('actividades_seleccionadas')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
 
         <!-- Datos de Contacto -->
@@ -205,10 +239,14 @@
                     </label>
                     <div class="relative group">
                         <input type="text" id="contacto_nombre" name="contacto_nombre"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('contacto_nombre') border-red-500 @enderror"
                                placeholder="Nombre completo del contacto"
-                               maxlength="40">
+                               maxlength="40"
+                               value="{{ old('contacto_nombre', '') }}" required>
                     </div>
+                    @error('contacto_nombre')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Cargo -->
@@ -219,10 +257,14 @@
                     </label>
                     <div class="relative group">
                         <input type="text" id="contacto_cargo" name="contacto_cargo"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('contacto_cargo') border-red-500 @enderror"
                                placeholder="Cargo en la empresa"
-                               maxlength="50">
+                               maxlength="50"
+                               value="{{ old('contacto_cargo', '') }}" required>
                     </div>
+                    @error('contacto_cargo')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Email -->
@@ -233,9 +275,13 @@
                     </label>
                     <div class="relative group">
                         <input type="email" id="contacto_correo" name="contacto_correo"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
-                               placeholder="correo@ejemplo.com">
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('contacto_correo') border-red-500 @enderror"
+                               placeholder="correo@ejemplo.com"
+                               value="{{ old('contacto_correo', '') }}" required>
                     </div>
+                    @error('contacto_correo')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Teléfono -->
@@ -246,21 +292,36 @@
                     </label>
                     <div class="relative group">
                         <input type="tel" id="contacto_telefono" name="contacto_telefono"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('contacto_telefono') border-red-500 @enderror"
                                placeholder="10 dígitos"
                                pattern="[0-9]{10}"
                                maxlength="10"
-                               inputmode="numeric">
+                               inputmode="numeric"
+                               value="{{ old('contacto_telefono', '') }}" required>
                     </div>
+                    @error('contacto_telefono')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
+        </div>
+
+        <!-- Botón de envío -->
+        <div class="flex justify-end pt-6 border-t border-gray-100">
+            <button type="submit" 
+                    onclick="this.disabled=true; this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i> Guardando...'; this.form.submit();"
+                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#9d2449] to-[#7a1d37] text-white font-semibold rounded-xl shadow-lg hover:from-[#7a1d37] hover:to-[#9d2449] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#9d2449]/30 gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-save text-sm"></i>
+                <span>Registrar y Continuar</span>
+                <i class="fas fa-arrow-right text-sm"></i>
+            </button>
         </div>
     </form>
 </div>
 
 <style>
 /* Estilos para los iconos de sección */
-.h-12 {
+ .h-12 {
     @apply bg-gradient-to-br from-[#9d2449] to-[#8a203f];
     position: relative;
     overflow: hidden;
