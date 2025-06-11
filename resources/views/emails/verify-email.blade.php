@@ -22,7 +22,7 @@
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #800000 0%, #5c0000 100%);
+            background: linear-gradient(135deg, #9d2449 0%, #8a203f 100%);
             color: white;
             padding: 40px 20px;
             text-align: center;
@@ -35,7 +35,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #b30000 0%, #800000 50%, #b30000 100%);
+            background: linear-gradient(90deg, #b30000 0%, #9d2449 50%, #b30000 100%);
         }
         .logo {
             width: 80px;
@@ -56,14 +56,14 @@
         .welcome-text {
             font-size: 28px;
             font-weight: bold;
-            color: #800000;
+            color: #9d2449;
             margin-bottom: 25px;
             text-align: center;
             text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
         }
         .verify-button {
             display: inline-block;
-            background: linear-gradient(135deg, #800000 0%, #5c0000 100%);
+            background: linear-gradient(135deg, #9d2449 0%, #8a203f 100%);
             color: white;
             padding: 16px 40px;
             border-radius: 30px;
@@ -71,27 +71,27 @@
             font-weight: bold;
             margin: 25px 0;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(128, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(157, 36, 73, 0.2);
             text-transform: uppercase;
             letter-spacing: 1px;
             font-size: 14px;
         }
         .verify-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(128, 0, 0, 0.3);
-            background: linear-gradient(135deg, #990000 0%, #800000 100%);
+            box-shadow: 0 6px 20px rgba(157, 36, 73, 0.3);
+            background: linear-gradient(135deg, #ae294f 0%, #9d2449 100%);
         }
         .info-box {
             background-color: #fff;
-            border-left: 4px solid #800000;
+            border-left: 4px solid #b87070;
             padding: 25px;
             margin: 25px 0;
             border-radius: 8px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
         }
         .footer {
-            background-color: #2a0000;
-            color: #e6c9c9;
+            background-color: #9d6b6b;
+            color: #f4e6e6;
             padding: 35px;
             text-align: center;
             font-size: 14px;
@@ -100,21 +100,21 @@
         }
         .warning {
             background-color: #fff5f5;
-            border-left: 4px solid #cc0000;
+            border-left: 4px solid #c98b8b;
             padding: 20px;
             margin: 25px 0;
             border-radius: 8px;
-            color: #800000;
-            box-shadow: 0 2px 12px rgba(204, 0, 0, 0.1);
+            color: #b87070;
+            box-shadow: 0 2px 12px rgba(201, 139, 139, 0.1);
         }
         .verification-link {
             word-break: break-all;
-            color: #800000;
+            color: #b87070;
             background-color: #fff5f5;
             padding: 15px;
             border-radius: 8px;
             font-family: monospace;
-            border: 1px dashed #cc0000;
+            border: 1px dashed #c98b8b;
             margin: 20px 0;
         }
     </style>

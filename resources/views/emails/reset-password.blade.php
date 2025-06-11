@@ -19,10 +19,10 @@
             background-color: #ffffff;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 12px 30px rgba(128, 0, 0, 0.15);
+            box-shadow: 0 12px 30px rgba(157, 36, 73, 0.15);
         }
         .header {
-            background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
+            background: linear-gradient(135deg, #9d2449 0%, #8a203f 100%);
             color: white;
             padding: 40px 30px;
             text-align: center;
@@ -56,7 +56,7 @@
             position: absolute;
             bottom: -10px;
             right: -10px;
-            background: #990000;
+            background: #9d2449;
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -72,7 +72,7 @@
         }
         .greeting {
             font-size: 28px;
-            color: #800000;
+            color: #9d2449;
             margin-bottom: 25px;
             text-align: center;
             font-weight: 600;
@@ -86,7 +86,7 @@
         }
         .reset-button {
             display: inline-block;
-            background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
+            background: linear-gradient(135deg, #9d2449 0%, #8a203f 100%);
             color: white;
             padding: 18px 45px;
             border-radius: 50px;
@@ -95,7 +95,7 @@
             font-size: 16px;
             text-align: center;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(128, 0, 0, 0.2);
+            box-shadow: 0 8px 20px rgba(157, 36, 73, 0.2);
             text-transform: uppercase;
             letter-spacing: 1px;
             position: relative;
@@ -103,7 +103,7 @@
         }
         .reset-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(128, 0, 0, 0.25);
+            box-shadow: 0 12px 25px rgba(157, 36, 73, 0.25);
         }
         .reset-button::after {
             content: '';
@@ -121,7 +121,7 @@
             100% { transform: translateX(100%) rotate(45deg); }
         }
         .security-box {
-            background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
+            background: linear-gradient(135deg, #9d2449 0%, #8a203f 100%);
             border-radius: 16px;
             padding: 30px;
             color: white;
@@ -175,15 +175,15 @@
             margin-top: 30px;
             word-break: break-all;
             font-size: 14px;
-            color: #800000;
+            color: #9d2449;
         }
         .link-fallback strong {
             display: block;
             margin-bottom: 10px;
-            color: #4a0000;
+            color: #8a203f;
         }
         .footer {
-            background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
+            background: linear-gradient(135deg, #9d2449 0%, #8a203f 100%);
             color: white;
             padding: 40px 30px;
             text-align: center;
@@ -262,7 +262,7 @@
                 <strong>¿Problemas con el botón?</strong>
                 Copia y pega este enlace en tu navegador:
                 <br>
-                <a href="{{ $resetUrl }}" style="color: #800000; word-break: break-all;">{{ $resetUrl }}</a>
+                <a href="{{ $resetUrl }}" style="color: #9d2449; word-break: break-all;">{{ $resetUrl }}</a>
             </div>
         </div>
 
