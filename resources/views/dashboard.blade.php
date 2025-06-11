@@ -33,7 +33,7 @@
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                     <div class="mb-4 lg:mb-0">
                         <div class="flex items-center gap-3 mb-2">
-                            <span id="currentTime" class="text-2xl font-bold text-gray-800"></span>
+                            <span id="currentTime" class="text-2xl font-semibold text-[#9d2449]/70"></span>
                         </div>
                         <h2 id="greeting" class="text-2xl font-bold text-[#9d2449] mb-1">
                             Buenos días, {{ auth()->check() ? auth()->user()->name : 'Invitado' }}
