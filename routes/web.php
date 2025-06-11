@@ -12,6 +12,9 @@ use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\TramiteController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CitaController;
+use App\Http\Controllers\DiaInhabilController;
 
 // Ruta principal - solo para usuarios no autenticados
 Route::middleware(['web', 'guest'])->group(function () {
@@ -84,6 +87,16 @@ Route::middleware(['auth'])->group(function () {
     
     // Rutas de Proveedores
     Route::resource('proveedores', ProveedorController::class);
+
+    // Rutas de Perfil
+    Route::get('/perfil', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    // Rutas de Citas
+    Route::resource('citas', CitaController::class);
+    Route::put('/citas/{cita}/estado', [CitaController::class, 'cambiarEstado'])->name('citas.estado.update');
+
+    Route::resource('dias-inhabiles', DiaInhabilController::class)->only(['create', 'store', 'destroy']);
 });
 
 // Rutas para trámites

@@ -8,22 +8,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('cita', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('solicitante_id');
-            $table->unsignedBigInteger('tramite_id');
-            $table->date('fecha_cita');
-            $table->time('hora_cita');
-            $table->enum('estado', ['Pendiente', 'Confirmada', 'Cancelada', 'Completada'])->default('Pendiente');
-            $table->text('observaciones')->nullable();
+        Schema::create('citas', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->dateTime('fecha_hora');
+            $table->string('motivo');
+            $table->enum('estado', ['pendiente', 'confirmada', 'cancelada', 'completada'])->default('pendiente');
+            $table->text('notas')->nullable();
             $table->timestamps();
-            $table->foreign('solicitante_id')->references('id')->on('solicitante')->onDelete('cascade');
-            $table->foreign('tramite_id')->references('id')->on('tramite')->onDelete('cascade');
+            $table->softDeletes();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('cita');
+        Schema::dropIfExists('citas');
     }
 };
