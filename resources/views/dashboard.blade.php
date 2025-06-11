@@ -45,17 +45,20 @@
                             <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
                             Sesión Activa
                         </span>
-                        <button class="inline-flex items-center bg-[#9d2449] text-white px-4 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20 text-sm">
+                        @if(auth()->user()->hasRole('solicitante') || !auth()->user()->hasRole('revisor'))
+                        <a href="{{ route('tramites.solicitante.index') }}" class="inline-flex items-center bg-[#9d2449] text-white px-4 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20 text-sm">
                             <span class="font-semibold">Iniciar trámite</span>
                             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                             </svg>
-                        </button>
+                        </a>
+                        @endif
                     </div>
                 </div>
             </div>
 
             <div class="p-5 bg-white">
+                @if(auth()->user()->hasRole('revisor'))
                 <!-- Stats Grid -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
                     <!-- Usuarios -->
@@ -130,6 +133,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 <!-- Main Content Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">

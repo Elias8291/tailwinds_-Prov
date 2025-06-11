@@ -30,15 +30,7 @@
             tipoPersona: '{{ $datosTramite['tipo_persona'] }}',
             isPersonaFisica: {{ $datosTramite['tipo_persona'] === 'Física' ? 'true' : 'false' }},
             rfc: '{{ $datosTramite['rfc'] ?? '' }}',
-            curp: '',
-            razonSocial: '',
-            nombreVialidad: '',
-            numeroExterior: '',
-            numeroInterior: '',
-            cp: '',
-            colonia: '',
-            estado: '',
-            municipio: '',
+            tramiteId: {{ $datosTramite['tramite_id'] ?? 'null' }},
             steps: {{ $datosTramite['tipo_persona'] === 'Física' ? 
                 json_encode([
                     ['number' => '01', 'label' => 'Datos Generales'],
@@ -54,29 +46,9 @@
                     ['number' => '06', 'label' => 'Documentos']
                 ]) 
             }},
-            formData: {},
             init() {
                 this.$nextTick(() => {
                     this.$el.classList.remove('invisible');
-                    
-                    // Verificar si hay datos del SAT en sessionStorage
-                    const satData = sessionStorage.getItem('satData');
-                    if (satData) {
-                        const data = JSON.parse(satData);
-                        this.tipoPersona = data.tipoPersona || this.tipoPersona;
-                        this.rfc = data.rfc || this.rfc;
-                        this.curp = data.curp || '';
-                        this.razonSocial = data.tipoPersona === 'Moral' ? 
-                            (data.razonSocial || '') : 
-                            (data.nombreCompleto || '');
-                        this.nombreVialidad = data.nombreVialidad || '';
-                        this.numeroExterior = data.numeroExterior || '';
-                        this.numeroInterior = data.numeroInterior || '';
-                        this.cp = data.cp || '';
-                        this.colonia = data.colonia || '';
-                        this.estado = data.estado || '';
-                        this.municipio = data.municipio || '';
-                    }
                 });
             }
          }"

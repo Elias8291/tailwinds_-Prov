@@ -15,6 +15,7 @@ use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\DiaInhabilController;
+use App\Http\Controllers\TramiteSolicitanteController;
 
 // Ruta principal - solo para usuarios no autenticados
 Route::middleware(['web', 'guest'])->group(function () {
@@ -116,4 +117,12 @@ Route::prefix('tramites')->group(function () {
         ->name('tramites.create');
     
     Route::post('/store', [TramiteController::class, 'store'])->name('tramites.store');
+});
+
+// Rutas para el módulo de Trámite Solicitante
+Route::middleware(['auth'])->prefix('tramites-solicitante')->group(function () {
+    Route::get('/', [TramiteSolicitanteController::class, 'index'])->name('tramites.solicitante.index');
+    Route::post('/iniciar-inscripcion', [TramiteSolicitanteController::class, 'iniciarInscripcion'])->name('tramites.solicitante.iniciar-inscripcion');
+    Route::post('/iniciar-renovacion', [TramiteSolicitanteController::class, 'iniciarRenovacion'])->name('tramites.solicitante.iniciar-renovacion');
+    Route::post('/iniciar-actualizacion', [TramiteSolicitanteController::class, 'iniciarActualizacion'])->name('tramites.solicitante.iniciar-actualizacion');
 });

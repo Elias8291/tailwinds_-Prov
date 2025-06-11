@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class SeccionTramite extends Model
+{
+    use HasFactory;
+
+    protected $table = 'seccion_tramite';
+
+    protected $fillable = [
+        'nombre',
+        'descripcion',
+        'orden',
+        'es_requerido'
+    ];
+
+    protected $casts = [
+        'es_requerido' => 'boolean',
+        'orden' => 'integer'
+    ];
+
+    public function progresoTramites()
+    {
+        return $this->hasMany(ProgresoTramite::class, 'seccion_id');
+    }
+
+    public function tramites()
+    {
+        return $this->belongsToMany(Tramite::class, 'progreso_tramite')
+            ->withPivot(['estado', 'observaciones', 'fecha_inicio', 'fecha_completado'])
+            ->withTimestamps();
+    }
+} 
