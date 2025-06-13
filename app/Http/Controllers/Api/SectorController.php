@@ -35,6 +35,28 @@ class SectorController extends Controller
     }
 
     /**
+     * Get all activities with their sectors
+     *
+     * @return JsonResponse
+     */
+    public function getAllActividades(): JsonResponse
+    {
+        try {
+            $actividades = Actividad::with('sector')->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $actividades
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar actividades: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get a specific activity with its sector
      *
      * @param int $actividadId

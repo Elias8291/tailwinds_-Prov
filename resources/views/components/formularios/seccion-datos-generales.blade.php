@@ -1,19 +1,118 @@
-@props(['title' => 'Datos Generales'])
+@props(['title' => 'Datos Generales', 'datosTramite' => [], 'datosSolicitante' => []])
 
 <!-- Asegúrate de incluir Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+<script>
+function datosGeneralesData() {
+    return {
+        tipoPersona: @json($datosSolicitante['tipo_persona'] ?? $datosTramite['tipo_persona'] ?? ''),
+        rfc: @json($datosSolicitante['rfc'] ?? $datosTramite['rfc'] ?? ''),
+        curp: @json($datosSolicitante['curp'] ?? $datosTramite['curp'] ?? ''),
+        razonSocial: @json($datosSolicitante['razon_social'] ?? $datosSolicitante['nombre_completo'] ?? $datosTramite['razon_social'] ?? $datosTramite['nombre_completo'] ?? ''),
+        objetoSocial: @json($datosSolicitante['objeto_social'] ?? $datosTramite['objeto_social'] ?? ''),
+        esEdicion: @json(isset($datosTramite['tramite_id']) && $datosTramite['tramite_id'] ? true : false),
+        sectorId: @json($datosTramite['sector_id'] ?? ''),
+        
+        init() {
+            // Cargar datos si es edición
+            if (this.esEdicion) {
+                // Los datos ya están cargados desde el servidor
+                console.log('Modo edición - datos cargados:', {
+                    tipo: this.tipoPersona,
+                    rfc: this.rfc,
+                    curp: this.curp,
+                    razon: this.razonSocial,
+                    objeto: this.objetoSocial,
+                    sector: this.sectorId
+                });
+                
+                // Cargar actividades del sector si existe
+                if (this.sectorId) {
+                    this.$nextTick(() => {
+                        // Disparar el evento change del select de sector para cargar actividades
+                        const sectorSelect = document.getElementById('sector_id');
+                        if (sectorSelect) {
+                            sectorSelect.dispatchEvent(new Event('change'));
+                        }
+                    });
+                }
+            }
+            
+            // Log de depuración para verificar datos recibidos
+            console.log('Datos disponibles en el componente:', {
+                datosSolicitante: @json($datosSolicitante ?? []),
+                datosTramite: @json($datosTramite ?? [])
+            });
+        }
+    }
+}
+</script>
+
+<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" x-data="datosGeneralesData()">
     <!-- Encabezado con icono mejorado -->
-    <div class="flex items-center space-x-4 mb-8 pb-6 border-b border-gray-100">
-        <div class="h-12 w-12 flex items-center justify-center rounded-xl bg-[#9d2449] text-white shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-[#8a203f]">
-            <i class="fas fa-building text-xl"></i>
+    <div class="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
+        <div class="flex items-center space-x-4">
+            <div class="h-12 w-12 flex items-center justify-center rounded-xl bg-[#9d2449] text-white shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-[#8a203f]">
+                <i class="fas fa-building text-xl"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">{{ $title }}</h2>
+                <p class="text-sm text-gray-500 mt-1">Complete la información general del proveedor</p>
+            </div>
         </div>
-        <div>
-            <h2 class="text-xl font-bold text-gray-800">{{ $title }}</h2>
-            <p class="text-sm text-gray-500 mt-1">Complete la información general del proveedor</p>
+        
+        <!-- Indicador de modo edición -->
+        <div x-show="esEdicion" class="flex items-center px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+            <i class="fas fa-edit text-amber-600 mr-2"></i>
+            <span class="text-sm text-amber-700 font-medium">Modo Edición</span>
         </div>
     </div>
+
+    <!-- Información del Solicitante -->
+    @if(!empty($datosSolicitante))
+    <div class="mb-8 bg-gradient-to-r from-[#9d2449]/5 to-[#7a1d37]/5 rounded-lg border border-[#9d2449]/10 p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/80 rounded-lg p-2">
+                    <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500">Tipo de Persona</span>
+                    <p class="text-sm font-semibold text-gray-800">{{ $datosSolicitante['tipo_persona'] ?? 'No especificado' }}</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <div class="bg-white/80 rounded-lg p-2">
+                    <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500">RFC</span>
+                    <p class="text-sm font-semibold text-gray-800 font-mono">{{ $datosSolicitante['rfc'] ?? 'No especificado' }}</p>
+                </div>
+            </div>
+
+            @if(!empty($datosSolicitante['curp']) && $datosSolicitante['tipo_persona'] === 'Física')
+            <div class="flex items-center gap-3">
+                <div class="bg-white/80 rounded-lg p-2">
+                    <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500">CURP</span>
+                    <p class="text-sm font-semibold text-gray-800 font-mono">{{ $datosSolicitante['curp'] }}</p>
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+    @endif
 
     <form action="{{ route('tramites.guardar-datos-generales') }}" method="POST" class="space-y-8">
         @csrf
@@ -28,6 +127,19 @@
             <input type="hidden" name="tipo_tramite" value="{{ $datosTramite['tipo_tramite'] }}">
         @endif
         
+        <!-- Información de datos cargados -->
+        <div x-show="esEdicion" class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">Datos existentes cargados</h3>
+                    <p class="text-sm text-blue-700 mt-1">Los campos RFC, tipo de persona y CURP no pueden modificarse una vez establecidos.</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Información Principal -->
         <div class="space-y-6">
             <!-- Tipo de Proveedor y RFC -->
@@ -40,16 +152,21 @@
                     </label>
                     <div class="relative group">
                         <select id="tipo_persona" name="tipo_persona" 
-                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('tipo_persona') border-red-500 @enderror"
+                                class="block w-full px-4 py-2.5 text-gray-700 border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('tipo_persona') border-red-500 @enderror"
+                                :class="esEdicion && tipoPersona ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'"
                                 x-model="tipoPersona"
-                                :value="tipoPersona" required>
+                                :disabled="esEdicion && tipoPersona"
+                                required>
                             <option value="">Seleccione un tipo</option>
-                            <option value="Física" {{ old('tipo_persona', $datosTramite['tipo_persona'] ?? '') === 'Física' ? 'selected' : '' }}>Física</option>
-                            <option value="Moral" {{ old('tipo_persona', $datosTramite['tipo_persona'] ?? '') === 'Moral' ? 'selected' : '' }}>Moral</option>
+                            <option value="Física">Física</option>
+                            <option value="Moral">Moral</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <i class="fas fa-chevron-down text-[#9d2449]/50"></i>
                         </div>
+                    </div>
+                    <div x-show="esEdicion && tipoPersona" class="mt-1 text-xs text-gray-500">
+                        <i class="fas fa-lock mr-1"></i>Este campo no se puede modificar
                     </div>
                     @error('tipo_persona')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -64,11 +181,16 @@
                     </label>
                     <div class="relative group">
                         <input type="text" id="rfc" name="rfc"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('rfc') border-red-500 @enderror"
+                               class="block w-full px-4 py-2.5 text-gray-700 border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('rfc') border-red-500 @enderror"
+                               :class="esEdicion && rfc ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'"
                                placeholder="Ej. XAXX010101000"
                                maxlength="13"
-                               value="{{ old('rfc', $datosTramite['rfc'] ?? '') }}"
-                               x-model="rfc" required>
+                               x-model="rfc"
+                               :readonly="esEdicion && rfc"
+                               required>
+                    </div>
+                    <div x-show="esEdicion && rfc" class="mt-1 text-xs text-gray-500">
+                        <i class="fas fa-lock mr-1"></i>El RFC no se puede modificar
                     </div>
                     @error('rfc')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -84,12 +206,16 @@
                 </label>
                 <div class="relative group">
                     <input type="text" id="curp" name="curp"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('curp') border-red-500 @enderror"
+                           class="block w-full px-4 py-2.5 text-gray-700 border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('curp') border-red-500 @enderror"
+                           :class="esEdicion && curp ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'"
                            placeholder="Ej. XAXX010101HDFXXX01"
                            maxlength="18"
-                           value="{{ old('curp') }}"
                            x-model="curp"
+                           :readonly="esEdicion && curp"
                            x-bind:required="tipoPersona === 'Física'">
+                </div>
+                <div x-show="esEdicion && curp" class="mt-1 text-xs text-gray-500">
+                    <i class="fas fa-lock mr-1"></i>El CURP no se puede modificar
                 </div>
                 @error('curp')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -100,7 +226,7 @@
             <div class="form-group">
                 <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
                     <span x-text="tipoPersona === 'Moral' ? 'Razón Social' : 'Nombre Completo'">
-                        {{ old('tipo_persona', $datosTramite['tipo_persona'] ?? '') === 'Moral' ? 'Razón Social' : 'Nombre Completo' }}
+                        Razón Social / Nombre Completo
                     </span>
                     <span class="text-[#9d2449]">*</span>
                 </label>
@@ -108,10 +234,9 @@
                     <input type="text" id="razon_social" name="razon_social"
                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('razon_social') border-red-500 @enderror"
                            :placeholder="tipoPersona === 'Moral' ? 'Nombre de la empresa' : 'Nombre completo'"
-                           placeholder="{{ old('tipo_persona', $datosTramite['tipo_persona'] ?? '') === 'Moral' ? 'Nombre de la empresa' : 'Nombre completo' }}"
                            maxlength="100"
-                           value="{{ old('razon_social') }}"
-                           x-model="razonSocial" required>
+                           x-model="razonSocial" 
+                           required>
                 </div>
                 @error('razon_social')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -128,9 +253,10 @@
                     <textarea id="objeto_social" name="objeto_social" rows="4"
                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 resize-none @error('objeto_social') border-red-500 @enderror"
                               placeholder="Describa el objeto social de la empresa"
-                              maxlength="500" required>{{ old('objeto_social') }}</textarea>
+                              x-model="objetoSocial"
+                              maxlength="500" required></textarea>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
-                        <span class="char-count">{{ strlen(old('objeto_social', '')) }}</span>/500
+                        <span x-text="objetoSocial ? objetoSocial.length : 0">0</span>/500
                     </div>
                 </div>
                 @error('objeto_social')
@@ -167,7 +293,7 @@
                                 <option value="{{ $sector->id }}" 
                                         data-nombre="{{ $sector->nombre }}"
                                         title="{{ $sector->nombre }}"
-                                        {{ old('sector_id') == $sector->id ? 'selected' : '' }}>
+                                        {{ old('sector_id', $datosTramite['sector_id'] ?? '') == $sector->id ? 'selected' : '' }}>
                                     {{ \Illuminate\Support\Str::limit($sector->nombre, 40) }}
                                 </option>
                             @endforeach
@@ -210,8 +336,8 @@
                 </div>
             </div>
 
-            <!-- Input oculto para almacenar las actividades seleccionadas -->
-            <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', '') }}">
+                <!-- Input oculto para almacenar las actividades seleccionadas -->
+    <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
             @error('actividades_seleccionadas')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -242,7 +368,7 @@
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('contacto_nombre') border-red-500 @enderror"
                                placeholder="Nombre completo del contacto"
                                maxlength="40"
-                               value="{{ old('contacto_nombre', '') }}" required>
+                               value="{{ old('contacto_nombre', $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? '') }}" required>
                     </div>
                     @error('contacto_nombre')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -260,7 +386,7 @@
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('contacto_cargo') border-red-500 @enderror"
                                placeholder="Cargo en la empresa"
                                maxlength="50"
-                               value="{{ old('contacto_cargo', '') }}" required>
+                               value="{{ old('contacto_cargo', $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? '') }}" required>
                     </div>
                     @error('contacto_cargo')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -277,7 +403,7 @@
                         <input type="email" id="contacto_correo" name="contacto_correo"
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('contacto_correo') border-red-500 @enderror"
                                placeholder="correo@ejemplo.com"
-                               value="{{ old('contacto_correo', '') }}" required>
+                               value="{{ old('contacto_correo', $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? '') }}" required>
                     </div>
                     @error('contacto_correo')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -297,7 +423,7 @@
                                pattern="[0-9]{10}"
                                maxlength="10"
                                inputmode="numeric"
-                               value="{{ old('contacto_telefono', '') }}" required>
+                               value="{{ old('contacto_telefono', $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? '') }}" required>
                     </div>
                     @error('contacto_telefono')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -759,6 +885,29 @@ document.addEventListener('DOMContentLoaded', function() {
         actualizarMensajeNoActividades();
     }
 
+    async function cargarActividadesExistentes() {
+        try {
+            // Obtener todas las actividades para mostrar los nombres
+            const response = await fetch('/api/actividades');
+            if (!response.ok) throw new Error('Error al cargar actividades');
+            
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message || 'Error al cargar actividades');
+            
+            // Crear tags para las actividades seleccionadas
+            actividadesSeleccionadas.forEach(actividadId => {
+                const actividad = data.data.find(act => act.id.toString() === actividadId);
+                if (actividad) {
+                    const sectorNombre = actividad.sector ? actividad.sector.nombre : 'Sin sector';
+                    agregarTag(actividadId, actividad.nombre, sectorNombre);
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error al cargar actividades existentes:', error);
+        }
+    }
+
     function agregarTag(id, nombre, sectorNombre) {
         const tag = document.createElement('div');
         tag.className = 'tag';
@@ -841,6 +990,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // Resetear el select
             this.value = '';
         });
+    }
+
+    // Inicializar actividades seleccionadas si existen
+    const actividadesExistentes = actividadesInput.value;
+    if (actividadesExistentes) {
+        try {
+            const actividades = JSON.parse(actividadesExistentes);
+            if (Array.isArray(actividades) && actividades.length > 0) {
+                actividades.forEach(actividadId => {
+                    actividadesSeleccionadas.add(actividadId.toString());
+                });
+                
+                // Cargar los nombres de las actividades
+                cargarActividadesExistentes();
+            }
+        } catch (error) {
+            console.error('Error al parsear actividades existentes:', error);
+        }
     }
 
     // Inicializar el mensaje

@@ -13,6 +13,8 @@ use App\Models\Asentamiento;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Formularios\DomicilioController;
+use App\Http\Controllers\Formularios\DatosGeneralesController;
 
 class TramiteController extends Controller
 {
@@ -90,31 +92,22 @@ class TramiteController extends Controller
                 $actividades = ActividadSolicitante::where('tramite_id', $tramite->id)->get();
                 $datosExistentes['actividades_seleccionadas'] = $actividades->pluck('actividad_id')->toArray();
                 
-                // Cargar datos de domicilio si existen
-                if ($tramite->detalleTramite && $tramite->detalleTramite->direccion) {
-                    $direccion = $tramite->detalleTramite->direccion;
-                    $datosExistentes['direccion'] = [
-                        'codigo_postal' => $direccion->codigo_postal,
-                        'calle' => $direccion->calle,
-                        'numero_exterior' => $direccion->numero_exterior,
-                        'numero_interior' => $direccion->numero_interior,
-                        'entre_calle_1' => $direccion->entre_calle_1,
-                        'entre_calle_2' => $direccion->entre_calle_2,
-                        'asentamiento_id' => $direccion->asentamiento_id,
-                    ];
-                }
+                // Cargar datos de domicilio usando el controlador especializado
+                $domicilioController = new DomicilioController();
+                $datosExistentes['direccion'] = $domicilioController->obtenerDatos($tramite);
             }
 
-            // Preparar datos para la vista
-            $datosTramite = [
+            // Obtener datos usando los controladores especializados
+            $datosGeneralesController = new DatosGeneralesController();
+            $domicilioController = new DomicilioController();
+            
+            // Preparar datos base del trámite
+            $datosTramiteBase = [
                 'tipo_tramite' => $tipoTramite,
                 'titulo' => $tipos_tramite[$tipoTramite],
                 'rfc' => $solicitante->rfc,
                 'tipo_persona' => $solicitante->tipo_persona,
                 'curp' => $solicitante->curp,
-                'nombre_completo' => $solicitante->tipo_persona === 'Física' ? 
-                    $solicitante->nombre . ' ' . $solicitante->apellido_paterno . ' ' . $solicitante->apellido_materno :
-                    $solicitante->razon_social,
                 'mostrar_razon_social' => $tipoTramite !== 'inscripcion',
                 'tramite_id' => $tramite->id,
                 'progreso_tramite' => $tramite->progreso_tramite,
@@ -122,10 +115,23 @@ class TramiteController extends Controller
                 'datos_existentes' => $datosExistentes
             ];
 
+            // Obtener datos completos de datos generales si el trámite ya está en progreso
+            if ($tramite->progreso_tramite >= 1) {
+                // Siempre intentar cargar datos existentes, aunque el progreso sea 1
+                $datosGeneralesCompletos = $datosGeneralesController->obtenerDatos($tramite);
+                $datosTramite = array_merge($datosTramiteBase, $datosGeneralesCompletos);
+            } else {
+                $datosTramite = $datosTramiteBase;
+            }
+
+            // Obtener datos de domicilio
+            $datosDomicilio = $domicilioController->obtenerDatos($tramite);
+
             return view("tramites.create", [
                 'tramite' => $tramite,
                 'solicitante' => $solicitante,
-                'datosTramite' => $datosTramite
+                'datosTramite' => $datosTramite,
+                'datosDomicilio' => $datosDomicilio
             ]);
 
         } catch (\Exception $e) {

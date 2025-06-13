@@ -14,7 +14,7 @@
                 </div>
                 <div>
                     <h2 class="text-2xl font-bold bg-gradient-to-r from-[#9d2449] to-[#7a1d37] bg-clip-text text-transparent">
-                        {{ ucfirst($datosTramite['tipo_tramite']) }} al Padrón de Proveedores
+                        {{ ucfirst($datosTramite['tipo_tramite'] ?? 'Trámite') }} al Padrón de Proveedores
                     </h2>
                     <p class="text-sm text-gray-600 mt-1">Complete el formulario con la información requerida</p>
                 </div>
@@ -25,28 +25,45 @@
     <!-- Form Container -->
     <div class="max-w-4xl mx-auto mt-4 sm:mt-8 md:mt-16 bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-8 relative z-10"
          x-data="{ 
-            currentStep: {{ $datosTramite['paso_inicial'] ?? 1 }},
-            totalSteps: {{ $datosTramite['tipo_persona'] === 'Física' ? 3 : 6 }},
-            tipoPersona: '{{ $datosTramite['tipo_persona'] }}',
-            isPersonaFisica: {{ $datosTramite['tipo_persona'] === 'Física' ? 'true' : 'false' }},
-            rfc: '{{ $datosTramite['rfc'] ?? '' }}',
-            tramiteId: {{ $datosTramite['tramite_id'] ?? 'null' }},
-            steps: {{ $datosTramite['tipo_persona'] === 'Física' ? 
-                json_encode([
-                    ['number' => '01', 'label' => 'Datos Generales'],
-                    ['number' => '02', 'label' => 'Domicilio'],
-                    ['number' => '03', 'label' => 'Documentos']
-                ]) : 
-                json_encode([
-                    ['number' => '01', 'label' => 'Datos Generales'],
-                    ['number' => '02', 'label' => 'Domicilio'],
-                    ['number' => '03', 'label' => 'Constitución'],
-                    ['number' => '04', 'label' => 'Accionistas'],
-                    ['number' => '05', 'label' => 'Apoderado Legal'],
-                    ['number' => '06', 'label' => 'Documentos']
-                ]) 
-            }},
-            init() {
+            currentStep: 1,
+            totalSteps: 0,
+            tipoPersona: '',
+            isPersonaFisica: false,
+            rfc: '',
+            curp: '',
+            tramiteId: null,
+            steps: [],
+            async init() {
+                // Obtener datos del trámite desde el controlador
+                try {
+                    const response = await fetch('/tramites-solicitante/datos-tramite');
+                    const data = await response.json();
+                    
+                    this.currentStep = data.paso_inicial || 1;
+                    this.tipoPersona = data.tipo_persona;
+                    this.isPersonaFisica = data.tipo_persona === 'Física';
+                    this.totalSteps = this.isPersonaFisica ? 3 : 6;
+                    this.rfc = data.rfc;
+                    this.curp = data.curp;
+                    this.tramiteId = data.tramite_id;
+                    this.steps = this.isPersonaFisica ? 
+                        [
+                            {number: '01', label: 'Datos Generales'},
+                            {number: '02', label: 'Domicilio'},
+                            {number: '03', label: 'Documentos'}
+                        ] : 
+                        [
+                            {number: '01', label: 'Datos Generales'},
+                            {number: '02', label: 'Domicilio'},
+                            {number: '03', label: 'Constitución'},
+                            {number: '04', label: 'Accionistas'},
+                            {number: '05', label: 'Apoderado Legal'},
+                            {number: '06', label: 'Documentos'}
+                        ];
+                } catch (error) {
+                    console.error('Error al cargar datos del trámite:', error);
+                }
+                
                 this.$nextTick(() => {
                     this.$el.classList.remove('invisible');
                 });
@@ -56,7 +73,7 @@
          
         <!-- Información del Solicitante -->
         <div class="mb-8 bg-gradient-to-r from-[#9d2449]/5 to-[#7a1d37]/5 rounded-lg border border-[#9d2449]/10 p-4">
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div class="flex items-center gap-3">
                     <div class="bg-white/80 rounded-lg p-2">
                         <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +82,7 @@
                     </div>
                     <div>
                         <span class="text-xs font-medium text-gray-500">Tipo de Persona</span>
-                        <p class="text-sm font-semibold text-gray-800">{{ $datosTramite['tipo_persona'] }}</p>
+                        <p class="text-sm font-semibold text-gray-800" x-text="tipoPersona"></p>
                     </div>
                 </div>
                 
@@ -77,7 +94,19 @@
                     </div>
                     <div>
                         <span class="text-xs font-medium text-gray-500">RFC</span>
-                        <p class="text-sm font-semibold text-gray-800 font-mono">{{ $datosTramite['rfc'] }}</p>
+                        <p class="text-sm font-semibold text-gray-800 font-mono" x-text="rfc"></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3" x-show="isPersonaFisica && curp" x-cloak>
+                    <div class="bg-white/80 rounded-lg p-2">
+                        <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-xs font-medium text-gray-500">CURP</span>
+                        <p class="text-sm font-semibold text-gray-800 font-mono" x-text="curp"></p>
                     </div>
                 </div>
             </div>
@@ -90,7 +119,7 @@
                 <span class="text-xs">/</span>
                 <span class="text-sm" x-text="totalSteps"></span>
             </div>
-            <div class="mt-1 text-xs text-gray-600 font-medium" x-text="steps[currentStep - 1].label"></div>
+            <div class="mt-1 text-xs text-gray-600 font-medium" x-text="steps[currentStep - 1]?.label || ''"></div>
         </div>
 
         <!-- Desktop Progress Container -->
@@ -139,18 +168,36 @@
                 <!-- Datos Generales -->
                 <div x-show="currentStep === 1" x-cloak>
                     @include('components.formularios.seccion-datos-generales', [
-                        'datosTramite' => [
-                            'tipo_tramite' => $datosTramite['tipo_tramite'],
-                            'tipo_persona' => $datosTramite['tipo_persona'],
-                            'rfc' => $datosTramite['rfc'],
-                            'tramite_id' => $datosTramite['tramite_id']
+                        'datosTramite' => isset($datosTramite) ? $datosTramite : [],
+                        'datosSolicitante' => isset($solicitante) ? [
+                            'rfc' => $solicitante->rfc ?? $datosTramite['rfc'] ?? '',
+                            'curp' => $solicitante->curp ?? $datosTramite['curp'] ?? '',
+                            'tipo_persona' => $solicitante->tipo_persona ?? $datosTramite['tipo_persona'] ?? 'Física',
+                            'nombre_completo' => $solicitante->nombre_completo ?? $datosTramite['nombre_completo'] ?? '',
+                            'razon_social' => $solicitante->razon_social ?? $datosTramite['razon_social'] ?? '',
+                            'objeto_social' => $solicitante->objeto_social ?? $datosTramite['objeto_social'] ?? ''
+                        ] : [
+                            'rfc' => $datosTramite['rfc'] ?? '',
+                            'curp' => $datosTramite['curp'] ?? '',
+                            'tipo_persona' => $datosTramite['tipo_persona'] ?? 'Física',
+                            'nombre_completo' => $datosTramite['nombre_completo'] ?? '',
+                            'razon_social' => $datosTramite['razon_social'] ?? '',
+                            'objeto_social' => $datosTramite['objeto_social'] ?? ''
                         ]
                     ])
                 </div>
 
                 <!-- Domicilio -->
                 <div x-show="currentStep === 2" x-cloak @next-step="currentStep++">
-                    @include('components.formularios.seccion-domicilio', ['datosDomicilio' => $datosTramite['datos_existentes']['direccion'] ?? ['tramite_id' => $datosTramite['tramite_id']]])
+                    @include('components.formularios.seccion-domicilio', [
+                        'datosDomicilio' => isset($datosDomicilio) ? $datosDomicilio : [],
+                        'datosSAT' => isset($datosSAT) ? $datosSAT : null,
+                        'datosSolicitante' => [
+                            'rfc' => $datosTramite['rfc'] ?? '',
+                            'curp' => $datosTramite['curp'] ?? '',
+                            'tipo_persona' => $datosTramite['tipo_persona'] ?? 'Física'
+                        ]
+                    ])
                 </div>
 
                 <!-- Constitución - Solo para Persona Moral -->
@@ -160,7 +207,7 @@
 
                 <!-- Documentos - Para Persona Física en paso 3, para Moral en paso 6 -->
                 <div x-show="(isPersonaFisica === true && currentStep === 3) || (isPersonaFisica === false && currentStep === 6)" x-cloak>
-                    <x-formularios.seccion-documentos :tipoPersona="$datosTramite['tipo_persona']" />
+                    @include('components.formularios.seccion-documentos')
                 </div>
 
                 <!-- Accionistas - Solo para Persona Moral -->
@@ -183,23 +230,16 @@
                         <i class="fas fa-arrow-left mr-1"></i> Anterior
                     </button>
                     <button type="button" 
-                            x-show="currentStep < totalSteps && currentStep !== 2"
+                            x-show="currentStep < totalSteps"
                             x-cloak
                             @click="currentStep++"
                             class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-red-800 text-white text-sm sm:text-base rounded-lg hover:bg-red-900 transition-all duration-300 transform-gpu hover:-translate-y-0.5">
                         Siguiente <i class="fas fa-arrow-right ml-1"></i>
                     </button>
-                    <!-- Botón especial para el paso de domicilio -->
                     <button type="button" 
-                            x-show="currentStep === 2"
-                            x-cloak
-                            @click="$dispatch('guardar-domicilio')"
-                            class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-red-800 text-white text-sm sm:text-base rounded-lg hover:bg-red-900 transition-all duration-300 transform-gpu hover:-translate-y-0.5">
-                        Guardar y Continuar <i class="fas fa-arrow-right ml-1"></i>
-                    </button>
-                    <button type="submit" 
                             x-show="currentStep === totalSteps"
                             x-cloak
+                            @click="finalizarTramite()"
                             class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-red-800 text-white text-sm sm:text-base rounded-lg hover:bg-red-900 transition-all duration-300 transform-gpu hover:-translate-y-0.5">
                         Finalizar <i class="fas fa-check ml-1"></i>
                     </button>
@@ -361,58 +401,28 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('formData', () => ({
-            currentStep: 1,
-            totalSteps: {{ $datosTramite['tipo_persona'] === 'Física' ? 3 : 6 }},
-            tipoPersona: '{{ $datosTramite['tipo_persona'] }}',
-            isPersonaFisica: {{ $datosTramite['tipo_persona'] === 'Física' ? 'true' : 'false' }},
-            rfc: '{{ $datosTramite['rfc'] ?? '' }}',
-            curp: '',
-            razonSocial: '',
-            nombreVialidad: '',
-            numeroExterior: '',
-            numeroInterior: '',
-            cp: '',
-            colonia: '',
-            estado: '',
-            municipio: '',
-            steps: {{ $datosTramite['tipo_persona'] === 'Física' ? 
-                json_encode([
-                    ['number' => '01', 'label' => 'Datos Generales'],
-                    ['number' => '02', 'label' => 'Domicilio'],
-                    ['number' => '03', 'label' => 'Documentos']
-                ]) : 
-                json_encode([
-                    ['number' => '01', 'label' => 'Datos Generales'],
-                    ['number' => '02', 'label' => 'Domicilio'],
-                    ['number' => '03', 'label' => 'Constitución'],
-                    ['number' => '04', 'label' => 'Accionistas'],
-                    ['number' => '05', 'label' => 'Apoderado Legal'],
-                    ['number' => '06', 'label' => 'Documentos']
-                ]) 
-            }},
-            formData: {},
-            
-            nextStep() {
-                if (this.currentStep < this.totalSteps) {
-                    this.currentStep++
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            },
-            
-            prevStep() {
-                if (this.currentStep > 1) {
-                    this.currentStep--
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            },
-            
-            submitForm() {
-                console.log('Formulario enviado', this.formData)
+    function finalizarTramite() {
+        // Enviar finalización del trámite
+        fetch('/tramites-solicitante/finalizar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             }
-        }))
-    })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/tramites-solicitante';
+            } else {
+                alert('Error al finalizar el trámite: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al finalizar el trámite');
+        });
+    }
 </script>
 @endpush
 @endsection

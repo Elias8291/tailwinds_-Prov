@@ -17,6 +17,8 @@ class Solicitante extends Model
         'curp',
         'rfc',
         'objeto_social',
+        'nombre_completo',
+        'razon_social',
     ];
 
     protected $casts = [
@@ -41,5 +43,14 @@ class Solicitante extends Model
     public function proveedor()
     {
         return $this->hasOne(Proveedor::class);
+    }
+
+    // Accesor para obtener el nombre o razón social según el tipo de persona
+    public function getNombreCompletoAttribute($value)
+    {
+        if ($this->tipo_persona === 'Moral') {
+            return $this->razon_social;
+        }
+        return $value;
     }
 } 

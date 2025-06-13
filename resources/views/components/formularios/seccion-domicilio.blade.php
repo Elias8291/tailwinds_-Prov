@@ -1,17 +1,17 @@
-@props(['title' => 'Domicilio', 'datosDomicilio' => []])
+@props(['title' => 'Domicilio', 'datosDomicilio' => [], 'datosSAT' => null, 'datosSolicitante' => []])
 
-<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" 
-    x-data="{ 
-        cp: '{{ $datosDomicilio['codigo_postal'] ?? '' }}',
-        estado: '{{ $datosDomicilio['estado'] ?? '' }}',
-        municipio: '{{ $datosDomicilio['municipio'] ?? '' }}',
-        colonia: '{{ $datosDomicilio['colonia'] ?? '' }}',
-        nombreVialidad: '{{ $datosDomicilio['calle'] ?? '' }}',
-        numeroExterior: '{{ $datosDomicilio['numero_exterior'] ?? '' }}',
-        numeroInterior: '{{ $datosDomicilio['numero_interior'] ?? '' }}',
+<script>
+function domicilioData() {
+    return {
+        cp: @json($datosDomicilio['codigo_postal'] ?? ''),
+        estado: @json($datosDomicilio['estado'] ?? ''),
+        municipio: @json($datosDomicilio['municipio'] ?? ''),
+        colonia: @json($datosDomicilio['colonia'] ?? ''),
+        nombreVialidad: @json($datosDomicilio['calle'] ?? ''),
+        numeroExterior: @json($datosDomicilio['numero_exterior'] ?? ''),
+        numeroInterior: @json($datosDomicilio['numero_interior'] ?? ''),
         asentamientos: [],
         showSatModal: false,
-        satData: null,
         
         async loadLocationData() {
             if (this.cp.length === 5) {
@@ -31,26 +31,9 @@
         },
 
         init() {
-            // Cargar datos existentes si están disponibles
-            const satData = sessionStorage.getItem('satData');
-            if (satData) {
-                try {
-                    const data = JSON.parse(satData);
-                    this.satData = data;
-                    this.cp = data.cp || this.cp;
-                    this.estado = data.estado || this.estado;
-                    this.municipio = data.municipio || this.municipio;
-                    this.colonia = data.colonia || this.colonia;
-                    this.nombreVialidad = data.calle || this.nombreVialidad;
-                    this.numeroExterior = data.numeroExterior || this.numeroExterior;
-                    this.numeroInterior = data.numeroInterior || this.numeroInterior;
-                    
-                    if (this.cp) {
-                        this.loadLocationData();
-                    }
-                } catch (error) {
-                    console.error('Error parsing SAT data:', error);
-                }
+            // Cargar datos de ubicación si ya hay código postal
+            if (this.cp && this.cp.length === 5) {
+                this.loadLocationData();
             }
             
             // Watch for changes in código postal
@@ -74,7 +57,7 @@
             formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
             
             try {
-                const response = await fetch('{{ route("tramites.guardar-domicilio-formulario") }}', {
+                const response = await fetch(@json(route("tramites.guardar-domicilio-formulario")), {
                     method: 'POST',
                     body: formData
                 });
@@ -99,7 +82,12 @@
                 alert('Error al guardar los datos');
             }
         }
-    }"
+    }
+}
+</script>
+
+<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" 
+    x-data="domicilioData()"
     @guardar-domicilio.window="guardarDomicilio()">
     <!-- Encabezado con icono -->
     <div class="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
@@ -114,8 +102,8 @@
         </div>
 
         <!-- Botón para ver datos del SAT -->
-        <button x-show="satData" 
-                @click="showSatModal = true"
+        @if($datosSAT)
+        <button @click="showSatModal = true"
                 class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold text-[#9d2449] bg-[#9d2449]/5 hover:bg-[#9d2449]/10 transition-all duration-300 gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -123,7 +111,53 @@
             </svg>
             Ver Datos SAT
         </button>
+        @endif
     </div>
+
+    <!-- Información del Solicitante -->
+    @if(!empty($datosSolicitante))
+    <div class="mb-8 bg-gradient-to-r from-[#9d2449]/5 to-[#7a1d37]/5 rounded-lg border border-[#9d2449]/10 p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/80 rounded-lg p-2">
+                    <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500">Tipo de Persona</span>
+                    <p class="text-sm font-semibold text-gray-800">{{ $datosSolicitante['tipo_persona'] ?? 'No especificado' }}</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <div class="bg-white/80 rounded-lg p-2">
+                    <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500">RFC</span>
+                    <p class="text-sm font-semibold text-gray-800 font-mono">{{ $datosSolicitante['rfc'] ?? 'No especificado' }}</p>
+                </div>
+            </div>
+
+            @if(!empty($datosSolicitante['curp']) && $datosSolicitante['tipo_persona'] === 'Física')
+            <div class="flex items-center gap-3">
+                <div class="bg-white/80 rounded-lg p-2">
+                    <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500">CURP</span>
+                    <p class="text-sm font-semibold text-gray-800 font-mono">{{ $datosSolicitante['curp'] }}</p>
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+    @endif
 
     <form class="space-y-8" @submit.prevent="guardarDomicilio" x-ref="domicilioForm">
         <input type="hidden" name="action" value="next">
@@ -319,6 +353,7 @@
     </form>
 
     <!-- Modal para mostrar datos del SAT -->
+    @if($datosSAT)
     <div x-show="showSatModal" 
          x-cloak
          class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
@@ -356,21 +391,24 @@
                                 </div>
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-xl font-bold text-gray-900 mb-2" x-text="satData?.tipoPersona === 'Moral' ? 
-                                    (satData?.razonSocial || 'Razón Social No Disponible') : 
-                                    (satData?.nombreCompleto || 'Nombre No Disponible')">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">
+                                    @if(isset($datosSAT['tipoPersona']) && $datosSAT['tipoPersona'] === 'Moral')
+                                        {{ $datosSAT['razonSocial'] ?? 'Razón Social No Disponible' }}
+                                    @else
+                                        {{ $datosSAT['nombreCompleto'] ?? 'Nombre No Disponible' }}
+                                    @endif
                                 </h3>
                                 <div class="flex flex-wrap gap-2">
                                     <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-[#B4325E]/10 text-[#B4325E]">
-                                        RFC: <span x-text="satData?.rfc || 'No disponible'"></span>
+                                        RFC: {{ $datosSAT['rfc'] ?? 'No disponible' }}
                                     </span>
-                                    <template x-if="satData?.curp">
+                                    @if(isset($datosSAT['curp']) && $datosSAT['curp'])
                                         <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-[#B4325E]/10 text-[#B4325E]">
-                                            CURP: <span x-text="satData?.curp"></span>
+                                            CURP: {{ $datosSAT['curp'] }}
                                         </span>
-                                    </template>
+                                    @endif
                                     <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-[#B4325E]/10 text-[#B4325E]">
-                                        Persona <span x-text="satData?.tipoPersona || 'No especificada'"></span>
+                                        Persona {{ $datosSAT['tipoPersona'] ?? 'No especificada' }}
                                     </span>
                                 </div>
                             </div>
@@ -378,29 +416,31 @@
                     </div>
 
                     <!-- Secciones dinámicas -->
-                    <template x-if="satData?.sections">
-                        <template x-for="section in satData.sections" :key="section.title">
+                    @if(isset($datosSAT['sections']) && is_array($datosSAT['sections']) && count($datosSAT['sections']) > 0)
+                        @foreach($datosSAT['sections'] as $section)
                             <div class="bg-white rounded-xl shadow-sm border border-gray-100">
                                 <div class="px-6 py-4 border-b border-gray-100">
-                                    <h4 class="text-lg font-semibold text-gray-800" x-text="section.title || 'Información Adicional'"></h4>
+                                    <h4 class="text-lg font-semibold text-gray-800">{{ $section['title'] ?? 'Información Adicional' }}</h4>
                                 </div>
                                 <div class="divide-y divide-gray-100">
-                                    <template x-for="field in section.fields" :key="field.label">
-                                        <div class="px-6 py-4">
-                                            <div class="flex flex-col sm:flex-row sm:items-center">
-                                                <div class="sm:w-1/3">
-                                                    <span class="text-sm font-medium text-gray-500" x-text="field.label"></span>
-                                                </div>
-                                                <div class="sm:w-2/3 mt-1 sm:mt-0">
-                                                    <span class="text-sm text-gray-900" x-text="field.value"></span>
+                                    @if(isset($section['fields']) && is_array($section['fields']))
+                                        @foreach($section['fields'] as $field)
+                                            <div class="px-6 py-4">
+                                                <div class="flex flex-col sm:flex-row sm:items-center">
+                                                    <div class="sm:w-1/3">
+                                                        <span class="text-sm font-medium text-gray-500">{{ $field['label'] ?? '' }}</span>
+                                                    </div>
+                                                    <div class="sm:w-2/3 mt-1 sm:mt-0">
+                                                        <span class="text-sm text-gray-900">{{ $field['value'] ?? '' }}</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </template>
+                                        @endforeach
+                                    @endif
                                 </div>
                             </div>
-                        </template>
-                    </template>
+                        @endforeach
+                    @endif
 
                     <!-- Información de dirección -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
@@ -409,27 +449,27 @@
                         </div>
                         <div class="p-6">
                             <div class="space-y-2">
-                                <template x-if="satData?.nombreVialidad">
+                                @if(isset($datosSAT['nombreVialidad']) && $datosSAT['nombreVialidad'])
                                     <p class="text-sm text-gray-900">
-                                        <span x-text="satData.nombreVialidad"></span>
-                                        <template x-if="satData?.numeroExterior">
-                                            <span x-text="' #' + satData.numeroExterior"></span>
-                                        </template>
-                                        <template x-if="satData?.numeroInterior">
-                                            <span x-text="' Int. ' + satData.numeroInterior"></span>
-                                        </template>
+                                        {{ $datosSAT['nombreVialidad'] }}
+                                        @if(isset($datosSAT['numeroExterior']) && $datosSAT['numeroExterior'])
+                                            #{{ $datosSAT['numeroExterior'] }}
+                                        @endif
+                                        @if(isset($datosSAT['numeroInterior']) && $datosSAT['numeroInterior'])
+                                            Int. {{ $datosSAT['numeroInterior'] }}
+                                        @endif
                                     </p>
-                                </template>
-                                <template x-if="satData?.colonia">
+                                @endif
+                                @if(isset($datosSAT['colonia']) && $datosSAT['colonia'])
                                     <p class="text-sm text-gray-600">
-                                        Col. <span x-text="satData.colonia"></span>
+                                        Col. {{ $datosSAT['colonia'] }}
                                     </p>
-                                </template>
-                                <template x-if="satData?.cp">
+                                @endif
+                                @if(isset($datosSAT['cp']) && $datosSAT['cp'])
                                     <p class="text-sm text-gray-600">
-                                        CP <span x-text="satData.cp"></span>
+                                        CP {{ $datosSAT['cp'] }}
                                     </p>
-                                </template>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -446,6 +486,7 @@
             </div>
         </div>
     </div>
+    @endif
 </div>
 
 <style>

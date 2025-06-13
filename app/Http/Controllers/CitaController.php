@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cita;
+use App\Models\Solicitante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,7 +20,13 @@ class CitaController extends Controller
 
     public function create()
     {
-        return view('citas.create');
+        // Obtener el usuario autenticado
+        $user = Auth::user();
+        
+        // Buscar el solicitante asociado al usuario
+        $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+        
+        return view('citas.create', compact('solicitante'));
     }
 
     public function store(Request $request)
@@ -30,8 +37,20 @@ class CitaController extends Controller
             'notas' => 'nullable|string',
         ]);
 
+        // Obtener el usuario autenticado
+        $user = Auth::user();
+        
+        // Buscar el solicitante asociado al usuario
+        $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+        
+        if (!$solicitante) {
+            return redirect()->back()
+                ->with('error', 'No se encontró información del solicitante. Por favor, complete su registro primero.');
+        }
+
         $cita = Cita::create([
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
+            'solicitante_id' => $solicitante->id,
             'fecha_hora' => $request->fecha_hora,
             'motivo' => $request->motivo,
             'notas' => $request->notas,

@@ -16,6 +16,52 @@ use Illuminate\Support\Facades\DB;
 class DatosGeneralesController extends Controller
 {
     /**
+     * Muestra el formulario de datos generales con datos del usuario autenticado
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function index(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            
+            // Buscar el solicitante asociado al usuario
+            $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+            
+            // Preparar datos del trámite con información del usuario autenticado
+            $datosTramite = [
+                'tramite_id' => null,
+                'tipo_tramite' => $request->get('tipo_tramite', 'inscripcion'),
+                'tipo_persona' => $solicitante->tipo_persona ?? 'Física',
+                'rfc' => $solicitante->rfc ?? '',
+                'curp' => $solicitante->curp ?? '',
+                'paso_inicial' => 1,
+                'datos_existentes' => []
+            ];
+
+            // Si hay un tramite_id en el request, cargar datos del trámite
+            if ($request->tramite_id) {
+                $tramite = Tramite::find($request->tramite_id);
+                if ($tramite && $tramite->solicitante_id == $solicitante->id) {
+                    $datosCompletos = $this->obtenerDatos($tramite);
+                    $datosTramite = array_merge($datosTramite, $datosCompletos);
+                }
+            }
+
+            return view('tramites.datos-generales', compact('datosTramite'));
+
+        } catch (\Exception $e) {
+            Log::error('Error al mostrar formulario de datos generales:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->with('error', 'Error al cargar el formulario: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Guarda los datos generales del trámite y sus relaciones
      *
      * @param Request $request La solicitud HTTP con los datos del formulario
@@ -173,14 +219,20 @@ class DatosGeneralesController extends Controller
         $detalleTramite = $tramite->detalleTramite;
         $contacto = $detalleTramite ? $detalleTramite->contacto : null;
 
+        // Obtener actividades seleccionadas
+        $actividadesSeleccionadas = $tramite->actividades()->pluck('actividad_id')->toArray();
+
         return [
+            'tramite_id' => $tramite->id,
             'rfc' => $solicitante->rfc ?? null,
             'tipo_persona' => $solicitante->tipo_persona ?? null,
             'curp' => $solicitante->curp ?? null,
             'razon_social' => $detalleTramite->razon_social ?? null,
+            'nombre_completo' => $detalleTramite->razon_social ?? null,
             'objeto_social' => $solicitante->objeto_social ?? null,
             'sector_id' => $tramite->sector_id ?? null,
-            'actividades' => $tramite->actividades()->pluck('id')->toArray(),
+            'actividades' => $actividadesSeleccionadas,
+            'actividades_seleccionadas' => json_encode($actividadesSeleccionadas),
             'contacto_nombre' => $contacto->nombre ?? '',
             'contacto_cargo' => $contacto->puesto ?? '',
             'contacto_correo' => $contacto->email ?? '',

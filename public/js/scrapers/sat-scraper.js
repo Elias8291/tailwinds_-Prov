@@ -55,7 +55,30 @@ class SATScraper {
                     numeroInterior: '',
                     tipoPersona: '',
                     curp: '',
-                    nombreCompleto: ''
+                    nombreCompleto: '',
+                    // Datos adicionales del SAT
+                    estado: '',
+                    municipio: '',
+                    localidad: '',
+                    tipoVialidad: '',
+                    entreCalles: '',
+                    telefono: '',
+                    fax: '',
+                    correoElectronico: '',
+                    sitioWeb: '',
+                    actividadEconomica: '',
+                    fechaInicioOperaciones: '',
+                    estatusContribuyente: '',
+                    fechaUltimoCambioSituacion: '',
+                    entidadFederativa: '',
+                    regimenCapital: '',
+                    numeroInteriorCompleto: '',
+                    numeroExteriorCompleto: '',
+                    referencia: '',
+                    tipoAsentamiento: '',
+                    claveMunicipio: '',
+                    claveEntidad: '',
+                    paisResidencia: ''
                 }
             };
 
@@ -120,6 +143,7 @@ class SATScraper {
     static assignSpecificValue(details, label, value) {
         const labelLower = label.toLowerCase();
         
+        // Datos básicos
         if (/correo|email/i.test(label)) details.email = value;
         if (/denominación|razón social/i.test(label)) details.razonSocial = value;
         if (labelLower === 'nombre') details.nombre = value;
@@ -127,19 +151,41 @@ class SATScraper {
         if (/apellido materno/i.test(label)) details.apellidoMaterno = value;
         if (/rfc/i.test(label)) details.rfc = value;
         if (/código postal|cp/i.test(label)) details.cp = value;
-        if (/colonia|asentamiento/i.test(label)) details.colonia = value;
+        if (/colonia|asentamiento/i.test(label) && !details.colonia) details.colonia = value;
         if (/nombre de la vialidad|calle|vialidad/i.test(label)) details.nombreVialidad = value;
         if (/número exterior|numero exterior|no exterior/i.test(label)) details.numeroExterior = value;
         if (/número interior|numero interior|no interior/i.test(label)) details.numeroInterior = value;
         if (/curp/i.test(label)) details.curp = value;
 
-        // Asegurarse de que los valores estén presentes
-        if (details.razonSocial) {
-            console.log('Razón Social encontrada:', details.razonSocial);
-        }
-        if (details.cp) {
-            console.log('Código Postal encontrado:', details.cp);
-        }
+        // Datos adicionales de dirección
+        if (/estado|entidad federativa/i.test(label)) details.estado = value;
+        if (/municipio/i.test(label) && !details.municipio) details.municipio = value;
+        if (/localidad/i.test(label)) details.localidad = value;
+        if (/tipo de vialidad/i.test(label)) details.tipoVialidad = value;
+        if (/entre calles/i.test(label)) details.entreCalles = value;
+        if (/tipo de asentamiento/i.test(label)) details.tipoAsentamiento = value;
+        if (/referencia/i.test(label)) details.referencia = value;
+
+        // Datos de contacto
+        if (/teléfono|telefono/i.test(label)) details.telefono = value;
+        if (/fax/i.test(label)) details.fax = value;
+        if (/correo electrónico/i.test(label)) details.correoElectronico = value;
+        if (/sitio web|página web/i.test(label)) details.sitioWeb = value;
+
+        // Datos fiscales y de actividad
+        if (/actividad económica|actividad economica|giro/i.test(label)) details.actividadEconomica = value;
+        if (/fecha de inicio de operaciones|inicio de operaciones/i.test(label)) details.fechaInicioOperaciones = value;
+        if (/estatus|situación del contribuyente/i.test(label)) details.estatusContribuyente = value;
+        if (/fecha del último cambio|ultimo cambio/i.test(label)) details.fechaUltimoCambioSituacion = value;
+        if (/régimen de capital/i.test(label)) details.regimenCapital = value;
+        if (/país de residencia/i.test(label)) details.paisResidencia = value;
+
+        // Códigos y claves
+        if (/clave del municipio/i.test(label)) details.claveMunicipio = value;
+        if (/clave de la entidad/i.test(label)) details.claveEntidad = value;
+
+        // Log para debugging
+        console.log(`Campo asignado: ${label} -> ${value}`);
     }
 
     static processFullName(details) {
@@ -168,82 +214,277 @@ class SATScraper {
         // Información principal
         content += `
             <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-                <div class="px-4 py-3 border-b border-gray-100">
-                    <h4 class="text-base font-semibold text-gray-800">
+                <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#9d2449] to-[#7a1d37]">
+                    <h4 class="text-base font-semibold text-white flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
                         Información Principal
                     </h4>
                 </div>
-                <div class="p-4 space-y-3">
+                <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     ${data.details.rfc ? `
-                        <div>
-                            <span class="text-xs font-medium text-gray-500">RFC</span>
-                            <p class="text-sm font-medium text-gray-900">${data.details.rfc}</p>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <span class="text-xs font-medium text-gray-500 uppercase">RFC</span>
+                            <p class="text-sm font-bold text-gray-900 font-mono">${data.details.rfc}</p>
                         </div>
                     ` : ''}
                     
                     ${data.details.tipoPersona ? `
-                        <div>
-                            <span class="text-xs font-medium text-gray-500">Tipo de Persona</span>
-                            <p class="text-sm font-medium text-gray-900">${data.details.tipoPersona}</p>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <span class="text-xs font-medium text-gray-500 uppercase">Tipo de Persona</span>
+                            <p class="text-sm font-bold text-gray-900">${data.details.tipoPersona}</p>
                         </div>
                     ` : ''}
                     
                     ${data.details.nombreCompleto || data.details.razonSocial ? `
-                        <div>
-                            <span class="text-xs font-medium text-gray-500">${data.details.tipoPersona === 'Física' ? 'Nombre Completo' : 'Razón Social'}</span>
-                            <p class="text-sm font-medium text-gray-900">${data.details.nombreCompleto || data.details.razonSocial}</p>
+                        <div class="bg-gray-50 p-3 rounded-lg md:col-span-2">
+                            <span class="text-xs font-medium text-gray-500 uppercase">${data.details.tipoPersona === 'Física' ? 'Nombre Completo' : 'Razón Social'}</span>
+                            <p class="text-sm font-bold text-gray-900">${data.details.nombreCompleto || data.details.razonSocial}</p>
                         </div>
                     ` : ''}
                     
                     ${data.details.curp && data.details.tipoPersona === 'Física' ? `
-                        <div>
-                            <span class="text-xs font-medium text-gray-500">CURP</span>
-                            <p class="text-sm font-medium text-gray-900">${data.details.curp}</p>
+                        <div class="bg-gray-50 p-3 rounded-lg md:col-span-2">
+                            <span class="text-xs font-medium text-gray-500 uppercase">CURP</span>
+                            <p class="text-sm font-bold text-gray-900 font-mono">${data.details.curp}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${data.details.estatusContribuyente ? `
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <span class="text-xs font-medium text-gray-500 uppercase">Estatus</span>
+                            <p class="text-sm font-bold text-gray-900">${data.details.estatusContribuyente}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${data.details.fechaInicioOperaciones ? `
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <span class="text-xs font-medium text-gray-500 uppercase">Inicio de Operaciones</span>
+                            <p class="text-sm font-bold text-gray-900">${data.details.fechaInicioOperaciones}</p>
                         </div>
                     ` : ''}
                 </div>
             </div>`;
 
         // Información de dirección
-        if (data.details.nombreVialidad || data.details.colonia || data.details.cp) {
+        const hasAddressData = data.details.nombreVialidad || data.details.colonia || data.details.cp || 
+                              data.details.estado || data.details.municipio || data.details.localidad;
+        
+        if (hasAddressData) {
             content += `
                 <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div class="px-4 py-3 border-b border-gray-100">
-                        <h4 class="text-base font-semibold text-gray-800">
-                            Dirección
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#9d2449] to-[#7a1d37]">
+                        <h4 class="text-base font-semibold text-white flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Domicilio Fiscal
                         </h4>
                     </div>
-                    <div class="p-4 space-y-3">
-                        ${data.details.nombreVialidad ? `
-                            <div>
-                                <span class="text-xs font-medium text-gray-500">Calle</span>
-                                <p class="text-sm font-medium text-gray-900">
-                                    ${data.details.nombreVialidad}
-                                    ${data.details.numeroExterior ? `#${data.details.numeroExterior}` : ''}
-                                    ${data.details.numeroInterior ? `Int. ${data.details.numeroInterior}` : ''}
+                    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${data.details.tipoVialidad || data.details.nombreVialidad ? `
+                            <div class="bg-gray-50 p-3 rounded-lg md:col-span-2">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Dirección</span>
+                                <p class="text-sm font-bold text-gray-900">
+                                    ${data.details.tipoVialidad ? data.details.tipoVialidad + ' ' : ''}${data.details.nombreVialidad || ''}
+                                    ${data.details.numeroExterior ? ' #' + data.details.numeroExterior : ''}
+                                    ${data.details.numeroInterior ? ' Int. ' + data.details.numeroInterior : ''}
                                 </p>
                             </div>
                         ` : ''}
                         
                         ${data.details.colonia ? `
-                            <div>
-                                <span class="text-xs font-medium text-gray-500">Colonia</span>
-                                <p class="text-sm font-medium text-gray-900">${data.details.colonia}</p>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Colonia</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.colonia}</p>
                             </div>
                         ` : ''}
                         
                         ${data.details.cp ? `
-                            <div>
-                                <span class="text-xs font-medium text-gray-500">Código Postal</span>
-                                <p class="text-sm font-medium text-gray-900">${data.details.cp}</p>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Código Postal</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.cp}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.localidad ? `
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Localidad</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.localidad}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.municipio ? `
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Municipio</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.municipio}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.estado ? `
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Estado</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.estado}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.paisResidencia ? `
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-xs font-medium text-gray-500 uppercase">País</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.paisResidencia}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.entreCalles ? `
+                            <div class="bg-gray-50 p-3 rounded-lg md:col-span-2">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Entre Calles</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.entreCalles}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.referencia ? `
+                            <div class="bg-gray-50 p-3 rounded-lg md:col-span-2">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Referencia</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.referencia}</p>
                             </div>
                         ` : ''}
                     </div>
                 </div>`;
         }
 
+        // Información de contacto
+        const hasContactData = data.details.email || data.details.correoElectronico || 
+                              data.details.telefono || data.details.fax || data.details.sitioWeb;
+        
+        if (hasContactData) {
+            content += `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100">
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#9d2449] to-[#7a1d37]">
+                        <h4 class="text-base font-semibold text-white flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            Información de Contacto
+                        </h4>
+                    </div>
+                    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${data.details.email || data.details.correoElectronico ? `
+                            <div class="bg-gray-50 p-3 rounded-lg md:col-span-2">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Correo Electrónico</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.email || data.details.correoElectronico}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.telefono ? `
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Teléfono</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.telefono}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.fax ? `
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Fax</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.fax}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.sitioWeb ? `
+                            <div class="bg-gray-50 p-3 rounded-lg md:col-span-2">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Sitio Web</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.sitioWeb}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>`;
+        }
+
+        // Información fiscal y actividad económica
+        const hasFiscalData = data.details.actividadEconomica || data.details.regimenCapital || 
+                             data.details.fechaUltimoCambioSituacion;
+        
+        if (hasFiscalData) {
+            content += `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100">
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#9d2449] to-[#7a1d37]">
+                        <h4 class="text-base font-semibold text-white flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Información Fiscal
+                        </h4>
+                    </div>
+                    <div class="p-4 grid grid-cols-1 gap-4">
+                        ${data.details.actividadEconomica ? `
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Actividad Económica</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.actividadEconomica}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.regimenCapital ? `
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Régimen de Capital</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.regimenCapital}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.details.fechaUltimoCambioSituacion ? `
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-xs font-medium text-gray-500 uppercase">Fecha Último Cambio</span>
+                                <p class="text-sm font-bold text-gray-900">${data.details.fechaUltimoCambioSituacion}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>`;
+        }
+
+        // Mostrar todas las secciones disponibles si existen
+        if (data.sections && data.sections.length > 0) {
+            content += `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100">
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#9d2449] to-[#7a1d37]">
+                        <h4 class="text-base font-semibold text-white flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                            </svg>
+                            Información Adicional del SAT
+                        </h4>
+                    </div>
+                    <div class="p-4 space-y-4">`;
+            
+            data.sections.forEach(section => {
+                if (section.fields && section.fields.length > 0) {
+                    content += `
+                        <div class="border border-gray-200 rounded-lg p-3">
+                            <h5 class="text-sm font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-2">${section.title}</h5>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
+                    
+                    section.fields.forEach(field => {
+                        if (field.value && field.value.trim()) {
+                            content += `
+                                <div class="bg-gray-50 p-2 rounded">
+                                    <span class="text-xs font-medium text-gray-500 uppercase block">${field.label}</span>
+                                    <p class="text-sm text-gray-900 mt-1">${field.value}</p>
+                                </div>`;
+                        }
+                    });
+                    
+                    content += `
+                            </div>
+                        </div>`;
+                }
+            });
+            
+            content += `
+                    </div>
+                </div>`;
+        }
+
         content += '</div>';
-        console.log('Contenido generado correctamente');
+        console.log('Contenido completo generado correctamente');
 
         const verBtn = document.getElementById('verSatModalBtn');
         if (verBtn) verBtn.classList.add('hidden');

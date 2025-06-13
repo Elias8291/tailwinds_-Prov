@@ -16,6 +16,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\DiaInhabilController;
 use App\Http\Controllers\TramiteSolicitanteController;
+use App\Http\Controllers\RevisionController;
+use App\Http\Controllers\Formularios\DomicilioController;
 
 // Ruta principal - solo para usuarios no autenticados
 Route::middleware(['web', 'guest'])->group(function () {
@@ -98,18 +100,22 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/citas/{cita}/estado', [CitaController::class, 'cambiarEstado'])->name('citas.estado.update');
 
     Route::resource('dias-inhabiles', DiaInhabilController::class)->only(['create', 'store', 'destroy']);
+
+    // Rutas de Revisión de Trámites
+    Route::get('/revision', [RevisionController::class, 'index'])->name('revision.index');
+    Route::get('/revision/{tramite}', [RevisionController::class, 'show'])->name('revision.show');
 });
 
 // Rutas para trámites
 Route::prefix('tramites')->group(function () {
     Route::get('/', [TramiteController::class, 'index'])->name('tramites.index');
     Route::post('/iniciar', [TramiteController::class, 'iniciarTramite'])->name('tramites.iniciar');
-    Route::get('/datos-generales', [TramiteController::class, 'mostrarDatosGenerales'])->name('tramites.datos-generales');
+    Route::get('/datos-generales', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'index'])->name('tramites.datos-generales');
     Route::post('/guardar-datos-generales', [TramiteController::class, 'guardarDatosGenerales'])->name('tramites.guardar-datos-generales');
     
     Route::get('/domicilio', [TramiteController::class, 'mostrarDomicilio'])->name('tramites.domicilio');
     Route::post('/guardar-domicilio', [TramiteController::class, 'guardarDomicilio'])->name('tramites.guardar-domicilio');
-    Route::post('/guardar-domicilio-formulario', [TramiteController::class, 'guardarDomicilioFormulario'])->name('tramites.guardar-domicilio-formulario');
+    Route::post('/guardar-domicilio-formulario', [DomicilioController::class, 'guardarFormulario'])->name('tramites.guardar-domicilio-formulario');
     
     // Rutas específicas para cada tipo de trámite
     Route::get('/{tipo_tramite}/{tramite}/create', [TramiteController::class, 'create'])
@@ -122,7 +128,26 @@ Route::prefix('tramites')->group(function () {
 // Rutas para el módulo de Trámite Solicitante
 Route::middleware(['auth'])->prefix('tramites-solicitante')->group(function () {
     Route::get('/', [TramiteSolicitanteController::class, 'index'])->name('tramites.solicitante.index');
+    
+    // Rutas POST para iniciar trámites
     Route::post('/iniciar-inscripcion', [TramiteSolicitanteController::class, 'iniciarInscripcion'])->name('tramites.solicitante.iniciar-inscripcion');
     Route::post('/iniciar-renovacion', [TramiteSolicitanteController::class, 'iniciarRenovacion'])->name('tramites.solicitante.iniciar-renovacion');
     Route::post('/iniciar-actualizacion', [TramiteSolicitanteController::class, 'iniciarActualizacion'])->name('tramites.solicitante.iniciar-actualizacion');
+    
+    // Rutas GET para redireccionar si alguien accede directamente
+    Route::get('/iniciar-inscripcion', function() {
+        return redirect()->route('tramites.solicitante.index');
+    });
+    Route::get('/iniciar-renovacion', function() {
+        return redirect()->route('tramites.solicitante.index');
+    });
+    Route::get('/iniciar-actualizacion', function() {
+        return redirect()->route('tramites.solicitante.index');
+    });
+    
+    // Nuevas rutas para obtener datos dinámicamente
+    Route::get('/datos-tramite', [TramiteSolicitanteController::class, 'obtenerDatosTramite'])->name('tramites.solicitante.datos-tramite');
+    Route::get('/documentos', [TramiteSolicitanteController::class, 'obtenerDocumentos'])->name('tramites.solicitante.documentos');
+    Route::post('/upload-documento', [TramiteSolicitanteController::class, 'subirDocumento'])->name('tramites.solicitante.upload-documento');
+    Route::post('/finalizar', [TramiteSolicitanteController::class, 'finalizarTramite'])->name('tramites.solicitante.finalizar');
 });

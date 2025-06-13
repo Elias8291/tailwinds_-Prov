@@ -5,7 +5,7 @@
 @section('content')
 <!-- Modal para mostrar datos del SAT (Fuera del formulario principal) -->
 <div id="satDataModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
         <!-- Modal header -->
         <div class="px-5 py-3 bg-gradient-to-br from-primary to-primary-dark border-b border-primary/10">
             <div class="flex items-center justify-between">
@@ -25,7 +25,7 @@
             </div>
         </div>
         <!-- Modal body -->
-        <div class="p-5 overflow-y-auto" style="max-height: calc(80vh - 120px);">
+        <div class="p-5 overflow-y-auto" style="max-height: calc(90vh - 120px);">
             <div id="satDataContent" class="space-y-4">
                 <!-- Los datos del SAT se insertarán aquí -->
             </div>

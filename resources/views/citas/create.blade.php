@@ -26,6 +26,19 @@
             <form action="{{ route('citas.store') }}" method="POST" class="p-6 space-y-6">
                 @csrf
 
+                <!-- Datos Generales -->
+                @include('components.formularios.seccion-datos-generales', [
+                    'datosTramite' => [],
+                    'datosSolicitante' => isset($solicitante) ? [
+                        'rfc' => $solicitante->rfc,
+                        'curp' => $solicitante->curp,
+                        'tipo_persona' => $solicitante->tipo_persona,
+                        'nombre_completo' => $solicitante->nombre_completo,
+                        'razon_social' => $solicitante->razon_social,
+                        'objeto_social' => $solicitante->objeto_social
+                    ] : []
+                ])
+
                 <!-- Fecha y Hora -->
                 <div>
                     <label for="fecha_hora" class="block text-sm font-medium text-gray-700 mb-1">
