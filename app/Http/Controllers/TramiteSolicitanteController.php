@@ -137,12 +137,23 @@ class TramiteSolicitanteController extends Controller
 
     private function continuarTramite($tramite)
     {
+        // Obtener el solicitante asociado al trámite
+        $solicitante = $tramite->solicitante;
+        
+        if (!$solicitante) {
+            return back()->with('error', 'No se encontró información del solicitante');
+        }
+
         // Preparar datos del trámite existente para continuar
         $datosTramite = [
             'tramite_id' => $tramite->id,
             'tipo_tramite' => $tramite->tipo_tramite,
-            'tipo_persona' => $tramite->tipo_persona ?? 'Física',
-            'rfc' => $tramite->rfc ?? '',
+            'tipo_persona' => $solicitante->tipo_persona,
+            'rfc' => $solicitante->rfc,
+            'curp' => $solicitante->curp,
+            'nombre_completo' => $solicitante->nombre_completo,
+            'razon_social' => $solicitante->razon_social,
+            'objeto_social' => $solicitante->objeto_social,
             'paso_inicial' => $tramite->paso_actual ?? 1,
             'datos_existentes' => [
                 'direccion' => $tramite->direccion ?? null,
@@ -150,22 +161,33 @@ class TramiteSolicitanteController extends Controller
             ]
         ];
         
-        return view('tramites.create', compact('datosTramite'));
+        return view('tramites.create', compact('datosTramite', 'solicitante'));
     }
 
     private function crearNuevoTramite($tipoTramite, $user)
     {
-        // Datos básicos para la vista - los datos reales se cargarán via AJAX
+        // Buscar el solicitante asociado al usuario
+        $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+        
+        if (!$solicitante) {
+            return back()->with('error', 'No se encontró información del solicitante');
+        }
+
+        // Datos básicos para la vista con la información del solicitante
         $datosTramite = [
             'tramite_id' => null,
             'tipo_tramite' => $tipoTramite,
-            'tipo_persona' => 'Física',
-            'rfc' => '',
+            'tipo_persona' => $solicitante->tipo_persona,
+            'rfc' => $solicitante->rfc,
+            'curp' => $solicitante->curp,
+            'nombre_completo' => $solicitante->nombre_completo,
+            'razon_social' => $solicitante->razon_social,
+            'objeto_social' => $solicitante->objeto_social,
             'paso_inicial' => 1,
             'datos_existentes' => []
         ];
         
-        return view('tramites.create', compact('datosTramite'));
+        return view('tramites.create', compact('datosTramite', 'solicitante'));
     }
 
     /**
@@ -194,9 +216,12 @@ class TramiteSolicitanteController extends Controller
 
             $datosTramite = [
                 'paso_inicial' => 1,
-                'tipo_persona' => $solicitante->tipo_persona ?? 'Física',
-                'rfc' => $solicitante->rfc ?? '',
-                'curp' => $solicitante->curp ?? '',
+                'tipo_persona' => $solicitante->tipo_persona,
+                'rfc' => $solicitante->rfc,
+                'curp' => $solicitante->curp,
+                'nombre_completo' => $solicitante->nombre_completo,
+                'razon_social' => $solicitante->razon_social,
+                'objeto_social' => $solicitante->objeto_social,
                 'tramite_id' => null,
                 'tipo_tramite' => 'inscripcion'
             ];
@@ -207,6 +232,9 @@ class TramiteSolicitanteController extends Controller
                     'tipo_persona' => $solicitante->tipo_persona,
                     'rfc' => $solicitante->rfc,
                     'curp' => $solicitante->curp,
+                    'nombre_completo' => $solicitante->nombre_completo,
+                    'razon_social' => $solicitante->razon_social,
+                    'objeto_social' => $solicitante->objeto_social,
                     'tramite_id' => $tramite->id,
                     'tipo_tramite' => strtolower($tramite->tipo_tramite)
                 ];

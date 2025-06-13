@@ -115,11 +115,14 @@
         <!-- Mobile Progress Indicator -->
         <div class="md:hidden mb-4 text-center">
             <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-800 text-white shadow-lg">
-                <span class="text-xl font-bold" x-text="currentStep">1</span>
+                <span class="text-xl font-bold" x-text="currentStep - 1">0</span>
                 <span class="text-xs">/</span>
-                <span class="text-sm" x-text="totalSteps"></span>
+                <span class="text-sm" x-text="totalSteps - 1"></span>
             </div>
             <div class="mt-1 text-xs text-gray-600 font-medium" x-text="steps[currentStep - 1]?.label || ''"></div>
+            <div class="mt-2 text-xs text-gray-500">
+                <span x-text="Math.round(((currentStep - 1) / (totalSteps - 1)) * 100) + '%'">0%</span> Completado
+            </div>
         </div>
 
         <!-- Desktop Progress Container -->
@@ -127,13 +130,13 @@
             <div class="max-w-3xl mx-auto mb-10 h-[100px] flex flex-col md:flex-row items-center gap-6">
                 <!-- Progress Info -->
                 <div class="flex flex-col items-center min-w-[80px]">
-                    <span class="text-2xl md:text-3xl font-bold text-red-800 h-[36px] flex items-center" x-text="Math.round((currentStep / totalSteps) * 100) + '%'">0%</span>
+                    <span class="text-2xl md:text-3xl font-bold text-red-800 h-[36px] flex items-center" x-text="Math.round(((currentStep - 1) / (totalSteps - 1)) * 100) + '%'">0%</span>
                     <span class="text-xs uppercase text-gray-500 tracking-wide">Completado</span>
                 </div>
                 <!-- Progress Bar -->
                 <div class="w-full h-2 relative">
                     <div class="h-2 bg-gray-200 rounded-full absolute inset-0">
-                        <div class="h-full bg-red-800 rounded-full transition-all duration-500 transform-gpu" x-bind:style="'width: ' + (currentStep / totalSteps * 100) + '%'"></div>
+                        <div class="h-full bg-red-800 rounded-full transition-all duration-500 transform-gpu" x-bind:style="'width: ' + ((currentStep - 1) / (totalSteps - 1) * 100) + '%'"></div>
                     </div>
                 </div>
             </div>
@@ -141,7 +144,7 @@
             <!-- Progress Tracker (Steps) - Only visible on desktop -->
             <div class="relative max-w-3xl mx-auto mb-12 h-[80px]">
                 <div class="absolute top-4 left-10 right-10 h-0.5 bg-gray-200"></div>
-                <div class="absolute top-4 left-10 h-0.5 bg-red-800 transition-all duration-600 transform-gpu" x-bind:style="'width: ' + (currentStep / totalSteps * 100) + '%'"></div>
+                <div class="absolute top-4 left-10 h-0.5 bg-red-800 transition-all duration-600 transform-gpu" x-bind:style="'width: ' + ((currentStep - 1) / (totalSteps - 1) * 100) + '%'"></div>
                 <div class="flex justify-between">
                     <template x-for="(step, index) in steps" :key="index">
                         <div class="flex flex-col items-center relative z-10 w-24">

@@ -9,7 +9,8 @@ function datosGeneralesData() {
         tipoPersona: @json($datosSolicitante['tipo_persona'] ?? $datosTramite['tipo_persona'] ?? ''),
         rfc: @json($datosSolicitante['rfc'] ?? $datosTramite['rfc'] ?? ''),
         curp: @json($datosSolicitante['curp'] ?? $datosTramite['curp'] ?? ''),
-        razonSocial: @json($datosSolicitante['razon_social'] ?? $datosSolicitante['nombre_completo'] ?? $datosTramite['razon_social'] ?? $datosTramite['nombre_completo'] ?? ''),
+        nombreCompleto: @json($datosSolicitante['nombre_completo'] ?? $datosTramite['nombre_completo'] ?? ''),
+        razonSocial: @json($datosSolicitante['razon_social'] ?? $datosTramite['razon_social'] ?? ''),
         objetoSocial: @json($datosSolicitante['objeto_social'] ?? $datosTramite['objeto_social'] ?? ''),
         esEdicion: @json(isset($datosTramite['tramite_id']) && $datosTramite['tramite_id'] ? true : false),
         sectorId: @json($datosTramite['sector_id'] ?? ''),
@@ -22,6 +23,7 @@ function datosGeneralesData() {
                     tipo: this.tipoPersona,
                     rfc: this.rfc,
                     curp: this.curp,
+                    nombre: this.nombreCompleto,
                     razon: this.razonSocial,
                     objeto: this.objetoSocial,
                     sector: this.sectorId
@@ -69,51 +71,6 @@ function datosGeneralesData() {
         </div>
     </div>
 
-    <!-- Información del Solicitante -->
-    @if(!empty($datosSolicitante))
-    <div class="mb-8 bg-gradient-to-r from-[#9d2449]/5 to-[#7a1d37]/5 rounded-lg border border-[#9d2449]/10 p-4">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-white/80 rounded-lg p-2">
-                    <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                </div>
-                <div>
-                    <span class="text-xs font-medium text-gray-500">Tipo de Persona</span>
-                    <p class="text-sm font-semibold text-gray-800">{{ $datosSolicitante['tipo_persona'] ?? 'No especificado' }}</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-3">
-                <div class="bg-white/80 rounded-lg p-2">
-                    <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
-                    </svg>
-                </div>
-                <div>
-                    <span class="text-xs font-medium text-gray-500">RFC</span>
-                    <p class="text-sm font-semibold text-gray-800 font-mono">{{ $datosSolicitante['rfc'] ?? 'No especificado' }}</p>
-                </div>
-            </div>
-
-            @if(!empty($datosSolicitante['curp']) && $datosSolicitante['tipo_persona'] === 'Física')
-            <div class="flex items-center gap-3">
-                <div class="bg-white/80 rounded-lg p-2">
-                    <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-                <div>
-                    <span class="text-xs font-medium text-gray-500">CURP</span>
-                    <p class="text-sm font-semibold text-gray-800 font-mono">{{ $datosSolicitante['curp'] }}</p>
-                </div>
-            </div>
-            @endif
-        </div>
-    </div>
-    @endif
-
     <form action="{{ route('tramites.guardar-datos-generales') }}" method="POST" class="space-y-8">
         @csrf
         <input type="hidden" name="action" value="next">
@@ -126,125 +83,93 @@ function datosGeneralesData() {
         @if(isset($datosTramite['tipo_tramite']))
             <input type="hidden" name="tipo_tramite" value="{{ $datosTramite['tipo_tramite'] }}">
         @endif
-        
-        <!-- Información de datos cargados -->
-        <div x-show="esEdicion" class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-                </div>
-                <div class="ml-3">
-                    <h3 class="text-sm font-medium text-blue-800">Datos existentes cargados</h3>
-                    <p class="text-sm text-blue-700 mt-1">Los campos RFC, tipo de persona y CURP no pueden modificarse una vez establecidos.</p>
-                </div>
-            </div>
-        </div>
 
         <!-- Información Principal -->
         <div class="space-y-6">
             <!-- Tipo de Proveedor y RFC -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Tipo de Proveedor -->
+                <!-- Tipo de Proveedor (Solo lectura) -->
                 <div class="form-group">
                     <label for="tipo_persona" class="block text-sm font-medium text-gray-700 mb-2">
                         Tipo de Proveedor
                         <span class="text-[#9d2449]">*</span>
                     </label>
-                    <div class="relative group">
-                        <select id="tipo_persona" name="tipo_persona" 
-                                class="block w-full px-4 py-2.5 text-gray-700 border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('tipo_persona') border-red-500 @enderror"
-                                :class="esEdicion && tipoPersona ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'"
-                                x-model="tipoPersona"
-                                :disabled="esEdicion && tipoPersona"
-                                required>
-                            <option value="">Seleccione un tipo</option>
-                            <option value="Física">Física</option>
-                            <option value="Moral">Moral</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <i class="fas fa-chevron-down text-[#9d2449]/50"></i>
-                        </div>
+                    <div class="relative">
+                        <input type="text" 
+                               name="tipo_persona"
+                               value="{{ $datosSolicitante['tipo_persona'] ?? '' }}" 
+                               class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                               readonly>
                     </div>
-                    <div x-show="esEdicion && tipoPersona" class="mt-1 text-xs text-gray-500">
-                        <i class="fas fa-lock mr-1"></i>Este campo no se puede modificar
-                    </div>
-                    @error('tipo_persona')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
                 </div>
 
-                <!-- RFC -->
+                <!-- RFC (Solo lectura) -->
                 <div class="form-group">
                     <label for="rfc" class="block text-sm font-medium text-gray-700 mb-2">
                         RFC
                         <span class="text-[#9d2449]">*</span>
                     </label>
-                    <div class="relative group">
-                        <input type="text" id="rfc" name="rfc"
-                               class="block w-full px-4 py-2.5 text-gray-700 border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('rfc') border-red-500 @enderror"
-                               :class="esEdicion && rfc ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'"
-                               placeholder="Ej. XAXX010101000"
-                               maxlength="13"
-                               x-model="rfc"
-                               :readonly="esEdicion && rfc"
-                               required>
+                    <div class="relative">
+                        <input type="text" 
+                               name="rfc"
+                               value="{{ $datosSolicitante['rfc'] ?? '' }}" 
+                               class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                               readonly>
                     </div>
-                    <div x-show="esEdicion && rfc" class="mt-1 text-xs text-gray-500">
-                        <i class="fas fa-lock mr-1"></i>El RFC no se puede modificar
-                    </div>
-                    @error('rfc')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
                 </div>
             </div>
 
-            <!-- CURP - Solo visible para persona física -->
-            <div class="form-group" x-show="tipoPersona === 'Física'" x-transition>
+            <!-- CURP - Solo visible para persona física (Solo lectura) -->
+            @if(($datosSolicitante['tipo_persona'] ?? '') === 'Física')
+            <div class="form-group">
                 <label for="curp" class="block text-sm font-medium text-gray-700 mb-2">
                     CURP
                     <span class="text-[#9d2449]">*</span>
                 </label>
-                <div class="relative group">
-                    <input type="text" id="curp" name="curp"
-                           class="block w-full px-4 py-2.5 text-gray-700 border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('curp') border-red-500 @enderror"
-                           :class="esEdicion && curp ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'"
-                           placeholder="Ej. XAXX010101HDFXXX01"
-                           maxlength="18"
-                           x-model="curp"
-                           :readonly="esEdicion && curp"
-                           x-bind:required="tipoPersona === 'Física'">
+                <div class="relative">
+                    <input type="text" 
+                           name="curp"
+                           value="{{ $datosSolicitante['curp'] ?? '' }}" 
+                           class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                           readonly>
                 </div>
-                <div x-show="esEdicion && curp" class="mt-1 text-xs text-gray-500">
-                    <i class="fas fa-lock mr-1"></i>El CURP no se puede modificar
-                </div>
-                @error('curp')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
             </div>
+            @endif
 
-            <!-- Razón Social / Nombre Completo -->
+            <!-- Nombre Completo (Solo lectura) -->
             <div class="form-group">
-                <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
-                    <span x-text="tipoPersona === 'Moral' ? 'Razón Social' : 'Nombre Completo'">
-                        Razón Social / Nombre Completo
-                    </span>
+                <label for="nombre_completo" class="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre Completo
                     <span class="text-[#9d2449]">*</span>
                 </label>
-                <div class="relative group">
-                    <input type="text" id="razon_social" name="razon_social"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('razon_social') border-red-500 @enderror"
-                           :placeholder="tipoPersona === 'Moral' ? 'Nombre de la empresa' : 'Nombre completo'"
-                           maxlength="100"
-                           x-model="razonSocial" 
-                           required>
+                <div class="relative">
+                    <input type="text" 
+                           name="nombre_completo"
+                           value="{{ auth()->user()->name ?? '' }}" 
+                           class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                           readonly>
                 </div>
-                @error('razon_social')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
             </div>
 
+            <!-- Razón Social (Solo lectura para persona moral) -->
+            @if(($datosSolicitante['tipo_persona'] ?? '') === 'Moral')
+            <div class="form-group">
+                <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
+                    Razón Social
+                    <span class="text-[#9d2449]">*</span>
+                </label>
+                <div class="relative">
+                    <input type="text" 
+                           name="razon_social"
+                           value="{{ $datosSolicitante['razon_social'] ?? '' }}" 
+                           class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                           readonly>
+                </div>
+            </div>
+            @endif
+
             <!-- Objeto Social -->
-            <div class="form-group mb-8">
+            <div class="form-group">
                 <label for="objeto_social" class="block text-sm font-medium text-gray-700 mb-2">
                     Objeto Social
                     <span class="text-[#9d2449]">*</span>
@@ -267,18 +192,6 @@ function datosGeneralesData() {
 
         <!-- Sector y Actividad -->
         <div class="space-y-8">
-            <!-- Sector con búsqueda -->
-            <div class="form-group">
-                <label for="sector_search" class="block text-sm font-medium text-gray-700 mb-2">
-                    Buscar Sector
-                </label>
-                <div class="relative group">
-                    <input type="text" id="sector_search" 
-                           class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           placeholder="Escriba para buscar un sector...">
-                </div>
-            </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Sector -->
                 <div class="form-group">
@@ -336,8 +249,8 @@ function datosGeneralesData() {
                 </div>
             </div>
 
-                <!-- Input oculto para almacenar las actividades seleccionadas -->
-    <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
+            <!-- Input oculto para almacenar las actividades seleccionadas -->
+            <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
             @error('actividades_seleccionadas')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -430,17 +343,6 @@ function datosGeneralesData() {
                     @enderror
                 </div>
             </div>
-        </div>
-
-        <!-- Botón de envío -->
-        <div class="flex justify-end pt-6 border-t border-gray-100">
-            <button type="submit" 
-                    onclick="this.disabled=true; this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i> Guardando...'; this.form.submit();"
-                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#9d2449] to-[#7a1d37] text-white font-semibold rounded-xl shadow-lg hover:from-[#7a1d37] hover:to-[#9d2449] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#9d2449]/30 gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                <i class="fas fa-save text-sm"></i>
-                <span>Registrar y Continuar</span>
-                <i class="fas fa-arrow-right text-sm"></i>
-            </button>
         </div>
     </form>
 </div>
@@ -840,74 +742,30 @@ button:hover {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Contador de caracteres
-    const objetoSocial = document.getElementById('objeto_social');
-    const charCount = document.querySelector('.char-count');
-    const noActividadesMessage = document.getElementById('no-actividades-message');
-
-    if (objetoSocial && charCount) {
-        objetoSocial.addEventListener('input', function() {
-            charCount.textContent = this.value.length;
-        });
-    }
-
-    // Manejo de sectores y actividades
-    const sectorSearch = document.getElementById('sector_search');
+    // Variables necesarias
     const sectorSelect = document.getElementById('sector_id');
     const actividadSelect = document.getElementById('actividad_id');
     const actividadesContainer = document.getElementById('actividades-seleccionadas');
     const actividadesInput = document.getElementById('actividades_seleccionadas_input');
+    const noActividadesMessage = document.getElementById('no-actividades-message');
     let actividadesSeleccionadas = new Set();
 
+    // Función para actualizar el mensaje de no actividades
     function actualizarMensajeNoActividades() {
         if (noActividadesMessage) {
             noActividadesMessage.style.display = actividadesSeleccionadas.size === 0 ? 'flex' : 'none';
         }
     }
 
-    // Función de búsqueda de sectores
-    if (sectorSearch) {
-        sectorSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const options = sectorSelect.options;
-
-            for (let i = 1; i < options.length; i++) {
-                const optionText = options[i].text.toLowerCase();
-                const optionTitle = options[i].title.toLowerCase();
-                const match = optionText.includes(searchTerm) || optionTitle.includes(searchTerm);
-                options[i].style.display = match ? '' : 'none';
-            }
-        });
-    }
-
+    // Función para actualizar el input oculto de actividades
     function actualizarActividadesInput() {
-        actividadesInput.value = JSON.stringify(Array.from(actividadesSeleccionadas));
-        actualizarMensajeNoActividades();
-    }
-
-    async function cargarActividadesExistentes() {
-        try {
-            // Obtener todas las actividades para mostrar los nombres
-            const response = await fetch('/api/actividades');
-            if (!response.ok) throw new Error('Error al cargar actividades');
-            
-            const data = await response.json();
-            if (!data.success) throw new Error(data.message || 'Error al cargar actividades');
-            
-            // Crear tags para las actividades seleccionadas
-            actividadesSeleccionadas.forEach(actividadId => {
-                const actividad = data.data.find(act => act.id.toString() === actividadId);
-                if (actividad) {
-                    const sectorNombre = actividad.sector ? actividad.sector.nombre : 'Sin sector';
-                    agregarTag(actividadId, actividad.nombre, sectorNombre);
-                }
-            });
-            
-        } catch (error) {
-            console.error('Error al cargar actividades existentes:', error);
+        if (actividadesInput) {
+            actividadesInput.value = JSON.stringify(Array.from(actividadesSeleccionadas));
+            actualizarMensajeNoActividades();
         }
     }
 
+    // Función para agregar un tag de actividad
     function agregarTag(id, nombre, sectorNombre) {
         const tag = document.createElement('div');
         tag.className = 'tag';
@@ -935,6 +793,29 @@ document.addEventListener('DOMContentLoaded', function() {
         actualizarMensajeNoActividades();
     }
 
+    // Función para cargar actividades existentes
+    async function cargarActividadesExistentes() {
+        try {
+            const response = await fetch('/api/actividades');
+            if (!response.ok) throw new Error('Error al cargar actividades');
+            
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message || 'Error al cargar actividades');
+            
+            actividadesSeleccionadas.forEach(actividadId => {
+                const actividad = data.data.find(act => act.id.toString() === actividadId);
+                if (actividad) {
+                    const sectorNombre = actividad.sector ? actividad.sector.nombre : 'Sin sector';
+                    agregarTag(actividadId, actividad.nombre, sectorNombre);
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error al cargar actividades existentes:', error);
+        }
+    }
+
+    // Event Listeners
     if (sectorSelect && actividadSelect) {
         sectorSelect.addEventListener('change', async function() {
             const sectorId = this.value;
@@ -993,7 +874,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Inicializar actividades seleccionadas si existen
-    const actividadesExistentes = actividadesInput.value;
+    const actividadesExistentes = actividadesInput?.value;
     if (actividadesExistentes) {
         try {
             const actividades = JSON.parse(actividadesExistentes);

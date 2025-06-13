@@ -215,7 +215,7 @@ class TramiteController extends Controller
                     'solicitante_id' => $solicitante->id,
                     'tipo_tramite' => ucfirst($validated['tipo_tramite']),
                     'estado' => 'Pendiente',
-                    'progreso_tramite' => 2, // Marca como completada la primera sección
+                    'progreso_tramite' => 0, // Inicia en 0 y aumenta al completar secciones
                 ]);
                 Log::info('Nuevo trámite creado:', ['tramite_id' => $tramite->id]);
             }
