@@ -18,6 +18,7 @@ use App\Http\Controllers\DiaInhabilController;
 use App\Http\Controllers\TramiteSolicitanteController;
 use App\Http\Controllers\RevisionController;
 use App\Http\Controllers\Formularios\DomicilioController;
+use App\Http\Controllers\API\SectorController;
 
 // Ruta principal - solo para usuarios no autenticados
 Route::middleware(['web', 'guest'])->group(function () {
@@ -104,6 +105,7 @@ Route::middleware(['auth'])->group(function () {
     // Rutas de Revisión de Trámites
     Route::get('/revision', [RevisionController::class, 'index'])->name('revision.index');
     Route::get('/revision/{tramite}', [RevisionController::class, 'show'])->name('revision.show');
+    Route::get('/revision/{tramite}/datos-generales', [\App\Http\Controllers\DatosGeneralesController::class, 'prepararDatosRevision'])->name('revision.datos-generales');
 });
 
 // Rutas para trámites
@@ -111,7 +113,7 @@ Route::prefix('tramites')->group(function () {
     Route::get('/', [TramiteController::class, 'index'])->name('tramites.index');
     Route::post('/iniciar', [TramiteController::class, 'iniciarTramite'])->name('tramites.iniciar');
     Route::get('/datos-generales', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'index'])->name('tramites.datos-generales');
-    Route::post('/guardar-datos-generales', [TramiteController::class, 'guardarDatosGenerales'])->name('tramites.guardar-datos-generales');
+    Route::post('/guardar-datos-generales', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'guardar'])->name('tramites.guardar-datos-generales');
     
     Route::get('/domicilio', [TramiteController::class, 'mostrarDomicilio'])->name('tramites.domicilio');
     Route::post('/guardar-domicilio', [TramiteController::class, 'guardarDomicilio'])->name('tramites.guardar-domicilio');
@@ -123,6 +125,13 @@ Route::prefix('tramites')->group(function () {
         ->name('tramites.create');
     
     Route::post('/store', [TramiteController::class, 'store'])->name('tramites.store');
+});
+
+// Rutas para el controlador de datos generales
+Route::prefix('datos-generales')->group(function () {
+    Route::get('/{tramite}', [\App\Http\Controllers\DatosGeneralesController::class, 'mostrar'])->name('datos-generales.mostrar');
+    Route::post('/guardar', [\App\Http\Controllers\DatosGeneralesController::class, 'guardarDatos'])->name('datos-generales.guardar');
+    Route::get('/revision/{tramite}', [\App\Http\Controllers\DatosGeneralesController::class, 'mostrarRevision'])->name('datos-generales.revision');
 });
 
 // Rutas para el módulo de Trámite Solicitante
@@ -150,4 +159,93 @@ Route::middleware(['auth'])->prefix('tramites-solicitante')->group(function () {
     Route::get('/documentos', [TramiteSolicitanteController::class, 'obtenerDocumentos'])->name('tramites.solicitante.documentos');
     Route::post('/upload-documento', [TramiteSolicitanteController::class, 'subirDocumento'])->name('tramites.solicitante.upload-documento');
     Route::post('/finalizar', [TramiteSolicitanteController::class, 'finalizarTramite'])->name('tramites.solicitante.finalizar');
+});
+
+// Rutas de API para sectores y actividades
+Route::prefix('api')->group(function () {
+    Route::get('/sectores/{sector}/actividades', [SectorController::class, 'getActividades']);
+    Route::get('/actividades', [SectorController::class, 'getAllActividades']);
+    Route::get('/actividades/{actividad}', [SectorController::class, 'getActividad']);
+    
+    // Rutas para el controlador de datos generales
+    Route::get('/datos-generales/{tramite}', [\App\Http\Controllers\DatosGeneralesController::class, 'obtenerDatosAjax'])->name('api.datos-generales.obtener');
+    Route::post('/datos-generales/guardar', [\App\Http\Controllers\DatosGeneralesController::class, 'guardarDatos'])->name('api.datos-generales.guardar');
+    Route::get('/sectores', [\App\Http\Controllers\DatosGeneralesController::class, 'obtenerSectores'])->name('api.sectores');
+    Route::get('/actividades-sector', [\App\Http\Controllers\DatosGeneralesController::class, 'obtenerActividades'])->name('api.actividades-sector');
+});
+
+// Ruta temporal para debugging - ELIMINAR EN PRODUCCIÓN
+Route::get('/debug-tramite/{tramite}', function($tramiteId) {
+    $tramite = \App\Models\Tramite::find($tramiteId);
+    
+    if (!$tramite) {
+        return response()->json(['error' => 'Trámite no encontrado']);
+    }
+    
+    $solicitante = $tramite->solicitante;
+    $detalleTramite = $tramite->detalleTramite;
+    $contacto = $detalleTramite ? $detalleTramite->contacto : null;
+    $actividades = $tramite->actividades;
+    
+    // También buscar ContactoSolicitante directamente si existe contacto_id
+    $contactoDirecto = null;
+    if ($detalleTramite && $detalleTramite->contacto_id) {
+        $contactoDirecto = \App\Models\ContactoSolicitante::find($detalleTramite->contacto_id);
+    }
+    
+    return response()->json([
+        'tramite' => [
+            'id' => $tramite->id,
+            'tipo_tramite' => $tramite->tipo_tramite,
+            'estado' => $tramite->estado,
+            'solicitante_id' => $tramite->solicitante_id
+        ],
+        'solicitante' => $solicitante ? [
+            'id' => $solicitante->id,
+            'rfc' => $solicitante->rfc,
+            'tipo_persona' => $solicitante->tipo_persona,
+            'objeto_social' => $solicitante->objeto_social,
+            'razon_social' => $solicitante->razon_social ?? 'NULL',
+            'nombre_completo' => $solicitante->nombre_completo ?? 'NULL'
+        ] : null,
+        'detalle_tramite' => $detalleTramite ? [
+            'id' => $detalleTramite->id,
+            'tramite_id' => $detalleTramite->tramite_id,
+            'razon_social' => $detalleTramite->razon_social,
+            'email' => $detalleTramite->email,
+            'telefono' => $detalleTramite->telefono,
+            'contacto_id' => $detalleTramite->contacto_id,
+            'sitio_web' => $detalleTramite->sitio_web
+        ] : null,
+        'contacto_relacion' => $contacto ? [
+            'id' => $contacto->id,
+            'nombre' => $contacto->nombre,
+            'puesto' => $contacto->puesto,
+            'email' => $contacto->email,
+            'telefono' => $contacto->telefono
+        ] : null,
+        'contacto_directo' => $contactoDirecto ? [
+            'id' => $contactoDirecto->id,
+            'nombre' => $contactoDirecto->nombre,
+            'puesto' => $contactoDirecto->puesto,
+            'email' => $contactoDirecto->email,
+            'telefono' => $contactoDirecto->telefono
+        ] : null,
+        'actividades' => $actividades->map(function($act) {
+            return [
+                'id' => $act->id,
+                'nombre' => $act->nombre,
+                'sector_id' => $act->sector_id
+            ];
+        }),
+        'actividades_count' => $actividades->count()
+    ]);
+});
+
+// Ruta temporal para testing obtenerDatos - ELIMINAR EN PRODUCCIÓN
+Route::get('/test-obtener-datos/{tramite?}', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'testObtenerDatos']);
+
+// Ruta temporal para probar el formulario con trámite específico - ELIMINAR EN PRODUCCIÓN
+Route::get('/test-form-tramite/{tramite}', function($tramiteId) {
+    return redirect()->route('tramites.datos-generales', ['tramite_id' => $tramiteId]);
 });

@@ -14,6 +14,7 @@ class Documento extends Model
     protected $fillable = [
         'nombre',
         'tipo_persona',
+        'seccion',
         'descripcion',
         'es_visible'
     ];

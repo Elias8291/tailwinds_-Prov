@@ -71,7 +71,7 @@ function datosGeneralesData() {
         </div>
     </div>
 
-    <form action="{{ route('tramites.guardar-datos-generales') }}" method="POST" class="space-y-8">
+    <form action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-8">
         @csrf
         <input type="hidden" name="action" value="next">
         <input type="hidden" name="seccion" value="1">
@@ -100,7 +100,7 @@ function datosGeneralesData() {
                                value="{{ $datosSolicitante['tipo_persona'] ?? '' }}" 
                                class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                                readonly>
-                    </div>
+                        </div>
                 </div>
 
                 <!-- RFC (Solo lectura) -->
@@ -133,7 +133,7 @@ function datosGeneralesData() {
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                            readonly>
                 </div>
-            </div>
+                </div>
             @endif
 
             <!-- Nombre Completo (Solo lectura) -->
@@ -249,8 +249,8 @@ function datosGeneralesData() {
                 </div>
             </div>
 
-            <!-- Input oculto para almacenar las actividades seleccionadas -->
-            <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
+                <!-- Input oculto para almacenar las actividades seleccionadas -->
+    <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
             @error('actividades_seleccionadas')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -760,9 +760,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Función para actualizar el input oculto de actividades
     function actualizarActividadesInput() {
         if (actividadesInput) {
-            actividadesInput.value = JSON.stringify(Array.from(actividadesSeleccionadas));
-            actualizarMensajeNoActividades();
-        }
+        actividadesInput.value = JSON.stringify(Array.from(actividadesSeleccionadas));
+        actualizarMensajeNoActividades();
+    }
     }
 
     // Función para agregar un tag de actividad

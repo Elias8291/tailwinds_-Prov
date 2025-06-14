@@ -39,6 +39,15 @@
                                 </svg>
                                 Ver Historial
                             </button>
+
+                            <button id="revisarDatosBtn"
+                                    onclick="revisarDatosTramite()"
+                                    class="hidden inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-blue-600 bg-white border-2 border-blue-600 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:scale-95 gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Revisar Datos
+                            </button>
                             
                             <button id="verDatosSATBtn"
                                     onclick="window.satHandler?.showModal()"
@@ -57,7 +66,10 @@
 </div>
 
 <script>
-window.actualizarResumenProveedor = function(data, mostrarBotonSAT = false) {
+// Variable global para almacenar el ID del trámite activo para revisión
+window.tramiteActivoRevision = null;
+
+window.actualizarResumenProveedor = function(data, mostrarBotonSAT = false, tramiteId = null) {
     const resumen = document.getElementById('resumenProveedor');
     const nombreRazonSocial = document.getElementById('nombreRazonSocial');
     const rfcProveedor = document.getElementById('rfcProveedor');
@@ -65,8 +77,12 @@ window.actualizarResumenProveedor = function(data, mostrarBotonSAT = false) {
     const estadoIcono = document.getElementById('estadoIcono');
     const estadoBadge = document.getElementById('estadoBadge');
     const verDatosSATBtn = document.getElementById('verDatosSATBtn');
+    const revisarDatosBtn = document.getElementById('revisarDatosBtn');
 
     if (!data || !resumen) return;
+
+    // Almacenar el ID del trámite para revisión
+    window.tramiteActivoRevision = tramiteId;
 
     // Mostrar el contenedor
     resumen.classList.remove('hidden');
@@ -116,5 +132,23 @@ window.actualizarResumenProveedor = function(data, mostrarBotonSAT = false) {
     } else {
         verDatosSATBtn.classList.add('hidden');
     }
+
+    // Mostrar/ocultar botón de revisar datos si hay un trámite activo
+    if (tramiteId) {
+        revisarDatosBtn.classList.remove('hidden');
+    } else {
+        revisarDatosBtn.classList.add('hidden');
+    }
+};
+
+// Función para revisar datos del trámite
+window.revisarDatosTramite = function() {
+    if (!window.tramiteActivoRevision) {
+        alert('No hay un trámite seleccionado para revisar');
+        return;
+    }
+    
+    // Redirigir a la página de revisión de datos generales
+    window.location.href = `/datos-generales/revision/${window.tramiteActivoRevision}`;
 };
 </script> 

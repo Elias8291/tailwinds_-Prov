@@ -170,11 +170,11 @@ class DomicilioController extends Controller
     {
         // Solo actualizar a 3 si el progreso actual es 2
         if ($tramite->progreso_tramite == 2) {
-            $tramite->update(['progreso_tramite' => 3]);
-            Log::info('Progreso del trámite actualizado:', [
-                'tramite_id' => $tramite->id,
-                'progreso' => 3
-            ]);
+        $tramite->update(['progreso_tramite' => 3]);
+        Log::info('Progreso del trámite actualizado:', [
+            'tramite_id' => $tramite->id,
+            'progreso' => 3
+        ]);
         }
     }
 

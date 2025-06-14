@@ -167,7 +167,7 @@ class DatosGeneralesController extends Controller
 
             // Actualizar el progreso del trámite solo si está en 0
             if ($tramite->progreso_tramite == 0) {
-                $tramite->update(['progreso_tramite' => 2]);
+            $tramite->update(['progreso_tramite' => 2]);
             }
 
             DB::commit();
