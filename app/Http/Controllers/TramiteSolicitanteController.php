@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Tramite;
 use App\Models\Solicitante;
 use App\Models\Documento;
 use Carbon\Carbon;
+use App\Http\Controllers\Formularios\DomicilioController;
+use App\Http\Controllers\DetalleTramiteController;
 
 class TramiteSolicitanteController extends Controller
 {
@@ -18,7 +21,18 @@ class TramiteSolicitanteController extends Controller
         $tipoTramite = $this->determinarTipoTramite($user);
         $tramiteEnProgreso = $this->verificarTramiteEnProgreso($user);
         
-        return view('tramites.solicitante.index', compact('tipoTramite', 'user', 'tramiteEnProgreso'));
+        // Obtener datos de domicilio si hay un trámite en progreso
+        $datosDomicilio = [];
+        if ($tramiteEnProgreso) {
+            Log::info('Trámite en progreso encontrado:', [
+                'tramite_id' => $tramiteEnProgreso->id,
+                'tipo_tramite' => $tramiteEnProgreso->tipo_tramite
+            ]);
+            
+            $datosDomicilio = $this->obtenerDatosDomicilio($tramiteEnProgreso);
+        }
+        
+        return view('tramites.solicitante.index', compact('tipoTramite', 'user', 'tramiteEnProgreso', 'datosDomicilio'));
     }
 
     private function determinarTipoTramite($user)
@@ -73,24 +87,21 @@ class TramiteSolicitanteController extends Controller
 
     private function verificarTramiteEnProgreso($user)
     {
-        // Verificar si el usuario tiene un trámite en progreso
-        // Asumiendo que existe un modelo Tramite relacionado con el usuario
-        // return $user->tramites()->where('estado', 'en_progreso')->first();
+        // Buscar el solicitante asociado al usuario
+        $solicitante = Solicitante::where('usuario_id', $user->id)->first();
         
-        // Simulación para propósitos de demostración
-        // En una implementación real, esto vendría de la base de datos
-        
-        // Simulamos un trámite en progreso (descomenta para probar)
-        // return (object) [
-        //     'id' => 1,
-        //     'tipo_tramite' => 'inscripcion',
-        //     'tipo_persona' => 'Física',
-        //     'rfc' => 'XAXX010101000',
-        //     'paso_actual' => 2,
-        //     'estado' => 'en_progreso'
-        // ];
-        
-        return null;
+        if (!$solicitante) {
+            return null;
+        }
+
+        // Buscar un trámite en progreso del solicitante con las relaciones necesarias
+        return Tramite::with([
+            'detalleTramite.direccion.asentamiento.localidad.municipio.estado'
+        ])
+        ->where('solicitante_id', $solicitante->id)
+        ->whereIn('estado', ['Pendiente', 'En Revision'])
+        ->latest()
+        ->first();
     }
 
     public function iniciarInscripcion(Request $request)
@@ -137,31 +148,20 @@ class TramiteSolicitanteController extends Controller
 
     private function continuarTramite($tramite)
     {
-        // Obtener el solicitante asociado al trámite
-        $solicitante = $tramite->solicitante;
-        
-        if (!$solicitante) {
-            return back()->with('error', 'No se encontró información del solicitante');
+        // Verificar si ya tiene constancia de situación fiscal
+        if ($this->tieneConstanciaFiscal($tramite)) {
+            // Si ya tiene constancia, ir directamente al formulario principal
+            return redirect()->route('tramites.create', [
+                'tipo_tramite' => strtolower($tramite->tipo_tramite),
+                'tramite' => $tramite->id
+            ]);
         }
-
-        // Preparar datos del trámite existente para continuar
-        $datosTramite = [
-            'tramite_id' => $tramite->id,
-            'tipo_tramite' => $tramite->tipo_tramite,
-            'tipo_persona' => $solicitante->tipo_persona,
-            'rfc' => $solicitante->rfc,
-            'curp' => $solicitante->curp,
-            'nombre_completo' => $solicitante->nombre_completo,
-            'razon_social' => $solicitante->razon_social,
-            'objeto_social' => $solicitante->objeto_social,
-            'paso_inicial' => $tramite->paso_actual ?? 1,
-            'datos_existentes' => [
-                'direccion' => $tramite->direccion ?? null,
-                'datos_generales' => $tramite->datos_generales ?? null,
-            ]
-        ];
         
-        return view('tramites.create', compact('datosTramite', 'solicitante'));
+        // Si no tiene constancia, redirigir a la carga de constancia
+        return redirect()->route('tramites.solicitante.constancia-fiscal', [
+            'tipo_tramite' => strtolower($tramite->tipo_tramite),
+            'tramite' => $tramite->id
+        ]);
     }
 
     private function crearNuevoTramite($tipoTramite, $user)
@@ -173,21 +173,230 @@ class TramiteSolicitanteController extends Controller
             return back()->with('error', 'No se encontró información del solicitante');
         }
 
-        // Datos básicos para la vista con la información del solicitante
-        $datosTramite = [
-            'tramite_id' => null,
-            'tipo_tramite' => $tipoTramite,
-            'tipo_persona' => $solicitante->tipo_persona,
-            'rfc' => $solicitante->rfc,
-            'curp' => $solicitante->curp,
-            'nombre_completo' => $solicitante->nombre_completo,
-            'razon_social' => $solicitante->razon_social,
-            'objeto_social' => $solicitante->objeto_social,
-            'paso_inicial' => 1,
-            'datos_existentes' => []
-        ];
+        // Crear nuevo trámite
+        $tramite = Tramite::create([
+            'solicitante_id' => $solicitante->id,
+            'tipo_tramite' => ucfirst($tipoTramite),
+            'estado' => 'Pendiente',
+            'progreso_tramite' => 0,
+            'fecha_inicio' => now(),
+        ]);
         
-        return view('tramites.create', compact('datosTramite', 'solicitante'));
+        Log::info('Nuevo trámite creado desde solicitante:', [
+            'tramite_id' => $tramite->id,
+            'tipo_tramite' => $tipoTramite,
+            'solicitante_id' => $solicitante->id
+        ]);
+        
+        // Redirigir a la carga de constancia de situación fiscal
+        return redirect()->route('tramites.solicitante.constancia-fiscal', [
+            'tipo_tramite' => strtolower($tipoTramite),
+            'tramite' => $tramite->id
+        ]);
+    }
+
+    /**
+     * Verifica si el trámite ya tiene constancia de situación fiscal
+     */
+    private function tieneConstanciaFiscal($tramite)
+    {
+        // Por ahora solo verificamos si el trámite tiene progreso > 0
+        // Más adelante se puede implementar la verificación de documentos
+        return $tramite->progreso_tramite > 0;
+    }
+
+    /**
+     * Muestra el formulario para cargar la constancia de situación fiscal
+     */
+    public function mostrarConstanciaFiscal($tipoTramite, $tramiteId)
+    {
+        try {
+            $tramite = Tramite::with(['solicitante'])->find($tramiteId);
+            
+            if (!$tramite) {
+                return redirect()->route('tramites.solicitante.index')
+                    ->with('error', 'Trámite no encontrado');
+            }
+
+            // Verificar que el trámite pertenece al usuario actual
+            $user = Auth::user();
+            $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+            
+            if (!$solicitante || $tramite->solicitante_id !== $solicitante->id) {
+                return redirect()->route('tramites.solicitante.index')
+                    ->with('error', 'No tienes permisos para acceder a este trámite');
+            }
+
+            return view('tramites.solicitante.constancia-fiscal', [
+                'tramite' => $tramite,
+                'tipoTramite' => $tipoTramite,
+                'solicitante' => $tramite->solicitante
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al mostrar formulario de constancia fiscal:', [
+                'message' => $e->getMessage(),
+                'tramite_id' => $tramiteId
+            ]);
+
+            return redirect()->route('tramites.solicitante.index')
+                ->with('error', 'Error al cargar el formulario de constancia fiscal');
+        }
+    }
+
+    /**
+     * Procesa la carga de la constancia de situación fiscal
+     */
+    public function subirConstanciaFiscal(Request $request)
+    {
+        try {
+            $request->validate([
+                'tramite_id' => 'required|integer|exists:tramite,id',
+                'tipo_tramite' => 'required|string',
+                'sat_data' => 'required|string'
+            ]);
+
+            $tramite = Tramite::find($request->tramite_id);
+            
+            if (!$tramite) {
+                return back()->with('error', 'Trámite no encontrado');
+            }
+
+            // Verificar que el trámite pertenece al usuario actual
+            $user = Auth::user();
+            $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+            
+            if (!$solicitante || $tramite->solicitante_id !== $solicitante->id) {
+                return back()->with('error', 'No tienes permisos para este trámite');
+            }
+
+            // Decodificar datos del SAT
+            $satData = json_decode($request->sat_data, true);
+            
+            if (!$satData || !isset($satData['details'])) {
+                return back()->with('error', 'Los datos de la constancia fiscal no son válidos');
+            }
+
+            $details = $satData['details'];
+
+            // Validar que el RFC coincida
+            if (isset($details['rfc']) && $details['rfc'] !== $solicitante->rfc) {
+                return back()->with('error', 'El RFC de la constancia no coincide con el RFC registrado');
+            }
+
+            // Actualizar datos del solicitante si están disponibles
+            $updateData = [];
+            if (isset($details['razonSocial']) && !empty($details['razonSocial'])) {
+                $updateData['razon_social'] = $details['razonSocial'];
+            }
+            if (isset($details['nombreCompleto']) && !empty($details['nombreCompleto']) && !isset($updateData['razon_social'])) {
+                $updateData['razon_social'] = $details['nombreCompleto'];
+            }
+            if (isset($details['curp']) && !empty($details['curp'])) {
+                $updateData['curp'] = $details['curp'];
+            }
+            if (isset($details['tipoPersona']) && !empty($details['tipoPersona'])) {
+                $updateData['tipo_persona'] = ucfirst(strtolower($details['tipoPersona']));
+                if ($updateData['tipo_persona'] === 'Fisica') {
+                    $updateData['tipo_persona'] = 'Física';
+                }
+            }
+
+            if (!empty($updateData)) {
+                $solicitante->update($updateData);
+                Log::info('Datos del solicitante actualizados desde constancia fiscal:', [
+                    'solicitante_id' => $solicitante->id,
+                    'datos' => $updateData
+                ]);
+            }
+
+            // Actualizar el progreso del trámite para indicar que ya tiene constancia
+            $observaciones = 'Constancia de situación fiscal procesada. RFC: ' . ($details['rfc'] ?? 'N/A');
+            if (isset($details['razonSocial'])) {
+                $observaciones .= ', Razón Social: ' . $details['razonSocial'];
+            }
+
+            $tramite->update([
+                'progreso_tramite' => 1,
+                'observaciones' => $observaciones
+            ]);
+
+            Log::info('Constancia fiscal procesada exitosamente:', [
+                'tramite_id' => $tramite->id,
+                'rfc' => $details['rfc'] ?? 'N/A',
+                'tipo_persona' => $details['tipoPersona'] ?? 'N/A'
+            ]);
+
+            // Extraer código postal del SAT si está disponible
+            $codigoPostalSat = null;
+            if ($request->has('codigo_postal_sat') && !empty($request->codigo_postal_sat)) {
+                $codigoPostalSat = $request->codigo_postal_sat;
+                Log::info('Código postal del SAT recibido:', ['cp' => $codigoPostalSat]);
+            }
+
+            // Redirigir al formulario principal del trámite
+            $redirectRoute = redirect()->route('tramites.create', [
+                'tipo_tramite' => $request->tipo_tramite,
+                'tramite' => $tramite->id
+            ])->with('success', 'Constancia de situación fiscal procesada exitosamente. Los datos han sido extraídos automáticamente.');
+
+            // Si hay código postal del SAT, agregarlo a la sesión
+            if ($codigoPostalSat) {
+                $redirectRoute->with('codigo_postal_sat', $codigoPostalSat);
+            }
+
+            return $redirectRoute;
+
+        } catch (\Exception $e) {
+            Log::error('Error al procesar constancia fiscal:', [
+                'message' => $e->getMessage(),
+                'tramite_id' => $request->tramite_id ?? 'N/A',
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->with('error', 'Error al procesar la constancia fiscal: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Obtiene los datos de domicilio de un trámite específico
+     */
+    private function obtenerDatosDomicilio($tramite)
+    {
+        try {
+            // Usar el nuevo método del DetalleTramiteController
+            $detalleTramiteController = new DetalleTramiteController();
+            $datosDomicilio = $detalleTramiteController->getDatosDomicilioByTramiteId($tramite->id);
+            
+            if ($datosDomicilio) {
+                Log::info('🏠 DEBUG DOMICILIO: Datos obtenidos exitosamente usando DetalleTramiteController', [
+                    'tramite_id' => $tramite->id,
+                    'codigo_postal' => $datosDomicilio['codigo_postal'],
+                    'estado' => $datosDomicilio['estado'],
+                    'municipio' => $datosDomicilio['municipio']
+                ]);
+                return $datosDomicilio;
+            }
+            
+            // Si no hay datos, retornar estructura básica
+            Log::info('🏠 DEBUG DOMICILIO: No se encontraron datos de domicilio', [
+                'tramite_id' => $tramite->id
+            ]);
+            
+            return [
+                'tramite_id' => $tramite->id,
+            ];
+            
+        } catch (\Exception $e) {
+            Log::error('🏠 DEBUG DOMICILIO: Error al obtener datos de domicilio', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'tramite_id' => $tramite->id,
+            ];
+        }
     }
 
     /**
@@ -409,6 +618,50 @@ class TramiteSolicitanteController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al finalizar el trámite: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API endpoint para obtener datos de domicilio de un trámite
+     */
+    public function obtenerDatosDomicilioAPI(Request $request, $tramiteId)
+    {
+        try {
+            $tramite = Tramite::with([
+                'detalleTramite.direccion.asentamiento.localidad.municipio.estado'
+            ])->find($tramiteId);
+
+            if (!$tramite) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trámite no encontrado'
+                ], 404);
+            }
+
+            $datosDomicilio = $this->obtenerDatosDomicilio($tramite);
+            
+            return response()->json([
+                'success' => true,
+                'datos' => $datosDomicilio,
+                'debug' => [
+                    'tramite_id' => $tramite->id,
+                    'tiene_detalle' => $tramite->detalleTramite ? 'SI' : 'NO',
+                    'direccion_id' => $tramite->detalleTramite->direccion_id ?? 'NULL',
+                    'tiene_direccion' => ($tramite->detalleTramite && $tramite->detalleTramite->direccion) ? 'SI' : 'NO'
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error en obtenerDatosDomicilioAPI:', [
+                'message' => $e->getMessage(),
+                'tramite_id' => $tramiteId
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

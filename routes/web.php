@@ -154,11 +154,18 @@ Route::middleware(['auth'])->prefix('tramites-solicitante')->group(function () {
         return redirect()->route('tramites.solicitante.index');
     });
     
+    // Rutas para constancia de situación fiscal
+    Route::get('/constancia-fiscal/{tipo_tramite}/{tramite}', [TramiteSolicitanteController::class, 'mostrarConstanciaFiscal'])->name('tramites.solicitante.constancia-fiscal');
+    Route::post('/constancia-fiscal/subir', [TramiteSolicitanteController::class, 'subirConstanciaFiscal'])->name('tramites.solicitante.subir-constancia-fiscal');
+    
     // Nuevas rutas para obtener datos dinámicamente
     Route::get('/datos-tramite', [TramiteSolicitanteController::class, 'obtenerDatosTramite'])->name('tramites.solicitante.datos-tramite');
     Route::get('/documentos', [TramiteSolicitanteController::class, 'obtenerDocumentos'])->name('tramites.solicitante.documentos');
     Route::post('/upload-documento', [TramiteSolicitanteController::class, 'subirDocumento'])->name('tramites.solicitante.upload-documento');
     Route::post('/finalizar', [TramiteSolicitanteController::class, 'finalizarTramite'])->name('tramites.solicitante.finalizar');
+    
+    // API para obtener datos de domicilio
+    Route::get('/api/domicilio/{tramite}', [TramiteSolicitanteController::class, 'obtenerDatosDomicilioAPI'])->name('tramites.solicitante.api.domicilio');
 });
 
 // Rutas de API para sectores y actividades

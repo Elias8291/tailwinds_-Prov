@@ -8,4 +8,7 @@ class SATValidator {
     }
 }
 
-export default SATValidator; 
+// Hacer la clase disponible globalmente para navegadores legacy
+if (typeof window !== 'undefined') {
+    window.SATValidator = SATValidator;
+} 

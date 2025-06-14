@@ -229,12 +229,19 @@
 <!-- Scripts -->
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js"></script>
-<script type="module">
-    import QRHandler from '/js/components/qr-handler.js';
-    import QRReader from '/js/components/qr-reader.js';
-    import SATValidator from '/js/validators/sat-validator.js';
-    import SATScraper from '/js/scrapers/sat-scraper.js';
+<script src="/js/scrapers/sat-scraper.js"></script>
+<script src="/js/validators/sat-validator.js"></script>
+<script src="/js/components/qr-reader.js"></script>
+<script src="/js/components/qr-handler.js"></script>
+
+<script>
+    // Configurar PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
     
+    // Variables globales
+    let documentProcessed = false;
+    let qrHandler = null;
+
     // Configuración específica para register.blade.php
     const config = {
         fileNameElement: 'fileName',
@@ -248,11 +255,21 @@
     // Esperar a que el DOM esté listo
     document.addEventListener('DOMContentLoaded', async () => {
         try {
-            console.log('Inicializando QRHandler para registro...');
+            console.log('Inicializando procesador para registro...');
+            
+            // Verificar que las clases estén disponibles
+            if (typeof QRHandler === 'undefined' || typeof QRReader === 'undefined' || 
+                typeof SATValidator === 'undefined' || typeof SATScraper === 'undefined') {
+                throw new Error('Las clases necesarias no están disponibles');
+            }
             
             // Crear e inicializar QRHandler con configuración
-            const qrHandler = new QRHandler(config);
-            await qrHandler.initialize(QRReader, SATValidator, SATScraper);
+            qrHandler = new QRHandler(config);
+            const initialized = await qrHandler.initialize(QRReader, SATValidator, SATScraper);
+            
+            if (!initialized) {
+                throw new Error('No se pudo inicializar el QRHandler');
+            }
 
             // Configurar callbacks
             qrHandler.setOnDataScanned((data) => {
@@ -318,16 +335,13 @@
 
             // Asignar a window para acceso global
             window.qrHandler = qrHandler;
-            console.log('QRHandler inicializado correctamente');
+            console.log('Procesador inicializado correctamente');
 
         } catch (error) {
             console.error('Error durante la inicialización:', error);
-            showError('Error al inicializar el lector QR: ' + error.message);
+            showError('Error al inicializar el procesador: ' + error.message);
         }
     });
-
-    // Variable global para controlar el estado del formulario
-    let documentProcessed = false;
 
     // Función para manejar el botón de acción
     window.handleActionButton = function() {
@@ -399,7 +413,7 @@
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             
-            const result = window.qrHandler.showSatData();
+            const result = qrHandler.showSatData();
             if (result.success) {
                 const satDataContent = document.getElementById('satDataContent');
                 if (satDataContent) {
@@ -459,11 +473,11 @@
             console.log('Iniciando procesamiento del archivo:', file.name);
 
             // Procesar el archivo con QRHandler
-            if (!window.qrHandler) {
-                throw new Error('El lector QR no está inicializado');
+            if (!qrHandler) {
+                throw new Error('El procesador no está inicializado');
             }
 
-            await window.qrHandler.handleFile(file);
+            await qrHandler.handleFile(file);
 
         } catch (error) {
             console.error('Error detallado:', error);
@@ -592,8 +606,8 @@
         document.getElementById('satNumeroExterior').value = '';
         document.getElementById('satNumeroInterior').value = '';
 
-        if (window.qrHandler) {
-            window.qrHandler.reset();
+        if (qrHandler) {
+            qrHandler.reset();
         }
 
         // Resetear el estado del botón

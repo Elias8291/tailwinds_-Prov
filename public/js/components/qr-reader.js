@@ -215,4 +215,7 @@ class QRReader {
     }
 }
 
-export default QRReader; 
+// Hacer la clase disponible globalmente para navegadores legacy
+if (typeof window !== 'undefined') {
+    window.QRReader = QRReader;
+} 

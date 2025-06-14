@@ -493,4 +493,7 @@ class SATScraper {
     }
 }
 
-export default SATScraper; 
+// Hacer la clase disponible globalmente para navegadores legacy
+if (typeof window !== 'undefined') {
+    window.SATScraper = SATScraper;
+} 

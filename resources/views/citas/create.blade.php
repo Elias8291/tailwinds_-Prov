@@ -26,7 +26,7 @@
             <form action="{{ route('citas.store') }}" method="POST" class="p-6 space-y-6">
                 @csrf
 
-                <!-- Datos Generales -->
+                <!-- Datos Generales y Domicilio -->
                 @include('components.formularios.seccion-datos-generales', [
                     'datosTramite' => [],
                     'datosSolicitante' => isset($solicitante) ? [
@@ -38,6 +38,43 @@
                         'objeto_social' => $solicitante->objeto_social
                     ] : []
                 ])
+
+                <!-- Información de Domicilio (Solo vista) -->
+                @if(!empty($datosDomicilio['codigo_postal']))
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-blue-100 rounded-lg p-2">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-blue-800">Domicilio Registrado</p>
+                            <p class="text-xs text-blue-600 mt-1">
+                                CP {{ $datosDomicilio['codigo_postal'] }}
+                                @if(!empty($datosDomicilio['estado']))
+                                    - {{ $datosDomicilio['estado'] }}
+                                @endif
+                                @if(!empty($datosDomicilio['municipio']))
+                                    - {{ $datosDomicilio['municipio'] }}
+                                @endif
+                                @if(!empty($datosDomicilio['colonia']))
+                                    - {{ $datosDomicilio['colonia'] }}
+                                @endif
+                            </p>
+                            @if(!empty($datosDomicilio['calle']))
+                                <p class="text-xs text-blue-600">
+                                    {{ $datosDomicilio['calle'] }}
+                                    @if(!empty($datosDomicilio['numero_exterior']))
+                                        #{{ $datosDomicilio['numero_exterior'] }}
+                                    @endif
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Fecha y Hora -->
                 <div>

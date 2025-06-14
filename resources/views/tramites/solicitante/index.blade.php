@@ -49,6 +49,9 @@
                     <p class="text-gray-700 text-sm mb-4">
                         @if($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'inscripcion')
                             <span class="text-[#9d2449] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->paso_actual ?? 1 }} de {{ $tramiteEnProgreso->tipo_persona === 'Física' ? 3 : 6 }}
+                            @if(!empty($datosDomicilio['codigo_postal']))
+                                <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
+                            @endif
                         @else
                             Primera inscripción al Padrón de Proveedores del Estado
                         @endif
@@ -105,6 +108,9 @@
                     <p class="text-gray-700 text-sm mb-4">
                         @if($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'renovacion')
                             <span class="text-[#c1437a] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->paso_actual ?? 1 }} de {{ $tramiteEnProgreso->tipo_persona === 'Física' ? 3 : 6 }}
+                            @if(!empty($datosDomicilio['codigo_postal']))
+                                <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
+                            @endif
                         @else
                             Renueva tu registro antes del vencimiento (7 días)
                         @endif
@@ -161,6 +167,9 @@
                     <p class="text-gray-700 text-sm mb-4">
                         @if($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'actualizacion')
                             <span class="text-[#7a1d37] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->paso_actual ?? 1 }} de {{ $tramiteEnProgreso->tipo_persona === 'Física' ? 3 : 6 }}
+                            @if(!empty($datosDomicilio['codigo_postal']))
+                                <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
+                            @endif
                         @else
                             Actualiza información, servicios y documentos
                         @endif
@@ -197,6 +206,20 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Las tarjetas cargan inmediatamente sin animación de retraso
         console.log('Módulo de trámites cargado');
+        
+        // Debug de datos de domicilio
+        @if($tramiteEnProgreso)
+        console.log('🎯 TRAMITE DEBUG: Trámite en progreso encontrado:', {
+            tramite_id: {{ $tramiteEnProgreso->id }},
+            tipo_tramite: '{{ $tramiteEnProgreso->tipo_tramite }}'
+        });
+        @endif
+        
+        @if(!empty($datosDomicilio))
+        console.log('🏠 DATOS DOMICILIO DEBUG:', @json($datosDomicilio));
+        @else 
+        console.log('🏠 DATOS DOMICILIO DEBUG: No hay datos de domicilio');
+        @endif
     });
 </script>
 @endpush

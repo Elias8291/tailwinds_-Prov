@@ -47,33 +47,46 @@ class TramiteController extends Controller
         return view('tramites.index', compact('tramites'));
     }
 
-        public function create($tipoTramite, $tramiteId)
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create($tipoTramite, $tramiteId)
     {
         try {
-            // Validar que el tipo de trámite sea válido
+            // Buscar el trámite con todas las relaciones necesarias
+            $tramite = Tramite::with([
+                'solicitante',
+                'detalleTramite.direccion.asentamiento.localidad.municipio.estado',
+                'detalleTramite.contacto',
+                'actividades'
+            ])->find($tramiteId);
+
+            if (!$tramite) {
+                return redirect()->route('tramites.index')->with('error', 'Trámite no encontrado.');
+            }
+
+            $solicitante = $tramite->solicitante;
+            if (!$solicitante) {
+                return redirect()->route('tramites.index')->with('error', 'Solicitante no encontrado.');
+            }
+
+            Log::info('Cargando formulario de trámite:', [
+                'tramite_id' => $tramite->id,
+                'tipo_tramite' => $tipoTramite,
+                'solicitante_id' => $solicitante->id,
+                'tiene_detalle' => $tramite->detalleTramite ? 'SI' : 'NO',
+                'direccion_id' => $tramite->detalleTramite->direccion_id ?? 'NULL'
+            ]);
+
             $tipos_tramite = [
                 'inscripcion' => 'Inscripción',
                 'renovacion' => 'Renovación',
                 'actualizacion' => 'Actualización'
             ];
 
-            if (!array_key_exists($tipoTramite, $tipos_tramite)) {
-                abort(404, 'Tipo de trámite no válido');
-            }
-
-            // Buscar el trámite
-            $tramite = Tramite::findOrFail($tramiteId);
-            
-            // Verificar que el trámite corresponda al tipo
-            if (strtolower($tramite->tipo_tramite) !== $tipoTramite) {
-                abort(404, 'El tipo de trámite no corresponde');
-            }
-
-            // Obtener el solicitante y sus datos
-            $solicitante = $tramite->solicitante;
-            
-            // Cargar datos existentes si los hay
             $datosExistentes = [];
+
+            // Cargar datos existentes si el trámite ya tiene progreso
             if ($tramite->progreso_tramite >= 2) {
                 // Cargar datos de la sección 1 (datos generales)
                 if ($tramite->detalleTramite) {
@@ -91,10 +104,6 @@ class TramiteController extends Controller
                 // Cargar actividades seleccionadas
                 $actividades = ActividadSolicitante::where('tramite_id', $tramite->id)->get();
                 $datosExistentes['actividades_seleccionadas'] = $actividades->pluck('actividad_id')->toArray();
-                
-                // Cargar datos de domicilio usando el controlador especializado
-                $domicilioController = new DomicilioController();
-                $datosExistentes['direccion'] = $domicilioController->obtenerDatos($tramite);
             }
 
             // Obtener datos usando los controladores especializados
@@ -126,6 +135,15 @@ class TramiteController extends Controller
 
             // Obtener datos de domicilio
             $datosDomicilio = $domicilioController->obtenerDatos($tramite);
+            
+            Log::info('Datos de domicilio para formulario:', [
+                'tramite_id' => $tramite->id,
+                'codigo_postal' => $datosDomicilio['codigo_postal'] ?? 'NULL',
+                'estado' => $datosDomicilio['estado'] ?? 'NULL',
+                'municipio' => $datosDomicilio['municipio'] ?? 'NULL',
+                'total_datos' => count($datosDomicilio),
+                'datos_completos' => $datosDomicilio
+            ]);
 
             return view("tramites.create", [
                 'tramite' => $tramite,

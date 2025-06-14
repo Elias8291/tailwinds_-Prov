@@ -11,6 +11,7 @@ use App\Models\Tramite;
 use App\Models\DetalleTramite;
 use App\Models\Direccion;
 use App\Models\Asentamiento;
+use App\Http\Controllers\DetalleTramiteController;
 
 class DomicilioController extends Controller
 {
@@ -186,33 +187,44 @@ class DomicilioController extends Controller
      */
     public function obtenerDatos(Tramite $tramite)
     {
-        $datosDomicilio = [
-            'tramite_id' => $tramite->id,
-        ];
-
-        // Si existe dirección, cargar los datos
-        if ($tramite->detalleTramite && $tramite->detalleTramite->direccion) {
-            $direccion = $tramite->detalleTramite->direccion;
-            $datosDomicilio = array_merge($datosDomicilio, [
-                'codigo_postal' => $direccion->codigo_postal,
-                'calle' => $direccion->calle,
-                'numero_exterior' => $direccion->numero_exterior,
-                'numero_interior' => $direccion->numero_interior,
-                'entre_calle_1' => $direccion->entre_calle_1,
-                'entre_calle_2' => $direccion->entre_calle_2,
-                'colonia' => $direccion->asentamiento_id,
-                'asentamiento_id' => $direccion->asentamiento_id,
+        try {
+            Log::info('🏠 DOMICILIO DEBUG: Iniciando obtenerDatos', [
+                'tramite_id' => $tramite->id
             ]);
 
-            // Obtener datos del asentamiento (estado, municipio)
-            if ($direccion->asentamiento) {
-                $asentamiento = $direccion->asentamiento;
-                $datosDomicilio['estado'] = $asentamiento->estado;
-                $datosDomicilio['municipio'] = $asentamiento->municipio;
+            // Usar el nuevo método del DetalleTramiteController
+            $detalleTramiteController = new DetalleTramiteController();
+            $datosDomicilio = $detalleTramiteController->getDatosDomicilioByTramiteId($tramite->id);
+            
+            if ($datosDomicilio) {
+                Log::info('🏠 DOMICILIO DEBUG: Datos obtenidos exitosamente usando DetalleTramiteController', [
+                    'tramite_id' => $tramite->id,
+                    'codigo_postal' => $datosDomicilio['codigo_postal'],
+                    'estado' => $datosDomicilio['estado'],
+                    'municipio' => $datosDomicilio['municipio']
+                ]);
+                return $datosDomicilio;
             }
+            
+            // Si no hay datos, retornar estructura básica
+            Log::info('🏠 DOMICILIO DEBUG: No se encontraron datos de domicilio', [
+                'tramite_id' => $tramite->id
+            ]);
+            
+            return [
+                'tramite_id' => $tramite->id,
+            ];
+            
+        } catch (\Exception $e) {
+            Log::error('🏠 DOMICILIO DEBUG: Error al obtener datos de domicilio', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'tramite_id' => $tramite->id,
+            ];
         }
-
-        return $datosDomicilio;
     }
 
     /**

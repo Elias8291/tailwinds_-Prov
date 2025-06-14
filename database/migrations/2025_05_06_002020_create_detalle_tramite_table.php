@@ -12,6 +12,7 @@ class CreateDetalleTramiteTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('tramite_id');
             $table->string('razon_social', 255);
+            $table->string('giro', 255)->nullable();
             $table->string('email', 255)->nullable(); 
             $table->string('telefono', 255)->nullable();
             $table->unsignedBigInteger('direccion_id')->nullable();

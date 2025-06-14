@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Cita;
 use App\Models\Solicitante;
+use App\Models\Tramite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\DetalleTramiteController;
 
 class CitaController extends Controller
 {
@@ -26,7 +29,38 @@ class CitaController extends Controller
         // Buscar el solicitante asociado al usuario
         $solicitante = Solicitante::where('usuario_id', $user->id)->first();
         
-        return view('citas.create', compact('solicitante'));
+        // Obtener datos de domicilio si hay un trámite en progreso
+        $datosDomicilio = [];
+        if ($solicitante) {
+            $tramiteEnProgreso = Tramite::where('solicitante_id', $solicitante->id)
+                ->whereIn('estado', ['Pendiente', 'En Revision'])
+                ->latest()
+                ->first();
+                
+            if ($tramiteEnProgreso) {
+                try {
+                    $detalleTramiteController = new DetalleTramiteController();
+                    $datosDomicilio = $detalleTramiteController->getDatosDomicilioByTramiteId($tramiteEnProgreso->id);
+                    
+                    if ($datosDomicilio) {
+                        Log::info('📍 CITAS CREATE: Datos de domicilio obtenidos', [
+                            'tramite_id' => $tramiteEnProgreso->id,
+                            'codigo_postal' => $datosDomicilio['codigo_postal'],
+                            'estado' => $datosDomicilio['estado'],
+                            'municipio' => $datosDomicilio['municipio']
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('📍 CITAS CREATE: Error al obtener datos de domicilio', [
+                        'tramite_id' => $tramiteEnProgreso->id,
+                        'error' => $e->getMessage()
+                    ]);
+                    $datosDomicilio = [];
+                }
+            }
+        }
+        
+        return view('citas.create', compact('solicitante', 'datosDomicilio'));
     }
 
     public function store(Request $request)
