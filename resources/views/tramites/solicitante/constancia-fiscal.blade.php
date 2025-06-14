@@ -367,19 +367,18 @@
         // Extraer código postal de los datos del SAT
         let codigoPostalSat = '';
         try {
-            if (satDataExtracted && satDataExtracted.domicilio) {
-                // Buscar el código postal en diferentes posibles ubicaciones
-                if (satDataExtracted.domicilio.codigoPostal) {
-                    codigoPostalSat = satDataExtracted.domicilio.codigoPostal;
-                } else if (satDataExtracted.domicilio.cp) {
-                    codigoPostalSat = satDataExtracted.domicilio.cp;
-                } else if (satDataExtracted.domicilio['Código Postal']) {
-                    codigoPostalSat = satDataExtracted.domicilio['Código Postal'];
+            if (satDataExtracted && satDataExtracted.details) {
+                // El sat-scraper.js guarda el código postal en data.details.cp
+                if (satDataExtracted.details.cp) {
+                    codigoPostalSat = satDataExtracted.details.cp;
+                    console.log('Código postal extraído del SAT (details.cp):', codigoPostalSat);
                 }
                 
                 // Limpiar el código postal (solo números)
-                codigoPostalSat = codigoPostalSat.toString().replace(/\D/g, '');
-                console.log('Código postal extraído del SAT:', codigoPostalSat);
+                if (codigoPostalSat) {
+                    codigoPostalSat = codigoPostalSat.toString().replace(/\D/g, '');
+                    console.log('Código postal limpio del SAT:', codigoPostalSat);
+                }
             }
         } catch (error) {
             console.error('Error al extraer código postal del SAT:', error);
