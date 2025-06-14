@@ -10,7 +10,7 @@ class Cita extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'cita';
+    protected $table = 'citas';
 
     protected $fillable = [
         'solicitante_id',
