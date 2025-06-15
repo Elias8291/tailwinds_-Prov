@@ -40,7 +40,7 @@ class DomicilioController extends Controller
     public function guardarFormulario(Request $request)
     {
         try {
-            Log::info('=== INICIO guardarDomicilioFormulario ===');
+    
             Log::info('Request completo:', ['data' => $request->all()]);
 
             // Validar los datos del formulario
@@ -68,9 +68,7 @@ class DomicilioController extends Controller
 
             DB::commit();
 
-            Log::info('Datos de domicilio guardados exitosamente:', [
-                'tramite_id' => $tramite->id
-            ]);
+
 
             return response()->json([
                 'success' => true,
@@ -133,10 +131,10 @@ class DomicilioController extends Controller
         // Si existe la dirección, actualizarla; si no, crear una nueva
         if ($direccion) {
             $direccion->update($direccionData);
-            Log::info('Dirección actualizada:', ['direccion_id' => $direccion->id]);
+
         } else {
             $direccion = Direccion::create($direccionData);
-            Log::info('Nueva dirección creada:', ['direccion_id' => $direccion->id]);
+
         }
 
         return $direccion;
@@ -155,10 +153,7 @@ class DomicilioController extends Controller
         $detalle->direccion_id = $direccion->id;
         $detalle->save();
 
-        Log::info('DetalleTramite actualizado con dirección:', [
-            'tramite_id' => $tramite->id,
-            'direccion_id' => $direccion->id
-        ]);
+
     }
 
     /**
@@ -172,10 +167,7 @@ class DomicilioController extends Controller
         // Solo actualizar a 3 si el progreso actual es 2
         if ($tramite->progreso_tramite == 2) {
         $tramite->update(['progreso_tramite' => 3]);
-        Log::info('Progreso del trámite actualizado:', [
-            'tramite_id' => $tramite->id,
-            'progreso' => 3
-        ]);
+
         }
     }
 
@@ -188,38 +180,26 @@ class DomicilioController extends Controller
     public function obtenerDatos(Tramite $tramite)
     {
         try {
-            Log::info('🏠 DOMICILIO DEBUG: Iniciando obtenerDatos', [
-                'tramite_id' => $tramite->id
-            ]);
+
 
             // Usar el nuevo método del DetalleTramiteController
             $detalleTramiteController = new DetalleTramiteController();
             $datosDomicilio = $detalleTramiteController->getDatosDomicilioByTramiteId($tramite->id);
             
             if ($datosDomicilio) {
-                Log::info('🏠 DOMICILIO DEBUG: Datos obtenidos exitosamente usando DetalleTramiteController', [
-                    'tramite_id' => $tramite->id,
-                    'codigo_postal' => $datosDomicilio['codigo_postal'],
-                    'estado' => $datosDomicilio['estado'],
-                    'municipio' => $datosDomicilio['municipio']
-                ]);
+
                 return $datosDomicilio;
             }
             
             // Si no hay datos, retornar estructura básica
-            Log::info('🏠 DOMICILIO DEBUG: No se encontraron datos de domicilio', [
-                'tramite_id' => $tramite->id
-            ]);
+
             
             return [
                 'tramite_id' => $tramite->id,
             ];
             
         } catch (\Exception $e) {
-            Log::error('🏠 DOMICILIO DEBUG: Error al obtener datos de domicilio', [
-                'tramite_id' => $tramite->id,
-                'error' => $e->getMessage()
-            ]);
+
             
             return [
                 'tramite_id' => $tramite->id,

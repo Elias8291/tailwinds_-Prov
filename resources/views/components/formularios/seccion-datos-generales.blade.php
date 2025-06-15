@@ -1,4 +1,4 @@
-@props(['title' => 'Datos Generales', 'datosTramite' => [], 'datosSolicitante' => []])
+@props(['title' => 'Datos Generales', 'datosTramite' => [], 'datosSolicitante' => [], 'codigoPostalDomicilio' => null, 'datosDomicilio' => []])
 
 <!-- Asegúrate de incluir Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -11,7 +11,7 @@ function datosGeneralesData() {
         curp: @json($datosSolicitante['curp'] ?? $datosTramite['curp'] ?? ''),
         nombreCompleto: @json($datosSolicitante['nombre_completo'] ?? $datosTramite['nombre_completo'] ?? ''),
         razonSocial: @json($datosSolicitante['razon_social'] ?? $datosTramite['razon_social'] ?? ''),
-        objetoSocial: @json($datosSolicitante['objeto_social'] ?? $datosTramite['objeto_social'] ?? ''),
+        giro: @json($datosTramite['giro'] ?? ''),
         esEdicion: @json(isset($datosTramite['tramite_id']) && $datosTramite['tramite_id'] ? true : false),
         sectorId: @json($datosTramite['sector_id'] ?? ''),
         
@@ -19,15 +19,7 @@ function datosGeneralesData() {
             // Cargar datos si es edición
             if (this.esEdicion) {
                 // Los datos ya están cargados desde el servidor
-                console.log('Modo edición - datos cargados:', {
-                    tipo: this.tipoPersona,
-                    rfc: this.rfc,
-                    curp: this.curp,
-                    nombre: this.nombreCompleto,
-                    razon: this.razonSocial,
-                    objeto: this.objetoSocial,
-                    sector: this.sectorId
-                });
+
                 
                 // Cargar actividades del sector si existe
                 if (this.sectorId) {
@@ -41,37 +33,20 @@ function datosGeneralesData() {
                 }
             }
             
-            // Log de depuración para verificar datos recibidos
-            console.log('Datos disponibles en el componente:', {
-                datosSolicitante: @json($datosSolicitante ?? []),
-                datosTramite: @json($datosTramite ?? [])
-            });
+
         }
     }
 }
 </script>
 
-<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" x-data="datosGeneralesData()">
-    <!-- Encabezado con icono mejorado -->
-    <div class="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
-        <div class="flex items-center space-x-4">
-            <div class="h-12 w-12 flex items-center justify-center rounded-xl bg-[#9d2449] text-white shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-[#8a203f]">
-                <i class="fas fa-building text-xl"></i>
-            </div>
-            <div>
-                <h2 class="text-xl font-bold text-gray-800">{{ $title }}</h2>
-                <p class="text-sm text-gray-500 mt-1">Complete la información general del proveedor</p>
-            </div>
-        </div>
-        
-        <!-- Indicador de modo edición -->
-        <div x-show="esEdicion" class="flex items-center px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
-            <i class="fas fa-edit text-amber-600 mr-2"></i>
-            <span class="text-sm text-amber-700 font-medium">Modo Edición</span>
-        </div>
+<div x-data="datosGeneralesData()">
+    <!-- Indicador de modo edición (si está editando) -->
+    <div x-show="esEdicion" class="flex items-center px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg mb-6">
+        <i class="fas fa-edit text-amber-600 mr-2"></i>
+        <span class="text-sm text-amber-700 font-medium">Editando datos existentes</span>
     </div>
 
-    <form action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-8">
+    <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-6">
         @csrf
         <input type="hidden" name="action" value="next">
         <input type="hidden" name="seccion" value="1">
@@ -85,7 +60,7 @@ function datosGeneralesData() {
         @endif
 
         <!-- Información Principal -->
-        <div class="space-y-6">
+        <div class="space-y-4">
             <!-- Tipo de Proveedor y RFC -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Tipo de Proveedor (Solo lectura) -->
@@ -168,30 +143,76 @@ function datosGeneralesData() {
             </div>
             @endif
 
-            <!-- Objeto Social -->
+            <!-- Giro -->
             <div class="form-group">
-                <label for="objeto_social" class="block text-sm font-medium text-gray-700 mb-2">
-                    Objeto Social
+                <label for="giro" class="block text-sm font-medium text-gray-700 mb-2">
+                    Giro
                     <span class="text-[#9d2449]">*</span>
                 </label>
                 <div class="relative group">
-                    <textarea id="objeto_social" name="objeto_social" rows="4"
-                              class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 resize-none @error('objeto_social') border-red-500 @enderror"
-                              placeholder="Describa el objeto social de la empresa"
-                              x-model="objetoSocial"
-                              maxlength="500" required></textarea>
+                    <textarea id="giro" name="giro" rows="4"
+                              class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 resize-none @error('giro') border-red-500 @enderror"
+                              placeholder="Describa el giro de la empresa"
+                              x-model="giro"
+                              maxlength="500" required>{{ old('giro', $datosTramite['giro'] ?? '') }}</textarea>
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
-                        <span x-text="objetoSocial ? objetoSocial.length : 0">0</span>/500
+                        <span x-text="giro ? giro.length : 0">0</span>/500
                     </div>
                 </div>
-                @error('objeto_social')
+                @error('giro')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
         </div>
 
+        <!-- Información del Domicilio (si existe) -->
+        @if(!empty($codigoPostalDomicilio))
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start space-x-3">
+                <div class="bg-blue-100 rounded-lg p-2">
+                    <i class="fas fa-map-marker-alt text-blue-600"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-blue-800 mb-1">Domicilio Registrado</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-blue-600">
+                        <div>
+                            <span class="font-medium">Código Postal:</span> {{ $codigoPostalDomicilio }}
+                        </div>
+                        @if(!empty($datosDomicilio['estado']))
+                        <div>
+                            <span class="font-medium">Estado:</span> {{ $datosDomicilio['estado'] }}
+                        </div>
+                        @endif
+                        @if(!empty($datosDomicilio['municipio']))
+                        <div>
+                            <span class="font-medium">Municipio:</span> {{ $datosDomicilio['municipio'] }}
+                        </div>
+                        @endif
+                        @if(!empty($datosDomicilio['colonia']))
+                        <div>
+                            <span class="font-medium">Asentamiento:</span> {{ $datosDomicilio['colonia'] }}
+                        </div>
+                        @endif
+                    </div>
+                    @if(!empty($datosDomicilio['calle']))
+                    <div class="mt-2 text-xs text-blue-600">
+                        <span class="font-medium">Dirección:</span> 
+                        {{ $datosDomicilio['calle'] }}
+                        @if(!empty($datosDomicilio['numero_exterior']))
+                            #{{ $datosDomicilio['numero_exterior'] }}
+                        @endif
+                        @if(!empty($datosDomicilio['numero_interior']))
+                            Int. {{ $datosDomicilio['numero_interior'] }}
+                        @endif
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Sector y Actividad -->
-        <div class="space-y-8">
+        <div class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Sector -->
                 <div class="form-group">
@@ -254,6 +275,24 @@ function datosGeneralesData() {
             @error('actividades_seleccionadas')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
+        </div>
+
+        <!-- Página Web -->
+        <div class="space-y-4 pt-6 border-t border-gray-100">
+            <div class="form-group">
+                <label for="pagina_web" class="block text-sm font-medium text-gray-700 mb-2">
+                    Página Web
+                </label>
+                <div class="relative group">
+                    <input type="url" id="pagina_web" name="pagina_web"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('pagina_web') border-red-500 @enderror"
+                           placeholder="https://www.ejemplo.com"
+                           value="{{ old('pagina_web', $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? '') }}">
+                </div>
+                @error('pagina_web')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
         </div>
 
         <!-- Datos de Contacto -->
@@ -344,6 +383,27 @@ function datosGeneralesData() {
                 </div>
             </div>
         </div>
+        </div>
+
+        @if(!isset($mostrar_navegacion) || $mostrar_navegacion !== false)
+        <!-- Botones de navegación -->
+        <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+            <button type="button" 
+                    onclick="guardarYSiguiente()"
+                    class="w-full sm:w-auto px-6 py-3 bg-[#9d2449] text-white rounded-lg hover:bg-[#8a203f] transition-all duration-300 transform-gpu hover:-translate-y-0.5">
+                <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+        @else
+        <!-- Botón navegación integrado cuando mostrar_navegacion es false -->
+        <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+            <button type="button" 
+                    onclick="guardarYSiguiente()"
+                    class="w-full sm:w-auto px-6 py-3 bg-[#9d2449] text-white rounded-lg hover:bg-[#8a203f] transition-all duration-300 transform-gpu hover:-translate-y-0.5">
+                <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+        @endif
     </form>
 </div>
 
@@ -811,7 +871,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
         } catch (error) {
-            console.error('Error al cargar actividades existentes:', error);
+            
         }
     }
 
@@ -849,7 +909,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 actividadSelect.disabled = false;
 
             } catch (error) {
-                console.error('Error:', error);
                 actividadSelect.innerHTML = '<option value="">Error al cargar actividades</option>';
                 actividadSelect.disabled = true;
             }
@@ -887,11 +946,114 @@ document.addEventListener('DOMContentLoaded', function() {
                 cargarActividadesExistentes();
             }
         } catch (error) {
-            console.error('Error al parsear actividades existentes:', error);
+
         }
     }
 
     // Inicializar el mensaje
     actualizarMensajeNoActividades();
 });
+
+// Función para guardar datos y navegar al siguiente paso
+async function guardarYSiguiente() {
+    try {
+        // 1. Obtener el formulario y preparar datos
+        const form = document.getElementById('datos-generales-form');
+        if (!form) {
+            alert('Error: No se encontró el formulario');
+            return;
+        }
+        
+        // 2. Preparar FormData y agregar token CSRF
+        const formData = new FormData(form);
+        formData.set('action', 'next'); // Asegurar que la acción sea 'next'
+        
+        // Agregar token CSRF si no existe
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (csrfToken && !formData.has('_token')) {
+            formData.set('_token', csrfToken.getAttribute('content'));
+        }
+        
+        // 3. Usar ruta específica para guardar datos generales (NO usar form.action)
+        const saveUrl = '{{ route("datos-generales.guardar") }}';
+        
+        const response = await fetch(saveUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        
+        // Obtener el texto de la respuesta primero
+        const responseText = await response.text();
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status} - ${responseText.substring(0, 200)}`);
+        }
+        
+        // Intentar parsear como JSON
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (parseError) {
+            throw new Error(`Respuesta del servidor no es JSON válido. Recibido: ${responseText.substring(0, 100)}...`);
+        }
+        
+        if (result.success) {
+            // 4. Navegar al siguiente paso
+            navegarSiguienteSeccion();
+        } else {
+            alert('Error al guardar: ' + (result.message || JSON.stringify(result.errors) || 'Error desconocido'));
+        }
+        
+    } catch (error) {
+        // Si falla el guardado, preguntar al usuario si quiere continuar
+        const continuar = confirm('Error al guardar los datos. ¿Desea continuar sin guardar?');
+        if (continuar) {
+            navegarSiguienteSeccion();
+        }
+    }
+}
+
+// Función simplificada para navegar al siguiente paso
+function navegarSiguienteSeccion() {
+    // Método 1: Función global navegarSiguiente (preferido)
+    if (typeof window.navegarSiguiente === 'function') {
+        window.navegarSiguiente();
+        return;
+    }
+    
+    // Método 2: Buscar contenedor Alpine.js y manipular directamente
+    const alpineContainer = document.querySelector('[x-data*="currentStep"]');
+    if (alpineContainer && typeof Alpine !== 'undefined') {
+        try {
+            const alpineData = Alpine.$data(alpineContainer);
+            if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                if (alpineData.currentStep < alpineData.totalSteps) {
+                    alpineData.currentStep++;
+                    return;
+                }
+            }
+        } catch (error) {
+            // Error silencioso
+        }
+    }
+    
+    // Método 3: Disparar evento personalizado
+    if (alpineContainer) {
+        alpineContainer.dispatchEvent(new CustomEvent('next-step'));
+        return;
+    }
+    
+    // Método 4: Buscar botón de navegación externa y hacer click
+    const siguienteBtn = document.querySelector('button[onclick*="navegarSiguiente"]');
+    if (siguienteBtn) {
+        siguienteBtn.click();
+        return;
+    }
+    
+    alert('Error: No se puede navegar al siguiente paso. Verifique que la página esté cargada correctamente.');
+}
 </script> 

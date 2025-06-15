@@ -115,7 +115,7 @@
                                     'tipo_persona' => $solicitante->tipo_persona ?? $datosTramite['tipo_persona'] ?? 'Física',
                                     'nombre_completo' => $solicitante->nombre_completo ?? $datosTramite['nombre_completo'] ?? '',
                                     'razon_social' => $solicitante->razon_social ?? $datosTramite['razon_social'] ?? '',
-                                    'objeto_social' => $solicitante->objeto_social ?? $datosTramite['objeto_social'] ?? ''
+                                    'giro' => $solicitante->giro ?? $datosTramite['giro'] ?? ''
                                 ] : []
                             ])
                             

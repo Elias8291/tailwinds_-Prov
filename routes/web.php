@@ -19,6 +19,7 @@ use App\Http\Controllers\TramiteSolicitanteController;
 use App\Http\Controllers\RevisionController;
 use App\Http\Controllers\Formularios\DomicilioController;
 use App\Http\Controllers\API\SectorController;
+use App\Http\Controllers\TramiteNavegacionController;
 
 // Ruta principal - solo para usuarios no autenticados
 Route::middleware(['web', 'guest'])->group(function () {
@@ -124,14 +125,65 @@ Route::prefix('tramites')->group(function () {
         ->where('tipo_tramite', 'inscripcion|renovacion|actualizacion')
         ->name('tramites.create');
     
+    // Ruta para pasos específicos del trámite
+    Route::get('/{tramite}/paso/{paso}', [TramiteNavegacionController::class, 'mostrarPaso'])
+        ->where(['tramite' => '[0-9]+', 'paso' => '[0-9]+'])
+        ->name('tramites.solicitante.paso');
+    
+    // Rutas de navegación entre pasos
+    Route::match(['get', 'post'], '/{tramite}/siguiente/{paso}', [TramiteNavegacionController::class, 'siguientePaso'])
+        ->where(['tramite' => '[0-9]+', 'paso' => '[0-9]+'])
+        ->name('tramites.navegacion.siguiente');
+    
+    Route::get('/{tramite}/anterior/{paso}', [TramiteNavegacionController::class, 'pasoAnterior'])
+        ->where(['tramite' => '[0-9]+', 'paso' => '[0-9]+'])
+        ->name('tramites.navegacion.anterior');
+    
     Route::post('/store', [TramiteController::class, 'store'])->name('tramites.store');
 });
 
-// Rutas para el controlador de datos generales
-Route::prefix('datos-generales')->group(function () {
-    Route::get('/{tramite}', [\App\Http\Controllers\DatosGeneralesController::class, 'mostrar'])->name('datos-generales.mostrar');
-    Route::post('/guardar', [\App\Http\Controllers\DatosGeneralesController::class, 'guardarDatos'])->name('datos-generales.guardar');
-    Route::get('/revision/{tramite}', [\App\Http\Controllers\DatosGeneralesController::class, 'mostrarRevision'])->name('datos-generales.revision');
+// Rutas para el formulario de datos generales
+Route::middleware(['auth'])->prefix('formularios')->group(function () {
+    Route::post('/datos-generales/guardar', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'guardar'])->name('datos-generales.guardar');
+    
+    // Ruta de prueba para el componente
+    Route::get('/datos-generales/test/{tramite?}', function($tramiteId = null) {
+        $datosTramite = [];
+        $datosSolicitante = [];
+        
+        if ($tramiteId) {
+            $tramite = \App\Models\Tramite::findOrFail($tramiteId);
+            $controller = new \App\Http\Controllers\Formularios\DatosGeneralesController();
+            $datosTramite = $controller->obtenerDatos($tramite);
+            
+            $solicitante = $tramite->solicitante;
+            if ($solicitante) {
+                $datosSolicitante = [
+                    'rfc' => $solicitante->rfc,
+                    'tipo_persona' => $solicitante->tipo_persona,
+                    'curp' => $solicitante->curp,
+                    'razon_social' => $solicitante->razon_social,
+                ];
+            }
+        }
+        
+        return view('tramites.datos-generales-test', compact('datosTramite', 'datosSolicitante'));
+    })->name('datos-generales.test');
+    
+    // Ruta de prueba para navegación de pasos
+    Route::get('/navegacion/test/{tramite?}', function($tramiteId = null) {
+        if (!$tramiteId) {
+            // Si no hay trámite, crear uno de prueba o listar trámites disponibles
+            $tramites = \App\Models\Tramite::with('solicitante')->take(10)->get();
+            return view('tramites.navegacion-test', compact('tramites'));
+        }
+        
+        // Redirigir al primer paso del trámite
+        return redirect()->route('tramites.solicitante.paso', [
+            'tramite' => $tramiteId,
+            'paso' => 1
+        ]);
+    })->name('navegacion.test');
 });
 
 // Rutas para el módulo de Trámite Solicitante
@@ -170,15 +222,12 @@ Route::middleware(['auth'])->prefix('tramites-solicitante')->group(function () {
 
 // Rutas de API para sectores y actividades
 Route::prefix('api')->group(function () {
-    Route::get('/sectores/{sector}/actividades', [SectorController::class, 'getActividades']);
-    Route::get('/actividades', [SectorController::class, 'getAllActividades']);
+    Route::get('/sectores/{sector}/actividades', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'getActividadesPorSector']);
+    Route::get('/actividades', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'getAllActividades']);
     Route::get('/actividades/{actividad}', [SectorController::class, 'getActividad']);
     
     // Rutas para el controlador de datos generales
-    Route::get('/datos-generales/{tramite}', [\App\Http\Controllers\DatosGeneralesController::class, 'obtenerDatosAjax'])->name('api.datos-generales.obtener');
-    Route::post('/datos-generales/guardar', [\App\Http\Controllers\DatosGeneralesController::class, 'guardarDatos'])->name('api.datos-generales.guardar');
-    Route::get('/sectores', [\App\Http\Controllers\DatosGeneralesController::class, 'obtenerSectores'])->name('api.sectores');
-    Route::get('/actividades-sector', [\App\Http\Controllers\DatosGeneralesController::class, 'obtenerActividades'])->name('api.actividades-sector');
+    Route::get('/datos-generales/{tramite}', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'obtenerDatos'])->name('api.datos-generales.obtener');
 });
 
 // Ruta temporal para debugging - ELIMINAR EN PRODUCCIÓN
@@ -256,3 +305,27 @@ Route::get('/test-obtener-datos/{tramite?}', [\App\Http\Controllers\Formularios\
 Route::get('/test-form-tramite/{tramite}', function($tramiteId) {
     return redirect()->route('tramites.datos-generales', ['tramite_id' => $tramiteId]);
 });
+
+// Ruta para debuggear problemas de sesión - ELIMINAR EN PRODUCCIÓN
+Route::get('/test-session-debug', function () {
+    return response()->json([
+        'session_started' => session()->isStarted(),
+        'session_id' => session()->getId(),
+        'user_authenticated' => Auth::check(),
+        'user_id' => Auth::id(),
+        'user_data' => Auth::user() ? [
+            'id' => Auth::user()->id,
+            'nombre' => Auth::user()->nombre,
+            'has_solicitante' => Auth::user()->solicitante !== null,
+            'solicitante_id' => Auth::user()->solicitante?->id
+        ] : null,
+        'session_data_keys' => array_keys(session()->all()),
+        'csrf_token' => csrf_token(),
+        'request_info' => [
+            'method' => request()->method(),
+            'url' => request()->url(),
+            'ip' => request()->ip(),
+            'user_agent' => request()->userAgent()
+        ]
+    ]);
+})->middleware('auth')->name('test.session-debug');

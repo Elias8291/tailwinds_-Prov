@@ -50,7 +50,7 @@ class TramiteController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create($tipoTramite, $tramiteId)
+    public function create($tipoTramite, $tramiteId, $pasoInicial = null)
     {
         try {
             // Buscar el trámite con todas las relaciones necesarias
@@ -107,7 +107,7 @@ class TramiteController extends Controller
             }
 
             // Obtener datos usando los controladores especializados
-            $datosGeneralesController = new DatosGeneralesController();
+            $datosGeneralesController = new \App\Http\Controllers\Formularios\DatosGeneralesController();
             $domicilioController = new DomicilioController();
             
             // Preparar datos base del trámite
@@ -120,7 +120,7 @@ class TramiteController extends Controller
                 'mostrar_razon_social' => $tipoTramite !== 'inscripcion',
                 'tramite_id' => $tramite->id,
                 'progreso_tramite' => $tramite->progreso_tramite,
-                'paso_inicial' => $tramite->progreso_tramite >= 2 ? 2 : 1,
+                'paso_inicial' => $pasoInicial ?? ($tramite->progreso_tramite >= 2 ? 2 : 1),
                 'datos_existentes' => $datosExistentes
             ];
 
@@ -133,23 +133,21 @@ class TramiteController extends Controller
                 $datosTramite = $datosTramiteBase;
             }
 
-            // Obtener datos de domicilio
+            // Obtener datos de domicilio usando la cadena: tramite_id → detalle_tramite → direccion_id → codigo_postal
             $datosDomicilio = $domicilioController->obtenerDatos($tramite);
             
-            Log::info('Datos de domicilio para formulario:', [
-                'tramite_id' => $tramite->id,
-                'codigo_postal' => $datosDomicilio['codigo_postal'] ?? 'NULL',
-                'estado' => $datosDomicilio['estado'] ?? 'NULL',
-                'municipio' => $datosDomicilio['municipio'] ?? 'NULL',
-                'total_datos' => count($datosDomicilio),
-                'datos_completos' => $datosDomicilio
-            ]);
+            // Obtener código postal específicamente usando DetalleTramiteController
+            $detalleTramiteController = new \App\Http\Controllers\DetalleTramiteController();
+            $codigoPostalDomicilio = $detalleTramiteController->getCodigoPostalByTramiteId($tramite->id);
+            
+
 
             return view("tramites.create", [
                 'tramite' => $tramite,
                 'solicitante' => $solicitante,
                 'datosTramite' => $datosTramite,
-                'datosDomicilio' => $datosDomicilio
+                'datosDomicilio' => $datosDomicilio,
+                'codigoPostalDomicilio' => $codigoPostalDomicilio
             ]);
 
         } catch (\Exception $e) {
@@ -160,6 +158,17 @@ class TramiteController extends Controller
 
             return back()->with('error', 'Error al cargar el formulario: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Muestra un paso específico del trámite
+     */
+    public function mostrarPaso($tramiteId, $paso)
+    {
+        $tramite = Tramite::findOrFail($tramiteId);
+        $tipoTramite = strtolower($tramite->tipo_tramite);
+        
+        return $this->create($tipoTramite, $tramiteId, $paso);
     }
 
     public function store(Request $request)
@@ -562,7 +571,7 @@ class TramiteController extends Controller
                 ]);
             }
 
-            Log::info('Mostrando formulario de domicilio:', ['datos' => $datosDomicilio]);
+    
 
             return view('tramites.domicilio', compact('datosDomicilio', 'tramite'));
 
@@ -582,7 +591,7 @@ class TramiteController extends Controller
     public function guardarDomicilio(Request $request)
     {
         try {
-            Log::info('=== INICIO guardarDomicilio ===');
+    
             Log::info('Request completo:', ['data' => $request->all()]);
 
             // Validar los datos del formulario

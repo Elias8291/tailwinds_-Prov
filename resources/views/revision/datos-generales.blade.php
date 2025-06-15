@@ -71,10 +71,10 @@
                     </div>
                     @endif
 
-                    <!-- Objeto Social -->
+                    <!-- Giro -->
                     <div class="bg-gray-50 rounded-lg p-4 md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Objeto Social</label>
-                        <p class="text-gray-800 leading-relaxed">{{ $datosTramite['objeto_social'] }}</p>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Giro</label>
+                        <p class="text-gray-800 leading-relaxed">{{ $datosTramite['giro'] ?? 'No especificado' }}</p>
                     </div>
                 </div>
             </div>
@@ -111,6 +111,19 @@
                         <p class="text-lg font-mono text-gray-800">{{ $datosTramite['contacto_telefono'] }}</p>
                     </div>
                 </div>
+
+                @if(!empty($datosTramite['pagina_web']))
+                <!-- Página Web -->
+                <div class="bg-gray-50 rounded-lg p-4 md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Página Web</label>
+                    <p class="text-lg text-blue-600 hover:text-blue-800">
+                        <a href="{{ $datosTramite['pagina_web'] }}" target="_blank" rel="noopener noreferrer" class="flex items-center">
+                            {{ $datosTramite['pagina_web'] }}
+                            <i class="fas fa-external-link-alt ml-2 text-sm"></i>
+                        </a>
+                    </p>
+                </div>
+                @endif
             </div>
         </div>
 

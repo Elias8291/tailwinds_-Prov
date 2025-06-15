@@ -26,13 +26,27 @@ class TramiteSolicitanteController extends Controller
         if ($tramiteEnProgreso) {
             Log::info('Trámite en progreso encontrado:', [
                 'tramite_id' => $tramiteEnProgreso->id,
-                'tipo_tramite' => $tramiteEnProgreso->tipo_tramite
+                'tipo_tramite' => $tramiteEnProgreso->tipo_tramite,
+                'progreso' => $tramiteEnProgreso->progreso_tramite
             ]);
             
             $datosDomicilio = $this->obtenerDatosDomicilio($tramiteEnProgreso);
+            
+
         }
         
-        return view('tramites.solicitante.index', compact('tipoTramite', 'user', 'tramiteEnProgreso', 'datosDomicilio'));
+        // Obtener código postal específicamente usando DetalleTramiteController si hay trámite en progreso
+        $codigoPostalDomicilio = null;
+        if ($tramiteEnProgreso) {
+            $detalleTramiteController = new \App\Http\Controllers\DetalleTramiteController();
+            $codigoPostalDomicilio = $detalleTramiteController->getCodigoPostalByTramiteId($tramiteEnProgreso->id);
+            Log::info('📮 Código postal obtenido para vista index:', [
+                'tramite_id' => $tramiteEnProgreso->id,
+                'codigo_postal' => $codigoPostalDomicilio
+            ]);
+        }
+        
+        return view('tramites.solicitante.index', compact('tipoTramite', 'user', 'tramiteEnProgreso', 'datosDomicilio', 'codigoPostalDomicilio'));
     }
 
     private function determinarTipoTramite($user)
@@ -187,17 +201,8 @@ class TramiteSolicitanteController extends Controller
 
     private function continuarTramite($tramite)
     {
-        // Verificar si ya tiene constancia de situación fiscal
-        if ($this->tieneConstanciaFiscal($tramite)) {
-            // Si ya tiene constancia, ir directamente al formulario principal
-            return redirect()->route('tramites.create', [
-                'tipo_tramite' => strtolower($tramite->tipo_tramite),
-                'tramite' => $tramite->id
-            ]);
-        }
-        
-        // Si no tiene constancia, redirigir a la carga de constancia
-        return redirect()->route('tramites.solicitante.constancia-fiscal', [
+        // Siempre redirigir a la vista create unificada
+        return redirect()->route('tramites.create', [
             'tipo_tramite' => strtolower($tramite->tipo_tramite),
             'tramite' => $tramite->id
         ]);
@@ -243,8 +248,8 @@ class TramiteSolicitanteController extends Controller
             'solicitante_id' => $solicitante->id
         ]);
         
-        // Redirigir a la carga de constancia de situación fiscal
-        return redirect()->route('tramites.solicitante.constancia-fiscal', [
+        // Redirigir directamente a la vista create unificada
+        return redirect()->route('tramites.create', [
             'tipo_tramite' => strtolower($tipoTramite),
             'tramite' => $tramite->id
         ]);

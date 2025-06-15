@@ -18,6 +18,7 @@
     <form class="space-y-8" @submit.prevent="guardarDomicilio" x-ref="domicilioForm">
         <input type="hidden" name="action" value="next">
         <input type="hidden" name="seccion" value="2">
+        <input type="hidden" name="tramite_id" value="{{ $datosDomicilio['tramite_id'] ?? ($tramite->id ?? '') }}">
         
         <!-- Código Postal y Ubicación -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -175,6 +176,23 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Botones de navegación -->
+        <div class="flex justify-between pt-6 border-t border-gray-100">
+            <button type="button" 
+                    onclick="navegarAnteriorDomicilio()"
+                    class="inline-flex items-center bg-gray-600 text-white px-6 py-2 rounded-xl shadow-lg hover:bg-gray-700 transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-gray-600/20">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Anterior
+            </button>
+            
+            <button type="button" 
+                    onclick="guardarDomicilioYSiguiente()"
+                    class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20">
+                <i class="fas fa-save mr-2"></i> Guardar y Continuar
+                <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
     </form>
 </div>
 
@@ -197,26 +215,67 @@ function domicilioData() {
                     const data = await response.json();
                     
                     if (data.success) {
-                        this.estado = data.estado;
-                        this.municipio = data.municipio;
+                        // Solo actualizar estado y municipio si no están ya establecidos
+                        if (!this.estado || this.estado === '') {
+                            this.estado = data.estado;
+                        }
+                        if (!this.municipio || this.municipio === '') {
+                            this.municipio = data.municipio;
+                        }
+                        
+                        // Siempre actualizar asentamientos disponibles
                         this.asentamientos = data.asentamientos;
+                        
+                        // Solo limpiar colonia si no hay una preseleccionada
+                        if (!this.colonia || this.colonia === '') {
+                            this.colonia = '';
+                        }
+                    } else {
+                        this.estado = '';
+                        this.municipio = '';
+                        this.asentamientos = [];
                         this.colonia = '';
                     }
                 } catch (error) {
-                    console.error('Error loading location data:', error);
+                    this.estado = '';
+                    this.municipio = '';
+                    this.asentamientos = [];
+                    this.colonia = '';
                 }
             }
         },
 
         async init() {
-            // Verificar si hay código postal del SAT en la sesión
+            // 1. Verificar si hay datos de domicilio del trámite
+            const datosDomicilio = @json($datosDomicilio ?? []);
+            const tramite = @json($tramite ?? null);
+            
+            // 2. Verificar si hay código postal del SAT en la sesión
             const codigoPostalSat = @json(session('codigo_postal_sat', null));
-            if (codigoPostalSat && codigoPostalSat.length === 5) {
-                console.log('Código postal del SAT detectado:', codigoPostalSat);
+            
+            // PRIORIDAD PRINCIPAL: Obtener datos directamente desde la base de datos usando tramite_id
+            if (tramite && tramite.id) {
+                const resultado = await this.cargarDatosDesdeTramite(tramite.id);
+                if (!resultado) {
+                    // Si no se pudieron cargar datos desde el trámite, intentar con datos pasados o SAT
+                    if (datosDomicilio && datosDomicilio.codigo_postal) {
+                        await this.cargarDatosDesdeObjeto(datosDomicilio);
+                    } else if (codigoPostalSat && codigoPostalSat.length === 5) {
+                        this.cp = codigoPostalSat;
+                        await this.loadLocationData();
+                    }
+                }
+            }
+            // Fallback final: Si no hay trámite, usar datos pasados o SAT
+            else if (datosDomicilio && datosDomicilio.codigo_postal) {
+                await this.cargarDatosDesdeObjeto(datosDomicilio);
+            } 
+            else if (codigoPostalSat && codigoPostalSat.length === 5) {
                 this.cp = codigoPostalSat;
                 await this.loadLocationData();
             }
 
+            // 3. Configurar watcher para cambios en el código postal
             this.$watch('cp', (value) => {
                 if (value && value.length === 5) {
                     this.loadLocationData();
@@ -229,39 +288,287 @@ function domicilioData() {
             });
         },
 
+        // Método para cargar datos desde un objeto de datos
+        async cargarDatosDesdeObjeto(datosDomicilio) {
+            try {
+                // Cargar datos básicos del domicilio existente
+                this.cp = datosDomicilio.codigo_postal.toString();
+                this.nombreVialidad = datosDomicilio.calle || '';
+                this.numeroExterior = datosDomicilio.numero_exterior || '';
+                this.numeroInterior = datosDomicilio.numero_interior || '';
+                
+                // Cargar datos de ubicación primero para obtener asentamientos
+                await this.loadLocationData();
+                
+                // Después de cargar asentamientos, seleccionar el correcto
+                if (datosDomicilio.asentamiento_id) {
+                    this.colonia = datosDomicilio.asentamiento_id.toString();
+                }
+                
+                // Si hay datos de estado y municipio ya disponibles, usarlos (sobrescribir si es necesario)
+                if (datosDomicilio.estado) {
+                    this.estado = datosDomicilio.estado;
+                }
+                if (datosDomicilio.municipio) {
+                    this.municipio = datosDomicilio.municipio;
+                }
+                
+                // Inicializar campos de las calles después de que el DOM esté listo
+                this.$nextTick(() => {
+                    const entreCalle1Input = document.getElementById('entre_calle_1');
+                    const entreCalle2Input = document.getElementById('entre_calle_2');
+                    if (entreCalle1Input && datosDomicilio.entre_calle_1) {
+                        entreCalle1Input.value = datosDomicilio.entre_calle_1;
+                    }
+                    if (entreCalle2Input && datosDomicilio.entre_calle_2) {
+                        entreCalle2Input.value = datosDomicilio.entre_calle_2;
+                    }
+                });
+                
+            } catch (error) {
+                // Error silencioso
+            }
+        },
+
+        // Método principal para cargar datos desde el trámite usando la cadena: tramite_id → detalle_tramite → direccion_id → codigo_postal
+        async cargarDatosDesdeTramite(tramiteId) {
+            try {
+                console.log('🔍 === INICIO DEBUG PASO A PASO ===');
+                console.log('🔍 PASO 1: Tramite ID recibido:', tramiteId);
+                
+                const response = await fetch(`/api/tramite/${tramiteId}/domicilio`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                console.log('📡 PASO 2: Respuesta HTTP recibida');
+                console.log('   - Status:', response.status);
+                console.log('   - Status Text:', response.statusText);
+                console.log('   - URL llamada:', response.url);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('📋 PASO 3: Datos JSON parseados');
+                    console.log('   - Respuesta completa:', JSON.stringify(data, null, 2));
+                    
+                    // Verificar estructura paso a paso
+                    console.log('🔎 PASO 4: Verificando estructura de datos');
+                    console.log('   - data.success existe:', 'success' in data ? '✅' : '❌');
+                    console.log('   - data.success valor:', data.success);
+                    console.log('   - data.domicilio existe:', 'domicilio' in data ? '✅' : '❌');
+                    
+                    if ('domicilio' in data && data.domicilio) {
+                        console.log('   - data.domicilio:', JSON.stringify(data.domicilio, null, 2));
+                        console.log('   - domicilio.codigo_postal existe:', 'codigo_postal' in data.domicilio ? '✅' : '❌');
+                        console.log('   - domicilio.codigo_postal valor:', data.domicilio.codigo_postal);
+                        console.log('   - domicilio.tramite_id:', data.domicilio.tramite_id);
+                        console.log('   - domicilio.direccion_id:', data.domicilio.direccion_id);
+                    }
+                    
+                    // Verificar si la respuesta fue exitosa y tiene datos
+                    if (data.success && data.domicilio && data.domicilio.codigo_postal) {
+                        console.log('✅ PASO 5: ÉXITO - Datos completos encontrados');
+                        console.log('   - Código postal:', data.domicilio.codigo_postal);
+                        console.log('   - Estado:', data.domicilio.estado);
+                        console.log('   - Municipio:', data.domicilio.municipio);
+                        
+                        // Cargar todos los datos obtenidos del servidor
+                        await this.cargarDatosDesdeObjeto(data.domicilio);
+                        return true; // Datos cargados exitosamente
+                    }
+                    // Si hay estructura de domicilio pero sin código postal completo
+                    else if (data.domicilio) {
+                        console.log('⚠️ PASO 5: PARCIAL - Datos incompletos encontrados');
+                        console.log('   - Razón del fallo:', !data.success ? 'success=false' : 'codigo_postal vacío');
+                        
+                        // Intentar cargar al menos el código postal si existe
+                        if (data.domicilio.codigo_postal) {
+                            console.log('📮 Intentando cargar código postal parcial:', data.domicilio.codigo_postal);
+                            this.cp = data.domicilio.codigo_postal.toString();
+                            await this.loadLocationData();
+                        }
+                        return false; // Datos parciales
+                    }
+                    else {
+                        console.log('❌ PASO 5: FALLO - No se encontraron datos de domicilio');
+                        console.log('   - data.domicilio es:', data.domicilio);
+                        console.log('   - Claves disponibles en data:', Object.keys(data));
+                    }
+                }
+                else {
+                    console.error('❌ PASO 3: FALLO - Error en respuesta HTTP');
+                    console.error('   - Status:', response.status);
+                    console.error('   - Status Text:', response.statusText);
+                    
+                    // Intentar leer el cuerpo de la respuesta de error
+                    try {
+                        const errorText = await response.text();
+                        console.error('   - Cuerpo del error:', errorText);
+                    } catch (e) {
+                        console.error('   - No se pudo leer el cuerpo del error');
+                    }
+                }
+                
+                console.log('🔍 === FIN DEBUG - RETORNANDO FALSE ===');
+                return false; // No hay datos
+            } catch (error) {
+                console.error('❌ EXCEPCIÓN EN cargarDatosDesdeTramite:');
+                console.error('   - Mensaje:', error.message);
+                console.error('   - Stack:', error.stack);
+                return false;
+            }
+        },
+
         async guardarDomicilio() {
             const form = this.$refs.domicilioForm;
             const formData = new FormData(form);
             
-            formData.append('codigo_postal', this.cp);
-            formData.append('calle', this.nombreVialidad);
-            formData.append('numero_exterior', this.numeroExterior);
-            formData.append('numero_interior', this.numeroInterior);
-            formData.append('colonia', this.colonia);
-            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            // Asegurar que todos los datos estén incluidos
+            formData.set('codigo_postal', this.cp);
+            formData.set('calle', this.nombreVialidad);
+            formData.set('numero_exterior', this.numeroExterior);
+            formData.set('numero_interior', this.numeroInterior || '');
+            formData.set('colonia', this.colonia);
+            
+            // Obtener tramite_id de los datos pasados al componente o del trámite
+            const datosDomicilio = @json($datosDomicilio ?? []);
+            const tramite = @json($tramite ?? null);
+            
+            if (datosDomicilio && datosDomicilio.tramite_id) {
+                formData.set('tramite_id', datosDomicilio.tramite_id);
+            } else if (tramite && tramite.id) {
+                formData.set('tramite_id', tramite.id);
+            }
+            
+            // Agregar CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (csrfToken) {
+                formData.set('_token', csrfToken.getAttribute('content'));
+            }
+            
+
             
             try {
                 const response = await fetch(@json(route("tramites.guardar-domicilio-formulario")), {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
                 });
                 
-                const result = await response.json();
+                const responseText = await response.text();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = JSON.parse(responseText);
                 
                 if (result.success) {
-                    alert('Datos de domicilio guardados correctamente');
-                    if (window.Alpine && this.$dispatch) {
-                        this.$dispatch('next-step');
-                    }
+                    return true;
                 } else {
-                    console.error('Errores:', result.errors || result.message);
-                    alert('Error al guardar: ' + (result.message || 'Error desconocido'));
+                    const errorMsg = result.message || (result.errors ? Object.values(result.errors).flat().join(', ') : 'Error desconocido');
+                    alert('Error al guardar: ' + errorMsg);
+                    return false;
                 }
             } catch (error) {
-                console.error('Error al guardar domicilio:', error);
-                alert('Error al guardar los datos');
+                alert('Error al guardar los datos: ' + error.message);
+                return false;
             }
         }
+    }
+}
+
+// Función para navegar al paso anterior desde domicilio
+function navegarAnteriorDomicilio() {
+    // Método 1: Función global navegarAnterior
+    if (typeof window.navegarAnterior === 'function') {
+        window.navegarAnterior();
+        return;
+    }
+    
+    // Método 2: Buscar contenedor Alpine.js y retroceder
+    const alpineContainer = document.querySelector('[x-data*="currentStep"]');
+    if (alpineContainer && typeof Alpine !== 'undefined') {
+        try {
+            const alpineData = Alpine.$data(alpineContainer);
+            if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                if (alpineData.currentStep > 1) {
+                    alpineData.currentStep--;
+                    return;
+                }
+            }
+        } catch (error) {
+            // Error silencioso
+        }
+    }
+    
+    // Método 3: Disparar evento personalizado
+    if (alpineContainer) {
+        alpineContainer.dispatchEvent(new CustomEvent('prev-step'));
+        return;
+    }
+}
+
+// Función para guardar domicilio y navegar al siguiente paso
+async function guardarDomicilioYSiguiente() {
+    try {
+        // 1. Buscar el componente Alpine.js de domicilio
+        const domicilioContainer = document.querySelector('[x-data*="domicilioData"]');
+        if (domicilioContainer && typeof Alpine !== 'undefined') {
+            const alpineData = Alpine.$data(domicilioContainer);
+            
+            if (alpineData && typeof alpineData.guardarDomicilio === 'function') {
+                const guardado = await alpineData.guardarDomicilio();
+                
+                if (guardado) {
+                    navegarSiguienteDesdeDomicilio();
+                }
+                return;
+            }
+        }
+        
+        // Fallback: intentar navegar sin guardar
+        navegarSiguienteDesdeDomicilio();
+        
+    } catch (error) {
+        navegarSiguienteDesdeDomicilio();
+    }
+}
+
+// Función para navegar al siguiente paso desde domicilio
+function navegarSiguienteDesdeDomicilio() {
+    // Método 1: Función global navegarSiguiente
+    if (typeof window.navegarSiguiente === 'function') {
+        window.navegarSiguiente();
+        return;
+    }
+    
+    // Método 2: Buscar contenedor Alpine.js y avanzar
+    const alpineContainer = document.querySelector('[x-data*="currentStep"]');
+    if (alpineContainer && typeof Alpine !== 'undefined') {
+        try {
+            const alpineData = Alpine.$data(alpineContainer);
+            if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                if (alpineData.currentStep < alpineData.totalSteps) {
+                    alpineData.currentStep++;
+                    return;
+                }
+            }
+        } catch (error) {
+            // Error silencioso
+        }
+    }
+    
+    // Método 3: Disparar evento personalizado
+    if (alpineContainer) {
+        alpineContainer.dispatchEvent(new CustomEvent('next-step'));
+        return;
     }
 }
 </script>

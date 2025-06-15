@@ -33,3 +33,6 @@ Route::get('/actividades', [SectorController::class, 'getAllActividades']);
 Route::get('/actividades/{actividad}', [SectorController::class, 'getActividad']);
 
 Route::get('/location-data/{codigoPostal}', [LocationDataController::class, 'getLocationData']);
+
+// Tramite Routes
+Route::get('/tramite/{tramiteId}/domicilio', [App\Http\Controllers\DetalleTramiteController::class, 'getDomicilioApi']);

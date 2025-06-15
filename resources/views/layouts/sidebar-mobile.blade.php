@@ -25,7 +25,7 @@
                             </svg>
                             <span class="font-semibold tracking-wide">Dashboard</span>
                         </a>
-
+                        
                         <!-- Roles y Permisos -->
                         @can('dashboard.admin')
                         <a href="{{ route('roles.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
@@ -107,7 +107,7 @@
                             </svg>
                             <span class="font-medium tracking-wide">Configuración</span>
                         </a>
-
+                        
                         <!-- Citas -->
                         <a href="{{ route('citas.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
                             {{ request()->routeIs('citas.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">

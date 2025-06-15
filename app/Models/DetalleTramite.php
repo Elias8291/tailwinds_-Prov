@@ -16,6 +16,7 @@ class DetalleTramite extends Model
         'razon_social',
         'email',
         'telefono',
+        'giro',
         'direccion_id',
         'contacto_id',
         'representante_legal_id',

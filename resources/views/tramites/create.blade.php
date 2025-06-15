@@ -39,7 +39,7 @@
                     const response = await fetch('/tramites-solicitante/datos-tramite');
                     const data = await response.json();
                     
-                    this.currentStep = data.paso_inicial || 1;
+                    this.currentStep = data.paso_inicial || data.progreso_tramite || 1;
                     this.tipoPersona = data.tipo_persona;
                     this.isPersonaFisica = data.tipo_persona === 'Física';
                     this.totalSteps = this.isPersonaFisica ? 3 : 6;
@@ -61,7 +61,7 @@
                             {number: '06', label: 'Documentos'}
                         ];
                 } catch (error) {
-                    console.error('Error al cargar datos del trámite:', error);
+    
                 }
                 
                 this.$nextTick(() => {
@@ -178,14 +178,14 @@
                             'tipo_persona' => $solicitante->tipo_persona ?? $datosTramite['tipo_persona'] ?? 'Física',
                             'nombre_completo' => $solicitante->nombre_completo ?? $datosTramite['nombre_completo'] ?? '',
                             'razon_social' => $solicitante->razon_social ?? $datosTramite['razon_social'] ?? '',
-                            'objeto_social' => $solicitante->objeto_social ?? $datosTramite['objeto_social'] ?? ''
+                            'giro' => $solicitante->giro ?? $datosTramite['giro'] ?? ''
                         ] : [
                             'rfc' => $datosTramite['rfc'] ?? '',
                             'curp' => $datosTramite['curp'] ?? '',
                             'tipo_persona' => $datosTramite['tipo_persona'] ?? 'Física',
                             'nombre_completo' => $datosTramite['nombre_completo'] ?? '',
                             'razon_social' => $datosTramite['razon_social'] ?? '',
-                            'objeto_social' => $datosTramite['objeto_social'] ?? ''
+                            'giro' => $datosTramite['giro'] ?? ''
                         ]
                     ])
                 </div>
@@ -193,6 +193,7 @@
                 <!-- Domicilio -->
                 <div x-show="currentStep === 2" x-cloak @next-step="currentStep++">
                     @include('components.formularios.seccion-domicilio', [
+                        'tramite' => $tramite,
                         'datosDomicilio' => isset($datosDomicilio) ? $datosDomicilio : [],
                         'datosSAT' => isset($datosSAT) ? $datosSAT : null,
                         'datosSolicitante' => [
@@ -225,20 +226,7 @@
 
                 <!-- Navigation Buttons -->
                 <div class="flex flex-col sm:flex-row justify-between gap-3 mt-6">
-                    <button type="button" 
-                            x-show="currentStep > 1"
-                            x-cloak
-                            @click="currentStep--"
-                            class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-600 text-white text-sm sm:text-base rounded-lg hover:bg-gray-700 transition-all duration-300 transform-gpu hover:-translate-y-0.5">
-                        <i class="fas fa-arrow-left mr-1"></i> Anterior
-                    </button>
-                    <button type="button" 
-                            x-show="currentStep < totalSteps"
-                            x-cloak
-                            @click="currentStep++"
-                            class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-red-800 text-white text-sm sm:text-base rounded-lg hover:bg-red-900 transition-all duration-300 transform-gpu hover:-translate-y-0.5">
-                        Siguiente <i class="fas fa-arrow-right ml-1"></i>
-                    </button>
+                    
                     <button type="button" 
                             x-show="currentStep === totalSteps"
                             x-cloak
@@ -422,7 +410,7 @@
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+
             alert('Error al finalizar el trámite');
         });
     }

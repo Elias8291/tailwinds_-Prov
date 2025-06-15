@@ -1,21 +1,234 @@
 @extends('layouts.app')
 
+@push('head')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
+
 @section('content')
 <div class="min-h-screen bg-gray-50/30 font-montserrat py-8">
     <!-- Contenedor principal -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header elegante -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#9d2449] to-[#7a1d37] rounded-2xl mb-4 shadow-lg">
-                <i class="fas fa-clipboard-list text-2xl text-white"></i>
+        
+        @if(isset($tramite) && isset($paso_actual))
+            <!-- Vista de pasos del trámite -->
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                    <!-- Header Section -->
+                    <div class="p-5 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-[#9d2449]">
+                                    {{ ucfirst($tramite->tipo_tramite) }} - Paso {{ $paso_actual }} de {{ $total_pasos }}
+                                </h2>
+                                <p class="text-gray-600 text-sm">
+                                    RFC: {{ $solicitante->rfc }} | {{ $solicitante->tipo_persona === 'Física' ? 'Persona Física' : 'Persona Moral' }}
+                                </p>
+                            </div>
+                            <button onclick="volverATramites()" class="inline-flex items-center text-gray-500 hover:text-[#9d2449]">
+                                <i class="fas fa-arrow-left mr-2"></i>
+                                Volver
+                            </button>
+                        </div>
+                        
+                        <!-- Indicador de progreso -->
+                        <div class="mt-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-600">Progreso del trámite</span>
+                                <span class="text-sm text-gray-600">{{ round(($paso_actual / $total_pasos) * 100) }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] h-2 rounded-full transition-all duration-300" 
+                                     style="width: {{ ($paso_actual / $total_pasos) * 100 }}%"></div>
+                            </div>
+                            
+                            <!-- Indicadores de pasos compactos -->
+                            <div class="flex justify-between mt-3">
+                                @for($i = 1; $i <= $total_pasos; $i++)
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium
+                                            {{ $i <= $paso_actual ? 'bg-[#9d2449] text-white' : 'bg-gray-300 text-gray-600' }}
+                                            {{ $i == $paso_actual ? 'ring-2 ring-[#9d2449]/30' : '' }}">
+                                            {{ $i }}
+                                        </div>
+                                        <span class="text-xs mt-1 text-center max-w-16
+                                            {{ $i == $paso_actual ? 'text-[#9d2449] font-medium' : 'text-gray-500' }}">
+                                            @php
+                                                $nombres_pasos = [
+                                                    1 => 'Datos',
+                                                    2 => 'Domicilio',
+                                                    3 => $solicitante->tipo_persona === 'Física' ? 'Docs' : 'Constitución',
+                                                    4 => 'Accionistas',
+                                                    5 => 'Apoderado',
+                                                    6 => 'Documentos'
+                                                ];
+                                            @endphp
+                                            {{ $nombres_pasos[$i] ?? 'Paso ' . $i }}
+                                        </span>
+                                    </div>
+                                @endfor
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mensajes de estado -->
+                    @if(session('success'))
+                        <div class="mx-5 mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                            <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="mx-5 mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                            <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
+                        </div>
+                    @endif
+
+                    @if(session('warning'))
+                        <div class="mx-5 mb-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>{{ session('warning') }}
+                        </div>
+                    @endif
+
+                    <!-- Contenido del paso -->
+                    <div class="p-6 space-y-6" 
+                         x-data="{ 
+                            currentStep: {{ $paso_actual }}, 
+                            totalSteps: {{ $total_pasos }},
+                            tipoPersona: '{{ $solicitante->tipo_persona }}',
+                            tramiteId: {{ $tramite->id ?? 'null' }}
+                         }"
+                         @next-step="currentStep++"
+                         @prev-step="currentStep--">
+                         
+                        <!-- Sección 1: Datos Generales -->
+                        <div x-show="currentStep === 1" x-cloak>
+                            @include('components.formularios.seccion-datos-generales', [
+                                'title' => 'Datos Generales',
+                                'datosTramite' => $datosTramite ?? [],
+                                'datosSolicitante' => $datosSolicitante ?? [],
+                                'codigoPostalDomicilio' => $codigoPostalDomicilio ?? (isset($datosDomicilio['codigo_postal']) ? $datosDomicilio['codigo_postal'] : null),
+                                'datosDomicilio' => $datosDomicilio ?? [],
+                                'mostrar_navegacion' => false
+                            ])
+                        </div>
+                        
+                        <!-- Sección 2: Domicilio -->
+                        <div x-show="currentStep === 2" x-cloak>
+                            @include('components.formularios.seccion-domicilio', [
+                                'title' => 'Datos de Domicilio',
+                                'datosDomicilio' => isset($datosDomicilio) && !empty($datosDomicilio) ? $datosDomicilio : (isset($tramite) ? ['tramite_id' => $tramite->id] : []),
+                                'datosSolicitante' => $datosSolicitante ?? [],
+                                'tramite' => $tramite ?? null,
+                                'codigoPostalDomicilio' => $codigoPostalDomicilio ?? (isset($datosDomicilio['codigo_postal']) ? $datosDomicilio['codigo_postal'] : null),
+                                'mostrar_navegacion' => false
+                            ])
+                        </div>
+                        
+                        <!-- Sección 3: Constitución (Solo Persona Moral) -->
+                        <div x-show="currentStep === 3 && tipoPersona === 'Moral'" x-cloak>
+                            @include('components.formularios.seccion-constitucion', [
+                                'title' => 'Datos de Constitución',
+                                'mostrar_navegacion' => false
+                            ])
+                        </div>
+                        
+                        <!-- Sección 3: Documentos (Solo Persona Física) -->
+                        <div x-show="currentStep === 3 && tipoPersona === 'Física'" x-cloak>
+                            @include('components.formularios.seccion-documentos', [
+                                'title' => 'Documentos Requeridos',
+                                'mostrar_navegacion' => false
+                            ])
+                        </div>
+                        
+                        <!-- Sección 4: Accionistas (Solo Persona Moral) -->
+                        <div x-show="currentStep === 4 && tipoPersona === 'Moral'" x-cloak>
+                            @include('components.formularios.seccion-accionistas', [
+                                'title' => 'Accionistas',
+                                'mostrar_navegacion' => false
+                            ])
+                        </div>
+                        
+                        <!-- Sección 5: Apoderado Legal (Solo Persona Moral) -->
+                        <div x-show="currentStep === 5 && tipoPersona === 'Moral'" x-cloak>
+                            @include('components.formularios.seccion-apoderado', [
+                                'title' => 'Apoderado Legal',
+                                'mostrar_navegacion' => false
+                            ])
+                        </div>
+                        
+                        <!-- Sección 6: Documentos (Solo Persona Moral) -->
+                        <div x-show="currentStep === 6 && tipoPersona === 'Moral'" x-cloak>
+                            @include('components.formularios.seccion-documentos', [
+                                'title' => 'Documentos Requeridos',
+                                'mostrar_navegacion' => false
+                            ])
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="p-6 pt-0">
+                        <div class="flex justify-between pt-4">
+                            @if($puede_regresar ?? false)
+                                <button type="button" 
+                                        onclick="navegarAnterior()"
+                                        class="inline-flex items-center bg-gray-600 text-white px-6 py-2 rounded-xl shadow-lg hover:bg-gray-700 transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-gray-600/20">
+                                    <i class="fas fa-arrow-left mr-2"></i>
+                                    Anterior
+                                </button>
+                            @else
+                                <div></div>
+                            @endif
+                            
+                            @if($paso_actual < $total_pasos)
+                                <button type="button" 
+                                        onclick="navegarSiguiente()"
+                                        class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20">
+                                    Siguiente
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            @else
+                                <!-- Último paso - Botón Finalizar -->
+                                <button type="button" 
+                                        onclick="finalizarTramite()"
+                                        class="inline-flex items-center bg-green-600 text-white px-6 py-2 rounded-xl shadow-lg hover:bg-green-700 transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-green-600/20">
+                                    <i class="fas fa-check mr-2"></i>
+                                    Finalizar Trámite
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Información adicional -->
+                    <div class="px-6 pb-6">
+                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                                <div>
+                                    <h4 class="font-medium text-blue-900 mb-1">Información importante</h4>
+                                    <p class="text-sm text-blue-700">
+                                        Al presionar "Siguiente", sus datos se guardan automáticamente y avanza al siguiente paso. 
+                                        Puede regresar en cualquier momento para revisar o modificar la información.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <h1 class="text-3xl font-bold bg-gradient-to-r from-[#9d2449] to-[#7a1d37] bg-clip-text text-transparent mb-2">
-                Mis Trámites
-            </h1>
-            <p class="text-gray-600 max-w-lg mx-auto">
-                Selecciona el trámite que necesitas realizar
-            </p>
-        </div>
+        @else
+            <!-- Vista original de selección de trámites -->
+            <!-- Header elegante -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#9d2449] to-[#7a1d37] rounded-2xl mb-4 shadow-lg">
+                    <i class="fas fa-clipboard-list text-2xl text-white"></i>
+                </div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-[#9d2449] to-[#7a1d37] bg-clip-text text-transparent mb-2">
+                    Mis Trámites
+                </h1>
+                <p class="text-gray-600 max-w-lg mx-auto">
+                    Selecciona el trámite que necesitas realizar
+                </p>
+            </div>
 
         <!-- Tarjetas compactas y elegantes -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -197,29 +410,82 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 </div>
 
+@push('styles')
+<style>
+[x-cloak] { display: none !important; }
+</style>
+@endpush
+
 @push('scripts')
 <script>
+    // Función para volver a la vista de trámites
+    function volverATramites() {
+        window.location.href = '{{ route("tramites.solicitante.index") }}';
+    }
+
+    @if(isset($tramite) && isset($paso_actual))
+    // Funciones de navegación globales para integración con componentes
+    window.navegarSiguiente = function() {
+        // Usar SOLO Alpine.js - navegación SPA sin recargar página
+        const alpineContainer = document.querySelector('[x-data]');
+        
+        if (alpineContainer) {
+            try {
+                // Intentar acceder al componente Alpine y aumentar currentStep
+                if (typeof Alpine !== 'undefined') {
+                    const alpineData = Alpine.$data(alpineContainer);
+                    if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                        if (alpineData.currentStep < alpineData.totalSteps) {
+                            alpineData.currentStep++;
+                            return;
+                        } else {
+                            return;
+                        }
+                    }
+                }
+                
+                // Fallback: usar event dispatch para comunicarse con Alpine
+                alpineContainer.dispatchEvent(new CustomEvent('next-step'));
+                return;
+                
+            } catch (error) {
+                // Error silencioso
+            }
+        }
+    };
+
+    window.navegarAnterior = function() {
+        const alpineContainer = document.querySelector('[x-data]');
+        
+        if (alpineContainer) {
+            try {
+                if (typeof Alpine !== 'undefined') {
+                    const alpineData = Alpine.$data(alpineContainer);
+                    if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                        alpineData.currentStep--;
+                        return;
+                    }
+                }
+            } catch (error) {
+                // Error silencioso
+            }
+        }
+    };
+
+    function finalizarTramite() {
+        if (confirm('¿Está seguro de que desea finalizar el trámite? Una vez finalizado, no podrá realizar más cambios.')) {
+            window.location.href = '{{ route("tramites.solicitante.index") }}';
+        }
+    }
+    @endif
+
     // Carga instantánea - sin retrasos
     document.addEventListener('DOMContentLoaded', function() {
         // Las tarjetas cargan inmediatamente sin animación de retraso
-        console.log('Módulo de trámites cargado');
-        
-        // Debug de datos de domicilio
-        @if($tramiteEnProgreso)
-        console.log('🎯 TRAMITE DEBUG: Trámite en progreso encontrado:', {
-            tramite_id: {{ $tramiteEnProgreso->id }},
-            tipo_tramite: '{{ $tramiteEnProgreso->tipo_tramite }}'
-        });
-        @endif
-        
-        @if(!empty($datosDomicilio))
-        console.log('🏠 DATOS DOMICILIO DEBUG:', @json($datosDomicilio));
-        @else 
-        console.log('🏠 DATOS DOMICILIO DEBUG: No hay datos de domicilio');
-        @endif
     });
 </script>
 @endpush
