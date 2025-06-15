@@ -18,8 +18,11 @@ use App\Http\Controllers\DiaInhabilController;
 use App\Http\Controllers\TramiteSolicitanteController;
 use App\Http\Controllers\RevisionController;
 use App\Http\Controllers\Formularios\DomicilioController;
+use App\Http\Controllers\Formularios\ConstitucionController;
+use App\Http\Controllers\DireccionController;
 use App\Http\Controllers\API\SectorController;
 use App\Http\Controllers\TramiteNavegacionController;
+use App\Http\Controllers\Formularios\DocumentosController;
 
 // Ruta principal - solo para usuarios no autenticados
 Route::middleware(['web', 'guest'])->group(function () {
@@ -118,7 +121,10 @@ Route::prefix('tramites')->group(function () {
     
     Route::get('/domicilio', [TramiteController::class, 'mostrarDomicilio'])->name('tramites.domicilio');
     Route::post('/guardar-domicilio', [TramiteController::class, 'guardarDomicilio'])->name('tramites.guardar-domicilio');
-    Route::post('/guardar-domicilio-formulario', [DomicilioController::class, 'guardarFormulario'])->name('tramites.guardar-domicilio-formulario');
+    Route::post('/guardar-domicilio-formulario', [DireccionController::class, 'guardarFormulario'])->name('tramites.guardar-domicilio-formulario');
+    Route::post('/guardar-constitucion-formulario', [ConstitucionController::class, 'guardarFormulario'])->name('tramites.guardar-constitucion-formulario');
+    Route::post('/guardar-accionistas-formulario', [\App\Http\Controllers\Formularios\AccionistasController::class, 'guardarFormulario'])->name('tramites.guardar-accionistas-formulario');
+    Route::post('/guardar-apoderado-formulario', [\App\Http\Controllers\Formularios\ApoderadoLegalController::class, 'guardarFormulario'])->name('tramites.guardar-apoderado-formulario');
     
     // Rutas específicas para cada tipo de trámite
     Route::get('/{tipo_tramite}/{tramite}/create', [TramiteController::class, 'create'])
@@ -213,7 +219,7 @@ Route::middleware(['auth'])->prefix('tramites-solicitante')->group(function () {
     // Nuevas rutas para obtener datos dinámicamente
     Route::get('/datos-tramite', [TramiteSolicitanteController::class, 'obtenerDatosTramite'])->name('tramites.solicitante.datos-tramite');
     Route::get('/documentos', [TramiteSolicitanteController::class, 'obtenerDocumentos'])->name('tramites.solicitante.documentos');
-    Route::post('/upload-documento', [TramiteSolicitanteController::class, 'subirDocumento'])->name('tramites.solicitante.upload-documento');
+    Route::post('/upload-documento', [\App\Http\Controllers\Formularios\DocumentosController::class, 'subir'])->name('tramites.solicitante.upload-documento');
     Route::post('/finalizar', [TramiteSolicitanteController::class, 'finalizarTramite'])->name('tramites.solicitante.finalizar');
     
     // API para obtener datos de domicilio

@@ -140,14 +140,21 @@ class TramiteController extends Controller
             $detalleTramiteController = new \App\Http\Controllers\DetalleTramiteController();
             $codigoPostalDomicilio = $detalleTramiteController->getCodigoPostalByTramiteId($tramite->id);
             
-
+            // Obtener datos del apoderado legal si es persona moral
+            $datosApoderado = [];
+            if ($solicitante->tipo_persona === 'Moral') {
+                $apoderadoController = new \App\Http\Controllers\Formularios\ApoderadoLegalController();
+                $datosApoderado = $apoderadoController->getDatosApoderadoLegal($tramite);
+                $datosApoderado['tramite_id'] = $tramite->id;
+            }
 
             return view("tramites.create", [
                 'tramite' => $tramite,
                 'solicitante' => $solicitante,
                 'datosTramite' => $datosTramite,
                 'datosDomicilio' => $datosDomicilio,
-                'codigoPostalDomicilio' => $codigoPostalDomicilio
+                'codigoPostalDomicilio' => $codigoPostalDomicilio,
+                'datosApoderado' => $datosApoderado
             ]);
 
         } catch (\Exception $e) {

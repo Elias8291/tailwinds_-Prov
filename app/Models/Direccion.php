@@ -22,7 +22,7 @@ class Direccion extends Model
     ];
 
     protected $casts = [
-        'codigo_postal' => 'integer',
+        'codigo_postal' => 'string',
     ];
 
     public function asentamiento()

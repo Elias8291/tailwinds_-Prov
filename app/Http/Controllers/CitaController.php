@@ -31,6 +31,7 @@ class CitaController extends Controller
         
         // Obtener datos de domicilio si hay un trámite en progreso
         $datosDomicilio = [];
+        $datosApoderado = [];
         if ($solicitante) {
             $tramiteEnProgreso = Tramite::where('solicitante_id', $solicitante->id)
                 ->whereIn('estado', ['Pendiente', 'En Revision'])
@@ -57,10 +58,17 @@ class CitaController extends Controller
                     ]);
                     $datosDomicilio = [];
                 }
+                
+                // Obtener datos del apoderado legal si es persona moral
+                if ($tramiteEnProgreso && $tramiteEnProgreso->solicitante->tipo_persona === 'Moral') {
+                    $apoderadoController = new \App\Http\Controllers\Formularios\ApoderadoLegalController();
+                    $datosApoderado = $apoderadoController->getDatosApoderadoLegal($tramiteEnProgreso);
+                    $datosApoderado['tramite_id'] = $tramiteEnProgreso->id;
+                }
             }
         }
         
-        return view('citas.create', compact('solicitante', 'datosDomicilio'));
+        return view('citas.create', compact('solicitante', 'datosDomicilio', 'datosApoderado'));
     }
 
     public function store(Request $request)

@@ -210,18 +210,26 @@
                 </div>
 
                 <!-- Documentos - Para Persona Física en paso 3, para Moral en paso 6 -->
-                <div x-show="(isPersonaFisica === true && currentStep === 3) || (isPersonaFisica === false && currentStep === 6)" x-cloak>
-                    @include('components.formularios.seccion-documentos')
+                <div x-show="(isPersonaFisica === true && currentStep === 3) || (isPersonaFisica === false && currentStep === 6)" x-cloak @previous-step="currentStep--">
+                    @include('components.formularios.seccion-documentos', [
+                        'tramite' => $tramite
+                    ])
                 </div>
 
                 <!-- Accionistas - Solo para Persona Moral -->
-                <div x-show="isPersonaFisica === false && currentStep === 4" x-cloak>
-                    @include('components.formularios.seccion-accionistas')
+                <div x-show="isPersonaFisica === false && currentStep === 4" x-cloak @next-step="currentStep++" @previous-step="currentStep--">
+                    @include('components.formularios.seccion-accionistas', [
+                        'tramite' => $tramite,
+                        'datosAccionistas' => isset($datosAccionistas) ? $datosAccionistas : []
+                    ])
                 </div>
 
                 <!-- Apoderado Legal - Solo para Persona Moral -->
-                <div x-show="isPersonaFisica === false && currentStep === 5" x-cloak>
-                    @include('components.formularios.seccion-apoderado')
+                <div x-show="isPersonaFisica === false && currentStep === 5" x-cloak @next-step="currentStep++" @previous-step="currentStep--">
+                    @include('components.formularios.seccion-apoderado', [
+                        'tramite' => $tramite,
+                        'datosApoderado' => isset($datosApoderado) ? $datosApoderado : []
+                    ])
                 </div>
 
                 <!-- Navigation Buttons -->

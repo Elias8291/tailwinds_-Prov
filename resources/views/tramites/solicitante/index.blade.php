@@ -133,9 +133,10 @@
                         </div>
                         
                         <!-- Sección 3: Documentos (Solo Persona Física) -->
-                        <div x-show="currentStep === 3 && tipoPersona === 'Física'" x-cloak>
+                        <div x-show="currentStep === 3 && tipoPersona === 'Física'" x-cloak @previous-step="currentStep--">
                             @include('components.formularios.seccion-documentos', [
                                 'title' => 'Documentos Requeridos',
+                                'tramite' => $tramite ?? null,
                                 'mostrar_navegacion' => false
                             ])
                         </div>
@@ -149,17 +150,20 @@
                         </div>
                         
                         <!-- Sección 5: Apoderado Legal (Solo Persona Moral) -->
-                        <div x-show="currentStep === 5 && tipoPersona === 'Moral'" x-cloak>
+                        <div x-show="currentStep === 5 && tipoPersona === 'Moral'" x-cloak @next-step="currentStep++" @previous-step="currentStep--">
                             @include('components.formularios.seccion-apoderado', [
                                 'title' => 'Apoderado Legal',
+                                'tramite' => $tramite ?? null,
+                                'datosApoderado' => isset($datosApoderado) ? $datosApoderado : [],
                                 'mostrar_navegacion' => false
                             ])
                         </div>
                         
                         <!-- Sección 6: Documentos (Solo Persona Moral) -->
-                        <div x-show="currentStep === 6 && tipoPersona === 'Moral'" x-cloak>
+                        <div x-show="currentStep === 6 && tipoPersona === 'Moral'" x-cloak @previous-step="currentStep--">
                             @include('components.formularios.seccion-documentos', [
                                 'title' => 'Documentos Requeridos',
+                                'tramite' => $tramite ?? null,
                                 'mostrar_navegacion' => false
                             ])
                         </div>

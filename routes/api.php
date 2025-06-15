@@ -36,3 +36,6 @@ Route::get('/location-data/{codigoPostal}', [LocationDataController::class, 'get
 
 // Tramite Routes
 Route::get('/tramite/{tramiteId}/domicilio', [App\Http\Controllers\DetalleTramiteController::class, 'getDomicilioApi']);
+Route::get('/tramite/{tramiteId}/constitucion', [App\Http\Controllers\DetalleTramiteController::class, 'getConstitucionApi']);
+Route::get('/tramite/{tramiteId}/accionistas', [App\Http\Controllers\DetalleTramiteController::class, 'getAccionistasApi']);
+Route::get('/tramite/{tramiteId}/apoderado', [App\Http\Controllers\DetalleTramiteController::class, 'getApoderadoApi']);

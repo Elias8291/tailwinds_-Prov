@@ -46,7 +46,15 @@ class TramiteSolicitanteController extends Controller
             ]);
         }
         
-        return view('tramites.solicitante.index', compact('tipoTramite', 'user', 'tramiteEnProgreso', 'datosDomicilio', 'codigoPostalDomicilio'));
+        // Obtener datos del apoderado legal si hay trámite en progreso y es persona moral
+        $datosApoderado = [];
+        if ($tramiteEnProgreso && $tramiteEnProgreso->solicitante->tipo_persona === 'Moral') {
+            $apoderadoController = new \App\Http\Controllers\Formularios\ApoderadoLegalController();
+            $datosApoderado = $apoderadoController->getDatosApoderadoLegal($tramiteEnProgreso);
+            $datosApoderado['tramite_id'] = $tramiteEnProgreso->id;
+        }
+        
+        return view('tramites.solicitante.index', compact('tipoTramite', 'user', 'tramiteEnProgreso', 'datosDomicilio', 'codigoPostalDomicilio', 'datosApoderado'));
     }
 
     private function determinarTipoTramite($user)
@@ -539,6 +547,12 @@ class TramiteSolicitanteController extends Controller
 
             $tipoPersona = $solicitante->tipo_persona;
 
+            // Obtener el trámite en progreso
+            $tramite = Tramite::where('solicitante_id', $solicitante->id)
+                ->whereIn('estado', ['Pendiente', 'En Revision'])
+                ->latest()
+                ->first();
+
             // Obtener documentos según el tipo de persona
             $documentos = Documento::where(function($query) use ($tipoPersona) {
                 $query->where('tipo_persona', $tipoPersona)
@@ -548,10 +562,46 @@ class TramiteSolicitanteController extends Controller
             ->orderBy('nombre', 'asc')
             ->get(['id', 'nombre', 'descripcion', 'tipo_persona']);
 
+            // Si hay un trámite, verificar qué documentos ya están subidos
+            if ($tramite) {
+                $documentosSubidos = \App\Models\DocumentoSolicitante::where('tramite_id', $tramite->id)
+                    ->get()
+                    ->keyBy('documento_id');
+
+                $documentos = $documentos->map(function($documento) use ($documentosSubidos) {
+                    $docSubido = $documentosSubidos->get($documento->id);
+                    
+                    return [
+                        'id' => $documento->id,
+                        'nombre' => $documento->nombre,
+                        'descripcion' => $documento->descripcion,
+                        'tipo_persona' => $documento->tipo_persona,
+                        'estado' => $docSubido ? ucfirst($docSubido->estado) : 'Pendiente',
+                        'fecha_entrega' => $docSubido ? $docSubido->fecha_entrega : null,
+                        'ruta_archivo' => $docSubido ? asset('storage/' . $docSubido->ruta_archivo) : null,
+                        'observaciones' => $docSubido ? $docSubido->observaciones : null
+                    ];
+                });
+            } else {
+                // Si no hay trámite, todos los documentos están pendientes
+                $documentos = $documentos->map(function($documento) {
+                    return [
+                        'id' => $documento->id,
+                        'nombre' => $documento->nombre,
+                        'descripcion' => $documento->descripcion,
+                        'tipo_persona' => $documento->tipo_persona,
+                        'estado' => 'Pendiente',
+                        'fecha_entrega' => null,
+                        'ruta_archivo' => null
+                    ];
+                });
+            }
+
             return response()->json([
                 'success' => true,
                 'documentos' => $documentos,
-                'tipo_persona' => $tipoPersona
+                'tipo_persona' => $tipoPersona,
+                'tramite_id' => $tramite ? $tramite->id : null
             ]);
 
         } catch (\Exception $e) {
