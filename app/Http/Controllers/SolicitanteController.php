@@ -18,7 +18,6 @@ class SolicitanteController extends Controller
                 'tipo_persona' => $satData['tipo_persona'],
                 'curp' => $satData['tipo_persona'] === 'Física' ? ($satData['curp'] ?? null) : null,
                 'rfc' => $satData['rfc'],
-                'objeto_social' => $satData['objeto_social'] ?? null,
             ]);
 
             Log::info('Solicitante creado exitosamente', ['solicitante_id' => $solicitante->id]);

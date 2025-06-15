@@ -91,17 +91,32 @@ class TramiteSolicitanteController extends Controller
         $solicitante = Solicitante::where('usuario_id', $user->id)->first();
         
         if (!$solicitante) {
+            Log::info('No se encontró solicitante para el usuario:', ['user_id' => $user->id]);
             return null;
         }
 
         // Buscar un trámite en progreso del solicitante con las relaciones necesarias
-        return Tramite::with([
+        $tramite = Tramite::with([
             'detalleTramite.direccion.asentamiento.localidad.municipio.estado'
         ])
         ->where('solicitante_id', $solicitante->id)
         ->whereIn('estado', ['Pendiente', 'En Revision'])
         ->latest()
         ->first();
+        
+        if ($tramite) {
+            Log::info('Trámite en progreso encontrado:', [
+                'tramite_id' => $tramite->id,
+                'tipo_tramite' => $tramite->tipo_tramite,
+                'estado' => $tramite->estado,
+                'progreso' => $tramite->progreso_tramite,
+                'solicitante_id' => $solicitante->id
+            ]);
+        } else {
+            Log::info('No se encontró trámite en progreso para el solicitante:', ['solicitante_id' => $solicitante->id]);
+        }
+        
+        return $tramite;
     }
 
     public function iniciarInscripcion(Request $request)
@@ -109,11 +124,19 @@ class TramiteSolicitanteController extends Controller
         $user = Auth::user();
         $tramiteEnProgreso = $this->verificarTramiteEnProgreso($user);
         
-        if ($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'inscripcion') {
+        Log::info('Iniciando inscripción:', [
+            'user_id' => $user->id,
+            'tramite_en_progreso' => $tramiteEnProgreso ? $tramiteEnProgreso->id : 'null',
+            'tipo_tramite_progreso' => $tramiteEnProgreso ? $tramiteEnProgreso->tipo_tramite : 'null'
+        ]);
+        
+        if ($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion') {
+            Log::info('Continuando trámite existente de inscripción:', ['tramite_id' => $tramiteEnProgreso->id]);
             // Continuar trámite existente
             return $this->continuarTramite($tramiteEnProgreso);
         }
         
+        Log::info('Creando nuevo trámite de inscripción');
         // Crear nuevo trámite de inscripción
         return $this->crearNuevoTramite('inscripcion', $user);
     }
@@ -123,11 +146,19 @@ class TramiteSolicitanteController extends Controller
         $user = Auth::user();
         $tramiteEnProgreso = $this->verificarTramiteEnProgreso($user);
         
-        if ($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'renovacion') {
+        Log::info('Iniciando renovación:', [
+            'user_id' => $user->id,
+            'tramite_en_progreso' => $tramiteEnProgreso ? $tramiteEnProgreso->id : 'null',
+            'tipo_tramite_progreso' => $tramiteEnProgreso ? $tramiteEnProgreso->tipo_tramite : 'null'
+        ]);
+        
+        if ($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion') {
+            Log::info('Continuando trámite existente de renovación:', ['tramite_id' => $tramiteEnProgreso->id]);
             // Continuar trámite existente
             return $this->continuarTramite($tramiteEnProgreso);
         }
         
+        Log::info('Creando nuevo trámite de renovación');
         // Crear nuevo trámite de renovación
         return $this->crearNuevoTramite('renovacion', $user);
     }
@@ -137,11 +168,19 @@ class TramiteSolicitanteController extends Controller
         $user = Auth::user();
         $tramiteEnProgreso = $this->verificarTramiteEnProgreso($user);
         
-        if ($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'actualizacion') {
+        Log::info('Iniciando actualización:', [
+            'user_id' => $user->id,
+            'tramite_en_progreso' => $tramiteEnProgreso ? $tramiteEnProgreso->id : 'null',
+            'tipo_tramite_progreso' => $tramiteEnProgreso ? $tramiteEnProgreso->tipo_tramite : 'null'
+        ]);
+        
+        if ($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion') {
+            Log::info('Continuando trámite existente de actualización:', ['tramite_id' => $tramiteEnProgreso->id]);
             // Continuar trámite existente
             return $this->continuarTramite($tramiteEnProgreso);
         }
         
+        Log::info('Creando nuevo trámite de actualización');
         // Crear nuevo trámite de actualización
         return $this->crearNuevoTramite('actualizacion', $user);
     }
@@ -173,7 +212,23 @@ class TramiteSolicitanteController extends Controller
             return back()->with('error', 'No se encontró información del solicitante');
         }
 
-        // Crear nuevo trámite
+        // Verificar OTRA VEZ si ya existe un trámite del mismo tipo en progreso
+        $tramiteExistente = Tramite::where('solicitante_id', $solicitante->id)
+            ->where('tipo_tramite', ucfirst($tipoTramite))
+            ->whereIn('estado', ['Pendiente', 'En Revision'])
+            ->first();
+            
+        if ($tramiteExistente) {
+            Log::warning('Intento de crear trámite duplicado, redirigiendo al existente:', [
+                'tramite_existente_id' => $tramiteExistente->id,
+                'tipo_tramite' => $tipoTramite,
+                'solicitante_id' => $solicitante->id
+            ]);
+            
+            return $this->continuarTramite($tramiteExistente);
+        }
+
+        // Crear nuevo trámite SOLO si no existe uno del mismo tipo
         $tramite = Tramite::create([
             'solicitante_id' => $solicitante->id,
             'tipo_tramite' => ucfirst($tipoTramite),

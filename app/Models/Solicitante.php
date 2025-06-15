@@ -45,6 +45,20 @@ class Solicitante extends Model
         return $this->hasOne(Proveedor::class);
     }
 
+    public function documentosSolicitante()
+    {
+        return $this->hasManyThrough(
+            DocumentoSolicitante::class,
+            Tramite::class,
+            'solicitante_id', // Foreign key on tramites table
+            'tramite_id', // Foreign key on documento_solicitante table
+            'id', // Local key on solicitantes table
+            'id' // Local key on tramites table
+        );
+    }
+
+
+
     // Accesor para obtener el nombre o razón social según el tipo de persona
     public function getNombreCompletoAttribute($value)
     {

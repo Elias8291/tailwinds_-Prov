@@ -58,78 +58,98 @@
             </div>
 
             <div class="p-5 bg-white">
-                @if(auth()->user()->hasRole('admin',"admin"))
+                @if(auth()->user()->hasRole('admin'))
                 <!-- Stats Grid -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
                     <!-- Usuarios -->
                     <div class="bg-white rounded-xl p-3 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-users text-indigo-600 text-lg"></i>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-users text-indigo-600 text-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-semibold text-gray-800">Usuarios</h3>
+                                    <div class="flex items-baseline mt-1">
+                                        <p class="text-lg font-bold text-indigo-600">{{ $totalUsuarios ?? 0 }}</p>
+                                        <span class="ml-2 text-xs font-medium text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded-full">Total</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-semibold text-gray-800">Usuarios</h3>
-                                <div class="flex items-baseline mt-1">
-                                    <p class="text-lg font-bold text-indigo-600">2,450</p>
-                                    <span class="ml-2 text-xs font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded-full">+12%</span>
-                                </div>
-                            </div>
+                            <a href="{{ route('users.index') }}" class="text-indigo-600 hover:text-indigo-800 text-xs font-medium hover:underline">
+                                Ver más →
+                            </a>
                         </div>
                     </div>
 
                     <!-- Trámites -->
                     <div class="bg-white rounded-xl p-3 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-file-alt text-amber-600 text-lg"></i>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-file-alt text-amber-600 text-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-semibold text-gray-800">Trámites</h3>
+                                    <div class="flex items-baseline mt-1">
+                                        <p class="text-lg font-bold text-amber-600">{{ $tramitesPendientes ?? 0 }}</p>
+                                        <span class="ml-2 text-xs font-medium text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-full">Pendientes</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-semibold text-gray-800">Trámites</h3>
-                                <div class="flex items-baseline mt-1">
-                                    <p class="text-lg font-bold text-amber-600">145</p>
-                                    <span class="ml-2 text-xs font-medium text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-full">8 nuevos</span>
-                                </div>
-                            </div>
+                            <a href="{{ route('revision.index') }}" class="text-amber-600 hover:text-amber-800 text-xs font-medium hover:underline">
+                                Ver más →
+                            </a>
                         </div>
                     </div>
 
                     <!-- Proveedores -->
                     <div class="bg-white rounded-xl p-3 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-building text-emerald-600 text-lg"></i>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-building text-emerald-600 text-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-semibold text-gray-800">Proveedores</h3>
+                                    <div class="flex items-baseline mt-1">
+                                        <p class="text-lg font-bold text-emerald-600">{{ $totalProveedores ?? 0 }}</p>
+                                        <span class="ml-2 text-xs font-medium text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-full">Registrados</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-semibold text-gray-800">Proveedores</h3>
-                                <div class="flex items-baseline mt-1">
-                                    <p class="text-lg font-bold text-emerald-600">324</p>
-                                    <span class="ml-2 text-xs font-medium text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-full">+15%</span>
-                                </div>
-                            </div>
+                            <a href="{{ route('proveedores.index') }}" class="text-emerald-600 hover:text-emerald-800 text-xs font-medium hover:underline">
+                                Ver más →
+                            </a>
                         </div>
                     </div>
 
                     <!-- Citas -->
                     <div class="bg-white rounded-xl p-3 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-calendar-check text-rose-600 text-lg"></i>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-calendar-check text-rose-600 text-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-semibold text-gray-800">Citas</h3>
+                                    <div class="flex items-baseline mt-1">
+                                        <p class="text-lg font-bold text-rose-600">{{ $totalCitas ?? 0 }}</p>
+                                        <span class="ml-2 text-xs font-medium text-rose-600 bg-rose-100 px-1.5 py-0.5 rounded-full">{{ $citasHoy ?? 0 }} hoy</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-semibold text-gray-800">Citas</h3>
-                                <div class="flex items-baseline mt-1">
-                                    <p class="text-lg font-bold text-rose-600">89</p>
-                                    <span class="ml-2 text-xs font-medium text-rose-600 bg-rose-100 px-1.5 py-0.5 rounded-full">4 hoy</span>
-                                </div>
-                            </div>
+                            <a href="{{ route('citas.index') }}" class="text-rose-600 hover:text-rose-800 text-xs font-medium hover:underline">
+                                Ver más →
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -17,7 +17,7 @@
       
                     <nav class="px-3 space-y-2">
                         <!-- Dashboard -->
-                        <a href="{{ route('dashboard') }}" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                        <a href="{{ route('dashboard') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
                             {{ request()->routeIs('dashboard') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
                             <svg class="{{ request()->routeIs('dashboard') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
@@ -25,40 +25,96 @@
                             </svg>
                             <span class="font-semibold tracking-wide">Dashboard</span>
                         </a>
-                        
-                        <a href="#" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 text-gray-700 hover:bg-white hover:shadow-md hover:text-primary">
-                            <svg class="text-gray-400 flex-shrink-0 w-6 h-6 mr-3 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+
+                        <!-- Roles y Permisos -->
+                        @can('dashboard.admin')
+                        <a href="{{ route('roles.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                            {{ request()->routeIs('roles.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                            <svg class="{{ request()->routeIs('roles.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
                             </svg>
-                            <span class="font-medium tracking-wide">Analytics</span>
+                            <span class="font-medium tracking-wide">Roles y Permisos</span>
                         </a>
-                        <a href="#" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 text-gray-700 hover:bg-white hover:shadow-md hover:text-primary">
-                            <svg class="text-gray-400 flex-shrink-0 w-6 h-6 mr-3 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 011-1h1m-1 1v1m0 0h1m-1 0v3M9 7h1m0 0v3m0-3h1m0 0v3m0-3h1m-1 0v1" />
+
+                        <!-- Usuarios -->
+                        <a href="{{ route('users.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                            {{ request()->routeIs('users.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                            <svg class="{{ request()->routeIs('users.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                             </svg>
-                            <span class="font-medium tracking-wide">Proyectos</span>
+                            <span class="font-medium tracking-wide">Usuarios</span>
                         </a>
-                        <a href="#" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 text-gray-700 hover:bg-white hover:shadow-md hover:text-primary">
-                            <svg class="text-gray-400 flex-shrink-0 w-6 h-6 mr-3 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                            </svg>
-                            <span class="font-medium tracking-wide">Equipo</span>
-                        </a>
-                        <a href="#" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 text-gray-700 hover:bg-white hover:shadow-md hover:text-primary">
-                            <svg class="text-gray-400 flex-shrink-0 w-6 h-6 mr-3 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span class="font-medium tracking-wide">Configuración</span>
-                        </a>
-                        
+                        @endcan
+
                         <!-- Trámites -->
-                        <a href="{{ route('tramites.index') }}" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
-                            {{ request()->routeIs('tramites.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
-                            <svg class="{{ request()->routeIs('tramites.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <a href="{{ route('tramites.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                            {{ request()->routeIs('tramites.*') && !request()->routeIs('tramites.solicitante.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                            <svg class="{{ request()->routeIs('tramites.*') && !request()->routeIs('tramites.solicitante.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <span class="font-medium tracking-wide">Trámites</span>
+                        </a>
+
+                        <!-- Mis Trámites (Solicitante) -->
+                        <a href="{{ route('tramites.solicitante.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                            {{ request()->routeIs('tramites.solicitante.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                            <svg class="{{ request()->routeIs('tramites.solicitante.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span class="font-medium tracking-wide">Mis Trámites</span>
+                        </a>
+
+                        <!-- Revisión de Trámites -->
+                        <a href="{{ route('revision.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                            {{ request()->routeIs('revision.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                            <svg class="{{ request()->routeIs('revision.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="font-medium tracking-wide">Revisión de Trámites</span>
+                        </a>
+
+                        <!-- Documentos -->
+                        <a href="{{ route('documentos.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                            {{ request()->routeIs('documentos.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                            <svg class="{{ request()->routeIs('documentos.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <span class="font-medium tracking-wide">Documentos</span>
+                        </a>
+
+                        <!-- Proveedores -->
+                        <a href="{{ route('proveedores.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                            {{ request()->routeIs('proveedores.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                            <svg class="{{ request()->routeIs('proveedores.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <span class="font-medium tracking-wide">Proveedores</span>
+                        </a>
+
+                        <!-- Perfil -->
+                        <a href="{{ route('profile.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                            {{ request()->routeIs('profile.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                            <svg class="{{ request()->routeIs('profile.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="font-medium tracking-wide">Mi Perfil</span>
+                        </a>
+
+                        <!-- Settings -->
+                        <a href="#" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 text-gray-700 hover:bg-white hover:shadow-md hover:text-primary">
+                            <svg class="text-gray-400 flex-shrink-0 w-6 h-6 mr-3 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                            </svg>
+                            <span class="font-medium tracking-wide">Configuración</span>
+                        </a>
+
+                        <!-- Citas -->
+                        <a href="{{ route('citas.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                            {{ request()->routeIs('citas.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                            <svg class="{{ request()->routeIs('citas.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span class="font-medium tracking-wide">Citas</span>
                         </a>
                     </nav>
                 </div>

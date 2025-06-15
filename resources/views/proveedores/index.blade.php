@@ -63,31 +63,8 @@
                     </div>
                 </div>
                 <div class="flex flex-col md:flex-row gap-3">
-                    <!-- Búsqueda por RFC -->
-                    <form method="GET" action="{{ route('proveedores.index') }}" class="flex gap-3">
-                        <div class="flex-grow">
-                            <input type="text" 
-                                   name="rfc" 
-                                   value="{{ request()->get('rfc') }}"
-                                   placeholder="Buscar por RFC o razón social..."
-                                   class="w-full px-4 py-2 rounded-xl border-2 border-gray-300 focus:border-[#B4325E] focus:outline-none transition-colors duration-200">
-                        </div>
-                        <button type="submit" 
-                                class="px-4 py-2 bg-gradient-to-r from-[#B4325E] to-[#93264B] text-white rounded-xl hover:from-[#93264B] hover:to-[#B4325E] transition-all duration-300 shadow-sm hover:shadow flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                            Buscar
-                        </button>
-                    </form>
-                    
-                    <a href="{{ route('proveedores.create') }}" 
-                       class="inline-flex items-center justify-center px-5 py-2 border border-transparent rounded-xl shadow-md text-sm font-medium text-white bg-gradient-to-r from-[#B4325E] to-[#93264B] hover:from-[#93264B] hover:to-[#B4325E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#B4325E] transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                        </svg>
-                        Registrar Nuevo Proveedor
-                    </a>
+                   
+                
                 </div>
             </div>
 

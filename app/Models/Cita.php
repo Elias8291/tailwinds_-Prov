@@ -13,8 +13,7 @@ class Cita extends Model
     protected $table = 'citas';
 
     protected $fillable = [
-        'solicitante_id',
-        'tramite_id',
+        'user_id',
         'fecha_hora',
         'motivo',
         'estado',
@@ -28,16 +27,6 @@ class Cita extends Model
     protected $attributes = [
         'estado' => 'pendiente',
     ];
-
-    public function solicitante()
-    {
-        return $this->belongsTo(Solicitante::class);
-    }
-
-    public function tramite()
-    {
-        return $this->belongsTo(Tramite::class);
-    }
 
     public function user()
     {

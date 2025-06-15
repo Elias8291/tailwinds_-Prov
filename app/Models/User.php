@@ -104,4 +104,14 @@ class User extends Authenticatable implements CanResetPassword
     {
         return $this->correo;
     }
+
+    /**
+     * Get the citas associated with the user
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function citas()
+    {
+        return $this->hasMany(Cita::class);
+    }
 }

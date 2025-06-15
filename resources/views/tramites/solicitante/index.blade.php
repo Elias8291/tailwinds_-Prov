@@ -47,8 +47,8 @@
 
                     <!-- Descripción compacta -->
                     <p class="text-gray-700 text-sm mb-4">
-                        @if($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'inscripcion')
-                            <span class="text-[#9d2449] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->paso_actual ?? 1 }} de {{ $tramiteEnProgreso->tipo_persona === 'Física' ? 3 : 6 }}
+                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion')
+                            <span class="text-[#9d2449] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
                             @if(!empty($datosDomicilio['codigo_postal']))
                                 <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
                             @endif
@@ -62,7 +62,7 @@
                         <form action="{{ route('tramites.solicitante.iniciar-inscripcion') }}" method="POST">
                             @csrf
                             <button type="submit" class="w-full bg-gradient-to-r from-[#9d2449] to-[#b8396b] text-white py-2.5 rounded-xl font-medium text-sm shadow-lg hover:shadow-xl transition-all duration-200">
-                                @if($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'inscripcion')
+                                @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion')
                                     Continuar
                                     <i class="fas fa-play ml-2"></i>
                                 @else
@@ -106,8 +106,8 @@
 
                     <!-- Descripción compacta -->
                     <p class="text-gray-700 text-sm mb-4">
-                        @if($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'renovacion')
-                            <span class="text-[#c1437a] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->paso_actual ?? 1 }} de {{ $tramiteEnProgreso->tipo_persona === 'Física' ? 3 : 6 }}
+                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion')
+                            <span class="text-[#c1437a] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
                             @if(!empty($datosDomicilio['codigo_postal']))
                                 <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
                             @endif
@@ -121,7 +121,7 @@
                         <form action="{{ route('tramites.solicitante.iniciar-renovacion') }}" method="POST">
                             @csrf
                             <button type="submit" class="w-full bg-gradient-to-r from-[#c1437a] to-[#9d2449] text-white py-2.5 rounded-xl font-medium text-sm shadow-lg hover:shadow-xl transition-all duration-200">
-                                @if($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'renovacion')
+                                @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion')
                                     Continuar
                                     <i class="fas fa-play ml-2"></i>
                                 @else
@@ -165,8 +165,8 @@
 
                     <!-- Descripción compacta -->
                     <p class="text-gray-700 text-sm mb-4">
-                        @if($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'actualizacion')
-                            <span class="text-[#7a1d37] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->paso_actual ?? 1 }} de {{ $tramiteEnProgreso->tipo_persona === 'Física' ? 3 : 6 }}
+                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion')
+                            <span class="text-[#7a1d37] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
                             @if(!empty($datosDomicilio['codigo_postal']))
                                 <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
                             @endif
@@ -180,7 +180,7 @@
                         <form action="{{ route('tramites.solicitante.iniciar-actualizacion') }}" method="POST">
                             @csrf
                             <button type="submit" class="w-full bg-gradient-to-r from-[#7a1d37] to-[#9d2449] text-white py-2.5 rounded-xl font-medium text-sm shadow-lg hover:shadow-xl transition-all duration-200">
-                                @if($tramiteEnProgreso && $tramiteEnProgreso->tipo_tramite === 'actualizacion')
+                                @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion')
                                     Continuar
                                     <i class="fas fa-play ml-2"></i>
                                 @else
