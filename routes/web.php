@@ -109,6 +109,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/revision', [RevisionController::class, 'index'])->name('revision.index');
     Route::get('/revision/{tramite}', [RevisionController::class, 'show'])->name('revision.show');
     Route::get('/revision/{tramite}/datos-generales', [\App\Http\Controllers\DatosGeneralesController::class, 'prepararDatosRevision'])->name('revision.datos-generales');
+    
+    // Rutas para acciones de revisión de secciones
+    Route::post('/revision/{tramite}/seccion/{seccion}/aprobar', [\App\Http\Controllers\SeccionRevisionController::class, 'aprobarSeccion'])->name('revision.seccion.aprobar');
+    Route::post('/revision/{tramite}/seccion/{seccion}/rechazar', [\App\Http\Controllers\SeccionRevisionController::class, 'rechazarSeccion'])->name('revision.seccion.rechazar');
+    Route::post('/revision/{tramite}/aprobar-todo', [\App\Http\Controllers\SeccionRevisionController::class, 'aprobarTodo'])->name('revision.aprobar-todo');
+    Route::post('/revision/{tramite}/rechazar-todo', [\App\Http\Controllers\SeccionRevisionController::class, 'rechazarTodo'])->name('revision.rechazar-todo');
+    Route::post('/revision/{tramite}/pausar', [\App\Http\Controllers\SeccionRevisionController::class, 'pausarRevision'])->name('revision.pausar');
+    Route::get('/revision/{tramite}/estado-revisiones', [\App\Http\Controllers\SeccionRevisionController::class, 'obtenerEstadoRevisiones'])->name('revision.estado-revisiones');
 });
 
 // Rutas para trámites
@@ -227,6 +235,7 @@ Route::middleware(['auth'])->prefix('tramites-solicitante')->group(function () {
     // Rutas para manejo de estado y edición de trámites
     Route::get('/estado/{tramite}', [TramiteSolicitanteController::class, 'mostrarEstadoTramite'])->name('tramites.solicitante.estado');
     Route::post('/habilitar-edicion/{tramite}', [TramiteSolicitanteController::class, 'habilitarEdicion'])->name('tramites.solicitante.habilitar-edicion');
+    Route::post('/corregir-seccion/{tramite}/{seccion}', [TramiteSolicitanteController::class, 'corregirSeccion'])->name('tramites.solicitante.corregir-seccion');
     
     // API para obtener datos de domicilio
     Route::get('/api/domicilio/{tramite}', [TramiteSolicitanteController::class, 'obtenerDatosDomicilioAPI'])->name('tramites.solicitante.api.domicilio');

@@ -9,7 +9,7 @@ class Seccion extends Model
 {
     use HasFactory;
 
-    protected $table = 'seccion';
+    protected $table = 'secciones';
 
     protected $fillable = [
         'nombre',
@@ -33,5 +33,13 @@ class Seccion extends Model
         return $this->belongsToMany(User::class, 'seccion_revision', 'seccion_id', 'revisado_por')
             ->withPivot(['estado', 'comentario'])
             ->withTimestamps();
+    }
+
+    /**
+     * Relación con las revisiones de sección
+     */
+    public function revisiones()
+    {
+        return $this->hasMany(SeccionRevision::class, 'seccion_id');
     }
 } 

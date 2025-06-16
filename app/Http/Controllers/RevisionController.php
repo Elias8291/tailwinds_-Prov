@@ -44,7 +44,7 @@ class RevisionController extends Controller
             ]);
 
             // Cargar relaciones necesarias
-            $tramite->load(['solicitante', 'revisor', 'detalleTramite']);
+            $tramite->load(['solicitante', 'revisor', 'detalleTramite', 'seccionesRevision.seccion']);
             
             // 1. Obtener datos generales
             $datosTramite = $this->obtenerDatosGenerales($tramite);
@@ -78,6 +78,16 @@ class RevisionController extends Controller
                 'tipo_persona' => $tramite->solicitante->tipo_persona ?? 'No definido'
             ]);
 
+            // 6. Obtener revisiones existentes
+            $revisionesExistentes = $tramite->seccionesRevision->mapWithKeys(function ($revision) {
+                return [$revision->seccion_id => [
+                    'estado' => $revision->estado,
+                    'comentario' => $revision->comentario,
+                    'revisor' => $revision->revisor->name ?? 'N/A',
+                    'fecha' => $revision->updated_at->format('d/m/Y H:i')
+                ]];
+            });
+
             return view('revision.show', compact(
                 'tramite',
                 'datosTramite',
@@ -86,7 +96,8 @@ class RevisionController extends Controller
                 'documentos',
                 'accionistas',
                 'apoderado',
-                'constitucion'
+                'constitucion',
+                'revisionesExistentes'
             ));
 
         } catch (\Exception $e) {

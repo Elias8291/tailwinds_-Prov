@@ -35,6 +35,33 @@ class ProgresoTramite extends Model
         return $this->belongsTo(SeccionTramite::class, 'seccion_id');
     }
 
+    /**
+     * Verifica si la sección está completada
+     */
+    public function estaCompletado()
+    {
+        return in_array($this->estado, ['completado', 'aprobado']);
+    }
+
+    /**
+     * Verifica si la sección está rechazada
+     */
+    public function estaRechazado()
+    {
+        return $this->estado === 'rechazado';
+    }
+
+    /**
+     * Marca la sección como completada
+     */
+    public function marcarComoCompletado()
+    {
+        $this->update([
+            'estado' => 'completado',
+            'fecha_completado' => now()
+        ]);
+    }
+
     public function calcularPorcentaje()
     {
         $totalSecciones = $this->tramite->secciones()->where('es_requerido', true)->count();

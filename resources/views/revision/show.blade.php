@@ -37,13 +37,13 @@
                     
                     <!-- Botones de Acción -->
                     <div class="flex items-center space-x-2">
-                        <button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                        <button onclick="aprobarTodo()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
                             <i class="fas fa-check mr-2"></i>Aprobar Todo
                         </button>
-                        <button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
+                        <button onclick="mostrarModalRechazarTodo()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
                             <i class="fas fa-times mr-2"></i>Rechazar Todo
                         </button>
-                        <button class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors duration-200">
+                        <button onclick="mostrarModalPausar()" class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors duration-200">
                             <i class="fas fa-pause mr-2"></i>Pausar
                         </button>
                     </div>
@@ -86,20 +86,20 @@
             esMoral: {{ ($tramite->solicitante->tipo_persona ?? 'Física') === 'Moral' ? 'true' : 'false' }},
             pdfVisible: {},
             sectionStatus: {
-                datos_generales: 'pendiente',
-                domicilio: 'pendiente', 
-                constitucion: 'pendiente',
-                accionistas: 'pendiente',
-                apoderado: 'pendiente',
-                documentos: 'pendiente'
+                datos_generales: '{{ $revisionesExistentes[1]['estado'] ?? 'pendiente' }}',
+                domicilio: '{{ $revisionesExistentes[2]['estado'] ?? 'pendiente' }}', 
+                constitucion: '{{ $revisionesExistentes[3]['estado'] ?? 'pendiente' }}',
+                accionistas: '{{ $revisionesExistentes[4]['estado'] ?? 'pendiente' }}',
+                apoderado: '{{ $revisionesExistentes[5]['estado'] ?? 'pendiente' }}',
+                documentos: '{{ $revisionesExistentes[6]['estado'] ?? 'pendiente' }}'
             },
             sectionComments: {
-                datos_generales: '',
-                domicilio: '', 
-                constitucion: '',
-                accionistas: '',
-                apoderado: '',
-                documentos: ''
+                datos_generales: '{{ $revisionesExistentes[1]['comentario'] ?? '' }}',
+                domicilio: '{{ $revisionesExistentes[2]['comentario'] ?? '' }}', 
+                constitucion: '{{ $revisionesExistentes[3]['comentario'] ?? '' }}',
+                accionistas: '{{ $revisionesExistentes[4]['comentario'] ?? '' }}',
+                apoderado: '{{ $revisionesExistentes[5]['comentario'] ?? '' }}',
+                documentos: '{{ $revisionesExistentes[6]['comentario'] ?? '' }}'
             },
             togglePdf(section) {
                 this.pdfVisible[section] = !this.pdfVisible[section];
@@ -205,11 +205,11 @@
                                         </div>
                                         
                                         <div class="flex flex-col sm:flex-row gap-3">
-                                            <button @click="approveSection('datos_generales')" 
+                                            <button onclick="aprobarSeccion(1, 'sectionComments.datos_generales')" 
                                                     class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                                 <i class="fas fa-check mr-2"></i>Aprobar Sección
                                             </button>
-                                            <button @click="rejectSection('datos_generales')" 
+                                            <button onclick="rechazarSeccion(1, 'datos_generales')" 
                                                     class="flex-1 px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                                 <i class="fas fa-times mr-2"></i>Rechazar Sección
                                             </button>
@@ -294,11 +294,11 @@
                                         </div>
                                         
                                         <div class="flex flex-col sm:flex-row gap-3">
-                                            <button @click="approveSection('domicilio')" 
+                                            <button onclick="aprobarSeccion(2, 'sectionComments.domicilio')" 
                                                     class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                                 <i class="fas fa-check mr-2"></i>Aprobar Sección
                                             </button>
-                                            <button @click="rejectSection('domicilio')" 
+                                            <button onclick="rechazarSeccion(2, 'domicilio')" 
                                                     class="flex-1 px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                                 <i class="fas fa-times mr-2"></i>Rechazar Sección
                                             </button>
@@ -384,11 +384,11 @@
                                                 </div>
                                                 
                                                 <div class="flex flex-col sm:flex-row gap-3">
-                                                    <button @click="approveSection('constitucion')" 
+                                                    <button onclick="aprobarSeccion(3, 'sectionComments.constitucion')" 
                                                             class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                                         <i class="fas fa-check mr-2"></i>Aprobar Sección
                                                     </button>
-                                                    <button @click="rejectSection('constitucion')" 
+                                                    <button onclick="rechazarSeccion(3, 'constitucion')" 
                                                             class="flex-1 px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                                         <i class="fas fa-times mr-2"></i>Rechazar Sección
                                                     </button>
@@ -472,11 +472,11 @@
                                                 </div>
                                                 
                                                 <div class="flex flex-col sm:flex-row gap-3">
-                                                    <button @click="approveSection('accionistas')" 
+                                                    <button onclick="aprobarSeccion(4, 'sectionComments.accionistas')" 
                                                             class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                                         <i class="fas fa-check mr-2"></i>Aprobar Sección
                                                     </button>
-                                                    <button @click="rejectSection('accionistas')" 
+                                                    <button onclick="rechazarSeccion(4, 'accionistas')" 
                                                             class="flex-1 px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                                         <i class="fas fa-times mr-2"></i>Rechazar Sección
                                                     </button>
@@ -560,11 +560,11 @@
                                                 </div>
                                                 
                                                 <div class="flex flex-col sm:flex-row gap-3">
-                                                    <button @click="approveSection('apoderado')" 
+                                                    <button onclick="aprobarSeccion(5, 'sectionComments.apoderado')" 
                                                             class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                                         <i class="fas fa-check mr-2"></i>Aprobar Sección
                                                     </button>
-                                                    <button @click="rejectSection('apoderado')" 
+                                                    <button onclick="rechazarSeccion(5, 'apoderado')" 
                                                             class="flex-1 px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                                         <i class="fas fa-times mr-2"></i>Rechazar Sección
                                                     </button>
@@ -648,16 +648,16 @@
                                                       rows="3"></textarea>
                                         </div>
                                         
-                                        <div class="flex flex-col sm:flex-row gap-3">
-                                            <button @click="approveSection('documentos')" 
-                                                    class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                                                <i class="fas fa-check mr-2"></i>Aprobar Sección
-                                            </button>
-                                            <button @click="rejectSection('documentos')" 
-                                                    class="flex-1 px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                                                <i class="fas fa-times mr-2"></i>Rechazar Sección
-                                            </button>
-                                        </div>
+                                                                    <div class="flex flex-col sm:flex-row gap-3">
+                                <button onclick="aprobarSeccion(6, 'sectionComments.documentos')" 
+                                        class="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                                    <i class="fas fa-check mr-2"></i>Aprobar Sección
+                                </button>
+                                <button onclick="rechazarSeccion(6, 'documentos')" 
+                                        class="flex-1 px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                                    <i class="fas fa-times mr-2"></i>Rechazar Sección
+                                </button>
+                            </div>
                                     </div>
                                 </div>
                             </div>
@@ -756,4 +756,274 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-@endpush 
+@endpush
+
+<!-- Modales -->
+<div id="modalRechazarTodo" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Rechazar Todo el Trámite</h3>
+        <p class="text-gray-600 mb-4">¿Está seguro de que desea rechazar todo el trámite? Debe proporcionar un comentario explicando el motivo.</p>
+        <textarea id="comentarioRechazarTodo" rows="4" class="w-full rounded-lg border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 mb-4" placeholder="Escriba el motivo del rechazo..."></textarea>
+        <div class="flex gap-3">
+            <button onclick="cerrarModalRechazarTodo()" class="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">Cancelar</button>
+            <button onclick="confirmarRechazarTodo()" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Rechazar Todo</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalPausar" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Pausar Revisión</h3>
+        <p class="text-gray-600 mb-4">¿Desea pausar la revisión de este trámite?</p>
+        <textarea id="comentarioPausar" rows="3" class="w-full rounded-lg border-gray-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 mb-4" placeholder="Comentario opcional..."></textarea>
+        <div class="flex gap-3">
+            <button onclick="cerrarModalPausar()" class="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">Cancelar</button>
+            <button onclick="confirmarPausar()" class="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700">Pausar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const tramiteId = {{ $tramite->id }};
+
+// Funciones para aprobar/rechazar secciones individuales
+async function aprobarSeccion(seccionId, comentarioField) {
+    const comentario = document.querySelector(`[x-model="${comentarioField}"]`)?.value || '';
+    
+    try {
+        const response = await fetch(`/revision/${tramiteId}/seccion/${seccionId}/aprobar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ comentario })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            mostrarNotificacion('Sección aprobada correctamente', 'success');
+            actualizarEstadoSeccion(seccionId, 'aprobado');
+        } else {
+            mostrarNotificacion('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error al aprobar la sección', 'error');
+    }
+}
+
+async function rechazarSeccion(seccionId, seccionNombre) {
+    const comentario = document.querySelector(`[data-comment="${seccionNombre}"]`)?.value;
+    
+    if (!comentario || comentario.trim() === '') {
+        mostrarNotificacion('Debe proporcionar un comentario para rechazar la sección', 'warning');
+        document.querySelector(`[data-comment="${seccionNombre}"]`)?.focus();
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/revision/${tramiteId}/seccion/${seccionId}/rechazar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ comentario })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            mostrarNotificacion('Sección rechazada correctamente', 'success');
+            actualizarEstadoSeccion(seccionId, 'rechazado');
+        } else {
+            mostrarNotificacion('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error al rechazar la sección', 'error');
+    }
+}
+
+// Funciones para acciones globales
+async function aprobarTodo() {
+    if (!confirm('¿Está seguro de que desea aprobar todo el trámite?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/revision/${tramiteId}/aprobar-todo`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            mostrarNotificacion('Trámite aprobado completamente', 'success');
+            setTimeout(() => {
+                window.location.href = '/revision';
+            }, 2000);
+        } else {
+            mostrarNotificacion('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error al aprobar el trámite', 'error');
+    }
+}
+
+function mostrarModalRechazarTodo() {
+    document.getElementById('modalRechazarTodo').classList.remove('hidden');
+}
+
+function cerrarModalRechazarTodo() {
+    document.getElementById('modalRechazarTodo').classList.add('hidden');
+    document.getElementById('comentarioRechazarTodo').value = '';
+}
+
+async function confirmarRechazarTodo() {
+    const comentario = document.getElementById('comentarioRechazarTodo').value;
+    
+    if (!comentario || comentario.trim() === '') {
+        mostrarNotificacion('Debe proporcionar un comentario para rechazar el trámite', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/revision/${tramiteId}/rechazar-todo`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ comentario_general: comentario })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            mostrarNotificacion('Trámite rechazado completamente', 'success');
+            cerrarModalRechazarTodo();
+            setTimeout(() => {
+                window.location.href = '/revision';
+            }, 2000);
+        } else {
+            mostrarNotificacion('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error al rechazar el trámite', 'error');
+    }
+}
+
+function mostrarModalPausar() {
+    document.getElementById('modalPausar').classList.remove('hidden');
+}
+
+function cerrarModalPausar() {
+    document.getElementById('modalPausar').classList.add('hidden');
+    document.getElementById('comentarioPausar').value = '';
+}
+
+async function confirmarPausar() {
+    const comentario = document.getElementById('comentarioPausar').value;
+    
+    try {
+        const response = await fetch(`/revision/${tramiteId}/pausar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ comentario })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            mostrarNotificacion('Revisión pausada correctamente', 'success');
+            cerrarModalPausar();
+            setTimeout(() => {
+                window.location.href = '/revision';
+            }, 2000);
+        } else {
+            mostrarNotificacion('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error al pausar la revisión', 'error');
+    }
+}
+
+// Función para actualizar el estado visual de una sección
+function actualizarEstadoSeccion(seccionId, estado) {
+    const seccion = document.querySelector(`[data-section="${getSeccionName(seccionId)}"]`);
+    if (seccion) {
+        const statusElement = seccion.querySelector('.status-indicator');
+        if (statusElement) {
+            statusElement.className = `status-indicator ${getStatusClass(estado)}`;
+            statusElement.textContent = estado === 'aprobado' ? 'Aprobado' : 'Rechazado';
+        }
+    }
+}
+
+function getSeccionName(seccionId) {
+    const nombres = {
+        1: 'datos_generales',
+        2: 'domicilio',
+        3: 'constitucion',
+        4: 'accionistas',
+        5: 'apoderado',
+        6: 'documentos'
+    };
+    return nombres[seccionId] || 'unknown';
+}
+
+function getStatusClass(estado) {
+    return estado === 'aprobado' ? 'text-green-600' : 'text-red-600';
+}
+
+// Función para mostrar notificaciones
+function mostrarNotificacion(mensaje, tipo) {
+    const colores = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        warning: 'bg-yellow-500',
+        info: 'bg-blue-500'
+    };
+    
+    const notificacion = document.createElement('div');
+    notificacion.className = `fixed top-4 right-4 ${colores[tipo]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300`;
+    notificacion.textContent = mensaje;
+    
+    document.body.appendChild(notificacion);
+    
+    setTimeout(() => {
+        notificacion.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            document.body.removeChild(notificacion);
+        }, 300);
+    }, 3000);
+}
+
+// Cerrar modales al hacer clic fuera
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'modalRechazarTodo') {
+        cerrarModalRechazarTodo();
+    }
+    if (e.target.id === 'modalPausar') {
+        cerrarModalPausar();
+    }
+});
+</script> 

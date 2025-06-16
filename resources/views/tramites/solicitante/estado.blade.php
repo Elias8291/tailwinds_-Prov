@@ -95,30 +95,83 @@
             <!-- Secciones -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @php
-                    $secciones = [
+                    $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
+                    $secciones = $tipoPersona === 'Moral' ? [
                         1 => ['nombre' => 'Datos Generales', 'icono' => 'fa-user'],
                         2 => ['nombre' => 'Domicilio', 'icono' => 'fa-home'],
                         3 => ['nombre' => 'Constitución', 'icono' => 'fa-building'],
                         4 => ['nombre' => 'Accionistas', 'icono' => 'fa-users'],
                         5 => ['nombre' => 'Apoderado Legal', 'icono' => 'fa-user-tie'],
                         6 => ['nombre' => 'Documentos', 'icono' => 'fa-file-upload']
+                    ] : [
+                        1 => ['nombre' => 'Datos Generales', 'icono' => 'fa-user'],
+                        2 => ['nombre' => 'Domicilio', 'icono' => 'fa-home'],
+                        3 => ['nombre' => 'Documentos', 'icono' => 'fa-file-upload']
                     ];
+                    
+                    $progresoMaximo = $tipoPersona === 'Moral' ? 6 : 3;
+                    $progresoMostrado = min($tramite->progreso_tramite, $progresoMaximo);
                 @endphp
                 
                 @foreach($secciones as $numero => $seccion)
-                    <div class="flex items-center p-4 rounded-lg border-2 
-                        {{ $tramite->progreso_tramite >= $numero ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50' }}">
-                        <div class="h-10 w-10 flex items-center justify-center rounded-full mr-3
-                            {{ $tramite->progreso_tramite >= $numero ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400' }}">
+                    @php
+                        $seccionRechazada = $tramite->seccionEstaRechazada($numero);
+                        $seccionAprobada = $tramite->seccionEstaAprobada($numero);
+                        $estadoRevision = $tramite->getEstadoSeccion($numero);
+                        
+                        if ($seccionRechazada) {
+                            $bgColor = 'border-red-200 bg-red-50';
+                            $iconBg = 'bg-red-100 text-red-600';
+                            $textColor = 'text-red-800';
+                            $statusText = 'Rechazado - Requiere Corrección';
+                            $statusIcon = 'fas fa-times-circle text-red-500';
+                        } elseif ($seccionAprobada) {
+                            $bgColor = 'border-green-200 bg-green-50';
+                            $iconBg = 'bg-green-100 text-green-600';
+                            $textColor = 'text-green-800';
+                            $statusText = 'Aprobado';
+                            $statusIcon = 'fas fa-check-circle text-green-500';
+                        } elseif ($progresoMostrado >= $numero) {
+                            $bgColor = 'border-blue-200 bg-blue-50';
+                            $iconBg = 'bg-blue-100 text-blue-600';
+                            $textColor = 'text-blue-800';
+                            $statusText = 'En Revisión';
+                            $statusIcon = 'fas fa-clock text-blue-500';
+                        } else {
+                            $bgColor = 'border-gray-200 bg-gray-50';
+                            $iconBg = 'bg-gray-100 text-gray-400';
+                            $textColor = 'text-gray-600';
+                            $statusText = 'Pendiente';
+                            $statusIcon = 'fas fa-hourglass-half text-gray-400';
+                        }
+                    @endphp
+                    
+                    <div class="flex items-center p-4 rounded-lg border-2 {{ $bgColor }} relative">
+                        <!-- Indicador de estado en la esquina superior derecha -->
+                        <div class="absolute top-2 right-2">
+                            <i class="{{ $statusIcon }} text-lg"></i>
+                        </div>
+                        
+                        <div class="h-10 w-10 flex items-center justify-center rounded-full mr-3 {{ $iconBg }}">
                             <i class="fas {{ $seccion['icono'] }}"></i>
                         </div>
-                        <div>
-                            <h4 class="font-medium {{ $tramite->progreso_tramite >= $numero ? 'text-green-800' : 'text-gray-600' }}">
+                        <div class="flex-1">
+                            <h4 class="font-medium {{ $textColor }}">
                                 {{ $seccion['nombre'] }}
                             </h4>
-                            <p class="text-xs {{ $tramite->progreso_tramite >= $numero ? 'text-green-600' : 'text-gray-400' }}">
-                                {{ $tramite->progreso_tramite >= $numero ? 'Completado' : 'Pendiente' }}
+                            <p class="text-xs {{ $textColor }} mb-1">
+                                {{ $statusText }}
                             </p>
+                            
+                            @if($seccionRechazada && $estadoRevision && $estadoRevision->comentario)
+                                <p class="text-xs text-red-600 italic bg-red-100 p-1 rounded mt-1">
+                                    {{ $estadoRevision->comentario }}
+                                </p>
+                                <button onclick="corregirSeccion({{ $tramite->id }}, {{ $numero }})" 
+                                        class="mt-2 text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 transition">
+                                    <i class="fas fa-edit mr-1"></i>Corregir
+                                </button>
+                            @endif
                         </div>
                     </div>
                 @endforeach
@@ -241,6 +294,34 @@ async function habilitarEdicion(tramiteId) {
     } catch (error) {
         console.error('Error:', error);
         alert('Error al habilitar la edición del trámite');
+    }
+}
+
+async function corregirSeccion(tramiteId, seccionId) {
+    if (!confirm('¿Desea ir a corregir esta sección?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/tramites-solicitante/corregir-seccion/${tramiteId}/${seccionId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.href = data.redirect_url;
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al habilitar la corrección de la sección');
     }
 }
 </script>

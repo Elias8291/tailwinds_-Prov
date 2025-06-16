@@ -3,53 +3,61 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\SeccionTramite;
+use Illuminate\Support\Facades\DB;
 
-class SeccionTramiteSeeder extends Seeder
+class SeccionesSeeder extends Seeder
 {
     public function run()
     {
+        // Limpiar la tabla primero
+        DB::table('secciones')->delete();
+        
+        // Insertar las secciones
         $secciones = [
             [
+                'id' => 1,
                 'nombre' => 'Datos Generales',
                 'descripcion' => 'Información básica del solicitante',
-                'orden' => 1,
-                'es_requerido' => true
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 2,
                 'nombre' => 'Domicilio',
                 'descripcion' => 'Dirección fiscal y de notificaciones',
-                'orden' => 2,
-                'es_requerido' => true
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 3,
                 'nombre' => 'Constitución',
                 'descripcion' => 'Información de constitución de la empresa',
-                'orden' => 3,
-                'es_requerido' => true // Solo para personas morales
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 4,
                 'nombre' => 'Accionistas',
                 'descripcion' => 'Información de accionistas o socios',
-                'orden' => 4,
-                'es_requerido' => true // Solo para personas morales
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 5,
                 'nombre' => 'Apoderado Legal',
                 'descripcion' => 'Información del apoderado legal',
-                'orden' => 5,
-                'es_requerido' => true // Solo para personas morales
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
+                'id' => 6,
                 'nombre' => 'Documentos',
                 'descripcion' => 'Documentación requerida para el trámite',
-                'orden' => 6,
-                'es_requerido' => true
+                'created_at' => now(),
+                'updated_at' => now()
             ]
         ];
 
-        foreach ($secciones as $seccion) {
-            SeccionTramite::create($seccion);
-        }
+        DB::table('secciones')->insert($secciones);
     }
 } 

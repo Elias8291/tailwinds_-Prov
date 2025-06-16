@@ -23,15 +23,20 @@ class SeccionTramite extends Model
         'orden' => 'integer'
     ];
 
-    public function progresoTramites()
-    {
-        return $this->hasMany(ProgresoTramite::class, 'seccion_id');
-    }
-
     public function tramites()
     {
         return $this->belongsToMany(Tramite::class, 'progreso_tramite')
             ->withPivot(['estado', 'observaciones', 'fecha_inicio', 'fecha_completado'])
             ->withTimestamps();
+    }
+
+    public function progresoTramites()
+    {
+        return $this->hasMany(ProgresoTramite::class, 'seccion_id');
+    }
+
+    public function revisionesSecciones()
+    {
+        return $this->hasMany(SeccionRevision::class, 'seccion_id');
     }
 } 

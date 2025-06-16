@@ -88,9 +88,12 @@ class Tramite extends Model
 
     public function seccionesRevision()
     {
-        return $this->belongsToMany(Seccion::class, 'seccion_revision')
-            ->withPivot(['estado', 'comentario', 'revisado_por'])
-            ->withTimestamps();
+        return $this->hasMany(SeccionRevision::class);
+    }
+
+    public function progresoSecciones()
+    {
+        return $this->hasMany(ProgresoTramite::class);
     }
 
     /**
@@ -149,14 +152,45 @@ class Tramite extends Model
     }
 
     /**
-     * Obtiene el porcentaje de progreso basado en el número de sección
+     * Obtiene el porcentaje de progreso basado en el tipo de persona
      *
      * @return float
      */
     public function getPorcentajeProgreso()
     {
-        $totalSecciones = 6; // Total de secciones del formulario
-        return ($this->progreso_tramite / $totalSecciones) * 100;
+        $tipoPersona = $this->solicitante->tipo_persona ?? 'Física';
+        $totalSecciones = $tipoPersona === 'Moral' ? 6 : 3; // 6 para moral, 3 para física
+        $progresoMaximo = $tipoPersona === 'Moral' ? 6 : 3; // Máximo progreso permitido
+        
+        // Limitar el progreso mostrado al máximo permitido
+        $progresoMostrado = min($this->progreso_tramite, $progresoMaximo);
+        
+        return ($progresoMostrado / $totalSecciones) * 100;
+    }
+
+    /**
+     * Verifica si el trámite está completado según el tipo de persona
+     *
+     * @return bool
+     */
+    public function estaCompletadoSegunTipo()
+    {
+        $tipoPersona = $this->solicitante->tipo_persona ?? 'Física';
+        $progresoRequerido = $tipoPersona === 'Moral' ? 6 : 3;
+        
+        return $this->progreso_tramite >= $progresoRequerido;
+    }
+
+    /**
+     * Verifica si debe mostrar la vista de estado (enviado para revisión)
+     *
+     * @return bool
+     */
+    public function debesMostrarEstado()
+    {
+        $tipoPersona = $this->solicitante->tipo_persona ?? 'Física';
+        return ($tipoPersona === 'Moral' && $this->progreso_tramite >= 7) || 
+               ($tipoPersona === 'Física' && $this->progreso_tramite >= 4);
     }
 
     /**
@@ -219,6 +253,83 @@ class Tramite extends Model
                 'fecha_revision' => null,
                 'revisado_por' => null,
                 'observaciones' => null
+            ]);
+        }
+    }
+
+    /**
+     * Obtiene el estado de revisión de una sección específica
+     *
+     * @param int $seccionId
+     * @return SeccionRevision|null
+     */
+    public function getEstadoSeccion($seccionId)
+    {
+        return $this->seccionesRevision()->where('seccion_id', $seccionId)->first();
+    }
+
+    /**
+     * Verifica si una sección específica está rechazada
+     *
+     * @param int $seccionId
+     * @return bool
+     */
+    public function seccionEstaRechazada($seccionId)
+    {
+        $revision = $this->getEstadoSeccion($seccionId);
+        return $revision && $revision->estaRechazada();
+    }
+
+    /**
+     * Verifica si una sección específica está aprobada
+     *
+     * @param int $seccionId
+     * @return bool
+     */
+    public function seccionEstaAprobada($seccionId)
+    {
+        $revision = $this->getEstadoSeccion($seccionId);
+        return $revision && $revision->estaAprobada();
+    }
+
+    /**
+     * Obtiene las secciones que necesitan corrección
+     *
+     * @return array
+     */
+    public function getSeccionesParaCorregir()
+    {
+        return $this->seccionesRevision()
+            ->where('estado', 'rechazado')
+            ->with('seccion')
+            ->get()
+            ->map(function($revision) {
+                return [
+                    'seccion_id' => $revision->seccion_id,
+                    'nombre' => $revision->seccion->nombre ?? 'Sección ' . $revision->seccion_id,
+                    'comentario' => $revision->comentario,
+                    'orden' => $revision->seccion->orden ?? $revision->seccion_id
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Retrocede el progreso a la primera sección rechazada
+     */
+    public function retrocederASeccionRechazada()
+    {
+        $primeraSeccionRechazada = $this->seccionesRevision()
+            ->where('estado', 'rechazado')
+            ->join('seccion_tramite', 'seccion_revision.seccion_id', '=', 'seccion_tramite.id')
+            ->orderBy('seccion_tramite.orden')
+            ->select('seccion_tramite.orden')
+            ->first();
+
+        if ($primeraSeccionRechazada) {
+            $this->update([
+                'progreso_tramite' => $primeraSeccionRechazada->orden,
+                'estado' => 'Pendiente'
             ]);
         }
     }

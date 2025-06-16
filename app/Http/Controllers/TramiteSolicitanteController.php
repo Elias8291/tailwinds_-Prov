@@ -209,6 +209,22 @@ class TramiteSolicitanteController extends Controller
 
     private function continuarTramite($tramite)
     {
+        // Verificar si debe mostrar la vista de estado (enviado para revisión)
+        if ($tramite->debesMostrarEstado()) {
+            return redirect()->route('tramites.solicitante.estado', ['tramite' => $tramite->id]);
+        }
+
+        // Si hay secciones rechazadas, retroceder a la primera sección rechazada
+        $seccionesRechazadas = $tramite->getSeccionesParaCorregir();
+        if (!empty($seccionesRechazadas) && $tramite->estado === 'Rechazado') {
+            $tramite->retrocederASeccionRechazada();
+            
+            return redirect()->route('tramites.create.tipo', [
+                'tipo_tramite' => strtolower($tramite->tipo_tramite),
+                'tramite' => $tramite->id
+            ])->with('warning', 'Hay secciones que necesitan corrección. Por favor, revise las observaciones.');
+        }
+
         // Siempre redirigir a la vista create unificada
         return redirect()->route('tramites.create.tipo', [
             'tipo_tramite' => strtolower($tramite->tipo_tramite),
@@ -872,6 +888,82 @@ class TramiteSolicitanteController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al habilitar la edición del trámite'
+            ], 500);
+        }
+    }
+
+    /**
+     * Habilita la corrección de una sección específica rechazada
+     */
+    public function corregirSeccion($tramiteId, $seccionId)
+    {
+        try {
+            $user = Auth::user();
+            $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+            
+            if (!$solicitante) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró información del solicitante'
+                ], 404);
+            }
+
+            $tramite = Tramite::where('id', $tramiteId)
+                ->where('solicitante_id', $solicitante->id)
+                ->first();
+
+            if (!$tramite) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trámite no encontrado'
+                ], 404);
+            }
+
+            // Verificar que la sección está rechazada
+            if (!$tramite->seccionEstaRechazada($seccionId)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Esta sección no está rechazada o no requiere corrección'
+                ], 400);
+            }
+
+            // Cambiar el estado del trámite a pendiente para permitir edición
+            $tramite->update([
+                'estado' => 'Pendiente',
+                'progreso_tramite' => $seccionId, // Retroceder al paso de la sección rechazada
+            ]);
+
+            // Marcar la sección como pendiente para permitir nueva revisión
+            $revision = $tramite->getEstadoSeccion($seccionId);
+            if ($revision) {
+                $revision->update(['estado' => 'pendiente']);
+            }
+
+            Log::info('✅ Corrección habilitada para sección:', [
+                'tramite_id' => $tramite->id,
+                'seccion_id' => $seccionId,
+                'progreso_actualizado' => $seccionId
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sección habilitada para corrección',
+                'redirect_url' => route('tramites.create.tipo', [
+                    'tipo_tramite' => strtolower($tramite->tipo_tramite),
+                    'tramite' => $tramite->id
+                ])
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al habilitar corrección de sección:', [
+                'tramite_id' => $tramiteId,
+                'seccion_id' => $seccionId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al habilitar la corrección de la sección'
             ], 500);
         }
     }
