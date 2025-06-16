@@ -74,79 +74,11 @@
                 transform: translateY(0) scale(1);
             }
         }
-
-        /* Elementos decorativos flotantes */
-        .floating-elements {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 1;
-            overflow: hidden;
-        }
-
-        .floating-element {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle at center, rgba(157, 36, 73, 0.03) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: float 20s infinite;
-        }
-
-        .floating-element:nth-child(1) {
-            top: 10%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .floating-element:nth-child(2) {
-            top: 60%;
-            right: 15%;
-            animation-delay: -5s;
-        }
-
-        .floating-element:nth-child(3) {
-            bottom: 10%;
-            left: 20%;
-            animation-delay: -10s;
-        }
-
-        .floating-element:nth-child(4) {
-            top: 30%;
-            right: 30%;
-            animation-delay: -15s;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translate(0, 0) rotate(0deg) scale(1);
-            }
-            25% {
-                transform: translate(10px, 10px) rotate(5deg) scale(1.1);
-            }
-            50% {
-                transform: translate(-5px, 15px) rotate(-5deg) scale(0.95);
-            }
-            75% {
-                transform: translate(-15px, -5px) rotate(3deg) scale(1.05);
-            }
-        }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased">
     <!-- Fondo con logo -->
     <div class="bg-logo-pattern"></div>
-    
-    <!-- Elementos decorativos flotantes -->
-    <div class="floating-elements">
-        <div class="floating-element"></div>
-        <div class="floating-element"></div>
-        <div class="floating-element"></div>
-        <div class="floating-element"></div>
-    </div>
 
     <div class="min-h-screen relative" x-data="{ sidebarOpen: false, sidebarHovered: false }">
         <!-- Header (fixed) -->
@@ -171,7 +103,7 @@
                  x-data="{ sidebarHovered: false }"
                  @sidebar-hover.window="sidebarHovered = $event.detail"
                  :class="{ 'md:ml-72': sidebarHovered, 'md:ml-[65px]': !sidebarHovered }">
-                <main class="w-full mx-auto px-4 md:px-6">
+                <main class="w-full mx-auto">
                     @yield('content')
                 </main>
             </div>

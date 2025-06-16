@@ -108,7 +108,13 @@
                         <button @click="open = !open" class="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" id="user-menu-button">
                             <span class="sr-only">Abrir menú de usuario</span>
                             <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-primary-100 text-primary">
-                                <span class="text-sm font-medium leading-none">JD</span>
+                                <span class="text-sm font-medium leading-none">
+                                    @if(auth()->check())
+                                        {{ strtoupper(substr(auth()->user()->nombre ?? auth()->user()->name ?? '', 0, 1)) }}{{ strtoupper(substr(explode(' ', auth()->user()->nombre ?? auth()->user()->name ?? '')[1] ?? '', 0, 1)) }}
+                                    @else
+                                        U
+                                    @endif
+                                </span>
                             </span>
                         </button>
                     </div>

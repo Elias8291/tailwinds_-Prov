@@ -14,6 +14,8 @@ class CreateSolicitanteTable extends Migration
             $table->enum('tipo_persona', ['Física', 'Moral']);
             $table->string('curp', 255)->nullable();
             $table->string('rfc', 255);
+            $table->string('razon_social', 255)->nullable(); // Para persona moral
+            $table->string('nombre_completo', 255)->nullable(); // Para persona física
             $table->timestamps();
 
             $table->foreign('usuario_id')->references('id')->on('users')->onDelete('cascade');

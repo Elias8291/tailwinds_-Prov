@@ -1,4 +1,4 @@
-@props(['title' => 'Datos Generales', 'datosTramite' => [], 'datosSolicitante' => [], 'codigoPostalDomicilio' => null, 'datosDomicilio' => [], 'readonly' => false])
+@props(['title' => 'Datos Generales', 'datosTramite' => [], 'datosSolicitante' => [], 'readonly' => false])
 
 <!-- Asegúrate de incluir Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -111,7 +111,8 @@ function datosGeneralesData() {
                 </div>
             @endif
 
-            <!-- Nombre Completo (Solo lectura) -->
+            <!-- Nombre Completo (Solo para persona física) -->
+            @if(($datosSolicitante['tipo_persona'] ?? '') === 'Física')
             <div class="form-group">
                 <label for="nombre_completo" class="block text-sm font-medium text-gray-700 mb-2">
                     Nombre Completo
@@ -120,13 +121,14 @@ function datosGeneralesData() {
                 <div class="relative">
                     <input type="text" 
                            name="nombre_completo"
-                           value="{{ auth()->user()->name ?? '' }}" 
+                           value="{{ $datosSolicitante['nombre_completo'] ?? auth()->user()->name ?? '' }}" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                            readonly>
                 </div>
             </div>
+            @endif
 
-            <!-- Razón Social (Solo lectura para persona moral) -->
+            <!-- Razón Social (Solo para persona moral) -->
             @if(($datosSolicitante['tipo_persona'] ?? '') === 'Moral')
             <div class="form-group">
                 <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
@@ -136,7 +138,7 @@ function datosGeneralesData() {
                 <div class="relative">
                     <input type="text" 
                            name="razon_social"
-                           value="{{ $datosSolicitante['razon_social'] ?? '' }}" 
+                           value="{{ $datosSolicitante['razon_social'] ?? auth()->user()->name ?? '' }}" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                            readonly>
                 </div>
@@ -170,51 +172,7 @@ function datosGeneralesData() {
             </div>
         </div>
 
-        <!-- Información del Domicilio (si existe) -->
-        @if(!empty($codigoPostalDomicilio))
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-            <div class="flex items-start space-x-3">
-                <div class="bg-blue-100 rounded-lg p-2">
-                    <i class="fas fa-map-marker-alt text-blue-600"></i>
-                </div>
-                <div class="flex-1">
-                    <p class="text-sm font-medium text-blue-800 mb-1">Domicilio Registrado</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-blue-600">
-                        <div>
-                            <span class="font-medium">Código Postal:</span> {{ $codigoPostalDomicilio }}
-                        </div>
-                        @if(!empty($datosDomicilio['estado']))
-                        <div>
-                            <span class="font-medium">Estado:</span> {{ $datosDomicilio['estado'] }}
-                        </div>
-                        @endif
-                        @if(!empty($datosDomicilio['municipio']))
-                        <div>
-                            <span class="font-medium">Municipio:</span> {{ $datosDomicilio['municipio'] }}
-                        </div>
-                        @endif
-                        @if(!empty($datosDomicilio['colonia']))
-                        <div>
-                            <span class="font-medium">Asentamiento:</span> {{ $datosDomicilio['colonia'] }}
-                        </div>
-                        @endif
-                    </div>
-                    @if(!empty($datosDomicilio['calle']))
-                    <div class="mt-2 text-xs text-blue-600">
-                        <span class="font-medium">Dirección:</span> 
-                        {{ $datosDomicilio['calle'] }}
-                        @if(!empty($datosDomicilio['numero_exterior']))
-                            #{{ $datosDomicilio['numero_exterior'] }}
-                        @endif
-                        @if(!empty($datosDomicilio['numero_interior']))
-                            Int. {{ $datosDomicilio['numero_interior'] }}
-                        @endif
-                    </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-        @endif
+
 
         <!-- Sector y Actividad -->
         <div class="space-y-6">

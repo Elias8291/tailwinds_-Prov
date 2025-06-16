@@ -168,6 +168,10 @@ class RegisterController extends Controller
         // Asignar rol de solicitante al usuario
         $this->assignSolicitanteRole($user);
 
+        // Agregar razón social igual al nombre del usuario
+        $satData['razon_social'] = $satData['nombre'];
+        $satData['nombre_completo'] = $satData['nombre'];
+        
         $solicitante = $solicitanteController->create($user, $satData);
 
         $tramite = $tramiteController->createForRegistration($solicitante, [
@@ -237,8 +241,13 @@ class RegisterController extends Controller
                 'tipo_persona' => $satData['tipo_persona'],
                 'curp' => $satData['tipo_persona'] === 'Física' ? ($satData['curp'] ?? null) : null,
                 'rfc' => $satData['rfc'],
+                'razon_social' => $satData['nombre'],
+                'nombre_completo' => $satData['nombre'],
             ]);
         } else {
+            // Agregar razón social igual al nombre del usuario
+            $satData['razon_social'] = $satData['nombre'];
+            $satData['nombre_completo'] = $satData['nombre'];
             $solicitante = $solicitanteController->create($existingUser, $satData);
         }
 

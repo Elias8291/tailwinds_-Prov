@@ -526,9 +526,12 @@ function documentosData() {
             this.successMessage = mensaje;
             this.showSuccess = true;
             this.showError = false;
-            setTimeout(() => {
-                this.showSuccess = false;
-            }, 3000);
+            // No ocultar automáticamente si es mensaje de finalización
+            if (!mensaje.includes('Redirigiendo')) {
+                setTimeout(() => {
+                    this.showSuccess = false;
+                }, 3000);
+            }
         },
 
         async finalizarTramite() {
@@ -571,8 +574,13 @@ function documentosData() {
                 console.log('📥 Respuesta finalización:', data);
 
                 if (data.success) {
-                    // Mostrar vista de confirmación
-                    this.mostrarVistaConfirmacion(data);
+                    // Mostrar mensaje de éxito y redirigir al estado del trámite
+                    this.mostrarExito('¡Trámite enviado correctamente! Redirigiendo...');
+                    
+                    // Esperar un momento para que se vea el mensaje y luego redirigir
+                    setTimeout(() => {
+                        window.location.href = `/tramites-solicitante/estado/${this.tramiteId}`;
+                    }, 2000);
                 } else {
                     this.mostrarError(data.message || 'Error al finalizar el trámite');
                 }
@@ -585,65 +593,7 @@ function documentosData() {
             }
         },
 
-        mostrarVistaConfirmacion(data) {
-            // Ocultar el formulario de documentos y mostrar confirmación
-            document.querySelector('[x-data="documentosData()"]').innerHTML = `
-                <div class="text-center py-12">
-                    <div class="max-w-md mx-auto">
-                        <!-- Icono de éxito -->
-                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-                            <i class="fas fa-check text-green-600 text-2xl"></i>
-                        </div>
-                        
-                        <!-- Título -->
-                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
-                            ¡Trámite Enviado Correctamente!
-                        </h2>
-                        
-                        <!-- Mensaje -->
-                        <p class="text-gray-600 mb-6">
-                            Su trámite ha sido enviado para revisión. Recibirá una notificación cuando el proceso de revisión haya finalizado.
-                        </p>
-                        
-                        <!-- Estado del trámite -->
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                            <div class="flex items-center justify-center">
-                                <i class="fas fa-clock text-blue-600 mr-2"></i>
-                                <span class="text-blue-800 font-medium">Estado: En Revisión</span>
-                            </div>
-                            <p class="text-blue-600 text-sm mt-2">
-                                Progreso del trámite: 100% completado
-                            </p>
-                        </div>
-                        
-                        <!-- Información adicional -->
-                        <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                            <h3 class="font-medium text-gray-900 mb-2">¿Qué sigue?</h3>
-                            <ul class="text-sm text-gray-600 space-y-1">
-                                <li>• Su trámite será revisado por nuestro equipo</li>
-                                <li>• Recibirá notificaciones sobre el estado</li>
-                                <li>• Podrá editar el formulario si se requieren cambios</li>
-                            </ul>
-                        </div>
-                        
-                        <!-- Botones de acción -->
-                        <div class="space-y-3">
-                            <button onclick="window.location.href='/tramites-solicitante'" 
-                                    class="w-full bg-[#9d2449] text-white px-6 py-3 rounded-lg hover:bg-[#8a203f] transition duration-200">
-                                <i class="fas fa-home mr-2"></i>
-                                Volver al Inicio
-                            </button>
-                            
-                            <button onclick="window.print()" 
-                                    class="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition duration-200">
-                                <i class="fas fa-print mr-2"></i>
-                                Imprimir Comprobante
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        },
+
 
         verDocumento(documento) {
             if (!documento.ruta_archivo || !this.tramiteId) {

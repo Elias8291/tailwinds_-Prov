@@ -2,6 +2,35 @@
 
 @section('title', 'Registro - Padrón de Proveedores de Oaxaca')
 
+@push('styles')
+<style>
+    @keyframes loading-progress {
+        0% { width: 20%; }
+        50% { width: 75%; }
+        100% { width: 95%; }
+    }
+    
+    .animate-loading-progress {
+        animation: loading-progress 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-fadeInUp {
+        animation: fadeInUp 0.5s ease-out;
+    }
+</style>
+@endpush
+
 @section('content')
 <!-- Modal para mostrar datos del SAT (Fuera del formulario principal) -->
 <div id="satDataModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
@@ -105,6 +134,54 @@
                         </div>
                     </div>
                 </label>
+            </div>
+        </div>
+
+        <!-- Indicador de Carga -->
+        <div id="loading-indicator" class="hidden">
+            <div class="mt-4 p-6 bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg border border-primary/20">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <!-- Spinner animado -->
+                    <div class="relative">
+                        <div class="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-primary animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Texto de carga -->
+                    <div class="text-center">
+                        <h3 class="text-lg font-semibold text-primary mb-2">Procesando Constancia Fiscal</h3>
+                        <p class="text-sm text-gray-600 mb-3">
+                            Estamos leyendo y validando su documento...
+                        </p>
+                        
+                        <!-- Barra de progreso visual -->
+                        <div class="w-full max-w-sm mx-auto">
+                            <div class="bg-gray-200 rounded-full h-2 overflow-hidden">
+                                <div class="bg-gradient-to-r from-primary to-blue-500 h-full rounded-full animate-loading-progress"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pasos del proceso -->
+                        <div class="mt-4 text-xs text-gray-500 space-y-1">
+                            <div class="flex items-center justify-center space-x-2">
+                                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <span>Escaneando código QR...</span>
+                            </div>
+                            <div class="flex items-center justify-center space-x-2">
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+                                <span>Validando con el SAT...</span>
+                            </div>
+                            <div class="flex items-center justify-center space-x-2">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+                                <span>Extrayendo datos...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -274,6 +351,9 @@
             // Configurar callbacks
             qrHandler.setOnDataScanned((data) => {
                 console.log('Datos escaneados:', data);
+                
+                // Ocultar indicador de carga al procesar exitosamente
+                showLoading(false);
                 
                 // Llenar campos ocultos con datos del SAT
                 const fillSatData = (data) => {
@@ -510,8 +590,27 @@
     // Funciones de utilidad
     function showLoading(show = true) {
         const loadingIndicator = document.getElementById('loading-indicator');
+        const uploadArea = document.getElementById('uploadArea');
+        
         if (loadingIndicator) {
-            loadingIndicator.classList.toggle('hidden', !show);
+            if (show) {
+                loadingIndicator.classList.remove('hidden');
+                loadingIndicator.classList.add('animate-fadeInUp');
+            } else {
+                loadingIndicator.classList.add('hidden');
+                loadingIndicator.classList.remove('animate-fadeInUp');
+            }
+        }
+        
+        // Ocultar/mostrar el área de subida cuando se está cargando
+        if (uploadArea) {
+            if (show) {
+                uploadArea.style.opacity = '0.5';
+                uploadArea.style.pointerEvents = 'none';
+            } else {
+                uploadArea.style.opacity = '1';
+                uploadArea.style.pointerEvents = 'auto';
+            }
         }
     }
 
@@ -556,10 +655,18 @@
             fileName.textContent = 'PDF o Imagen con QR (Máximo 5MB)';
         }
 
-        // Mostrar área de subida
+        // Mostrar área de subida y restaurar estado normal
         const uploadArea = document.getElementById('uploadArea');
         if (uploadArea) {
             uploadArea.classList.remove('hidden');
+            uploadArea.style.opacity = '1';
+            uploadArea.style.pointerEvents = 'auto';
+        }
+        
+        // Ocultar indicador de carga
+        const loadingIndicator = document.getElementById('loading-indicator');
+        if (loadingIndicator) {
+            loadingIndicator.classList.add('hidden');
         }
         
         // Ocultar formulario de registro
