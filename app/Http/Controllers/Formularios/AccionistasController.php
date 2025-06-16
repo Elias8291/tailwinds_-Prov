@@ -24,14 +24,17 @@ class AccionistasController extends Controller
     {
         $this->validateRequest($request);
 
-        return DB::transaction(function () use ($request, $tramite) {
+        DB::transaction(function () use ($request, $tramite) {
             $accionistasData = $this->parseAccionistasData($request);
             $this->deleteExistingAccionistas($tramite);
             $totalPorcentaje = $this->saveAccionistas($tramite, $accionistasData);
             $this->validateTotalPorcentaje($totalPorcentaje, $tramite);
+        });
+
+        // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 4: Accionistas
+            $tramite->actualizarProgresoSeccion(4);
 
             return true;
-        });
     }
 
     /**
@@ -98,6 +101,9 @@ class AccionistasController extends Controller
 
                 Log::info('Total porcentaje accionistas: ' . $totalPorcentaje . '%');
             });
+
+            // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 4: Accionistas
+            $tramite->actualizarProgresoSeccion(4);
 
             Log::info('✅ Accionistas guardados exitosamente para tramite_id: ' . $validated['tramite_id']);
 

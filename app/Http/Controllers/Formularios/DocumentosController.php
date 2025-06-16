@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\Documento;
 use App\Models\DocumentoSolicitante;
 use App\Models\Tramite;
+use App\Models\Solicitante;
 use Illuminate\Support\Facades\DB;
 
 class DocumentosController extends Controller
@@ -26,12 +27,31 @@ class DocumentosController extends Controller
         $this->validateRequest($request, 'subir');
 
         $solicitante = Auth::user()->solicitante;
+        
+        Log::info('Intentando subir documento', [
+            'user_id' => Auth::id(),
+            'solicitante_id' => $solicitante->id,
+            'documento_id' => $request->input('documento_id')
+        ]);
+        
         $tramite = $this->getTramitePendiente($solicitante->id);
+        
+        if ($tramite) {
+            Log::info('Trámite encontrado', [
+                'tramite_id' => $tramite->id,
+                'estado' => $tramite->estado,
+                'progreso' => $tramite->progreso_tramite
+            ]);
+        } else {
+            Log::warning('No se encontró trámite activo', [
+                'solicitante_id' => $solicitante->id
+            ]);
+        }
 
         if (!$tramite) {
             return response()->json([
                 'success' => false,
-                'mensaje' => 'No se encontró un trámite pendiente.'
+                'mensaje' => 'No se encontró un trámite activo. Solo se pueden subir documentos a trámites en estado Pendiente o En Revisión.'
             ], 400);
         }
 
@@ -39,6 +59,9 @@ class DocumentosController extends Controller
             $documento = Documento::find($request->input('documento_id'));
             $ruta = $this->storeArchivo($request->file('archivo'), $tramite->id, $documento->id);
             $docSolicitante = $this->guardarDocumentoSolicitante($tramite->id, $documento->id, $ruta);
+
+            // Verificar si se han subido todos los documentos requeridos
+            $this->verificarYActualizarProgreso($tramite);
 
             return response()->json([
                 'success' => true,
@@ -114,15 +137,16 @@ class DocumentosController extends Controller
     }
 
     /**
-     * Obtiene el trámite pendiente para un solicitante
+     * Obtiene el trámite activo para un solicitante (Pendiente o En Revision)
      *
      * @param int $solicitanteId El ID del solicitante
-     * @return Tramite|null El trámite pendiente o null si no se encuentra
+     * @return Tramite|null El trámite activo o null si no se encuentra
      */
     private function getTramitePendiente($solicitanteId): ?Tramite
     {
         return Tramite::where('solicitante_id', $solicitanteId)
-            ->where('estado', 'Pendiente')
+            ->whereIn('estado', ['Pendiente', 'En Revision'])
+            ->orderBy('updated_at', 'desc')
             ->first();
     }
 
@@ -221,6 +245,242 @@ class DocumentosController extends Controller
             return response()->json([
                 'success' => false,
                 'mensaje' => 'Error inesperado al actualizar el documento: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Verifica si se han subido todos los documentos requeridos y actualiza el progreso
+     *
+     * @param Tramite $tramite El trámite asociado
+     * @return void
+     */
+    private function verificarYActualizarProgreso(Tramite $tramite)
+    {
+        $tipoPersona = $tramite->solicitante->tipo_persona;
+        
+        // Obtener total de documentos requeridos para el tipo de persona
+        $totalDocumentosRequeridos = Documento::where(function($query) use ($tipoPersona) {
+            $query->where('tipo_persona', $tipoPersona)
+                  ->orWhere('tipo_persona', 'Ambas');
+        })
+        ->where('es_visible', true)
+        ->count();
+        
+        // Obtener documentos ya subidos para este trámite del tipo de persona
+        $documentosSubidos = DocumentoSolicitante::where('tramite_id', $tramite->id)
+            ->whereHas('documento', function($query) use ($tipoPersona) {
+                $query->where('es_visible', true)
+                      ->where(function($subQuery) use ($tipoPersona) {
+                          $subQuery->where('tipo_persona', $tipoPersona)
+                                   ->orWhere('tipo_persona', 'Ambas');
+                      });
+            })
+            ->count();
+
+        Log::info('Verificando progreso de documentos:', [
+            'tramite_id' => $tramite->id,
+            'tipo_persona' => $tipoPersona,
+            'documentos_requeridos' => $totalDocumentosRequeridos,
+            'documentos_subidos' => $documentosSubidos
+        ]);
+
+        // Si se han subido todos los documentos requeridos, actualizar progreso
+        if ($documentosSubidos >= $totalDocumentosRequeridos) {
+            // Actualizar progreso del trámite - Sección 6: Documentos
+            $tramite->actualizarProgresoSeccion(6);
+            
+            Log::info('✅ Progreso actualizado a 6 - Documentos completados', [
+                'tramite_id' => $tramite->id,
+                'tipo_persona' => $tipoPersona
+            ]);
+        }
+    }
+
+    /**
+     * Finaliza el trámite y cambia su estado a "En Revision"
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function finalizarTramite(Request $request)
+    {
+        try {
+            $request->validate([
+                'tramite_id' => 'required|integer|exists:tramite,id'
+            ]);
+
+            $tramite = Tramite::with('solicitante')->find($request->tramite_id);
+            
+            if (!$tramite) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trámite no encontrado'
+                ], 404);
+            }
+
+            $tipoPersona = $tramite->solicitante->tipo_persona;
+
+            // Verificar que todos los documentos del tipo de persona estén subidos
+            $totalDocumentosRequeridos = Documento::where(function($query) use ($tipoPersona) {
+                $query->where('tipo_persona', $tipoPersona)
+                      ->orWhere('tipo_persona', 'Ambas');
+            })
+            ->where('es_visible', true)
+            ->count();
+
+            $documentosSubidos = DocumentoSolicitante::where('tramite_id', $tramite->id)
+                ->whereHas('documento', function($query) use ($tipoPersona) {
+                    $query->where('es_visible', true)
+                          ->where(function($subQuery) use ($tipoPersona) {
+                              $subQuery->where('tipo_persona', $tipoPersona)
+                                       ->orWhere('tipo_persona', 'Ambas');
+                          });
+                })
+                ->count();
+
+            Log::info('Verificando documentos para finalizar trámite:', [
+                'tramite_id' => $tramite->id,
+                'tipo_persona' => $tipoPersona,
+                'documentos_requeridos' => $totalDocumentosRequeridos,
+                'documentos_subidos' => $documentosSubidos
+            ]);
+
+            if ($documentosSubidos < $totalDocumentosRequeridos) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debe subir todos los documentos requeridos antes de finalizar el trámite',
+                    'debug' => [
+                        'tipo_persona' => $tipoPersona,
+                        'requeridos' => $totalDocumentosRequeridos,
+                        'subidos' => $documentosSubidos
+                    ]
+                ], 400);
+            }
+
+            // Actualizar el trámite
+            $tramite->update([
+                'estado' => 'En Revision',
+                'progreso_tramite' => 6,
+                'fecha_finalizacion' => now()
+            ]);
+
+            Log::info('✅ Trámite finalizado exitosamente', [
+                'tramite_id' => $tramite->id,
+                'estado' => $tramite->estado,
+                'progreso' => $tramite->progreso_tramite,
+                'tipo_persona' => $tipoPersona
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Trámite enviado correctamente para revisión',
+                'tramite_id' => $tramite->id,
+                'estado' => $tramite->estado
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error al finalizar trámite:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al finalizar el trámite: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Descarga o visualiza un documento
+     *
+     * @param Request $request
+     * @param int $tramiteId
+     * @param int $documentoId
+     * @return \Illuminate\Http\Response
+     */
+    public function verDocumento(Request $request, $tramiteId, $documentoId)
+    {
+        try {
+            // Verificar que el documento pertenece al usuario actual
+            $user = Auth::user();
+            $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+            
+            if (!$solicitante) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró información del solicitante'
+                ], 404);
+            }
+
+            $tramite = Tramite::where('id', $tramiteId)
+                ->where('solicitante_id', $solicitante->id)
+                ->first();
+
+            if (!$tramite) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trámite no encontrado'
+                ], 404);
+            }
+
+            $documentoSolicitante = DocumentoSolicitante::where('tramite_id', $tramiteId)
+                ->where('documento_id', $documentoId)
+                ->first();
+
+            if (!$documentoSolicitante || !$documentoSolicitante->ruta_archivo) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Documento no encontrado'
+                ], 404);
+            }
+
+            // Desencriptar la ruta del archivo
+            try {
+                $rutaArchivo = Crypt::decryptString($documentoSolicitante->ruta_archivo);
+            } catch (\Exception $e) {
+                // Si no está encriptado, usar la ruta directamente
+                $rutaArchivo = $documentoSolicitante->ruta_archivo;
+            }
+
+            $rutaCompleta = storage_path('app/public/' . $rutaArchivo);
+
+            if (!file_exists($rutaCompleta)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El archivo no existe en el servidor'
+                ], 404);
+            }
+
+            $documento = Documento::find($documentoId);
+            $nombreArchivo = $documento->nombre . '.pdf';
+
+            // Detectar si es móvil para forzar descarga
+            $userAgent = $request->header('User-Agent');
+            $esMobile = preg_match('/Mobile|Android|iPhone|iPad/', $userAgent);
+
+            if ($esMobile || $request->get('download') === '1') {
+                // Forzar descarga en móviles
+                return response()->download($rutaCompleta, $nombreArchivo);
+            } else {
+                // Mostrar en el navegador (desktop)
+                return response()->file($rutaCompleta, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . $nombreArchivo . '"'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Error al ver documento:', [
+                'tramite_id' => $tramiteId,
+                'documento_id' => $documentoId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al acceder al documento'
             ], 500);
         }
     }

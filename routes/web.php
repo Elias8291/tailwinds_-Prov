@@ -88,7 +88,6 @@ Route::middleware(['auth', \App\Http\Middleware\VerifyUserStatus::class])->group
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
-    Route::get('/tramites/create', [TramiteController::class, 'create'])->name('tramites.create');
     Route::post('/tramites', [TramiteController::class, 'store'])->name('tramites.store');
     
     Route::resource('documentos', DocumentoController::class);
@@ -115,6 +114,7 @@ Route::middleware(['auth'])->group(function () {
 // Rutas para trámites
 Route::prefix('tramites')->group(function () {
     Route::get('/', [TramiteController::class, 'index'])->name('tramites.index');
+    Route::get('/terminos-condiciones', [TramiteController::class, 'mostrarTerminos'])->name('tramites.terminos');
     Route::post('/iniciar', [TramiteController::class, 'iniciarTramite'])->name('tramites.iniciar');
     Route::get('/datos-generales', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'index'])->name('tramites.datos-generales');
     Route::post('/guardar-datos-generales', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'guardar'])->name('tramites.guardar-datos-generales');
@@ -129,7 +129,7 @@ Route::prefix('tramites')->group(function () {
     // Rutas específicas para cada tipo de trámite
     Route::get('/{tipo_tramite}/{tramite}/create', [TramiteController::class, 'create'])
         ->where('tipo_tramite', 'inscripcion|renovacion|actualizacion')
-        ->name('tramites.create');
+        ->name('tramites.create.tipo');
     
     // Ruta para pasos específicos del trámite
     Route::get('/{tramite}/paso/{paso}', [TramiteNavegacionController::class, 'mostrarPaso'])
@@ -220,7 +220,13 @@ Route::middleware(['auth'])->prefix('tramites-solicitante')->group(function () {
     Route::get('/datos-tramite', [TramiteSolicitanteController::class, 'obtenerDatosTramite'])->name('tramites.solicitante.datos-tramite');
     Route::get('/documentos', [TramiteSolicitanteController::class, 'obtenerDocumentos'])->name('tramites.solicitante.documentos');
     Route::post('/upload-documento', [\App\Http\Controllers\Formularios\DocumentosController::class, 'subir'])->name('tramites.solicitante.upload-documento');
+    Route::get('/ver-documento/{tramite}/{documento}', [\App\Http\Controllers\Formularios\DocumentosController::class, 'verDocumento'])->name('tramites.solicitante.ver-documento');
+    Route::post('/finalizar-tramite', [\App\Http\Controllers\Formularios\DocumentosController::class, 'finalizarTramite'])->name('tramites.solicitante.finalizar-tramite');
     Route::post('/finalizar', [TramiteSolicitanteController::class, 'finalizarTramite'])->name('tramites.solicitante.finalizar');
+    
+    // Rutas para manejo de estado y edición de trámites
+    Route::get('/estado/{tramite}', [TramiteSolicitanteController::class, 'mostrarEstadoTramite'])->name('tramites.solicitante.estado');
+    Route::post('/habilitar-edicion/{tramite}', [TramiteSolicitanteController::class, 'habilitarEdicion'])->name('tramites.solicitante.habilitar-edicion');
     
     // API para obtener datos de domicilio
     Route::get('/api/domicilio/{tramite}', [TramiteSolicitanteController::class, 'obtenerDatosDomicilioAPI'])->name('tramites.solicitante.api.domicilio');

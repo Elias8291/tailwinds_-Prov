@@ -1,4 +1,4 @@
-@props(['title' => 'Domicilio'])
+@props(['title' => 'Domicilio', 'datosDomicilio' => [], 'datosSAT' => [], 'readonly' => false])
 
 <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" 
     x-data="domicilioData()">
@@ -15,185 +15,274 @@
         </div>
     </div>
 
-    <form class="space-y-8" @submit.prevent="guardarDomicilio" x-ref="domicilioForm">
-        <input type="hidden" name="action" value="next">
-        <input type="hidden" name="seccion" value="2">
-        <input type="hidden" name="tramite_id" value="{{ $datosDomicilio['tramite_id'] ?? ($tramite->id ?? '') }}">
-        
-        <!-- Código Postal y Ubicación -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Código Postal -->
-            <div class="form-group">
-                <label for="codigo_postal" class="block text-sm font-medium text-gray-700 mb-2">
-                    Código Postal
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="text" id="codigo_postal" name="codigo_postal"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           placeholder="Ej: 12345"
-                           pattern="[0-9]{4,5}"
-                           maxlength="5"
-                           x-model="cp"
-                           required>
+    @if($readonly)
+        <!-- Vista de solo lectura para revisión -->
+        <div class="space-y-6">
+            <!-- Información del Domicilio -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Código Postal</label>
+                    <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                        {{ $datosDomicilio['codigo_postal'] ?? 'No especificado' }}
+                    </div>
                 </div>
-                <p class="mt-1 text-sm text-gray-500">Al ingresar el código postal se llenarán automáticamente algunos campos</p>
-            </div>
-
-            <!-- Estado -->
-            <div class="form-group">
-                <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">
-                    Estado
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="text" id="estado" name="estado"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-                           placeholder="Ej: Jalisco"
-                           x-model="estado"
-                           readonly
-                           required>
+                
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                    <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                        {{ $datosDomicilio['estado'] ?? 'No especificado' }}
+                    </div>
                 </div>
-            </div>
-
-            <!-- Municipio -->
-            <div class="form-group">
-                <label for="municipio" class="block text-sm font-medium text-gray-700 mb-2">
-                    Municipio
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="text" id="municipio" name="municipio"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-                           placeholder="Ej: Guadalajara"
-                           x-model="municipio"
-                           readonly
-                           required>
+                
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Municipio</label>
+                    <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                        {{ $datosDomicilio['municipio'] ?? 'No especificado' }}
+                    </div>
                 </div>
-            </div>
-
-            <!-- Colonia -->
-            <div class="form-group">
-                <label for="colonia" class="block text-sm font-medium text-gray-700 mb-2">
-                    Asentamiento
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <select id="colonia" name="colonia"
-                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                            x-model="colonia"
-                            required>
-                        <option value="">Seleccione un Asentamiento</option>
-                        <template x-for="asentamiento in asentamientos" :key="asentamiento.id">
-                            <option :value="asentamiento.id" x-text="asentamiento.nombre"></option>
-                        </template>
-                    </select>
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <i class="fas fa-chevron-down text-gray-400"></i>
+                
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Asentamiento</label>
+                    <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                        {{ $datosDomicilio['colonia'] ?? 'No especificado' }}
+                    </div>
+                </div>
+                
+                <div class="form-group md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Calle</label>
+                    <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                        {{ $datosDomicilio['calle'] ?? 'No especificado' }}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Número Exterior</label>
+                    <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                        {{ $datosDomicilio['numero_exterior'] ?? 'No especificado' }}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Número Interior</label>
+                    <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                        {{ $datosDomicilio['numero_interior'] ?? 'No especificado' }}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Entre Calle</label>
+                    <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                        {{ $datosDomicilio['entre_calle_1'] ?? 'No especificado' }}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Y Calle</label>
+                    <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                        {{ $datosDomicilio['entre_calle_2'] ?? 'No especificado' }}
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Dirección -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Calle -->
-            <div class="form-group md:col-span-2">
-                <label for="calle" class="block text-sm font-medium text-gray-700 mb-2">
-                    Calle
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="text" id="calle" name="calle"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           placeholder="Ej: Av. Principal"
-                           maxlength="100"
-                           x-model="nombreVialidad"
-                           required>
-                </div>
-            </div>
-
-            <!-- Número Exterior -->
-            <div class="form-group">
-                <label for="numero_exterior" class="block text-sm font-medium text-gray-700 mb-2">
-                    Número Exterior
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="text" id="numero_exterior" name="numero_exterior"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           placeholder="Ej: 123 o S/N"
-                           pattern="[A-Za-z0-9\/]+"
-                           maxlength="10"
-                           x-model="numeroExterior"
-                           required>
-                </div>
-            </div>
-
-            <!-- Número Interior -->
-            <div class="form-group">
-                <label for="numero_interior" class="block text-sm font-medium text-gray-700 mb-2">
-                    Número Interior
-                </label>
-                <div class="relative group">
-                    <input type="text" id="numero_interior" name="numero_interior"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           placeholder="Ej: 5A"
-                           pattern="[A-Za-z0-9]+"
-                           maxlength="10"
-                           x-model="numeroInterior">
-                </div>
-            </div>
-
-            <!-- Entre Calles -->
-            <div class="form-group">
-                <label for="entre_calle_1" class="block text-sm font-medium text-gray-700 mb-2">
-                    Entre Calle
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="text" id="entre_calle_1" name="entre_calle_1"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           placeholder="Ej: Calle Independencia"
-                           pattern="[A-Za-z0-9\s]+"
-                           maxlength="100"
-                           required>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="entre_calle_2" class="block text-sm font-medium text-gray-700 mb-2">
-                    Y Calle
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="text" id="entre_calle_2" name="entre_calle_2"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           placeholder="Ej: Calle Morelos"
-                           pattern="[A-Za-z0-9\s]+"
-                           maxlength="100"
-                           required>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Botones de navegación -->
-        <div class="flex justify-between pt-6 border-t border-gray-100">
-            <button type="button" 
-                    onclick="navegarAnteriorDomicilio()"
-                    class="inline-flex items-center bg-gray-600 text-white px-6 py-2 rounded-xl shadow-lg hover:bg-gray-700 transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-gray-600/20">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Anterior
-            </button>
             
-            <button type="button" 
-                    onclick="guardarDomicilioYSiguiente()"
-                    class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20">
-                <i class="fas fa-save mr-2"></i> Guardar y Continuar
-                <i class="fas fa-arrow-right ml-2"></i>
-            </button>
+            <!-- Información SAT si existe -->
+            @if(!empty($datosSAT))
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Información SAT</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @foreach($datosSAT as $key => $value)
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ ucfirst(str_replace('_', ' ', $key)) }}</label>
+                        <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                            {{ $value ?? 'No especificado' }}
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
-    </form>
+    @else
+        <!-- Formulario editable normal -->
+        <form class="space-y-8" @submit.prevent="guardarDomicilio" x-ref="domicilioForm">
+            <input type="hidden" name="action" value="next">
+            <input type="hidden" name="seccion" value="2">
+            <input type="hidden" name="tramite_id" value="{{ $datosDomicilio['tramite_id'] ?? ($tramite->id ?? '') }}">
+            
+            <!-- Código Postal y Ubicación -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Código Postal -->
+                <div class="form-group">
+                    <label for="codigo_postal" class="block text-sm font-medium text-gray-700 mb-2">
+                        Código Postal
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="codigo_postal" name="codigo_postal"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               placeholder="Ej: 12345"
+                               pattern="[0-9]{4,5}"
+                               maxlength="5"
+                               x-model="cp"
+                               required>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500">Al ingresar el código postal se llenarán automáticamente algunos campos</p>
+                </div>
+
+                <!-- Estado -->
+                <div class="form-group">
+                    <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">
+                        Estado
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="estado" name="estado"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+                               placeholder="Ej: Jalisco"
+                               x-model="estado"
+                               readonly
+                               required>
+                    </div>
+                </div>
+
+                <!-- Municipio -->
+                <div class="form-group">
+                    <label for="municipio" class="block text-sm font-medium text-gray-700 mb-2">
+                        Municipio
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="municipio" name="municipio"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+                               placeholder="Ej: Guadalajara"
+                               x-model="municipio"
+                               readonly
+                               required>
+                    </div>
+                </div>
+
+                <!-- Colonia -->
+                <div class="form-group">
+                    <label for="colonia" class="block text-sm font-medium text-gray-700 mb-2">
+                        Asentamiento
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <select id="colonia" name="colonia"
+                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                                x-model="colonia"
+                                required>
+                            <option value="">Seleccione un Asentamiento</option>
+                            <template x-for="asentamiento in asentamientos" :key="asentamiento.id">
+                                <option :value="asentamiento.id" x-text="asentamiento.nombre"></option>
+                            </template>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dirección -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Calle -->
+                <div class="form-group md:col-span-2">
+                    <label for="calle" class="block text-sm font-medium text-gray-700 mb-2">
+                        Calle
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="calle" name="calle"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               placeholder="Ej: Av. Principal"
+                               maxlength="100"
+                               x-model="nombreVialidad"
+                               required>
+                    </div>
+                </div>
+
+                <!-- Número Exterior -->
+                <div class="form-group">
+                    <label for="numero_exterior" class="block text-sm font-medium text-gray-700 mb-2">
+                        Número Exterior
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="numero_exterior" name="numero_exterior"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               placeholder="Ej: 123 o S/N"
+                               pattern="[A-Za-z0-9\/]+"
+                               maxlength="10"
+                               x-model="numeroExterior"
+                               required>
+                    </div>
+                </div>
+
+                <!-- Número Interior -->
+                <div class="form-group">
+                    <label for="numero_interior" class="block text-sm font-medium text-gray-700 mb-2">
+                        Número Interior
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="numero_interior" name="numero_interior"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               placeholder="Ej: 5A"
+                               pattern="[A-Za-z0-9]+"
+                               maxlength="10"
+                               x-model="numeroInterior">
+                    </div>
+                </div>
+
+                <!-- Entre Calles -->
+                <div class="form-group">
+                    <label for="entre_calle_1" class="block text-sm font-medium text-gray-700 mb-2">
+                        Entre Calle
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="entre_calle_1" name="entre_calle_1"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               placeholder="Ej: Calle Independencia"
+                               pattern="[A-Za-z0-9\s]+"
+                               maxlength="100"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="entre_calle_2" class="block text-sm font-medium text-gray-700 mb-2">
+                        Y Calle
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="entre_calle_2" name="entre_calle_2"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               placeholder="Ej: Calle Morelos"
+                               pattern="[A-Za-z0-9\s]+"
+                               maxlength="100"
+                               required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones de navegación -->
+            <div class="flex justify-between pt-6 border-t border-gray-100">
+                <button type="button" 
+                        onclick="navegarAnteriorDomicilio()"
+                        class="inline-flex items-center bg-gray-600 text-white px-6 py-2 rounded-xl shadow-lg hover:bg-gray-700 transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-gray-600/20">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Anterior
+                </button>
+                
+                <button type="button" 
+                        onclick="guardarDomicilioYSiguiente()"
+                        class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20">
+                    <i class="fas fa-save mr-2"></i> Guardar y Continuar
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </form>
+    @endif
 </div>
 
 <script>

@@ -31,8 +31,8 @@ class Accionista extends Model
     public function tramites()
     {
         return $this->belongsToMany(Tramite::class, 'accionista_solicitante', 'accionista_id', 'tramite_id')
-                    ->withPivot('porcentaje_participacion')
-                    ->withTimestamps();
+            ->withPivot('porcentaje_participacion')
+            ->withTimestamps();
     }
 
     /**

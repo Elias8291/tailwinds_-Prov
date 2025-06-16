@@ -47,16 +47,19 @@ class ConstitucionController extends Controller
     {
         $this->validateRequest($request);
 
-        return DB::transaction(function () use ($request, $tramite) {
+        DB::transaction(function () use ($request, $tramite) {
             $detalleTramite = $this->getOrCreateDetalleTramite($tramite);
             $instrumentoNotarial = $this->guardarInstrumentoNotarial($request, $detalleTramite->datoConstitutivo?->instrumento_notarial_id);
             $datoConstitutivo = $this->guardarDatoConstitutivo($instrumentoNotarial->id, $detalleTramite->dato_constitutivo_id);
 
             $detalleTramite->dato_constitutivo_id = $datoConstitutivo->id;
             $detalleTramite->save();
+        });
+
+        // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 3: Constitución
+            $tramite->actualizarProgresoSeccion(3);
 
             return true;
-        });
     }
 
     /**

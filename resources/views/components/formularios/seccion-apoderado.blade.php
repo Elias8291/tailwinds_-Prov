@@ -1,6 +1,7 @@
-@props(['title' => 'Apoderado Legal', 'tramite' => null, 'datosApoderado' => []])
+@props(['title' => 'Apoderado Legal', 'tramite' => null, 'datosApoderado' => [], 'readonly' => false])
 
-<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" x-data="apoderadoData()" x-init="init()">
+<div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" 
+     @if(!$readonly) x-data="apoderadoData()" x-init="init()" @endif>
     <!-- Encabezado con icono -->
     <div class="flex items-center space-x-4 mb-8 pb-6 border-b border-gray-100">
         <div class="h-12 w-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
@@ -12,120 +13,250 @@
         </div>
     </div>
 
-    <!-- Alert de Errores -->
-    <div x-show="showError" x-cloak class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-        <div class="flex items-center">
-            <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
-            <p class="text-red-700 text-sm" x-text="errorMessage"></p>
-        </div>
-    </div>
-
-    <!-- Alert de Éxito -->
-    <div x-show="showSuccess" x-cloak class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-        <div class="flex items-center">
-            <i class="fas fa-check-circle text-green-500 mr-3"></i>
-            <p class="text-green-700 text-sm" x-text="successMessage"></p>
-        </div>
-    </div>
-
-    <form class="space-y-8" @submit.prevent="guardarApoderado" x-ref="apoderadoForm">
-        <input type="hidden" name="action" value="next">
-        <input type="hidden" name="seccion" value="5">
-        <input type="hidden" name="tramite_id" :value="tramiteId">
-
-        <!-- Datos del Apoderado -->
+    @if($readonly)
+        <!-- Vista de solo lectura para revisión -->
         <div class="space-y-6">
-            <div class="flex items-center space-x-2 mb-6">
-                <i class="fas fa-user-tie text-[#9d2449]"></i>
-                <h4 class="text-lg font-medium text-gray-700">Datos del Apoderado o Representante Legal</h4>
-            </div>
+            @if(!empty($datosApoderado))
+                <!-- Datos del Apoderado -->
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-2 mb-6">
+                        <i class="fas fa-user-tie text-[#9d2449]"></i>
+                        <h4 class="text-lg font-medium text-gray-700">Datos del Apoderado o Representante Legal</h4>
+                    </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Nombre del Apoderado -->
-                <div class="form-group">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                            <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                                {{ $datosApoderado['nombre_apoderado'] ?? 'No especificado' }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Número de Escritura</label>
+                            <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                                {{ $datosApoderado['numero_escritura'] ?? 'No especificado' }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Notario</label>
+                            <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                                {{ $datosApoderado['nombre_notario'] ?? 'No especificado' }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Número del Notario</label>
+                            <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                                {{ $datosApoderado['numero_notario'] ?? 'No especificado' }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Entidad Federativa</label>
+                            <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                                @php
+                                    $estados = [
+                                        '1' => 'Aguascalientes', '2' => 'Baja California', '3' => 'Baja California Sur', 
+                                        '4' => 'Campeche', '5' => 'Coahuila', '6' => 'Colima', '7' => 'Chiapas', 
+                                        '8' => 'Chihuahua', '9' => 'Ciudad de México', '10' => 'Durango', 
+                                        '11' => 'Guanajuato', '12' => 'Guerrero', '13' => 'Hidalgo', 
+                                        '14' => 'Jalisco', '15' => 'México', '16' => 'Michoacán', 
+                                        '17' => 'Morelos', '18' => 'Nayarit', '19' => 'Nuevo León', 
+                                        '20' => 'Oaxaca', '21' => 'Puebla', '22' => 'Querétaro', 
+                                        '23' => 'Quintana Roo', '24' => 'San Luis Potosí', '25' => 'Sinaloa', 
+                                        '26' => 'Sonora', '27' => 'Tabasco', '28' => 'Tamaulipas', 
+                                        '29' => 'Tlaxcala', '30' => 'Veracruz', '31' => 'Yucatán', '32' => 'Zacatecas'
+                                    ];
+                                    $entidadId = $datosApoderado['entidad_federativa'] ?? '';
+                                @endphp
+                                {{ $estados[$entidadId] ?? 'No especificado' }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Escritura</label>
+                            <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                                @php
+                                    $fechaEscritura = $datosApoderado['fecha_escritura'] ?? '';
+                                    if (!empty($fechaEscritura) && $fechaEscritura !== 'No disponible') {
+                                        try {
+                                            $fechaEscrituraFormateada = \Carbon\Carbon::parse($fechaEscritura)->format('d/m/Y');
+                                        } catch (\Exception $e) {
+                                            $fechaEscrituraFormateada = $fechaEscritura;
+                                        }
+                                    } else {
+                                        $fechaEscrituraFormateada = 'No especificado';
+                                    }
+                                @endphp
+                                {{ $fechaEscrituraFormateada }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Datos de Inscripción -->
+                <div class="mt-8">
+                    <div class="flex items-center space-x-2 mb-6">
+                        <i class="fas fa-book text-[#9d2449]"></i>
+                        <h4 class="text-lg font-medium text-gray-700">Datos de Inscripción en el Registro Público</h4>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Número de Registro o Folio Mercantil</label>
+                            <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                                {{ $datosApoderado['numero_registro'] ?? 'No especificado' }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Inscripción</label>
+                            <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                                @php
+                                    $fechaInscripcionApoderado = $datosApoderado['fecha_inscripcion'] ?? '';
+                                    if (!empty($fechaInscripcionApoderado) && $fechaInscripcionApoderado !== 'No disponible') {
+                                        try {
+                                            $fechaInscripcionApoderadoFormateada = \Carbon\Carbon::parse($fechaInscripcionApoderado)->format('d/m/Y');
+                                        } catch (\Exception $e) {
+                                            $fechaInscripcionApoderadoFormateada = $fechaInscripcionApoderado;
+                                        }
+                                    } else {
+                                        $fechaInscripcionApoderadoFormateada = 'No especificado';
+                                    }
+                                @endphp
+                                {{ $fechaInscripcionApoderadoFormateada }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <!-- Mensaje cuando no hay datos de apoderado -->
+                <div class="text-center py-8">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <i class="fas fa-user-tie text-gray-400 text-3xl mb-3"></i>
+                        <p class="text-gray-500">No hay información del apoderado legal registrada para este trámite.</p>
+                    </div>
+                </div>
+            @endif
+        </div>
+    @else
+        <!-- Vista editable normal (código existente) -->
+        <!-- Alert de Errores -->
+        <div x-show="showError" x-cloak class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                <p class="text-red-700 text-sm" x-text="errorMessage"></p>
+            </div>
+        </div>
+
+        <!-- Alert de Éxito -->
+        <div x-show="showSuccess" x-cloak class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                <p class="text-green-700 text-sm" x-text="successMessage"></p>
+            </div>
+        </div>
+
+        <form class="space-y-8" @submit.prevent="guardarApoderado" x-ref="apoderadoForm">
+            <input type="hidden" name="action" value="next">
+            <input type="hidden" name="seccion" value="5">
+            <input type="hidden" name="tramite_id" :value="tramiteId">
+
+            <!-- Datos del Apoderado -->
+            <div class="space-y-6">
+            <div class="flex items-center space-x-2 mb-6">
+                    <i class="fas fa-user-tie text-[#9d2449]"></i>
+                    <h4 class="text-lg font-medium text-gray-700">Datos del Apoderado o Representante Legal</h4>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Nombre del Apoderado -->
+                    <div class="form-group">
                     <label for="nombre_apoderado" class="block text-sm font-medium text-gray-700 mb-2">
-                        Nombre
-                        <span class="text-[#9d2449]">*</span>
-                    </label>
-                    <div class="relative group">
+                            Nombre
+                            <span class="text-[#9d2449]">*</span>
+                        </label>
+                        <div class="relative group">
                         <input type="text" 
                                id="nombre_apoderado" 
                                name="nombre_apoderado"
                                x-model="nombreApoderado"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
-                               placeholder="Ej: Lic. Juan Pérez González"
+                                   class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
+                                   placeholder="Ej: Lic. Juan Pérez González"
                                maxlength="100"
                                required>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Número de Escritura -->
-                <div class="form-group">
+                    <!-- Número de Escritura -->
+                    <div class="form-group">
                     <label for="numero_escritura" class="block text-sm font-medium text-gray-700 mb-2">
-                        Número de Escritura
-                        <span class="text-[#9d2449]">*</span>
-                    </label>
-                    <div class="relative group">
+                            Número de Escritura
+                            <span class="text-[#9d2449]">*</span>
+                        </label>
+                        <div class="relative group">
                         <input type="text" 
                                id="numero_escritura" 
                                name="numero_escritura"
                                x-model="numeroEscritura"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
-                               placeholder="Ej: 12345"
+                                   class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
+                                   placeholder="Ej: 12345"
                                maxlength="15"
                                required>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Nombre del Notario -->
-                <div class="form-group">
+                    <!-- Nombre del Notario -->
+                    <div class="form-group">
                     <label for="nombre_notario" class="block text-sm font-medium text-gray-700 mb-2">
-                        Nombre del Notario
-                        <span class="text-[#9d2449]">*</span>
-                    </label>
-                    <div class="relative group">
+                            Nombre del Notario
+                            <span class="text-[#9d2449]">*</span>
+                        </label>
+                        <div class="relative group">
                         <input type="text" 
                                id="nombre_notario" 
                                name="nombre_notario"
                                x-model="nombreNotario"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
-                               placeholder="Ej: Lic. María López Ramírez"
+                                   class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
+                                   placeholder="Ej: Lic. María López Ramírez"
                                maxlength="100"
                                required>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Número del Notario -->
-                <div class="form-group">
+                    <!-- Número del Notario -->
+                    <div class="form-group">
                     <label for="numero_notario" class="block text-sm font-medium text-gray-700 mb-2">
-                        Número del Notario
-                        <span class="text-[#9d2449]">*</span>
-                    </label>
-                    <div class="relative group">
+                            Número del Notario
+                            <span class="text-[#9d2449]">*</span>
+                        </label>
+                        <div class="relative group">
                         <input type="text" 
                                id="numero_notario" 
                                name="numero_notario"
                                x-model="numeroNotario"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
-                               placeholder="Ej: 123"
+                                   class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
+                                   placeholder="Ej: 123"
                                maxlength="10"
                                required>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Entidad Federativa -->
-                <div class="form-group">
+                    <!-- Entidad Federativa -->
+                    <div class="form-group">
                     <label for="entidad_federativa" class="block text-sm font-medium text-gray-700 mb-2">
-                        Entidad Federativa
-                        <span class="text-[#9d2449]">*</span>
-                    </label>
-                    <div class="relative group">
+                            Entidad Federativa
+                            <span class="text-[#9d2449]">*</span>
+                        </label>
+                        <div class="relative group">
                         <select id="entidad_federativa" 
                                 name="entidad_federativa"
                                 x-model="entidadFederativa"
                                 class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40 appearance-none"
                                 required>
-                            <option value="">Seleccione un estado</option>
+                                <option value="">Seleccione un estado</option>
                             <option value="1">Aguascalientes</option>
                             <option value="2">Baja California</option>
                             <option value="3">Baja California Sur</option>
@@ -158,68 +289,68 @@
                             <option value="30">Veracruz</option>
                             <option value="31">Yucatán</option>
                             <option value="32">Zacatecas</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <i class="fas fa-chevron-down text-gray-400"></i>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-chevron-down text-gray-400"></i>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Fecha de Escritura -->
-                <div class="form-group">
+                    <!-- Fecha de Escritura -->
+                    <div class="form-group">
                     <label for="fecha_escritura" class="block text-sm font-medium text-gray-700 mb-2">
-                        Fecha de Escritura
-                        <span class="text-[#9d2449]">*</span>
-                    </label>
-                    <div class="relative group">
+                            Fecha de Escritura
+                            <span class="text-[#9d2449]">*</span>
+                        </label>
+                        <div class="relative group">
                         <input type="date" 
                                id="fecha_escritura" 
                                name="fecha_escritura"
                                x-model="fechaEscritura"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
+                                   class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
                                required>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Datos de Inscripción -->
-            <div class="mt-8">
+                <!-- Datos de Inscripción -->
+                <div class="mt-8">
                 <div class="flex items-center space-x-2 mb-6">
-                    <i class="fas fa-book text-[#9d2449]"></i>
-                    <h4 class="text-lg font-medium text-gray-700">Datos de Inscripción en el Registro Público</h4>
-                </div>
+                        <i class="fas fa-book text-[#9d2449]"></i>
+                        <h4 class="text-lg font-medium text-gray-700">Datos de Inscripción en el Registro Público</h4>
+                    </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Número de Registro -->
-                    <div class="form-group">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Número de Registro -->
+                        <div class="form-group">
                         <label for="numero_registro" class="block text-sm font-medium text-gray-700 mb-2">
-                            Número de Registro o Folio Mercantil
-                            <span class="text-[#9d2449]">*</span>
-                        </label>
-                        <div class="relative group">
+                                Número de Registro o Folio Mercantil
+                                <span class="text-[#9d2449]">*</span>
+                            </label>
+                            <div class="relative group">
                             <input type="text" 
                                    id="numero_registro" 
                                    name="numero_registro"
                                    x-model="numeroRegistro"
-                                   class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
-                                   placeholder="Ej: 987654"
+                                       class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
+                                       placeholder="Ej: 987654"
                                    maxlength="20"
                                    required>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Fecha de Inscripción -->
-                    <div class="form-group">
+                        <!-- Fecha de Inscripción -->
+                        <div class="form-group">
                         <label for="fecha_inscripcion" class="block text-sm font-medium text-gray-700 mb-2">
-                            Fecha de Inscripción
-                            <span class="text-[#9d2449]">*</span>
-                        </label>
-                        <div class="relative group">
+                                Fecha de Inscripción
+                                <span class="text-[#9d2449]">*</span>
+                            </label>
+                            <div class="relative group">
                             <input type="date" 
                                    id="fecha_inscripcion" 
                                    name="fecha_inscripcion"
                                    x-model="fechaInscripcion"
-                                   class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
+                                       class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
                                    required>
                         </div>
                     </div>
@@ -254,6 +385,7 @@
             </button>
         </div>
     </form>
+    @endif
 </div>
 
 <script>

@@ -28,16 +28,19 @@ class ApoderadoLegalController extends Controller
     {
         $this->validateRequest($request);
 
-        return DB::transaction(function () use ($request, $tramite) {
+        DB::transaction(function () use ($request, $tramite) {
             $detalleTramite = $this->getOrCreateDetalleTramite($tramite);
             $instrumentoNotarial = $this->guardarInstrumentoNotarial($request, $detalleTramite->representanteLegal?->instrumento_notarial_id);
             $representanteLegal = $this->guardarRepresentanteLegal($request, $instrumentoNotarial->id, $detalleTramite->representante_legal_id);
 
             $detalleTramite->representante_legal_id = $representanteLegal->id;
             $detalleTramite->save();
+        });
+
+        // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 5: Apoderado Legal
+            $tramite->actualizarProgresoSeccion(5);
 
             return true;
-        });
     }
 
     /**
@@ -93,6 +96,9 @@ class ApoderadoLegalController extends Controller
                     'tramite_id' => $tramite->id
                 ]);
             });
+
+            // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 5: Apoderado Legal
+            $tramite->actualizarProgresoSeccion(5);
 
             Log::info('✅ Apoderado legal guardado exitosamente para tramite_id: ' . $validated['tramite_id']);
 

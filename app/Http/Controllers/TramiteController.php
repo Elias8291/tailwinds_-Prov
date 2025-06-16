@@ -197,7 +197,7 @@ class TramiteController extends Controller
     /**
      * Inicia un trámite (inscripción, renovación, actualización) para un RFC dado.
      * Si el usuario o solicitante no existen, los crea y los asocia.
-     * Redirige a la vista de términos y condiciones.
+     * Primero muestra términos y condiciones si no han sido aceptados.
      */
     public function iniciarTramite(Request $request)
     {
@@ -208,6 +208,7 @@ class TramiteController extends Controller
                 'rfc' => 'required|string|max:13',
                 'tipo_tramite' => 'required|in:inscripcion,renovacion,actualizacion',
                 'tipo_persona' => 'required|in:Física,Moral,Fisica,FÍSICA,MORAL,fisica,moral',
+                'terminos_aceptados' => 'nullable|boolean', // Para saber si ya se aceptaron los términos
             ]);
 
             // Normalize tipo_persona value
@@ -217,6 +218,32 @@ class TramiteController extends Controller
             }
 
             Log::info('Datos validados correctamente', $validated);
+
+            // Si no se han aceptado los términos, mostrar la vista de términos y condiciones
+            if (!$request->has('terminos_aceptados') || !$request->terminos_aceptados) {
+                Log::info('Mostrando términos y condiciones antes del trámite');
+                
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Redirigiendo a términos y condiciones',
+                        'redirect' => route('tramites.terminos', [
+                            'tipo_tramite' => $validated['tipo_tramite'],
+                            'rfc' => $validated['rfc'],
+                            'tipo_persona' => $validated['tipo_persona']
+                        ])
+                    ]);
+                }
+
+                return redirect()->route('tramites.terminos', [
+                    'tipo_tramite' => $validated['tipo_tramite'],
+                    'rfc' => $validated['rfc'],
+                    'tipo_persona' => $validated['tipo_persona']
+                ]);
+            }
+
+            // Si ya se aceptaron los términos, proceder con la creación del trámite
+            Log::info('Términos ya aceptados, creando trámite...');
 
             // Buscar o crear solicitante sin usuario asociado
             $solicitante = Solicitante::firstOrCreate(
@@ -259,7 +286,7 @@ class TramiteController extends Controller
             }
 
             // Preparar datos para redirección al formulario principal
-            $redirectUrl = route('tramites.create', [
+            $redirectUrl = route('tramites.create.tipo', [
                 'tipo_tramite' => $validated['tipo_tramite'],
                 'tramite' => $tramite->id
             ]);
@@ -300,6 +327,45 @@ class TramiteController extends Controller
             return $request->expectsJson()
                 ? response()->json(['error' => $errorMessage], 500)
                 : back()->with('error', $errorMessage)->withInput();
+        }
+    }
+
+    /**
+     * Muestra la vista de términos y condiciones antes de iniciar un trámite
+     */
+    public function mostrarTerminos(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'tipo_tramite' => 'required|in:inscripcion,renovacion,actualizacion',
+                'rfc' => 'required|string|max:13',
+                'tipo_persona' => 'required|in:Física,Moral,Fisica,FÍSICA,MORAL,fisica,moral',
+                'tramite_id' => 'nullable|integer|exists:tramite,id'
+            ]);
+
+            // Normalize tipo_persona value
+            $validated['tipo_persona'] = ucfirst(strtolower($validated['tipo_persona']));
+            if ($validated['tipo_persona'] === 'Fisica') {
+                $validated['tipo_persona'] = 'Física';
+            }
+
+            Log::info('Mostrando términos y condiciones:', $validated);
+
+            return view('tramites.terminos-condiciones', [
+                'tipoTramite' => $validated['tipo_tramite'],
+                'rfc' => $validated['rfc'],
+                'tipoPersona' => $validated['tipo_persona'],
+                'tramiteId' => $validated['tramite_id'] ?? null
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al mostrar términos y condiciones:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->route('tramites.index')
+                ->with('error', 'Error al cargar términos y condiciones: ' . $e->getMessage());
         }
     }
 
@@ -480,7 +546,7 @@ class TramiteController extends Controller
             ]);
 
             // Redirigir al formulario principal con paso 2 activo (domicilio)
-            return redirect()->route('tramites.create', [
+            return redirect()->route('tramites.create.tipo', [
                 'tipo_tramite' => strtolower($tramite->tipo_tramite),
                 'tramite' => $tramite->id,
                 'step' => 2
@@ -522,7 +588,7 @@ class TramiteController extends Controller
             }
 
             // Redirigir al formulario principal con el diseño hermoso
-            return redirect()->route('tramites.create', [
+            return redirect()->route('tramites.create.tipo', [
                 'tipo_tramite' => $tipoTramite,
                 'tramite' => $tramiteId
             ]);

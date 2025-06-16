@@ -35,9 +35,11 @@ class DomicilioController extends Controller
 
             $direccion = $this->saveDireccion($request, $tramite);
             $this->updateDetalleTramite($tramite, $direccion);
-            $this->updateProgreso($tramite);
 
             DB::commit();
+
+            // Actualizar progreso DESPUÉS de confirmar la transacción
+            $this->updateProgreso($tramite);
 
             Log::info('✅ Domicilio guardado exitosamente', [
                 'tramite_id' => $tramite->id,
@@ -93,10 +95,16 @@ class DomicilioController extends Controller
             // Guardar los datos usando el método de la clase
             $this->guardar($request, $tramite);
 
+            // Determinar el siguiente paso según el tipo de persona
+            $tipoPersona = $tramite->solicitante?->tipo_persona ?? null;
+            $nextStep = ($tipoPersona === 'Física') ? 3 : 3; // Para física salta a documentos (3), para moral sigue a constitución (3)
+
             return response()->json([
                 'success' => true,
                 'message' => 'Datos de domicilio guardados correctamente.',
-                'step' => 3
+                'step' => $nextStep,
+                'tipo_persona' => $tipoPersona,
+                'progreso_actualizado' => 3
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -261,15 +269,26 @@ class DomicilioController extends Controller
      */
     private function updateProgreso(Tramite $tramite)
     {
-        // Solo actualizar a 3 si el progreso actual es 2
-        if ($tramite->progreso_tramite == 2) {
-            $tramite->update(['progreso_tramite' => 3]);
-            Log::info('✅ Progreso actualizado a 3:', ['tramite_id' => $tramite->id]);
-        } else {
-            Log::info('ℹ️ Progreso no actualizado:', [
+        // Obtener el tipo de persona del solicitante
+        $tipoPersona = $tramite->solicitante?->tipo_persona ?? null;
+        
+        if ($tipoPersona === 'Física') {
+            // Para persona física: saltar directamente a sección 3 (documentos)
+            // porque no necesita constitución, accionistas ni apoderado legal
+            $tramite->actualizarProgresoSeccion(3);
+            Log::info('✅ Progreso actualizado para Persona Física - Saltando a sección 3:', [
                 'tramite_id' => $tramite->id,
+                'tipo_persona' => $tipoPersona,
                 'progreso_actual' => $tramite->progreso_tramite
             ]);
+        } else {
+            // Para persona moral: avanzar a sección 3 (constitución)
+            $tramite->actualizarProgresoSeccion(3);
+            Log::info('✅ Progreso actualizado para Persona Moral - Sección 3 (Constitución):', [
+            'tramite_id' => $tramite->id,
+                'tipo_persona' => $tipoPersona,
+            'progreso_actual' => $tramite->progreso_tramite
+        ]);
         }
     }
 

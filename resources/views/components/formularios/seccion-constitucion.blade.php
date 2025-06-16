@@ -1,7 +1,7 @@
-@props(['title' => 'Constitución', 'tramite' => null, 'datosConstitucion' => []])
+@props(['title' => 'Constitución', 'tramite' => null, 'datosConstitucion' => [], 'readonly' => false])
 
 <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" 
-    x-data="constitucionData()">
+    @if(!$readonly) x-data="constitucionData()" @endif>
     <!-- Encabezado con icono -->
     <div class="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
         <div class="flex items-center space-x-4">
@@ -15,160 +15,267 @@
         </div>
     </div>
 
-    <form class="space-y-8" @submit.prevent="guardarConstitucion" x-ref="constitucionForm">
-        <input type="hidden" name="action" value="next">
-        <input type="hidden" name="seccion" value="3">
-        <input type="hidden" name="tramite_id" value="{{ $datosConstitucion['tramite_id'] ?? ($tramite->id ?? '') }}">
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Número de Escritura -->
-            <div class="form-group">
-                <label for="numero_escritura" class="block text-sm font-medium text-gray-700 mb-2">
-                    Número de Escritura
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="text" id="numero_escritura" name="numero_escritura"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           placeholder="Ej: 1234 o 1234/2024"
-                           maxlength="15"
-                           x-model="numeroEscritura"
-                           required>
+    @if($readonly)
+        <!-- Vista de solo lectura para revisión -->
+        <div class="space-y-6">
+            @if(!empty($datosConstitucion))
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Número de Escritura</label>
+                        <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                            {{ $datosConstitucion['numero_escritura'] ?? 'No especificado' }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Constitución</label>
+                        <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                            @php
+                                $fechaConstitucion = $datosConstitucion['fecha_constitucion'] ?? '';
+                                if (!empty($fechaConstitucion) && $fechaConstitucion !== 'No disponible') {
+                                    try {
+                                        $fechaFormateada = \Carbon\Carbon::parse($fechaConstitucion)->format('d/m/Y');
+                                    } catch (\Exception $e) {
+                                        $fechaFormateada = $fechaConstitucion;
+                                    }
+                                } else {
+                                    $fechaFormateada = 'No especificado';
+                                }
+                            @endphp
+                            {{ $fechaFormateada }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Notario</label>
+                        <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                            {{ $datosConstitucion['nombre_notario'] ?? 'No especificado' }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Entidad Federativa</label>
+                        <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                            @php
+                                $estados = [
+                                    '1' => 'Aguascalientes', '2' => 'Baja California', '3' => 'Baja California Sur', 
+                                    '4' => 'Campeche', '5' => 'Coahuila', '6' => 'Colima', '7' => 'Chiapas', 
+                                    '8' => 'Chihuahua', '9' => 'Distrito Federal', '10' => 'Durango', 
+                                    '11' => 'Guanajuato', '12' => 'Guerrero', '13' => 'Hidalgo', 
+                                    '14' => 'Jalisco', '15' => 'Estado de México', '16' => 'Michoacán', 
+                                    '17' => 'Morelos', '18' => 'Nayarit', '19' => 'Nuevo León', 
+                                    '20' => 'Oaxaca', '21' => 'Puebla', '22' => 'Querétaro', 
+                                    '23' => 'Quintana Roo', '24' => 'San Luis Potosí', '25' => 'Sinaloa', 
+                                    '26' => 'Sonora', '27' => 'Tabasco', '28' => 'Tamaulipas', 
+                                    '29' => 'Tlaxcala', '30' => 'Veracruz', '31' => 'Yucatán', '32' => 'Zacatecas'
+                                ];
+                                $entidadId = $datosConstitucion['entidad_federativa'] ?? '';
+                            @endphp
+                            {{ $estados[$entidadId] ?? 'No especificado' }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Número de Notario</label>
+                        <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                            {{ $datosConstitucion['numero_notario'] ?? 'No especificado' }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Número de Registro</label>
+                        <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                            {{ $datosConstitucion['numero_registro'] ?? 'No especificado' }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Inscripción</label>
+                        <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                            @php
+                                $fechaInscripcion = $datosConstitucion['fecha_inscripcion'] ?? '';
+                                if (!empty($fechaInscripcion) && $fechaInscripcion !== 'No disponible') {
+                                    try {
+                                        $fechaInscripcionFormateada = \Carbon\Carbon::parse($fechaInscripcion)->format('d/m/Y');
+                                    } catch (\Exception $e) {
+                                        $fechaInscripcionFormateada = $fechaInscripcion;
+                                    }
+                                } else {
+                                    $fechaInscripcionFormateada = 'No especificado';
+                                }
+                            @endphp
+                            {{ $fechaInscripcionFormateada }}
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Fecha de Constitución -->
-            <div class="form-group">
-                <label for="fecha_constitucion" class="block text-sm font-medium text-gray-700 mb-2">
-                    Fecha de Constitución
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="date" id="fecha_constitucion" name="fecha_constitucion"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           x-model="fechaConstitucion"
-                           required>
+            @else
+                <!-- Mensaje cuando no hay datos de constitución -->
+                <div class="text-center py-8">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <i class="fas fa-file-contract text-gray-400 text-3xl mb-3"></i>
+                        <p class="text-gray-500">No hay información de constitución registrada para este trámite.</p>
+                    </div>
                 </div>
-            </div>
+            @endif
+        </div>
+    @else
+        <!-- Vista editable normal (código existente) -->
+        <form class="space-y-8" @submit.prevent="guardarConstitucion" x-ref="constitucionForm">
+            <input type="hidden" name="action" value="next">
+            <input type="hidden" name="seccion" value="3">
+            <input type="hidden" name="tramite_id" value="{{ $datosConstitucion['tramite_id'] ?? ($tramite->id ?? '') }}">
 
-            <!-- Nombre del Notario -->
-            <div class="form-group md:col-span-2">
-                <label for="nombre_notario" class="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre del Notario
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="text" id="nombre_notario" name="nombre_notario"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           placeholder="Ej: Lic. Juan Pérez González"
-                           maxlength="100"
-                           x-model="nombreNotario"
-                           required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Número de Escritura -->
+                <div class="form-group">
+                    <label for="numero_escritura" class="block text-sm font-medium text-gray-700 mb-2">
+                        Número de Escritura
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="numero_escritura" name="numero_escritura"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               placeholder="Ej: 1234 o 1234/2024"
+                               maxlength="15"
+                               x-model="numeroEscritura"
+                               required>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Entidad Federativa -->
-            <div class="form-group">
-                <label for="entidad_federativa" class="block text-sm font-medium text-gray-700 mb-2">
-                    Entidad Federativa
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <select id="entidad_federativa" name="entidad_federativa"
-                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                            x-model="entidadFederativa"
-                            required>
-                        <option value="">Seleccione un estado</option>
-                        @php
-                        $estados = [
-                            '1' => 'Aguascalientes', '2' => 'Baja California', '3' => 'Baja California Sur', 
-                            '4' => 'Campeche', '5' => 'Coahuila', '6' => 'Colima', '7' => 'Chiapas', 
-                            '8' => 'Chihuahua', '9' => 'Distrito Federal', '10' => 'Durango', 
-                            '11' => 'Guanajuato', '12' => 'Guerrero', '13' => 'Hidalgo', 
-                            '14' => 'Jalisco', '15' => 'Estado de México', '16' => 'Michoacán', 
-                            '17' => 'Morelos', '18' => 'Nayarit', '19' => 'Nuevo León', 
-                            '20' => 'Oaxaca', '21' => 'Puebla', '22' => 'Querétaro', 
-                            '23' => 'Quintana Roo', '24' => 'San Luis Potosí', '25' => 'Sinaloa', 
-                            '26' => 'Sonora', '27' => 'Tabasco', '28' => 'Tamaulipas', 
-                            '29' => 'Tlaxcala', '30' => 'Veracruz', '31' => 'Yucatán', '32' => 'Zacatecas'
-                        ];
-                        @endphp
-                        @foreach($estados as $id => $estado)
-                            <option value="{{ $id }}">{{ $estado }}</option>
-                        @endforeach
-                    </select>
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <i class="fas fa-chevron-down text-gray-400"></i>
+                <!-- Fecha de Constitución -->
+                <div class="form-group">
+                    <label for="fecha_constitucion" class="block text-sm font-medium text-gray-700 mb-2">
+                        Fecha de Constitución
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="date" id="fecha_constitucion" name="fecha_constitucion"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               x-model="fechaConstitucion"
+                               required>
+                    </div>
+                </div>
+
+                <!-- Nombre del Notario -->
+                <div class="form-group md:col-span-2">
+                    <label for="nombre_notario" class="block text-sm font-medium text-gray-700 mb-2">
+                        Nombre del Notario
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="nombre_notario" name="nombre_notario"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               placeholder="Ej: Lic. Juan Pérez González"
+                               maxlength="100"
+                               x-model="nombreNotario"
+                               required>
+                    </div>
+                </div>
+
+                <!-- Entidad Federativa -->
+                <div class="form-group">
+                    <label for="entidad_federativa" class="block text-sm font-medium text-gray-700 mb-2">
+                        Entidad Federativa
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <select id="entidad_federativa" name="entidad_federativa"
+                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                                x-model="entidadFederativa"
+                                required>
+                            <option value="">Seleccione un estado</option>
+                            @php
+                            $estados = [
+                                '1' => 'Aguascalientes', '2' => 'Baja California', '3' => 'Baja California Sur', 
+                                '4' => 'Campeche', '5' => 'Coahuila', '6' => 'Colima', '7' => 'Chiapas', 
+                                '8' => 'Chihuahua', '9' => 'Distrito Federal', '10' => 'Durango', 
+                                '11' => 'Guanajuato', '12' => 'Guerrero', '13' => 'Hidalgo', 
+                                '14' => 'Jalisco', '15' => 'Estado de México', '16' => 'Michoacán', 
+                                '17' => 'Morelos', '18' => 'Nayarit', '19' => 'Nuevo León', 
+                                '20' => 'Oaxaca', '21' => 'Puebla', '22' => 'Querétaro', 
+                                '23' => 'Quintana Roo', '24' => 'San Luis Potosí', '25' => 'Sinaloa', 
+                                '26' => 'Sonora', '27' => 'Tabasco', '28' => 'Tamaulipas', 
+                                '29' => 'Tlaxcala', '30' => 'Veracruz', '31' => 'Yucatán', '32' => 'Zacatecas'
+                            ];
+                            @endphp
+                            @foreach($estados as $id => $estado)
+                                <option value="{{ $id }}">{{ $estado }}</option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Número de Notario -->
+                <div class="form-group">
+                    <label for="numero_notario" class="block text-sm font-medium text-gray-700 mb-2">
+                        Número de Notario
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="numero_notario" name="numero_notario"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               placeholder="Ej: 123"
+                               maxlength="10"
+                               x-model="numeroNotario"
+                               required>
+                    </div>
+                </div>
+
+                <!-- Número de Registro -->
+                <div class="form-group">
+                    <label for="numero_registro" class="block text-sm font-medium text-gray-700 mb-2">
+                        Número de Registro
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="text" id="numero_registro" name="numero_registro"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               placeholder="Ej: 0123456789 o FME123456789"
+                               maxlength="14"
+                               x-model="numeroRegistro"
+                               required>
+                    </div>
+                </div>
+
+                <!-- Fecha de Inscripción -->
+                <div class="form-group">
+                    <label for="fecha_inscripcion" class="block text-sm font-medium text-gray-700 mb-2">
+                        Fecha de Inscripción
+                        <span class="text-[#9d2449]">*</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="date" id="fecha_inscripcion" name="fecha_inscripcion"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
+                               x-model="fechaInscripcion"
+                               required>
                     </div>
                 </div>
             </div>
-
-            <!-- Número de Notario -->
-            <div class="form-group">
-                <label for="numero_notario" class="block text-sm font-medium text-gray-700 mb-2">
-                    Número de Notario
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="text" id="numero_notario" name="numero_notario"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           placeholder="Ej: 123"
-                           maxlength="10"
-                           x-model="numeroNotario"
-                           required>
-                </div>
-            </div>
-
-            <!-- Número de Registro -->
-            <div class="form-group">
-                <label for="numero_registro" class="block text-sm font-medium text-gray-700 mb-2">
-                    Número de Registro
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="text" id="numero_registro" name="numero_registro"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           placeholder="Ej: 0123456789 o FME123456789"
-                           maxlength="14"
-                           x-model="numeroRegistro"
-                           required>
-                </div>
-            </div>
-
-            <!-- Fecha de Inscripción -->
-            <div class="form-group">
-                <label for="fecha_inscripcion" class="block text-sm font-medium text-gray-700 mb-2">
-                    Fecha de Inscripción
-                    <span class="text-[#9d2449]">*</span>
-                </label>
-                <div class="relative group">
-                    <input type="date" id="fecha_inscripcion" name="fecha_inscripcion"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
-                           x-model="fechaInscripcion"
-                           required>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Botones de navegación -->
-        <div class="flex justify-between pt-6 border-t border-gray-100">
-            <button type="button" 
-                    onclick="navegarAnteriorConstitucion()"
-                    class="inline-flex items-center bg-gray-600 text-white px-6 py-2 rounded-xl shadow-lg hover:bg-gray-700 transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-gray-600/20">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Anterior
-            </button>
             
-            <button type="button" 
-                    onclick="guardarConstitucionYSiguiente()"
-                    class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20">
-                <i class="fas fa-save mr-2"></i> Guardar y Continuar
-                <i class="fas fa-arrow-right ml-2"></i>
-            </button>
-        </div>
-    </form>
+            <!-- Botones de navegación -->
+            <div class="flex justify-between pt-6 border-t border-gray-100">
+                <button type="button" 
+                        onclick="navegarAnteriorConstitucion()"
+                        class="inline-flex items-center bg-gray-600 text-white px-6 py-2 rounded-xl shadow-lg hover:bg-gray-700 transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-gray-600/20">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Anterior
+                </button>
+                
+                <button type="button" 
+                        onclick="guardarConstitucionYSiguiente()"
+                        class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20">
+                    <i class="fas fa-save mr-2"></i> Guardar y Continuar
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </form>
+    @endif
 </div>
 
+@if(!$readonly)
 <script>
 function constitucionData() {
     return {
@@ -210,63 +317,49 @@ function constitucionData() {
         // Cargar datos desde el trámite
         async cargarDatosDesdeTramite(tramiteId) {
             try {
-                console.log('🔍 Cargando datos de constitución para trámite:', tramiteId);
-                
-                const response = await fetch(`/api/tramite/${tramiteId}/constitucion`, {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                });
-                
+                const response = await fetch(`/api/tramite/${tramiteId}/constitucion`);
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('📋 Datos de constitución recibidos:', data);
-                    
                     if (data.success && data.constitucion) {
                         await this.cargarDatosDesdeObjeto(data.constitucion);
-                        return true;
                     }
                 }
-                return false;
             } catch (error) {
-                console.error('❌ Error al cargar datos de constitución:', error);
-                return false;
+                console.error('Error al cargar datos desde trámite:', error);
             }
         },
 
+        // Guardar constitución
         async guardarConstitucion() {
-            const form = this.$refs.constitucionForm;
-            const formData = new FormData(form);
-            
-            // Asegurar que todos los datos estén incluidos
-            formData.set('numero_escritura', this.numeroEscritura);
-            formData.set('fecha_constitucion', this.fechaConstitucion);
-            formData.set('nombre_notario', this.nombreNotario);
-            formData.set('entidad_federativa', this.entidadFederativa);
-            formData.set('numero_notario', this.numeroNotario);
-            formData.set('numero_registro', this.numeroRegistro);
-            formData.set('fecha_inscripcion', this.fechaInscripcion);
-            
-            // Obtener tramite_id
-            const datosConstitucion = @json($datosConstitucion ?? []);
-            const tramite = @json($tramite ?? null);
-            
-            if (datosConstitucion && datosConstitucion.tramite_id) {
-                formData.set('tramite_id', datosConstitucion.tramite_id);
-            } else if (tramite && tramite.id) {
-                formData.set('tramite_id', tramite.id);
-            }
-            
-            // Agregar CSRF token
-            const csrfToken = document.querySelector('meta[name="csrf-token"]');
-            if (csrfToken) {
-                formData.set('_token', csrfToken.getAttribute('content'));
-            }
-            
             try {
-                const response = await fetch(@json(route("tramites.guardar-constitucion-formulario")), {
+                // Obtener tramite_id de los datos pasados al componente
+                const tramite = @json($tramite ?? null);
+                const datosConstitucion = @json($datosConstitucion ?? []);
+                
+                let tramiteId = null;
+                if (tramite && tramite.id) {
+                    tramiteId = tramite.id;
+                } else if (datosConstitucion && datosConstitucion.tramite_id) {
+                    tramiteId = datosConstitucion.tramite_id;
+                }
+                
+                if (!tramiteId) {
+                    alert('Error: No se pudo obtener el ID del trámite');
+                    return false;
+                }
+                
+                const formData = new FormData();
+                formData.append('tramite_id', tramiteId);
+                formData.append('numero_escritura', this.numeroEscritura);
+                formData.append('fecha_constitucion', this.fechaConstitucion);
+                formData.append('nombre_notario', this.nombreNotario);
+                formData.append('entidad_federativa', this.entidadFederativa);
+                formData.append('numero_notario', this.numeroNotario);
+                formData.append('numero_registro', this.numeroRegistro);
+                formData.append('fecha_inscripcion', this.fechaInscripcion);
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+                const response = await fetch('{{ route('tramites.guardar-constitucion-formulario') }}', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -274,13 +367,8 @@ function constitucionData() {
                         'Accept': 'application/json'
                     }
                 });
-                
+
                 const responseText = await response.text();
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
                 const result = JSON.parse(responseText);
                 
                 if (result.success) {
@@ -386,6 +474,7 @@ function navegarSiguienteDesdeConstitucion() {
     }
 }
 </script>
+@endif
 
 <style>
 .h-12 {

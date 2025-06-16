@@ -56,7 +56,7 @@ class TramiteNavegacionController extends Controller
             
             // Validar que el paso solicitado sea válido
             if ($paso < 1 || $paso > $totalPasos) {
-                return redirect()->route('tramites.create', [
+                return redirect()->route('tramites.create.tipo', [
                     'tipo_tramite' => strtolower($tramite->tipo_tramite),
                     'tramite' => $tramiteId
                 ])->with('warning', 'Paso no válido, redirigido al primer paso');
@@ -64,7 +64,7 @@ class TramiteNavegacionController extends Controller
             
             // Verificar si puede acceder a este paso (no puede saltar pasos)
             if ($paso > $tramite->progreso_tramite + 1) {
-                return redirect()->route('tramites.create', [
+                return redirect()->route('tramites.create.tipo', [
                     'tipo_tramite' => strtolower($tramite->tipo_tramite),
                     'tramite' => $tramiteId
                 ])->with('warning', 'Debe completar los pasos anteriores primero');
@@ -128,7 +128,7 @@ class TramiteNavegacionController extends Controller
             }
             
             // Redirigir siempre a la vista create manteniendo la misma URL
-            return redirect()->route('tramites.create', [
+            return redirect()->route('tramites.create.tipo', [
                 'tipo_tramite' => strtolower($tramite->tipo_tramite),
                 'tramite' => $tramiteId
             ])->with('success', 'Datos guardados correctamente.');
@@ -154,7 +154,7 @@ class TramiteNavegacionController extends Controller
         $tramite = Tramite::findOrFail($tramiteId);
         
         // Redirigir siempre a la vista create manteniendo la misma URL
-        return redirect()->route('tramites.create', [
+        return redirect()->route('tramites.create.tipo', [
             'tipo_tramite' => strtolower($tramite->tipo_tramite),
             'tramite' => $tramiteId
         ])->with('info', 'Navegando al paso anterior.');

@@ -119,13 +119,10 @@ class DatosGeneralesController extends Controller
             $this->saveContactoSolicitante($request, $detalle);
             $this->syncActividades($request, $tramite);
 
-            // Actualizar progreso del trámite si es la primera vez que completa este paso
-            if ($tramite->progreso_tramite < 1) {
-                $tramite->progreso_tramite = 1;
-                $tramite->save();
-            }
-
             DB::commit();
+
+            // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Avanzar a sección 2: Domicilio
+            $tramite->actualizarProgresoSeccion(2);
 
             Log::info('Datos guardados exitosamente', [
                 'tramite_id' => $tramite->id,
@@ -140,12 +137,13 @@ class DatosGeneralesController extends Controller
                     'success' => true,
                     'message' => 'Datos guardados correctamente',
                     'tramite_id' => $tramite->id,
-                    'next_step' => 2 // Siguiente paso: domicilio
+                    'next_step' => 2, // Siguiente paso: domicilio
+                    'progreso_actualizado' => 2
                 ]);
             }
 
             // Si no es AJAX, redirigir de vuelta a la vista create manteniendo la misma URL
-            return redirect()->route('tramites.create', [
+            return redirect()->route('tramites.create.tipo', [
                 'tipo_tramite' => strtolower($tramite->tipo_tramite),
                 'tramite' => $tramite->id
             ])->with('success', 'Datos guardados correctamente');

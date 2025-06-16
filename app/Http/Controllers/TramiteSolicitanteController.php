@@ -210,7 +210,7 @@ class TramiteSolicitanteController extends Controller
     private function continuarTramite($tramite)
     {
         // Siempre redirigir a la vista create unificada
-        return redirect()->route('tramites.create', [
+        return redirect()->route('tramites.create.tipo', [
             'tipo_tramite' => strtolower($tramite->tipo_tramite),
             'tramite' => $tramite->id
         ]);
@@ -257,7 +257,7 @@ class TramiteSolicitanteController extends Controller
         ]);
         
         // Redirigir directamente a la vista create unificada
-        return redirect()->route('tramites.create', [
+        return redirect()->route('tramites.create.tipo', [
             'tipo_tramite' => strtolower($tipoTramite),
             'tramite' => $tramite->id
         ]);
@@ -403,7 +403,7 @@ class TramiteSolicitanteController extends Controller
             }
 
             // Redirigir al formulario principal del trámite
-            $redirectRoute = redirect()->route('tramites.create', [
+            $redirectRoute = redirect()->route('tramites.create.tipo', [
                 'tipo_tramite' => $request->tipo_tramite,
                 'tramite' => $tramite->id
             ])->with('success', 'Constancia de situación fiscal procesada exitosamente. Los datos han sido extraídos automáticamente.');
@@ -578,7 +578,7 @@ class TramiteSolicitanteController extends Controller
                         'tipo_persona' => $documento->tipo_persona,
                         'estado' => $docSubido ? ucfirst($docSubido->estado) : 'Pendiente',
                         'fecha_entrega' => $docSubido ? $docSubido->fecha_entrega : null,
-                        'ruta_archivo' => $docSubido ? asset('storage/' . $docSubido->ruta_archivo) : null,
+                        'ruta_archivo' => $docSubido ? true : null, // Solo indicar si existe
                         'observaciones' => $docSubido ? $docSubido->observaciones : null
                     ];
                 });
@@ -772,6 +772,106 @@ class TramiteSolicitanteController extends Controller
                 'success' => false,
                 'message' => 'Error interno del servidor',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Muestra el estado actual del trámite
+     */
+    public function mostrarEstadoTramite($tramiteId)
+    {
+        try {
+            $user = Auth::user();
+            $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+            
+            if (!$solicitante) {
+                return redirect()->route('tramites.solicitante.index')
+                    ->with('error', 'No se encontró información del solicitante');
+            }
+
+            $tramite = Tramite::where('id', $tramiteId)
+                ->where('solicitante_id', $solicitante->id)
+                ->first();
+
+            if (!$tramite) {
+                return redirect()->route('tramites.solicitante.index')
+                    ->with('error', 'Trámite no encontrado');
+            }
+
+            return view('tramites.solicitante.estado', compact('tramite'));
+
+        } catch (\Exception $e) {
+            Log::error('Error al mostrar estado del trámite:', [
+                'tramite_id' => $tramiteId,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('tramites.solicitante.index')
+                ->with('error', 'Error al cargar el estado del trámite');
+        }
+    }
+
+    /**
+     * Habilita la edición de un trámite rechazado
+     */
+    public function habilitarEdicion($tramiteId)
+    {
+        try {
+            $user = Auth::user();
+            $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+            
+            if (!$solicitante) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró información del solicitante'
+                ], 404);
+            }
+
+            $tramite = Tramite::where('id', $tramiteId)
+                ->where('solicitante_id', $solicitante->id)
+                ->first();
+
+            if (!$tramite) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trámite no encontrado'
+                ], 404);
+            }
+
+            if (!$tramite->puedeSerEditado()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Este trámite no puede ser editado en su estado actual'
+                ], 400);
+            }
+
+            $tramite->habilitarEdicion();
+
+            Log::info('✅ Edición habilitada para trámite:', [
+                'tramite_id' => $tramite->id,
+                'estado_anterior' => 'Rechazado',
+                'estado_nuevo' => $tramite->estado
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Trámite habilitado para edición',
+                'redirect_url' => route('tramites.create.tipo', [
+                    'tipo_tramite' => strtolower($tramite->tipo_tramite),
+                    'tramite' => $tramite->id
+                ])
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al habilitar edición del trámite:', [
+                'tramite_id' => $tramiteId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al habilitar la edición del trámite'
             ], 500);
         }
     }

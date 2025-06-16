@@ -1,4 +1,4 @@
-@props(['title' => 'Datos Generales', 'datosTramite' => [], 'datosSolicitante' => [], 'codigoPostalDomicilio' => null, 'datosDomicilio' => []])
+@props(['title' => 'Datos Generales', 'datosTramite' => [], 'datosSolicitante' => [], 'codigoPostalDomicilio' => null, 'datosDomicilio' => [], 'readonly' => false])
 
 <!-- Asegúrate de incluir Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -151,17 +151,22 @@ function datosGeneralesData() {
                 </label>
                 <div class="relative group">
                     <textarea id="giro" name="giro" rows="4"
-                              class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 resize-none @error('giro') border-red-500 @enderror"
-                              placeholder="Describa el giro de la empresa"
+                              class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50' }} border rounded-lg resize-none @error('giro') border-red-500 @enderror"
+                              placeholder="{{ $readonly ? '' : 'Describa el giro de la empresa' }}"
                               x-model="giro"
-                              maxlength="500" required>{{ old('giro', $datosTramite['giro'] ?? '') }}</textarea>
+                              maxlength="500" 
+                              {{ $readonly ? 'readonly' : 'required' }}>{{ old('giro', $datosTramite['giro'] ?? '') }}</textarea>
+                    @if(!$readonly)
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
                         <span x-text="giro ? giro.length : 0">0</span>/500
                     </div>
+                    @endif
                 </div>
-                @error('giro')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                @if(!$readonly)
+                    @error('giro')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                @endif
             </div>
         </div>
 
@@ -385,24 +390,26 @@ function datosGeneralesData() {
         </div>
         </div>
 
-        @if(!isset($mostrar_navegacion) || $mostrar_navegacion !== false)
-        <!-- Botones de navegación -->
-        <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
-            <button type="button" 
-                    onclick="guardarYSiguiente()"
-                    class="w-full sm:w-auto px-6 py-3 bg-[#9d2449] text-white rounded-lg hover:bg-[#8a203f] transition-all duration-300 transform-gpu hover:-translate-y-0.5">
-                <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
-            </button>
-        </div>
-        @else
-        <!-- Botón navegación integrado cuando mostrar_navegacion es false -->
-        <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
-            <button type="button" 
-                    onclick="guardarYSiguiente()"
-                    class="w-full sm:w-auto px-6 py-3 bg-[#9d2449] text-white rounded-lg hover:bg-[#8a203f] transition-all duration-300 transform-gpu hover:-translate-y-0.5">
-                <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
-            </button>
-        </div>
+        @if(!$readonly)
+            @if(!isset($mostrar_navegacion) || $mostrar_navegacion !== false)
+            <!-- Botones de navegación -->
+            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+                <button type="button" 
+                        onclick="guardarYSiguiente()"
+                        class="w-full sm:w-auto px-6 py-3 bg-[#9d2449] text-white rounded-lg hover:bg-[#8a203f] transition-all duration-300 transform-gpu hover:-translate-y-0.5">
+                    <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+            @else
+            <!-- Botón navegación integrado cuando mostrar_navegacion es false -->
+            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+                <button type="button" 
+                        onclick="guardarYSiguiente()"
+                        class="w-full sm:w-auto px-6 py-3 bg-[#9d2449] text-white rounded-lg hover:bg-[#8a203f] transition-all duration-300 transform-gpu hover:-translate-y-0.5">
+                    <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+            @endif
         @endif
     </form>
 </div>
