@@ -202,7 +202,7 @@
 
                     <!-- Botones de Acción -->
                     <div class="flex flex-col sm:flex-row gap-4 justify-between">
-                        <a href="{{ route('tramites.index') }}" 
+                        <a href="{{ route('tramites.solicitante.index') }}" 
                            class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 shadow-md">
                             <i class="fas fa-arrow-left mr-2"></i>
                             Cancelar y Volver

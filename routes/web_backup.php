@@ -131,10 +131,8 @@ Route::middleware(['auth', \App\Http\Middleware\VerifyUserStatus::class])->prefi
 
 Route::middleware(['auth'])->prefix('tramites')->group(function () {
     
-    // LISTADO Y GESTIÓN ADMINISTRATIVA (REDIRIGIR AL PORTAL DEL SOLICITANTE)
-    Route::get('/', function() {
-        return redirect()->route('tramites.solicitante.index');
-    })->name('tramites.index');
+    // LISTADO Y GESTIÓN ADMINISTRATIVA
+    Route::get('/', [TramiteController::class, 'index'])->name('tramites.index');
     Route::post('/', [TramiteController::class, 'store'])->name('tramites.store');
     
     // TÉRMINOS Y CONDICIONES
