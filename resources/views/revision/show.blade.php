@@ -783,6 +783,40 @@
     </div>
 </div>
 
+<!-- Modal Proveedor Creado -->
+<div id="modalProveedorCreado" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                <i class="fas fa-check text-green-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">¡Proveedor Creado Exitosamente!</h3>
+            <div class="mt-4 px-7 py-3">
+                <p class="text-sm text-gray-500 mb-4">
+                    El trámite ha sido aprobado y se ha creado automáticamente el registro de proveedor.
+                </p>
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-id-card text-green-600 mr-2"></i>
+                        <span class="text-sm font-medium text-gray-700">Código de Proveedor:</span>
+                    </div>
+                    <div class="mt-2">
+                        <span id="codigoProveedor" class="text-2xl font-bold text-green-600"></span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400">
+                    Este código será utilizado para identificar al proveedor en el sistema.
+                </p>
+            </div>
+            <div class="items-center px-4 py-3">
+                <button id="cerrarModalProveedor" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 const tramiteId = {{ $tramite->id }};
 
@@ -868,10 +902,16 @@ async function aprobarTodo() {
         const data = await response.json();
         
         if (data.success) {
-            mostrarNotificacion('Trámite aprobado completamente', 'success');
+            if (data.proveedor_pv) {
+                mostrarNotificacion(`Trámite aprobado completamente. Proveedor creado: ${data.proveedor_pv}`, 'success');
+                // Mostrar modal con información del proveedor
+                mostrarModalProveedorCreado(data.proveedor_pv);
+            } else {
+                mostrarNotificacion('Trámite aprobado completamente', 'success');
+            }
             setTimeout(() => {
                 window.location.href = '/revision';
-            }, 2000);
+            }, 4000); // Más tiempo para ver el código del proveedor
         } else {
             mostrarNotificacion('Error: ' + data.message, 'error');
         }
@@ -1017,6 +1057,19 @@ function mostrarNotificacion(mensaje, tipo) {
     }, 3000);
 }
 
+// Función para mostrar modal de proveedor creado
+function mostrarModalProveedorCreado(codigoPV) {
+    document.getElementById('codigoProveedor').textContent = codigoPV;
+    document.getElementById('modalProveedorCreado').classList.remove('hidden');
+}
+
+function cerrarModalProveedor() {
+    document.getElementById('modalProveedorCreado').classList.add('hidden');
+}
+
+// Event listener para cerrar modal de proveedor
+document.getElementById('cerrarModalProveedor').addEventListener('click', cerrarModalProveedor);
+
 // Cerrar modales al hacer clic fuera
 document.addEventListener('click', function(e) {
     if (e.target.id === 'modalRechazarTodo') {
@@ -1024,6 +1077,9 @@ document.addEventListener('click', function(e) {
     }
     if (e.target.id === 'modalPausar') {
         cerrarModalPausar();
+    }
+    if (e.target.id === 'modalProveedorCreado') {
+        cerrarModalProveedor();
     }
 });
 </script> 

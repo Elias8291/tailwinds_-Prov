@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Tramite;
 use App\Models\Solicitante;
 use App\Models\Documento;
+use App\Models\Proveedor;
 use Carbon\Carbon;
 use App\Http\Controllers\Formularios\DomicilioController;
 use App\Http\Controllers\DetalleTramiteController;
@@ -18,6 +19,10 @@ class TramiteSolicitanteController extends Controller
     public function index()
     {
         $user = Auth::user();
+        
+        // Verificar automáticamente el estado de proveedores vencidos antes de determinar tipo de trámite
+        $this->verificarEstadoProveedorAutomatico($user);
+        
         $tipoTramite = $this->determinarTipoTramite($user);
         $tramiteEnProgreso = $this->verificarTramiteEnProgreso($user);
         
@@ -54,15 +59,19 @@ class TramiteSolicitanteController extends Controller
             $datosApoderado['tramite_id'] = $tramiteEnProgreso->id;
         }
         
-        return view('tramites.solicitante.index', compact('tipoTramite', 'user', 'tramiteEnProgreso', 'datosDomicilio', 'codigoPostalDomicilio', 'datosApoderado'));
+        // Obtener información del proveedor para mostrar en la vista
+        $infoProveedor = $this->obtenerInfoProveedor($user);
+        
+        return view('tramites.solicitante.index', compact('tipoTramite', 'user', 'tramiteEnProgreso', 'datosDomicilio', 'codigoPostalDomicilio', 'datosApoderado', 'infoProveedor'));
     }
 
     private function determinarTipoTramite($user)
     {
-        // Simulando lógica de negocio - ajustar según tus modelos reales
+        // Obtener el solicitante asociado al usuario
+        $solicitante = Solicitante::where('usuario_id', $user->id)->first();
         
-        // Si no tiene proveedor o su PV ya venció: INSCRIPCIÓN
-        if (!$user->proveedor || $this->proveedorVencido($user)) {
+        if (!$solicitante) {
+            // Si no hay solicitante, solo puede hacer inscripción
             return [
                 'inscripcion' => true,
                 'renovacion' => false,
@@ -70,8 +79,54 @@ class TramiteSolicitanteController extends Controller
             ];
         }
         
-        // Si está cerca de vencer (7 días): RENOVACIÓN
-        if ($this->proveedorProximoAVencer($user)) {
+        // Buscar si ya tiene un proveedor activo
+        $proveedor = Proveedor::where('solicitante_id', $solicitante->id)
+                             ->where('estado', 'Activo')
+                             ->first();
+        
+        Log::info('🔍 Determinando tipo de trámite:', [
+            'user_id' => $user->id,
+            'solicitante_id' => $solicitante->id,
+            'tiene_proveedor' => $proveedor ? 'SI' : 'NO',
+            'proveedor_pv' => $proveedor ? $proveedor->pv : null,
+            'fecha_vencimiento' => $proveedor ? $proveedor->fecha_vencimiento : null
+        ]);
+        
+        // Si no tiene proveedor activo: SOLO INSCRIPCIÓN
+        if (!$proveedor) {
+            Log::info('✅ Resultado: SOLO INSCRIPCIÓN (sin proveedor)');
+            return [
+                'inscripcion' => true,
+                'renovacion' => false,
+                'actualizacion' => false
+            ];
+        }
+        
+        // Si tiene proveedor, verificar si está próximo a vencer (7 días)
+        $proximoAVencer = $proveedor->fecha_vencimiento <= Carbon::now()->addDays(7);
+        $yaVencido = $proveedor->fecha_vencimiento < Carbon::now();
+        
+        Log::info('📅 Análisis de fechas:', [
+            'fecha_actual' => Carbon::now()->format('Y-m-d'),
+            'fecha_vencimiento' => $proveedor->fecha_vencimiento->format('Y-m-d'),
+            'fecha_limite_renovacion' => Carbon::now()->addDays(7)->format('Y-m-d'),
+            'ya_vencido' => $yaVencido ? 'SI' : 'NO',
+            'proximo_a_vencer' => $proximoAVencer ? 'SI' : 'NO'
+        ]);
+        
+        // Si ya venció: SOLO INSCRIPCIÓN (nuevo registro)
+        if ($yaVencido) {
+            Log::info('✅ Resultado: SOLO INSCRIPCIÓN (proveedor vencido)');
+            return [
+                'inscripcion' => true,
+                'renovacion' => false,
+                'actualizacion' => false
+            ];
+        }
+        
+        // Si está próximo a vencer (7 días): SOLO RENOVACIÓN
+        if ($proximoAVencer) {
+            Log::info('✅ Resultado: SOLO RENOVACIÓN (próximo a vencer)');
             return [
                 'inscripcion' => false,
                 'renovacion' => true,
@@ -79,7 +134,8 @@ class TramiteSolicitanteController extends Controller
             ];
         }
         
-        // Si ya es proveedor y está vigente: ACTUALIZACIÓN
+        // Si es proveedor activo y vigente: SOLO ACTUALIZACIÓN
+        Log::info('✅ Resultado: SOLO ACTUALIZACIÓN (proveedor vigente)');
         return [
             'inscripcion' => false,
             'renovacion' => false,
@@ -87,24 +143,106 @@ class TramiteSolicitanteController extends Controller
         ];
     }
 
-    private function proveedorVencido($user)
+    private function obtenerInfoProveedor($user)
     {
-        // Lógica para verificar si el proveedor está vencido
-        if (!$user->proveedor) return true;
+        $solicitante = Solicitante::where('usuario_id', $user->id)->first();
         
-        // Asumiendo que hay un campo fecha_vencimiento en el modelo proveedor
-        // return $user->proveedor->fecha_vencimiento < Carbon::now();
-        return false; // Temporal
+        if (!$solicitante) {
+            return null;
+        }
+        
+        $proveedor = Proveedor::where('solicitante_id', $solicitante->id)
+                             ->where('estado', 'Activo')
+                             ->first();
+        
+        if (!$proveedor) {
+            return null;
+        }
+        
+        $ahora = Carbon::now();
+        $fechaVencimiento = Carbon::parse($proveedor->fecha_vencimiento);
+        
+        $yaVencido = $fechaVencimiento < $ahora;
+        $proximoAVencer = $fechaVencimiento <= $ahora->copy()->addDays(7);
+        
+        // Calcular tiempo restante de manera más precisa
+        $tiempoRestante = $this->calcularTiempoRestante($ahora, $fechaVencimiento);
+        
+        return [
+            'pv' => $proveedor->pv,
+            'fecha_vencimiento' => $proveedor->fecha_vencimiento,
+            'tiempo_restante' => $tiempoRestante,
+            'ya_vencido' => $yaVencido,
+            'proximo_a_vencer' => $proximoAVencer,
+            'estado' => $proveedor->estado
+        ];
     }
 
-    private function proveedorProximoAVencer($user)
+    private function calcularTiempoRestante($ahora, $fechaVencimiento)
     {
-        // Lógica para verificar si está próximo a vencer (7 días)
-        if (!$user->proveedor) return false;
-        
-        // Asumiendo que hay un campo fecha_vencimiento en el modelo proveedor
-        // return $user->proveedor->fecha_vencimiento <= Carbon::now()->addDays(7);
-        return false; // Temporal
+        if ($fechaVencimiento < $ahora) {
+            // Ya vencido
+            $diff = $ahora->diff($fechaVencimiento);
+            $texto = "Vencido hace ";
+            
+            if ($diff->m > 0) {
+                $texto .= $diff->m . " mes" . ($diff->m > 1 ? "es" : "");
+                if ($diff->d > 0) {
+                    $texto .= " y " . $diff->d . " día" . ($diff->d > 1 ? "s" : "");
+                }
+            } elseif ($diff->d > 0) {
+                $texto .= $diff->d . " día" . ($diff->d > 1 ? "s" : "");
+                if ($diff->h > 0) {
+                    $texto .= " y " . $diff->h . " hora" . ($diff->h > 1 ? "s" : "");
+                }
+            } elseif ($diff->h > 0) {
+                $texto .= $diff->h . " hora" . ($diff->h > 1 ? "s" : "");
+            } else {
+                $texto .= "menos de 1 hora";
+            }
+            
+            return [
+                'texto' => $texto,
+                'clase_css' => 'text-red-600',
+                'urgente' => true
+            ];
+        } else {
+            // Tiempo restante
+            $diff = $ahora->diff($fechaVencimiento);
+            $texto = "";
+            $urgente = false;
+            $clase_css = 'text-green-600';
+            
+            if ($diff->m > 0) {
+                $texto .= $diff->m . " mes" . ($diff->m > 1 ? "es" : "");
+                if ($diff->d > 0) {
+                    $texto .= " y " . $diff->d . " día" . ($diff->d > 1 ? "s" : "");
+                }
+            } elseif ($diff->d > 0) {
+                $texto .= $diff->d . " día" . ($diff->d > 1 ? "s" : "");
+                if ($diff->d <= 7) {
+                    $urgente = true;
+                    $clase_css = 'text-orange-600';
+                    if ($diff->h > 0) {
+                        $texto .= " y " . $diff->h . " hora" . ($diff->h > 1 ? "s" : "");
+                    }
+                }
+            } elseif ($diff->h > 0) {
+                $texto .= $diff->h . " hora" . ($diff->h > 1 ? "s" : "");
+                $urgente = true;
+                $clase_css = 'text-red-600';
+            } else {
+                $texto = "menos de 1 hora";
+                $urgente = true;
+                $clase_css = 'text-red-600';
+            }
+            
+            return [
+                'texto' => $texto,
+                'clase_css' => $clase_css,
+                'urgente' => $urgente
+            ];
+        }
     }
 
     private function verificarTramiteEnProgreso($user)
@@ -965,6 +1103,46 @@ class TramiteSolicitanteController extends Controller
                 'success' => false,
                 'message' => 'Error al habilitar la corrección de la sección'
             ], 500);
+        }
+    }
+
+    /**
+     * Verifica automáticamente el estado del proveedor del usuario y lo actualiza si está vencido
+     */
+    private function verificarEstadoProveedorAutomatico($user)
+    {
+        try {
+            $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+            
+            if (!$solicitante) {
+                return;
+            }
+
+            $proveedor = Proveedor::where('solicitante_id', $solicitante->id)
+                                 ->where('estado', 'Activo')
+                                 ->first();
+
+            if (!$proveedor) {
+                return;
+            }
+
+            $resultado = $proveedor->actualizarEstadoAutomatico();
+            
+            if ($resultado['cambio']) {
+                Log::info('✅ Estado de proveedor actualizado automáticamente:', [
+                    'pv' => $resultado['pv'],
+                    'estado_anterior' => $resultado['estado_anterior'],
+                    'estado_nuevo' => $resultado['estado_nuevo'],
+                    'user_id' => $user->id,
+                    'metodo' => 'verificacion_automatica_en_index'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Error en verificación automática de estado de proveedor:', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }

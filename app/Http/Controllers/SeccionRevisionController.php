@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tramite;
 use App\Models\SeccionRevision;
 use App\Models\Seccion;
+use App\Models\Proveedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -23,7 +24,7 @@ class SeccionRevisionController extends Controller
             ]);
 
             $tramite = Tramite::findOrFail($tramiteId);
-            $seccion = SeccionTramite::findOrFail($seccionId);
+            $seccion = Seccion::findOrFail($seccionId);
 
             // Crear o actualizar la revisión de la sección
             $revision = SeccionRevision::updateOrCreate(
@@ -75,7 +76,7 @@ class SeccionRevisionController extends Controller
             ]);
 
             $tramite = Tramite::findOrFail($tramiteId);
-            $seccion = SeccionTramite::findOrFail($seccionId);
+            $seccion = Seccion::findOrFail($seccionId);
 
             // Crear o actualizar la revisión de la sección
             $revision = SeccionRevision::updateOrCreate(
@@ -152,17 +153,22 @@ class SeccionRevisionController extends Controller
                 'revisado_por' => Auth::id()
             ]);
 
+            // Crear automáticamente el proveedor
+            $proveedor = Proveedor::crearDesdeTramiite($tramite);
+
             DB::commit();
 
-            Log::info('Trámite aprobado completamente:', [
+            Log::info('Trámite aprobado completamente y proveedor creado:', [
                 'tramite_id' => $tramiteId,
                 'revisor' => Auth::id(),
-                'tipo_persona' => $tipoPersona
+                'tipo_persona' => $tipoPersona,
+                'proveedor_pv' => $proveedor->pv
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Trámite aprobado completamente'
+                'message' => 'Trámite aprobado completamente. Proveedor creado con código: ' . $proveedor->pv,
+                'proveedor_pv' => $proveedor->pv
             ]);
 
         } catch (\Exception $e) {

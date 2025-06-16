@@ -26,7 +26,7 @@ class SeccionRevision extends Model
 
     public function seccion()
     {
-        return $this->belongsTo(SeccionTramite::class, 'seccion_id');
+        return $this->belongsTo(Seccion::class, 'seccion_id');
     }
 
     public function revisor()

@@ -270,7 +270,15 @@
                                 <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
                             @endif
                         @else
-                            Primera inscripción al Padrón de Proveedores del Estado
+                            @if($infoProveedor)
+                                @if($infoProveedor['ya_vencido'])
+                                    <span class="text-red-600 font-medium">Proveedor vencido</span> - Nueva inscripción requerida
+                                @else
+                                    Ya es proveedor activo ({{ $infoProveedor['pv'] }})
+                                @endif
+                            @else
+                                Primera inscripción al Padrón de Proveedores del Estado
+                            @endif
                         @endif
                     </p>
 
@@ -311,7 +319,17 @@
                             </div>
                             <div class="ml-3">
                                 <h3 class="text-lg font-bold text-[#9d2449]">Renovación</h3>
-                                <p class="text-xs text-gray-600">Próximo a vencer</p>
+                                <p class="text-xs text-gray-600">
+                                    @if($infoProveedor && $infoProveedor['proximo_a_vencer'])
+                                        @if($infoProveedor['tiempo_restante']['urgente'])
+                                            <span class="{{ $infoProveedor['tiempo_restante']['clase_css'] }} font-medium">¡URGENTE!</span>
+                                        @else
+                                            Próximo a vencer
+                                        @endif
+                                    @else
+                                        Próximo a vencer
+                                    @endif
+                                </p>
                             </div>
                         </div>
                         @if($tipoTramite['renovacion'])
@@ -329,7 +347,17 @@
                                 <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
                             @endif
                         @else
-                            Renueva tu registro antes del vencimiento (7 días)
+                            @if($infoProveedor && $infoProveedor['proximo_a_vencer'])
+                                <span class="font-medium {{ $infoProveedor['tiempo_restante']['clase_css'] }}">{{ $infoProveedor['pv'] }}</span> 
+                                @if($infoProveedor['ya_vencido'])
+                                    <span class="{{ $infoProveedor['tiempo_restante']['clase_css'] }}">{{ $infoProveedor['tiempo_restante']['texto'] }}</span>
+                                @else
+                                    vence en <span class="{{ $infoProveedor['tiempo_restante']['clase_css'] }}">{{ $infoProveedor['tiempo_restante']['texto'] }}</span>
+                                @endif
+                                <br><span class="text-xs text-gray-500">Vencimiento: {{ $infoProveedor['fecha_vencimiento']->format('d/m/Y H:i') }}</span>
+                            @else
+                                Renueva tu registro antes del vencimiento (7 días)
+                            @endif
                         @endif
                     </p>
 
@@ -388,7 +416,15 @@
                                 <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
                             @endif
                         @else
-                            Actualiza información, servicios y documentos
+                            @if($infoProveedor)
+                                <span class="text-green-600 font-medium">{{ $infoProveedor['pv'] }}</span> - Proveedor activo
+                                <br><span class="text-xs {{ $infoProveedor['tiempo_restante']['clase_css'] }}">
+                                    Vence en {{ $infoProveedor['tiempo_restante']['texto'] }}
+                                </span>
+                                <br><span class="text-xs text-gray-500">Vigente hasta: {{ $infoProveedor['fecha_vencimiento']->format('d/m/Y H:i') }}</span>
+                            @else
+                                Actualiza información, servicios y documentos
+                            @endif
                         @endif
                     </p>
 
