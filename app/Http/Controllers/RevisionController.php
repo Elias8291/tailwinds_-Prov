@@ -19,13 +19,58 @@ class RevisionController extends Controller
     /**
      * Mostrar la lista de trámites pendientes de revisión
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Obtener trámites pendientes de revisión con información del solicitante
-        $tramites = Tramite::with(['solicitante', 'revisor'])
-            ->whereIn('estado', ['Pendiente', 'En Revision', 'Por Cotejar'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        // Obtener trámites con información del solicitante
+        $query = Tramite::with(['solicitante', 'revisor']);
+
+        // Aplicar filtros
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->filled('tipo_tramite')) {
+            $query->where('tipo_tramite', $request->tipo_tramite);
+        }
+
+        if ($request->filled('rfc')) {
+            $query->whereHas('solicitante', function($q) use ($request) {
+                $q->where('rfc', 'like', '%' . $request->rfc . '%');
+            });
+        }
+
+        // Filtro por tiempo de revisión usando fecha_finalizacion
+        if ($request->filled('tiempo_revision')) {
+            $fecha = now();
+            switch ($request->tiempo_revision) {
+                case 'hoy':
+                    $query->whereDate('fecha_finalizacion', $fecha);
+                    break;
+                case 'semana':
+                    $query->whereBetween('fecha_finalizacion', [
+                        $fecha->copy()->startOfWeek(),
+                        $fecha->copy()->endOfWeek()
+                    ]);
+                    break;
+                case 'mes':
+                    $query->whereBetween('fecha_finalizacion', [
+                        $fecha->copy()->startOfMonth(),
+                        $fecha->copy()->endOfMonth()
+                    ]);
+                    break;
+                case 'todos':
+                    // No aplicar filtro de fecha
+                    break;
+            }
+        } else {
+            // Por defecto, mostrar solo trámites finalizados
+            $query->whereNotNull('fecha_finalizacion');
+        }
+
+        // Ordenamiento por fecha de finalización
+        $query->orderBy('fecha_finalizacion', 'desc');
+
+        $tramites = $query->paginate(15);
 
         return view('revision.index', compact('tramites'));
     }

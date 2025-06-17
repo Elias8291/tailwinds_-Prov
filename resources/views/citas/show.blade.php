@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 @endpush
 
-<div class="min-h-screen bg-gray-100 font-montserrat py-8">
+<div class="min-h-screen font-montserrat py-8">
     <div class="max-w-2xl mx-auto px-4 sm:px-6">
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <!-- Header Section -->
@@ -55,7 +55,7 @@
                 <!-- Información de la Cita -->
                 <div class="grid grid-cols-1 gap-6">
                     <!-- Usuario -->
-                    <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <h3 class="text-sm font-medium text-gray-500 mb-1">Usuario</h3>
                         <div class="flex items-center">
                             <div class="h-10 w-10 rounded-full bg-[#9d2449] text-white flex items-center justify-center">
@@ -69,7 +69,7 @@
                     </div>
 
                     <!-- Fecha y Hora -->
-                    <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <h3 class="text-sm font-medium text-gray-500 mb-1">Fecha y Hora</h3>
                         <div class="flex items-center">
                             <i class="fas fa-calendar-alt text-[#9d2449] mr-2"></i>
@@ -80,21 +80,21 @@
                     </div>
 
                     <!-- Motivo -->
-                    <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <h3 class="text-sm font-medium text-gray-500 mb-1">Motivo de la Cita</h3>
                         <p class="text-sm text-gray-900">{{ $cita->motivo }}</p>
                     </div>
 
                     <!-- Notas -->
                     @if($cita->notas)
-                    <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <h3 class="text-sm font-medium text-gray-500 mb-1">Notas Adicionales</h3>
                         <p class="text-sm text-gray-900">{{ $cita->notas }}</p>
                     </div>
                     @endif
 
                     <!-- Fechas de Registro -->
-                    <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <h3 class="text-sm font-medium text-gray-500 mb-1">Información del Registro</h3>
                         <div class="space-y-2">
                             <div class="flex items-center">

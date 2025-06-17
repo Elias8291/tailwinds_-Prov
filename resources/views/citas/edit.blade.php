@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 @endpush
 
-<div class="min-h-screen bg-gray-100 font-montserrat py-8">
+<div class="min-h-screen font-montserrat py-8">
     <div class="max-w-2xl mx-auto px-4 sm:px-6">
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <!-- Header Section -->

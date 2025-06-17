@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cita;
 use App\Models\Solicitante;
 use App\Models\Tramite;
+use App\Models\DiaInhabil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -17,8 +18,10 @@ class CitaController extends Controller
         $citas = Cita::with('user')
                     ->orderBy('fecha_hora', 'desc')
                     ->paginate(10);
+        
+        $diasInhabiles = DiaInhabil::orderBy('fecha', 'desc')->get();
 
-        return view('citas.index', compact('citas'));
+        return view('citas.index', compact('citas', 'diasInhabiles'));
     }
 
     public function create()

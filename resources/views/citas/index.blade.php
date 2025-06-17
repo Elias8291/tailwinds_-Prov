@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+@push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+@endpush
+
 <div class="py-4">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Notificaciones -->
@@ -46,13 +50,13 @@
                     </div>
                 </div>
                 <div class="flex flex-col md:flex-row gap-2">
-                    <a href="{{ route('dias-inhabiles.create') }}" 
-                       class="inline-flex items-center justify-center px-4 py-2 border border-[#B4325E] rounded-lg text-sm font-medium text-[#B4325E] bg-white hover:bg-[#B4325E] hover:text-white transition-all duration-200 w-full md:w-auto">
+                    <button onclick="openDiasInhabilesModal()" 
+                           class="inline-flex items-center justify-center px-4 py-2 border border-[#B4325E] rounded-lg text-sm font-medium text-[#B4325E] bg-white hover:bg-[#B4325E] hover:text-white transition-all duration-200 w-full md:w-auto">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        Agregar Día Inhábil
-                    </a>
+                        Días Inhábiles
+                    </button>
                     <a href="{{ route('citas.create') }}" 
                        class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-[#B4325E] to-[#93264B] hover:from-[#93264B] hover:to-[#B4325E] transition-all duration-200 w-full md:w-auto">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,50 +68,193 @@
             </div>
         </div>
 
-        <!-- Días Inhábiles -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-gray-100 mb-6">
-            <div class="p-4">
-                <div class="flex items-center space-x-3 mb-3">
-                    <div class="bg-gradient-to-br from-[#B4325E] to-[#93264B] rounded-lg p-1.5 shadow-sm">
-                        <svg class="w-4 h-4 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-base font-semibold text-gray-900">Días Inhábiles</h3>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    @forelse($diasInhabiles ?? [] as $dia)
-                    <div class="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-900">{{ $dia->fecha->format('d/m/Y') }}</p>
-                            <p class="text-xs text-gray-500">{{ $dia->descripcion }}</p>
-                        </div>
-                        <form action="{{ route('dias-inhabiles.destroy', $dia) }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" 
-                                    onclick="return confirm('¿Estás seguro de que deseas eliminar este día inhábil?')"
-                                    class="text-red-600 hover:text-red-900 p-1.5 rounded hover:bg-red-50 transition-colors duration-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        <!-- Modal de Días Inhábiles -->
+        <div id="diasInhabilesModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-xl shadow-xl max-w-lg w-full">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-gradient-to-br from-[#B4325E] to-[#93264B] rounded-lg p-2 shadow-sm">
+                                    <svg class="w-5 h-5 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">Días Inhábiles</h3>
+                                    <p class="text-xs text-gray-500">Fechas no disponibles para citas</p>
+                                </div>
+                            </div>
+                            <button onclick="closeDiasInhabilesModal()" class="text-gray-400 hover:text-gray-500">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </button>
-                        </form>
-                    </div>
-                    @empty
-                    <div class="col-span-full">
-                        <div class="text-center py-8">
-                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
-                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-base font-medium text-gray-900 mb-1">No hay días inhábiles registrados</h3>
-                            <p class="text-xs text-gray-500">Agrega un día inhábil para bloquear fechas específicas</p>
                         </div>
                     </div>
-                    @endforelse
+                    <div class="p-6">
+                        <!-- Lista de días inhábiles -->
+                        <div class="space-y-3">
+                            @forelse($diasInhabiles as $dia)
+                            <div class="bg-white border border-gray-100 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="bg-red-50 rounded-lg p-2">
+                                                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">{{ $dia->fecha->format('d/m/Y') }}</p>
+                                            <p class="text-xs text-gray-500">{{ $dia->descripcion }}</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="showDeleteConfirmation('{{ $dia->id }}', '{{ $dia->fecha->format('d/m/Y') }}')"
+                                            class="text-gray-400 hover:text-red-500 transition-colors duration-200">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            @empty
+                            <div class="text-center py-8">
+                                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-base font-medium text-gray-900 mb-1">No hay días inhábiles registrados</h3>
+                                <p class="text-xs text-gray-500">Agrega un día inhábil para bloquear fechas específicas</p>
+                            </div>
+                            @endforelse
+                        </div>
+
+                        <!-- Botón para agregar día inhábil -->
+                        <div class="mt-6 pt-4 border-t border-gray-100">
+                            <a href="{{ route('dias-inhabiles.create') }}" 
+                               class="inline-flex items-center justify-center w-full px-4 py-2.5 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-[#B4325E] to-[#93264B] hover:from-[#93264B] hover:to-[#B4325E] transition-all duration-200 shadow-sm hover:shadow-md">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Agregar Día Inhábil
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Confirmación de Eliminación -->
+        <div id="deleteConfirmationModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+                    <div class="p-6">
+                        <div class="text-center">
+                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">¿Eliminar día inhábil?</h3>
+                            <p class="text-sm text-gray-500 mb-6">¿Estás seguro de que deseas eliminar el día inhábil del <span id="deleteDate" class="font-medium"></span>? Esta acción no se puede deshacer.</p>
+                            <div class="flex justify-center space-x-3">
+                                <button onclick="closeDeleteConfirmation()" 
+                                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                                    Cancelar
+                                </button>
+                                <form id="deleteForm" method="POST" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" 
+                                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Éxito -->
+        <div id="successModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+                    <div class="p-6">
+                        <div class="text-center">
+                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">¡Eliminado con éxito!</h3>
+                            <p class="text-sm text-gray-500 mb-6">El día inhábil ha sido eliminado correctamente.</p>
+                            <button onclick="closeSuccessModal()" 
+                                    class="px-4 py-2 bg-[#B4325E] text-white rounded-lg hover:bg-[#93264B] transition-colors duration-200">
+                                Aceptar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Confirmación de Eliminación de Cita -->
+        <div id="deleteCitaConfirmationModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+                    <div class="p-6">
+                        <div class="text-center">
+                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">¿Eliminar cita?</h3>
+                            <p class="text-sm text-gray-500 mb-6">¿Estás seguro de que deseas eliminar esta cita? Esta acción no se puede deshacer.</p>
+                            <div class="flex justify-center space-x-3">
+                                <button onclick="closeDeleteCitaConfirmation()" 
+                                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                                    Cancelar
+                                </button>
+                                <form id="deleteCitaForm" method="POST" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" 
+                                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Éxito de Eliminación de Cita -->
+        <div id="deleteCitaSuccessModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+                    <div class="p-6">
+                        <div class="text-center">
+                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">¡Eliminado con éxito!</h3>
+                            <p class="text-sm text-gray-500 mb-6">La cita ha sido eliminada correctamente.</p>
+                            <button onclick="closeDeleteCitaSuccess()" 
+                                    class="px-4 py-2 bg-[#B4325E] text-white rounded-lg hover:bg-[#93264B] transition-colors duration-200">
+                                Aceptar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -137,17 +284,12 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                 </svg>
                             </a>
-                            <form action="{{ route('citas.destroy', $cita) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" 
-                                        onclick="return confirm('¿Estás seguro de que deseas eliminar esta cita?')"
-                                        class="p-1.5 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-200">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </form>
+                            <button onclick="showDeleteCitaConfirmation('{{ $cita->id }}')"
+                                    class="p-1.5 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                     <div class="mt-1.5">
@@ -156,6 +298,19 @@
                             @elseif($cita->estado === 'confirmada') bg-green-50 text-green-700 border border-green-100
                             @elseif($cita->estado === 'cancelada') bg-red-50 text-red-700 border border-red-100
                             @else bg-gray-50 text-gray-700 border border-gray-100 @endif">
+                            @if($cita->estado === 'pendiente')
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            @elseif($cita->estado === 'confirmada')
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            @elseif($cita->estado === 'cancelada')
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            @endif
                             {{ ucfirst($cita->estado) }}
                         </span>
                     </div>
@@ -213,6 +368,19 @@
                                     @elseif($cita->estado === 'confirmada') bg-green-50 text-green-700 border border-green-100
                                     @elseif($cita->estado === 'cancelada') bg-red-50 text-red-700 border border-red-100
                                     @else bg-gray-50 text-gray-700 border border-gray-100 @endif">
+                                    @if($cita->estado === 'pendiente')
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    @elseif($cita->estado === 'confirmada')
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    @elseif($cita->estado === 'cancelada')
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    @endif
                                     {{ ucfirst($cita->estado) }}
                                 </span>
                             </td>
@@ -231,24 +399,19 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                         </svg>
                                     </a>
-                                    <form action="{{ route('citas.destroy', $cita) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                onclick="return confirm('¿Estás seguro de que deseas eliminar esta cita?')"
-                                                class="text-red-600 hover:text-red-900 transform hover:scale-110 transition-all duration-200">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button onclick="showDeleteCitaConfirmation('{{ $cita->id }}')"
+                                            class="text-red-600 hover:text-red-900 transform hover:scale-110 transition-all duration-200">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5">
-                                <div class="text-center py-8">
+                            <td colspan="5" class="px-4 py-8">
+                                <div class="text-center">
                                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
                                         <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -273,4 +436,136 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function openDiasInhabilesModal() {
+    document.getElementById('diasInhabilesModal').classList.remove('hidden');
+}
+
+function closeDiasInhabilesModal() {
+    document.getElementById('diasInhabilesModal').classList.add('hidden');
+}
+
+function showDeleteConfirmation(id, date) {
+    document.getElementById('deleteDate').textContent = date;
+    document.getElementById('deleteForm').action = `/dias-inhabiles/${id}`;
+    document.getElementById('deleteConfirmationModal').classList.remove('hidden');
+}
+
+function closeDeleteConfirmation() {
+    document.getElementById('deleteConfirmationModal').classList.add('hidden');
+}
+
+function closeSuccessModal() {
+    document.getElementById('successModal').classList.add('hidden');
+    window.location.reload();
+}
+
+// Cerrar modales al hacer clic fuera
+document.getElementById('diasInhabilesModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDiasInhabilesModal();
+    }
+});
+
+document.getElementById('deleteConfirmationModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteConfirmation();
+    }
+});
+
+document.getElementById('successModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSuccessModal();
+    }
+});
+
+// Manejar el envío del formulario de eliminación
+document.getElementById('deleteForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = this;
+    
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            _method: 'DELETE'
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            throw new Error('Error al eliminar el día inhábil');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al eliminar el día inhábil. Por favor, intente nuevamente.');
+    });
+});
+
+function showDeleteCitaConfirmation(id) {
+    document.getElementById('deleteCitaForm').action = `/citas/${id}`;
+    document.getElementById('deleteCitaConfirmationModal').classList.remove('hidden');
+}
+
+function closeDeleteCitaConfirmation() {
+    document.getElementById('deleteCitaConfirmationModal').classList.add('hidden');
+}
+
+function closeDeleteCitaSuccess() {
+    document.getElementById('deleteCitaSuccessModal').classList.add('hidden');
+    window.location.reload();
+}
+
+// Cerrar modales al hacer clic fuera
+document.getElementById('deleteCitaConfirmationModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteCitaConfirmation();
+    }
+});
+
+document.getElementById('deleteCitaSuccessModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteCitaSuccess();
+    }
+});
+
+// Manejar el envío del formulario de eliminación de cita
+document.getElementById('deleteCitaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = this;
+    
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            _method: 'DELETE'
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            closeDeleteCitaConfirmation();
+            document.getElementById('deleteCitaSuccessModal').classList.remove('hidden');
+        } else {
+            throw new Error('Error al eliminar la cita');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al eliminar la cita. Por favor, intente nuevamente.');
+    });
+});
+</script>
+@endpush
 @endsection 
