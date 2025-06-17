@@ -23,6 +23,15 @@ class SeccionTramite extends Model
         'orden' => 'integer'
     ];
 
+    /**
+     * Relación muchos-a-muchos con Documento
+     */
+    public function documentos()
+    {
+        return $this->belongsToMany(Documento::class, 'documento_seccion', 'seccion_id', 'documento_id')
+                    ->withTimestamps();
+    }
+
     public function tramites()
     {
         return $this->belongsToMany(Tramite::class, 'progreso_tramite')

@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
             TramiteSeeder::class,
             DetalleTramiteSeeder::class,
             ProveedorSeeder::class,
+            SeccionTramiteSeeder::class,
         ]);
     }
 }
