@@ -18,7 +18,16 @@
     @if($readonly)
         <!-- Vista de solo lectura para revisión -->
         <div class="space-y-6">
-            @if(!empty($datosConstitucion))
+            @php
+                // Depuración: verificar los datos recibidos
+                Log::info('Datos de constitución en componente:', [
+                    'datosConstitucion' => $datosConstitucion ?? 'null',
+                    'is_empty' => empty($datosConstitucion),
+                    'is_array' => is_array($datosConstitucion)
+                ]);
+            @endphp
+            
+            @if(!empty($datosConstitucion) && is_array($datosConstitucion))
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-group">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Número de Escritura</label>
@@ -30,19 +39,7 @@
                     <div class="form-group">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Constitución</label>
                         <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
-                            @php
-                                $fechaConstitucion = $datosConstitucion['fecha_constitucion'] ?? '';
-                                if (!empty($fechaConstitucion) && $fechaConstitucion !== 'No disponible') {
-                                    try {
-                                        $fechaFormateada = \Carbon\Carbon::parse($fechaConstitucion)->format('d/m/Y');
-                                    } catch (\Exception $e) {
-                                        $fechaFormateada = $fechaConstitucion;
-                                    }
-                                } else {
-                                    $fechaFormateada = 'No especificado';
-                                }
-                            @endphp
-                            {{ $fechaFormateada }}
+                            {{ $datosConstitucion['fecha_constitucion_formatted'] ?? ($datosConstitucion['fecha_constitucion'] ? \Carbon\Carbon::parse($datosConstitucion['fecha_constitucion'])->format('d/m/Y') : 'No especificado') }}
                         </div>
                     </div>
                     
@@ -69,9 +66,8 @@
                                     '26' => 'Sonora', '27' => 'Tabasco', '28' => 'Tamaulipas', 
                                     '29' => 'Tlaxcala', '30' => 'Veracruz', '31' => 'Yucatán', '32' => 'Zacatecas'
                                 ];
-                                $entidadId = $datosConstitucion['entidad_federativa'] ?? '';
                             @endphp
-                            {{ $estados[$entidadId] ?? 'No especificado' }}
+                            {{ $datosConstitucion['entidad_federativa_nombre'] ?? ($datosConstitucion['entidad_federativa'] ? $estados[$datosConstitucion['entidad_federativa']] : 'No especificado') }}
                         </div>
                     </div>
                     
@@ -92,28 +88,32 @@
                     <div class="form-group">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Inscripción</label>
                         <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
-                            @php
-                                $fechaInscripcion = $datosConstitucion['fecha_inscripcion'] ?? '';
-                                if (!empty($fechaInscripcion) && $fechaInscripcion !== 'No disponible') {
-                                    try {
-                                        $fechaInscripcionFormateada = \Carbon\Carbon::parse($fechaInscripcion)->format('d/m/Y');
-                                    } catch (\Exception $e) {
-                                        $fechaInscripcionFormateada = $fechaInscripcion;
-                                    }
-                                } else {
-                                    $fechaInscripcionFormateada = 'No especificado';
-                                }
-                            @endphp
-                            {{ $fechaInscripcionFormateada }}
+                            {{ $datosConstitucion['fecha_inscripcion_formatted'] ?? ($datosConstitucion['fecha_inscripcion'] ? \Carbon\Carbon::parse($datosConstitucion['fecha_inscripcion'])->format('d/m/Y') : 'No especificado') }}
                         </div>
                     </div>
                 </div>
             @else
                 <!-- Mensaje cuando no hay datos de constitución -->
                 <div class="text-center py-8">
-                    <div class="bg-gray-50 rounded-lg p-6">
-                        <i class="fas fa-file-contract text-gray-400 text-3xl mb-3"></i>
-                        <p class="text-gray-500">No hay información de constitución registrada para este trámite.</p>
+                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-8">
+                        <div class="flex flex-col items-center">
+                            <div class="bg-amber-100 rounded-full p-4 mb-4">
+                                <i class="fas fa-file-contract text-amber-600 text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-amber-800 mb-2">Sin Datos de Constitución</h3>
+                            <div class="text-sm text-amber-700 space-y-1 text-center">
+                                <p>No se encontró información de constitución para este trámite.</p>
+                                <p class="text-xs text-amber-600">
+                                    @if(empty($datosConstitucion))
+                                        Estado: Datos vacíos
+                                    @elseif(!is_array($datosConstitucion))
+                                        Estado: Formato de datos incorrecto
+                                    @else
+                                        Estado: Solo valores por defecto
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endif

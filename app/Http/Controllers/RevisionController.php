@@ -253,14 +253,48 @@ class RevisionController extends Controller
     {
         try {
             $controller = new ConstitucionController();
-            return $controller->getIncorporationData($tramite);
+            $constitucion = $controller->getIncorporationData($tramite);
+            
+            Log::info('Datos de constitución obtenidos:', [
+                'tramite_id' => $tramite->id,
+                'constitucion' => $constitucion,
+                'tiene_datos' => !empty($constitucion) && !$this->sonDatosPorDefecto($constitucion)
+            ]);
+            
+            // Si solo tiene datos por defecto ("No disponible"), devolver array vacío
+            if ($this->sonDatosPorDefecto($constitucion)) {
+                return [];
+            }
+            
+            return $constitucion;
         } catch (\Exception $e) {
             Log::error('Error al obtener datos de constitución:', [
                 'tramite_id' => $tramite->id,
                 'error' => $e->getMessage()
             ]);
-            return null;
+            return [];
         }
+    }
+    
+    /**
+     * Verifica si los datos de constitución son solo valores por defecto
+     */
+    private function sonDatosPorDefecto($datos): bool
+    {
+        if (empty($datos) || !is_array($datos)) {
+            return true;
+        }
+        
+        // Campos principales que deben tener valor para considerar que hay datos reales
+        $camposPrincipales = ['numero_escritura', 'nombre_notario', 'fecha_constitucion'];
+        
+        foreach ($camposPrincipales as $campo) {
+            if (isset($datos[$campo]) && !empty($datos[$campo]) && $datos[$campo] !== null) {
+                return false; // Hay al menos un campo con datos reales
+            }
+        }
+        
+        return true; // Todos los campos principales están vacíos o null
     }
 
     /**
