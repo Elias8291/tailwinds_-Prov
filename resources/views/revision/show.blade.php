@@ -324,59 +324,8 @@
                 </div>
             </div>
 
-            <!-- Indicador de Tipo de Persona -->
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 mb-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] rounded-full w-12 h-12 flex items-center justify-center mr-4 shadow-lg">
-                            <i class="fas fa-info text-white text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-gray-800 text-lg" x-text="esMoral ? 'Persona Moral' : 'Persona Física'"></h3>
-                            <p class="text-sm text-gray-600" x-text="esMoral ? 'Se muestran 6 secciones de revisión' : 'Se muestran 3 secciones de revisión'"></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="px-4 py-2 rounded-full text-sm font-semibold" 
-                              :class="esMoral ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'"
-                              x-text="esMoral ? 'MORAL' : 'FÍSICA'"></span>
-                    </div>
-                </div>
-                
-                <!-- Lista de secciones -->
-                <div class="mt-4 pt-4 border-t border-blue-200">
-                    <p class="text-sm font-medium text-gray-700 mb-2">Secciones de revisión:</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                            01. Datos Generales
-                        </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                            02. Domicilio
-                        </div>
-                        <div class="flex items-center text-sm" :class="esMoral ? 'text-gray-600' : 'text-gray-400'">
-                            <i class="fas mr-2" :class="esMoral ? 'fa-check-circle text-green-500' : 'fa-times-circle text-gray-400'"></i>
-                            03. Constitución
-                        </div>
-                        <div class="flex items-center text-sm" :class="esMoral ? 'text-gray-600' : 'text-gray-400'">
-                            <i class="fas mr-2" :class="esMoral ? 'fa-check-circle text-green-500' : 'fa-times-circle text-gray-400'"></i>
-                            04. Accionistas
-                        </div>
-                        <div class="flex items-center text-sm" :class="esMoral ? 'text-gray-600' : 'text-gray-400'">
-                            <i class="fas mr-2" :class="esMoral ? 'fa-check-circle text-green-500' : 'fa-times-circle text-gray-400'"></i>
-                            05. Apoderado Legal
-                        </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                            <span x-text="esMoral ? '06. Documentos' : '03. Documentos'"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Secciones adicionales (Constitución, Accionistas, Apoderado) - Solo para Persona Moral -->
-            <div class="space-y-6" x-show="esMoral" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
+            <!-- Secciones adicionales (Constitución, Accionistas, Apoderado) -->
+            <div class="space-y-6">
                     <!-- 03. Constitución -->
                     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6" data-section="constitucion">
                         <div class="xl:col-span-12" :class="{ 'xl:col-span-8': pdfVisible.constitucion }">
@@ -642,14 +591,14 @@
                     </div>
             </div>
 
-            <!-- Documentos (03 para Física / 06 para Moral) -->
+            <!-- 06. Documentos -->
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6" data-section="documentos">
                 <div class="xl:col-span-12" :class="{ 'xl:col-span-8': pdfVisible.documentos }">
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300">
                         <div class="bg-gradient-to-r from-[#9d2449] via-[#8a203f] to-[#7a1d37] px-6 py-5">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <h2 class="text-xl font-bold text-white flex items-center">
-                                    <span class="bg-white text-[#9d2449] rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold mr-4 shadow-lg" x-text="esMoral ? '06' : '03'"></span>
+                                    <span class="bg-white text-[#9d2449] rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold mr-4 shadow-lg">06</span>
                                     <div class="flex items-center">
                                         <i class="fas fa-file-alt mr-3 text-2xl"></i>
                                         <span>Documentos</span>
@@ -834,40 +783,6 @@
     </div>
 </div>
 
-<!-- Modal Proveedor Creado -->
-<div id="modalProveedorCreado" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3 text-center">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-                <i class="fas fa-check text-green-600 text-xl"></i>
-            </div>
-            <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">¡Proveedor Creado Exitosamente!</h3>
-            <div class="mt-4 px-7 py-3">
-                <p class="text-sm text-gray-500 mb-4">
-                    El trámite ha sido aprobado y se ha creado automáticamente el registro de proveedor.
-                </p>
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                    <div class="flex items-center">
-                        <i class="fas fa-id-card text-green-600 mr-2"></i>
-                        <span class="text-sm font-medium text-gray-700">Código de Proveedor:</span>
-                    </div>
-                    <div class="mt-2">
-                        <span id="codigoProveedor" class="text-2xl font-bold text-green-600"></span>
-                    </div>
-                </div>
-                <p class="text-xs text-gray-400">
-                    Este código será utilizado para identificar al proveedor en el sistema.
-                </p>
-            </div>
-            <div class="items-center px-4 py-3">
-                <button id="cerrarModalProveedor" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
-                    Entendido
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 const tramiteId = {{ $tramite->id }};
 
@@ -953,16 +868,10 @@ async function aprobarTodo() {
         const data = await response.json();
         
         if (data.success) {
-            if (data.proveedor_pv) {
-                mostrarNotificacion(`Trámite aprobado completamente. Proveedor creado: ${data.proveedor_pv}`, 'success');
-                // Mostrar modal con información del proveedor
-                mostrarModalProveedorCreado(data.proveedor_pv);
-            } else {
-                mostrarNotificacion('Trámite aprobado completamente', 'success');
-            }
+            mostrarNotificacion('Trámite aprobado completamente', 'success');
             setTimeout(() => {
                 window.location.href = '/revision';
-            }, 4000); // Más tiempo para ver el código del proveedor
+            }, 2000);
         } else {
             mostrarNotificacion('Error: ' + data.message, 'error');
         }
@@ -1108,19 +1017,6 @@ function mostrarNotificacion(mensaje, tipo) {
     }, 3000);
 }
 
-// Función para mostrar modal de proveedor creado
-function mostrarModalProveedorCreado(codigoPV) {
-    document.getElementById('codigoProveedor').textContent = codigoPV;
-    document.getElementById('modalProveedorCreado').classList.remove('hidden');
-}
-
-function cerrarModalProveedor() {
-    document.getElementById('modalProveedorCreado').classList.add('hidden');
-}
-
-// Event listener para cerrar modal de proveedor
-document.getElementById('cerrarModalProveedor').addEventListener('click', cerrarModalProveedor);
-
 // Cerrar modales al hacer clic fuera
 document.addEventListener('click', function(e) {
     if (e.target.id === 'modalRechazarTodo') {
@@ -1128,9 +1024,6 @@ document.addEventListener('click', function(e) {
     }
     if (e.target.id === 'modalPausar') {
         cerrarModalPausar();
-    }
-    if (e.target.id === 'modalProveedorCreado') {
-        cerrarModalProveedor();
     }
 });
 </script> 

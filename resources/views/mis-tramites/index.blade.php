@@ -8,13 +8,13 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div class="h-12 w-12 flex items-center justify-center rounded-xl bg-white/10 text-white shadow-md">
-                        <i class="fas fa-clipboard-check text-xl"></i>
+                        <i class="fas fa-clipboard-list text-xl"></i>
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold text-white">
-                            Revisión de Trámites
+                            Mis Trámites
                         </h1>
-                        <p class="text-sm text-white/80 mt-1">Gestión de trámites pendientes de revisión</p>
+                        <p class="text-sm text-white/80 mt-1">Gestión de tus trámites y solicitudes</p>
                     </div>
                 </div>
                 
@@ -42,23 +42,10 @@
 
         <!-- Filtros -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
-            <form method="GET" action="{{ route('revision.index') }}" class="space-y-4">
+            <form method="GET" action="{{ route('mis-tramites.index') }}" class="space-y-4">
                 <!-- Grid de filtros -->
-                <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-                    <!-- Filtro por Tipo de Persona -->
-                    <div class="bg-gray-50 rounded-lg p-3">
-                        <label for="tipo_persona" class="block text-xs font-medium text-gray-600 mb-1">
-                            <i class="fas fa-user-tag mr-1 text-[#9d2449]"></i>
-                            Tipo de Persona
-                        </label>
-                        <select name="tipo_persona" id="tipo_persona" class="w-full text-sm rounded-lg border-gray-200 focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/20">
-                            <option value="">Todos</option>
-                            <option value="Fisica" {{ request('tipo_persona') == 'Fisica' ? 'selected' : '' }}>Persona Física</option>
-                            <option value="Moral" {{ request('tipo_persona') == 'Moral' ? 'selected' : '' }}>Persona Moral</option>
-                        </select>
-                    </div>
-
-                <!-- Filtro por Estado -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Filtro por Estado -->
                     <div class="bg-gray-50 rounded-lg p-3">
                         <label for="estado" class="block text-xs font-medium text-gray-600 mb-1">
                             <i class="fas fa-tasks mr-1 text-[#9d2449]"></i>
@@ -66,15 +53,14 @@
                         </label>
                         <select name="estado" id="estado" class="w-full text-sm rounded-lg border-gray-200 focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/20">
                             <option value="">Todos</option>
-                        <option value="Pendiente" {{ request('estado') == 'Pendiente' ? 'selected' : '' }}>Pendiente</option>
-                        <option value="En Revision" {{ request('estado') == 'En Revision' ? 'selected' : '' }}>En Revisión</option>
-                        <option value="Por Cotejar" {{ request('estado') == 'Por Cotejar' ? 'selected' : '' }}>Por Cotejar</option>
+                            <option value="Pendiente" {{ request('estado') == 'Pendiente' ? 'selected' : '' }}>Pendiente</option>
+                            <option value="En Revision" {{ request('estado') == 'En Revision' ? 'selected' : '' }}>En Revisión</option>
                             <option value="Aprobado" {{ request('estado') == 'Aprobado' ? 'selected' : '' }}>Aprobado</option>
                             <option value="Rechazado" {{ request('estado') == 'Rechazado' ? 'selected' : '' }}>Rechazado</option>
-                    </select>
-                </div>
+                        </select>
+                    </div>
 
-                <!-- Filtro por Tipo de Trámite -->
+                    <!-- Filtro por Tipo de Trámite -->
                     <div class="bg-gray-50 rounded-lg p-3">
                         <label for="tipo_tramite" class="block text-xs font-medium text-gray-600 mb-1">
                             <i class="fas fa-file-alt mr-1 text-[#9d2449]"></i>
@@ -82,49 +68,36 @@
                         </label>
                         <select name="tipo_tramite" id="tipo_tramite" class="w-full text-sm rounded-lg border-gray-200 focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/20">
                             <option value="">Todos</option>
-                        <option value="Inscripcion" {{ request('tipo_tramite') == 'Inscripcion' ? 'selected' : '' }}>Inscripción</option>
-                        <option value="Renovacion" {{ request('tipo_tramite') == 'Renovacion' ? 'selected' : '' }}>Renovación</option>
-                        <option value="Actualizacion" {{ request('tipo_tramite') == 'Actualizacion' ? 'selected' : '' }}>Actualización</option>
-                    </select>
-                </div>
-
-                    <!-- Filtro por Tiempo de Revisión -->
-                    <div class="bg-gray-50 rounded-lg p-3">
-                        <label for="tiempo_revision" class="block text-xs font-medium text-gray-600 mb-1">
-                            <i class="fas fa-clock mr-1 text-[#9d2449]"></i>
-                            Tiempo
-                        </label>
-                        <select name="tiempo_revision" id="tiempo_revision" class="w-full text-sm rounded-lg border-gray-200 focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/20">
-                            <option value="todos" {{ request('tiempo_revision') == 'todos' ? 'selected' : '' }}>Todos</option>
-                            <option value="hoy" {{ request('tiempo_revision') == 'hoy' ? 'selected' : '' }}>Hoy</option>
-                            <option value="semana" {{ request('tiempo_revision') == 'semana' ? 'selected' : '' }}>Esta semana</option>
-                            <option value="mes" {{ request('tiempo_revision') == 'mes' ? 'selected' : '' }}>Este mes</option>
+                            <option value="Inscripcion" {{ request('tipo_tramite') == 'Inscripcion' ? 'selected' : '' }}>Inscripción</option>
+                            <option value="Renovacion" {{ request('tipo_tramite') == 'Renovacion' ? 'selected' : '' }}>Renovación</option>
+                            <option value="Actualizacion" {{ request('tipo_tramite') == 'Actualizacion' ? 'selected' : '' }}>Actualización</option>
                         </select>
                     </div>
 
-                    <!-- Filtro por Fecha de Finalización -->
+                    <!-- Filtro por Fecha -->
                     <div class="bg-gray-50 rounded-lg p-3">
-                        <label for="fecha_finalizacion" class="block text-xs font-medium text-gray-600 mb-1">
-                            <i class="fas fa-calendar-check mr-1 text-[#9d2449]"></i>
-                            Finalización
+                        <label for="fecha" class="block text-xs font-medium text-gray-600 mb-1">
+                            <i class="fas fa-calendar mr-1 text-[#9d2449]"></i>
+                            Fecha
                         </label>
-                        <select name="fecha_finalizacion" id="fecha_finalizacion" class="w-full text-sm rounded-lg border-gray-200 focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/20">
-                            <option value="">Todos</option>
-                            <option value="recientes" {{ request('fecha_finalizacion') == 'recientes' ? 'selected' : '' }}>Recientes</option>
-                            <option value="antiguos" {{ request('fecha_finalizacion') == 'antiguos' ? 'selected' : '' }}>Antiguos</option>
-                    </select>
-                </div>
+                        <select name="fecha" id="fecha" class="w-full text-sm rounded-lg border-gray-200 focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/20">
+                            <option value="">Todas</option>
+                            <option value="hoy" {{ request('fecha') == 'hoy' ? 'selected' : '' }}>Hoy</option>
+                            <option value="semana" {{ request('fecha') == 'semana' ? 'selected' : '' }}>Esta semana</option>
+                            <option value="mes" {{ request('fecha') == 'mes' ? 'selected' : '' }}>Este mes</option>
+                        </select>
+                    </div>
 
-                <!-- Búsqueda por RFC -->
+                    <!-- Búsqueda -->
                     <div class="bg-gray-50 rounded-lg p-3">
-                        <label for="rfc" class="block text-xs font-medium text-gray-600 mb-1">
+                        <label for="buscar" class="block text-xs font-medium text-gray-600 mb-1">
                             <i class="fas fa-search mr-1 text-[#9d2449]"></i>
-                            RFC
+                            Buscar
                         </label>
                         <div class="relative">
-                    <input type="text" name="rfc" id="rfc" value="{{ request('rfc') }}" 
+                            <input type="text" name="buscar" id="buscar" value="{{ request('buscar') }}" 
                                    class="w-full text-sm rounded-lg border-gray-200 focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/20 pr-10"
-                                   placeholder="Buscar RFC">
+                                   placeholder="Buscar trámite...">
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                 <i class="fas fa-search text-gray-400 text-sm"></i>
                             </div>
@@ -134,7 +107,7 @@
 
                 <!-- Botones de acción -->
                 <div class="flex items-center justify-end space-x-3">
-                    <a href="{{ route('revision.index') }}" 
+                    <a href="{{ route('mis-tramites.index') }}" 
                        class="px-4 py-2 text-sm bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center">
                         <i class="fas fa-times mr-2 text-xs"></i>
                         Limpiar
@@ -163,12 +136,6 @@
                                 </th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">
                                     <div class="flex items-center space-x-2">
-                                        <i class="fas fa-user text-[#9d2449]"></i>
-                                        <span>Solicitante</span>
-                                    </div>
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">
-                                    <div class="flex items-center space-x-2">
                                         <i class="fas fa-tasks text-[#9d2449]"></i>
                                         <span>Estado</span>
                                     </div>
@@ -176,7 +143,7 @@
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">
                                     <div class="flex items-center space-x-2">
                                         <i class="fas fa-clipboard-list text-[#9d2449]"></i>
-                                        <span>Secciones</span>
+                                        <span>Progreso</span>
                                     </div>
                                 </th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">
@@ -209,28 +176,15 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-gray-900">
-                                            {{ $tramite->solicitante->razon_social ?? $tramite->solicitante->nombre_completo ?? 'Sin información' }}
-                                        </div>
-                                        <div class="text-xs text-gray-500 flex items-center mt-1">
-                                            <i class="fas fa-id-card mr-1 text-[#9d2449]"></i>
-                                            RFC: {{ $tramite->solicitante->rfc ?? 'N/A' }}
-                                        </div>
-                                        <div class="text-xs text-gray-500 flex items-center mt-1">
-                                            <i class="fas {{ $tramite->solicitante->tipo_persona == 'Moral' ? 'fa-building' : 'fa-user' }} mr-1 text-[#9d2449]"></i>
-                                            {{ $tramite->solicitante->tipo_persona ?? 'N/A' }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="inline-flex px-3 py-1.5 text-xs font-semibold rounded-full
                                             {{ $tramite->estado == 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
                                                ($tramite->estado == 'En Revision' ? 'bg-blue-100 text-blue-800' : 
                                                ($tramite->estado == 'Aprobado' ? 'bg-green-100 text-green-800' : 
                                                ($tramite->estado == 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-purple-100 text-purple-800'))) }}">
                                             <i class="fas {{ $tramite->estado == 'Pendiente' ? 'fa-clock' : 
-                                                   ($tramite->estado == 'En Revision' ? 'fa-tasks' : 
-                                                   ($tramite->estado == 'Aprobado' ? 'fa-check' : 
-                                                   ($tramite->estado == 'Rechazado' ? 'fa-times' : 'fa-question'))) }} mr-1.5"></i>
+                                                           ($tramite->estado == 'En Revision' ? 'fa-tasks' : 
+                                                           ($tramite->estado == 'Aprobado' ? 'fa-check' : 
+                                                           ($tramite->estado == 'Rechazado' ? 'fa-times' : 'fa-question'))) }} mr-1.5"></i>
                                             {{ $tramite->estado }}
                                         </span>
                                     </td>
@@ -268,7 +222,7 @@
                                                         <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap shadow-lg">
                                                             {{ $secciones[$seccionId]['title'] }} - {{ ucfirst($estado) }}
                                                         </div>
-                                            </div>
+                                                    </div>
                                                 @endforeach
                                             @else
                                                 <span class="text-sm text-gray-500">Sin secciones disponibles</span>
@@ -297,27 +251,24 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex items-center space-x-3">
-                                            <a href="{{ route('revision.show', $tramite) }}" 
+                                            <a href="{{ route('mis-tramites.show', $tramite) }}" 
                                                class="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-[#9d2449] hover:bg-[#9d2449] hover:text-white transition-colors duration-200"
-                                                    title="Ver detalles">
+                                               title="Ver detalles">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            @if($tramite->estado === 'Pendiente' || $tramite->estado === 'Por Cotejar')
-                                            <a href="{{ route('revision.show', $tramite) }}" 
+                                            @if($tramite->estado === 'Pendiente')
+                                                <a href="{{ route('mis-tramites.edit', $tramite) }}" 
                                                    class="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-blue-600 hover:bg-blue-600 hover:text-white transition-colors duration-200"
-                                               title="Iniciar revisión">
-                                                <i class="fas fa-play"></i>
-                                            </a>
+                                                   title="Editar trámite">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
                                             @endif
-                                            @if($tramite->estado === 'En Revision')
-                                                <button class="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-green-600 hover:bg-green-600 hover:text-white transition-colors duration-200"
-                                                    title="Aprobar">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                                <button class="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-red-600 hover:bg-red-600 hover:text-white transition-colors duration-200"
-                                                    title="Rechazar">
-                                                <i class="fas fa-times"></i>
-                                            </button>
+                                            @if($tramite->estado === 'Aprobado')
+                                                <a href="{{ route('mis-tramites.download', $tramite) }}" 
+                                                   class="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-green-600 hover:bg-green-600 hover:text-white transition-colors duration-200"
+                                                   title="Descargar constancia">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
                                             @endif
                                         </div>
                                     </td>

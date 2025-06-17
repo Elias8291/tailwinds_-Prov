@@ -44,7 +44,7 @@ class DetalleTramite extends Model
         return $this->belongsTo(RepresentanteLegal::class, 'representante_legal_id');
     }
 
-    public function datosConstitutivos()
+    public function datoConstitutivo()
     {
         return $this->belongsTo(DatosConstitutivo::class, 'dato_constitutivo_id');
     }

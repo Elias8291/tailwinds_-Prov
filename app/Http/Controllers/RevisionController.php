@@ -19,13 +19,58 @@ class RevisionController extends Controller
     /**
      * Mostrar la lista de trámites pendientes de revisión
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Obtener trámites pendientes de revisión con información del solicitante
-        $tramites = Tramite::with(['solicitante', 'revisor'])
-            ->whereIn('estado', ['Pendiente', 'En Revision', 'Por Cotejar'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        // Obtener trámites con información del solicitante
+        $query = Tramite::with(['solicitante', 'revisor']);
+
+        // Aplicar filtros
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->filled('tipo_tramite')) {
+            $query->where('tipo_tramite', $request->tipo_tramite);
+        }
+
+        if ($request->filled('rfc')) {
+            $query->whereHas('solicitante', function($q) use ($request) {
+                $q->where('rfc', 'like', '%' . $request->rfc . '%');
+            });
+        }
+
+        // Filtro por tiempo de revisión usando fecha_finalizacion
+        if ($request->filled('tiempo_revision')) {
+            $fecha = now();
+            switch ($request->tiempo_revision) {
+                case 'hoy':
+                    $query->whereDate('fecha_finalizacion', $fecha);
+                    break;
+                case 'semana':
+                    $query->whereBetween('fecha_finalizacion', [
+                        $fecha->copy()->startOfWeek(),
+                        $fecha->copy()->endOfWeek()
+                    ]);
+                    break;
+                case 'mes':
+                    $query->whereBetween('fecha_finalizacion', [
+                        $fecha->copy()->startOfMonth(),
+                        $fecha->copy()->endOfMonth()
+                    ]);
+                    break;
+                case 'todos':
+                    // No aplicar filtro de fecha
+                    break;
+            }
+        } else {
+            // Por defecto, mostrar solo trámites finalizados
+            $query->whereNotNull('fecha_finalizacion');
+        }
+
+        // Ordenamiento por fecha de finalización
+        $query->orderBy('fecha_finalizacion', 'desc');
+
+        $tramites = $query->paginate(15);
 
         return view('revision.index', compact('tramites'));
     }
@@ -208,14 +253,48 @@ class RevisionController extends Controller
     {
         try {
             $controller = new ConstitucionController();
-            return $controller->getIncorporationData($tramite);
+            $constitucion = $controller->getIncorporationData($tramite);
+            
+            Log::info('Datos de constitución obtenidos:', [
+                'tramite_id' => $tramite->id,
+                'constitucion' => $constitucion,
+                'tiene_datos' => !empty($constitucion) && !$this->sonDatosPorDefecto($constitucion)
+            ]);
+            
+            // Si solo tiene datos por defecto ("No disponible"), devolver array vacío
+            if ($this->sonDatosPorDefecto($constitucion)) {
+                return [];
+            }
+            
+            return $constitucion;
         } catch (\Exception $e) {
             Log::error('Error al obtener datos de constitución:', [
                 'tramite_id' => $tramite->id,
                 'error' => $e->getMessage()
             ]);
-            return null;
+            return [];
         }
+    }
+    
+    /**
+     * Verifica si los datos de constitución son solo valores por defecto
+     */
+    private function sonDatosPorDefecto($datos): bool
+    {
+        if (empty($datos) || !is_array($datos)) {
+            return true;
+        }
+        
+        // Campos principales que deben tener valor para considerar que hay datos reales
+        $camposPrincipales = ['numero_escritura', 'nombre_notario', 'fecha_constitucion'];
+        
+        foreach ($camposPrincipales as $campo) {
+            if (isset($datos[$campo]) && !empty($datos[$campo]) && $datos[$campo] !== null) {
+                return false; // Hay al menos un campo con datos reales
+            }
+        }
+        
+        return true; // Todos los campos principales están vacíos o null
     }
 
     /**
