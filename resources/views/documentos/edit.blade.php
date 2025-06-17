@@ -128,6 +128,36 @@
                                 </div>
                             </div>
 
+                            <!-- Secciones -->
+                            <div class="form-group">
+                                <div class="relative group">
+                                    <label class="block text-sm font-medium text-gray-600 mb-3 group-hover:text-[#9d2449] transition-colors duration-300">
+                                        <i class="fas fa-list-ul text-[#9d2449] mr-2"></i>
+                                        Secciones donde se revisa
+                                    </label>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl hover:border-[#9d2449]/50 transition-all duration-300">
+                                        @foreach($secciones as $seccion)
+                                        <label class="inline-flex items-center p-3 rounded-lg border border-gray-200 bg-white/70 hover:border-[#9d2449]/50 hover:bg-[#9d2449]/5 transition-all duration-300 cursor-pointer group/item">
+                                            <input type="checkbox" 
+                                                   name="secciones[]" 
+                                                   value="{{ $seccion->id }}"
+                                                   {{ in_array($seccion->id, old('secciones', $documento->secciones->pluck('id')->toArray())) ? 'checked' : '' }}
+                                                   class="rounded border-gray-300 text-[#9d2449] focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:ring-offset-0">
+                                            <span class="ml-3 text-sm text-gray-700 group-hover/item:text-gray-900 transition-colors duration-300">
+                                                {{ $seccion->nombre }}
+                                            </span>
+                                        </label>
+                                        @endforeach
+                                    </div>
+                                    @error('secciones')
+                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $message }}
+                                    </p>
+                                    @enderror
+                                </div>
+                            </div>
+
                             <!-- Visibilidad -->
                             <div class="form-group">
                                 <div class="relative">

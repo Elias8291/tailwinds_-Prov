@@ -14,7 +14,6 @@ class Documento extends Model
     protected $fillable = [
         'nombre',
         'tipo_persona',
-        'seccion',
         'descripcion',
         'es_visible'
     ];
@@ -22,6 +21,15 @@ class Documento extends Model
     protected $casts = [
         'es_visible' => 'boolean'
     ];
+
+    /**
+     * Relación muchos-a-muchos con SeccionTramite
+     */
+    public function secciones()
+    {
+        return $this->belongsToMany(SeccionTramite::class, 'documento_seccion', 'documento_id', 'seccion_id')
+                    ->withTimestamps();
+    }
 
     public function tramites()
     {

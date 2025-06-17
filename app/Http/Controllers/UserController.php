@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Auth\Events\Registered;
 use Spatie\Permission\Models\Role;
+use App\Services\SystemLogService;
 
 class UserController extends Controller
 {
@@ -44,12 +45,15 @@ class UserController extends Controller
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'nombre' => $request->name,
+            'correo' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
         $user->assignRole($request->roles);
+
+        // Log de creación de usuario
+        SystemLogService::userCreated($user->id, $user->nombre, $user->correo);
 
         // Trigger verification email
         event(new Registered($user));
@@ -73,8 +77,8 @@ class UserController extends Controller
         ]);
 
         $data = [
-            'name' => $request->name,
-            'email' => $request->email,
+            'nombre' => $request->name,
+            'correo' => $request->email,
         ];
 
         if ($request->filled('password')) {
@@ -87,6 +91,9 @@ class UserController extends Controller
         $user->update($data);
         $user->syncRoles($request->roles);
 
+        // Log de actualización de usuario
+        SystemLogService::userUpdated($user->id, $user->nombre, $user->correo);
+
         return redirect()->route('users.index')
             ->with('success', 'Usuario actualizado exitosamente.');
     }
@@ -97,6 +104,9 @@ class UserController extends Controller
             return redirect()->route('users.index')
                 ->with('error', 'No puedes eliminar tu propio usuario.');
         }
+
+        // Log de eliminación de usuario (antes de eliminar)
+        SystemLogService::userDeleted($user->id, $user->nombre, $user->correo);
 
         $user->delete();
 

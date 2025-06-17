@@ -12,8 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('solicitante', function (Blueprint $table) {
-            $table->string('nombre_completo')->nullable()->after('rfc');
-            $table->string('razon_social')->nullable()->after('nombre_completo');
+            // Solo agregar las columnas si no existen ya
+            if (!Schema::hasColumn('solicitante', 'nombre_completo')) {
+                $table->string('nombre_completo')->nullable()->after('rfc');
+            }
+            if (!Schema::hasColumn('solicitante', 'razon_social')) {
+                $table->string('razon_social')->nullable()->after('nombre_completo');
+            }
         });
     }
 
@@ -23,7 +28,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('solicitante', function (Blueprint $table) {
-            $table->dropColumn(['nombre_completo', 'razon_social']);
+            // Solo eliminar las columnas si existen
+            if (Schema::hasColumn('solicitante', 'nombre_completo')) {
+                $table->dropColumn('nombre_completo');
+            }
+            if (Schema::hasColumn('solicitante', 'razon_social')) {
+                $table->dropColumn('razon_social');
+            }
         });
     }
 };

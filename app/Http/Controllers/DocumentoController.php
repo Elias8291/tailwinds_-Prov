@@ -3,19 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Documento;
+use App\Models\SeccionTramite;
 use Illuminate\Http\Request;
 
 class DocumentoController extends Controller
 {
     public function index()
     {
-        $documentos = Documento::all();
+        $documentos = Documento::with('secciones')->get();
         return view('documentos.index', compact('documentos'));
     }
 
     public function create()
     {
-        return view('documentos.create');
+        $secciones = SeccionTramite::orderBy('orden')->get();
+        return view('documentos.create', compact('secciones'));
     }
 
     public function store(Request $request)
@@ -25,9 +27,16 @@ class DocumentoController extends Controller
             'tipo_persona' => 'required|in:Física,Moral,Ambas',
             'descripcion' => 'nullable|string|max:1000',
             'es_visible' => 'boolean',
+            'secciones' => 'nullable|array',
+            'secciones.*' => 'exists:seccion_tramite,id',
         ]);
 
-        Documento::create($request->all());
+        $documento = Documento::create($request->only(['nombre', 'tipo_persona', 'descripcion', 'es_visible']));
+
+        // Sincronizar secciones
+        if ($request->has('secciones')) {
+            $documento->secciones()->sync($request->secciones);
+        }
 
         return redirect()->route('documentos.index')
             ->with('success', 'Documento creado exitosamente.');
@@ -35,7 +44,9 @@ class DocumentoController extends Controller
 
     public function edit(Documento $documento)
     {
-        return view('documentos.edit', compact('documento'));
+        $secciones = SeccionTramite::orderBy('orden')->get();
+        $documento->load('secciones');
+        return view('documentos.edit', compact('documento', 'secciones'));
     }
 
     public function update(Request $request, Documento $documento)
@@ -45,9 +56,18 @@ class DocumentoController extends Controller
             'tipo_persona' => 'required|in:Física,Moral,Ambas',
             'descripcion' => 'nullable|string|max:1000',
             'es_visible' => 'boolean',
+            'secciones' => 'nullable|array',
+            'secciones.*' => 'exists:seccion_tramite,id',
         ]);
 
-        $documento->update($request->all());
+        $documento->update($request->only(['nombre', 'tipo_persona', 'descripcion', 'es_visible']));
+
+        // Sincronizar secciones
+        if ($request->has('secciones')) {
+            $documento->secciones()->sync($request->secciones);
+        } else {
+            $documento->secciones()->detach();
+        }
 
         return redirect()->route('documentos.index')
             ->with('success', 'Documento actualizado exitosamente.');

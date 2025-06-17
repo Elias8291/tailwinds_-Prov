@@ -81,6 +81,23 @@
                             </span>
                         </div>
                         <p class="mt-2 text-sm text-gray-600">{{ $documento->descripcion }}</p>
+                        
+                        <!-- Secciones -->
+                        <div class="mt-3">
+                            <p class="text-xs font-medium text-gray-700 mb-2">Secciones:</p>
+                            <div class="flex flex-wrap gap-1">
+                                @forelse($documento->secciones as $seccion)
+                                    <span class="px-2 py-1 text-xs font-medium bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20 rounded-md">
+                                        {{ $seccion->nombre }}
+                                    </span>
+                                @empty
+                                    <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 rounded-md">
+                                        Sin secciones
+                                    </span>
+                                @endforelse
+                            </div>
+                        </div>
+                        
                         <div class="mt-4 flex items-center justify-between">
                             <span class="px-2.5 py-0.5 text-xs font-semibold rounded-lg {{ $documento->es_visible ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100' }}">
                                 {{ $documento->es_visible ? 'Visible' : 'No Visible' }}
@@ -118,6 +135,7 @@
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Nombre</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Tipo Persona</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Secciones</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Descripción</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Estado</th>
                         <th class="px-6 py-4 text-center text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
@@ -143,6 +161,19 @@
                                 @endswitch">
                                 {{ $documento->tipo_persona }}
                             </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap gap-1">
+                                @forelse($documento->secciones as $seccion)
+                                    <span class="px-2 py-1 text-xs font-medium bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20 rounded-md">
+                                        {{ $seccion->nombre }}
+                                    </span>
+                                @empty
+                                    <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 rounded-md">
+                                        Sin secciones
+                                    </span>
+                                @endforelse
+                            </div>
                         </td>
                         <td class="px-6 py-4">
                             <p class="text-sm text-gray-900 line-clamp-2">{{ $documento->descripcion }}</p>
