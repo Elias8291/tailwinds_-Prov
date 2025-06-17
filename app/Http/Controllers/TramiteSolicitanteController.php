@@ -13,6 +13,7 @@ use App\Models\Proveedor;
 use Carbon\Carbon;
 use App\Http\Controllers\Formularios\DomicilioController;
 use App\Http\Controllers\DetalleTramiteController;
+use App\Services\SystemLogService;
 
 class TramiteSolicitanteController extends Controller
 {
@@ -409,6 +410,9 @@ class TramiteSolicitanteController extends Controller
             'tipo_tramite' => $tipoTramite,
             'solicitante_id' => $solicitante->id
         ]);
+
+        // Log del sistema para auditoría
+        SystemLogService::tramiteCreated($tramite->id, ucfirst($tipoTramite), $solicitante->razon_social ?? $solicitante->nombre_completo ?? 'Solicitante');
         
         // Redirigir directamente a la vista create unificada
         return redirect()->route('tramites.create.tipo', [
@@ -872,6 +876,9 @@ class TramiteSolicitanteController extends Controller
                 'fecha_finalizacion' => now(),
                 'progreso_tramite' => $solicitante->tipo_persona === 'Física' ? 3 : 6
             ]);
+
+            // Log del sistema para auditoría
+            SystemLogService::tramiteFinalized($tramite->id, $tramite->tipo_tramite, $solicitante->razon_social ?? $solicitante->nombre_completo ?? 'Solicitante');
 
             return response()->json([
                 'success' => true,

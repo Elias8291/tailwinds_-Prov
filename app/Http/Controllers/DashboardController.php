@@ -12,6 +12,24 @@ use App\Models\Cita;
 class DashboardController extends Controller
 {
     /**
+     * Dashboard principal que redirige según el rol del usuario
+     */
+    public function index()
+    {
+        $user = Auth::user();
+        
+        // Verificar permisos y redirigir al dashboard apropiado
+        if ($user->can('dashboard.admin') || $user->can('dashboard.revisor')) {
+            return $this->adminDashboard();
+        } elseif ($user->can('dashboard.solicitante')) {
+            return $this->solicitanteDashboard();
+        }
+        
+        // Si no tiene permisos específicos, mostrar dashboard básico
+        return $this->dashboardBasico();
+    }
+
+    /**
      * Muestra el dashboard administrativo
      */
     public function adminDashboard()
@@ -61,5 +79,22 @@ class DashboardController extends Controller
         }
 
         return view('dashboard2', compact('user', 'solicitante', 'documentos_pendientes_count'));
+    }
+
+    /**
+     * Dashboard básico para usuarios sin permisos específicos
+     */
+    public function dashboardBasico()
+    {
+        $user = Auth::user();
+        
+        return view('dashboard', [
+            'totalUsuarios' => 0,
+            'tramitesPendientes' => 0,
+            'totalProveedores' => 0,
+            'citasHoy' => 0,
+            'totalCitas' => 0,
+            'mensaje' => 'Bienvenido al sistema. Contacta al administrador para obtener los permisos necesarios.'
+        ]);
     }
 } 

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use App\Services\SystemLogService;
 
 class LoginController extends Controller
 {
@@ -57,6 +58,9 @@ class LoginController extends Controller
         // Inicializar la última actividad para el middleware de expiración de sesión
         session(['last_activity' => now()]);
 
+        // Log del login exitoso
+        SystemLogService::userLogin($user->correo);
+
         // Log para debugging
         Log::info('Usuario autenticado', [
             'user_id' => $user->id,
@@ -89,6 +93,9 @@ class LoginController extends Controller
 
         // Verificar contraseña
         if (!Hash::check($password, $user->password)) {
+            // Log del intento fallido
+            SystemLogService::loginFailed($user->correo);
+            
             return redirect()->back()
                 ->withInput($request->only($this->username(), 'remember'))
                 ->with('error', 'La contraseña es incorrecta.');
@@ -126,6 +133,13 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        $user = Auth::user();
+        
+        // Log del logout
+        if ($user) {
+            SystemLogService::userLogout($user->correo);
+        }
+        
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
