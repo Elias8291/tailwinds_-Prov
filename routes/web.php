@@ -25,6 +25,7 @@ use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CitaController;
+use App\Http\Controllers\CalendarioController;
 use App\Http\Controllers\DiaInhabilController;
 
 // Controladores de Trámites
@@ -40,6 +41,9 @@ use App\Http\Controllers\DireccionController;
 
 // Controladores de API
 use App\Http\Controllers\API\SectorController;
+
+// Controladores de Documentos
+use App\Http\Controllers\DocumentoMembretadoController;
 
 // ============================================================================
 // RUTAS PÚBLICAS (Sin autenticación requerida)
@@ -287,32 +291,38 @@ Route::middleware(['auth', 'can:revision-tramites.ver'])->prefix('revision')->gr
     // LISTADO Y GESTIÓN DE REVISIONES
     Route::get('/', [RevisionController::class, 'index'])->name('revision.index');
     Route::get('/{tramite}', [RevisionController::class, 'show'])->name('revision.show');
+    Route::get('/{tramite}/documento/{documentoId}', [RevisionController::class, 'verDocumento'])->name('revision.ver-documento');
     
     // REVISIÓN DE DATOS GENERALES
     Route::get('/{tramite}/datos-generales', [\App\Http\Controllers\DatosGeneralesController::class, 'prepararDatosRevision'])
         ->name('revision.datos-generales');
     
     // ACCIONES DE REVISIÓN POR SECCIÓN
-    Route::post('/{tramite}/seccion/{seccion}/aprobar', [\App\Http\Controllers\SeccionRevisionController::class, 'aprobarSeccion'])
+    Route::post('/{tramite}/seccion/{seccion}/aprobar', [RevisionController::class, 'aprobarSeccion'])
         ->middleware('can:revision-tramites.aprobar')
         ->name('revision.seccion.aprobar');
-    Route::post('/{tramite}/seccion/{seccion}/rechazar', [\App\Http\Controllers\SeccionRevisionController::class, 'rechazarSeccion'])
+    Route::post('/{tramite}/seccion/{seccion}/rechazar', [RevisionController::class, 'rechazarSeccion'])
         ->middleware('can:revision-tramites.rechazar')
         ->name('revision.seccion.rechazar');
     
     // ACCIONES MASIVAS DE REVISIÓN
-    Route::post('/{tramite}/aprobar-todo', [\App\Http\Controllers\SeccionRevisionController::class, 'aprobarTodo'])
+    Route::post('/{tramite}/aprobar-todo', [RevisionController::class, 'aprobarTodo'])
         ->middleware('can:revision-tramites.aprobar')
         ->name('revision.aprobar-todo');
-    Route::post('/{tramite}/rechazar-todo', [\App\Http\Controllers\SeccionRevisionController::class, 'rechazarTodo'])
+    Route::post('/{tramite}/rechazar-todo', [RevisionController::class, 'rechazarTodo'])
         ->middleware('can:revision-tramites.rechazar')
         ->name('revision.rechazar-todo');
-    Route::post('/{tramite}/pausar', [\App\Http\Controllers\SeccionRevisionController::class, 'pausarRevision'])
+    Route::post('/{tramite}/pausar', [RevisionController::class, 'pausarRevision'])
         ->name('revision.pausar');
     
     // ESTADO DE REVISIONES
     Route::get('/{tramite}/estado-revisiones', [\App\Http\Controllers\SeccionRevisionController::class, 'obtenerEstadoRevisiones'])
         ->name('revision.estado-revisiones');
+    
+    // COMENTARIOS DE REVISIÓN
+    Route::post('/{tramite}/comentario', [RevisionController::class, 'agregarComentario'])
+        ->middleware('can:revision-tramites.comentarios')
+        ->name('revision.agregar-comentario');
 });
 
 // ============================================================================
@@ -404,6 +414,24 @@ Route::prefix('api')->group(function () {
     // API DE DATOS GENERALES
     Route::get('/datos-generales/{tramite}', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'obtenerDatos'])
         ->name('api.datos-generales.obtener');
+});
+
+// ============================================================================
+// MÓDULO DE DOCUMENTOS MEMBRETADOS
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('documento-membretado')->group(function () {
+    // Formulario para crear documento
+    Route::get('/', [DocumentoMembretadoController::class, 'formulario'])->name('documento.formulario');
+    
+    // Vista previa del documento en navegador
+    Route::get('/vista', [DocumentoMembretadoController::class, 'vista'])->name('documento.vista');
+    
+    // Generar PDF personalizado
+    Route::post('/generar-pdf', [DocumentoMembretadoController::class, 'generarPDF'])->name('documento.generar-pdf');
+    
+    // Ejemplo completo con datos predefinidos
+    Route::get('/ejemplo', [DocumentoMembretadoController::class, 'ejemplo'])->name('documento.ejemplo');
 });
 
 // Profile Routes
