@@ -137,11 +137,19 @@
                             @if(isset($documentosPorSeccion['datos_generales']) && count($documentosPorSeccion['datos_generales']) > 0)
                                 <div class="flex items-center space-x-1">
                                     @foreach($documentosPorSeccion['datos_generales'] as $documento)
-                                        <button onclick="mostrarDocumento('datos_generales', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                               class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all duration-200 border border-blue-300 relative z-50"
-                                               title="{{ $documento['nombre'] }} - {{ $documento['descripcion'] }}">
-                                            <i class="fas fa-file-pdf text-sm"></i>
-                                        </button>
+                                        <div class="tooltip-container tooltip-pdf">
+                                            <button onclick="mostrarDocumento('datos_generales', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   class="documento-btn bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg border border-blue-300">
+                                                <i class="fas fa-file-pdf text-sm"></i>
+                                            </button>
+                                            <div class="custom-tooltip">
+                                                <div class="font-medium">{{ $documento['nombre'] }}</div>
+                                                @if(isset($documento['descripcion']) && $documento['descripcion'])
+                                                    <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
+                                                @endif
+                                                <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                            </div>
+                                        </div>
                                     @endforeach
                                     <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['datos_generales']) }} doc(s)</span>
                                 </div>
@@ -244,11 +252,19 @@
                                 @if(isset($documentosPorSeccion['domicilio']) && count($documentosPorSeccion['domicilio']) > 0)
                                     <div class="flex items-center space-x-1">
                                         @foreach($documentosPorSeccion['domicilio'] as $documento)
-                                            <button onclick="mostrarDocumento('domicilio', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   class="bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-lg transition-all duration-200 border border-green-300 relative z-50"
-                                                   title="{{ $documento['nombre'] }} - {{ $documento['descripcion'] }}">
-                                                <i class="fas fa-file-pdf text-sm"></i>
-                                            </button>
+                                            <div class="tooltip-container tooltip-general">
+                                                <button onclick="mostrarDocumento('domicilio', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                       class="documento-btn bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-lg border border-green-300">
+                                                    <i class="fas fa-file-pdf text-sm"></i>
+                                                </button>
+                                                <div class="custom-tooltip">
+                                                    <div class="font-medium">{{ $documento['nombre'] }}</div>
+                                                    @if(isset($documento['descripcion']) && $documento['descripcion'])
+                                                        <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
+                                                    @endif
+                                                    <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                                </div>
+                                            </div>
                                         @endforeach
                                         <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['domicilio']) }} doc(s)</span>
                                     </div>
@@ -257,11 +273,17 @@
                                 @endif
                                 
                                 <!-- Botón del Mapa -->
-                                <button onclick="mostrarMapa('domicilio')"
-                                       class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all duration-200 border border-blue-300 relative z-50"
-                                       title="Ver ubicación en mapa">
-                                    <i class="fas fa-map-marker-alt text-sm"></i>
-                                </button>
+                                <div class="tooltip-container tooltip-map">
+                                    <button onclick="mostrarMapa('domicilio')"
+                                           class="documento-btn bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg border border-blue-300">
+                                        <i class="fas fa-map-marker-alt text-sm"></i>
+                                    </button>
+                                    <div class="custom-tooltip">
+                                        <div class="font-medium">Ver Ubicación</div>
+                                        <div class="text-xs opacity-90 mt-1">Mapa interactivo con análisis de zona</div>
+                                        <div class="text-xs opacity-75 mt-1">Clic para abrir mapa</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -351,11 +373,19 @@
                             @if(isset($documentosPorSeccion['constitucion']) && count($documentosPorSeccion['constitucion']) > 0)
                                 <div class="flex items-center space-x-1">
                                     @foreach($documentosPorSeccion['constitucion'] as $documento)
-                                        <button onclick="mostrarDocumento('constitucion', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                               class="bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-lg transition-all duration-200 border border-purple-300 relative z-50"
-                                               title="{{ $documento['nombre'] }} - {{ $documento['descripcion'] }}">
-                                            <i class="fas fa-file-pdf text-sm"></i>
-                                        </button>
+                                        <div class="tooltip-container tooltip-pdf">
+                                            <button onclick="mostrarDocumento('constitucion', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   class="documento-btn bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-lg border border-purple-300">
+                                                <i class="fas fa-file-pdf text-sm"></i>
+                                            </button>
+                                            <div class="custom-tooltip">
+                                                <div class="font-medium">{{ $documento['nombre'] }}</div>
+                                                @if(isset($documento['descripcion']) && $documento['descripcion'])
+                                                    <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
+                                                @endif
+                                                <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                            </div>
+                                        </div>
                                     @endforeach
                                     <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['constitucion']) }} doc(s)</span>
                                 </div>
@@ -449,11 +479,19 @@
                             @if(isset($documentosPorSeccion['accionistas']) && count($documentosPorSeccion['accionistas']) > 0)
                                 <div class="flex items-center space-x-1">
                                     @foreach($documentosPorSeccion['accionistas'] as $documento)
-                                        <button onclick="mostrarDocumento('accionistas', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                               class="bg-amber-100 hover:bg-amber-200 text-amber-700 p-2 rounded-lg transition-all duration-200 border border-amber-300 relative z-50"
-                                               title="{{ $documento['nombre'] }} - {{ $documento['descripcion'] }}">
-                                            <i class="fas fa-file-pdf text-sm"></i>
-                                        </button>
+                                        <div class="tooltip-container tooltip-general">
+                                            <button onclick="mostrarDocumento('accionistas', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   class="documento-btn bg-amber-100 hover:bg-amber-200 text-amber-700 p-2 rounded-lg border border-amber-300">
+                                                <i class="fas fa-file-pdf text-sm"></i>
+                                            </button>
+                                            <div class="custom-tooltip">
+                                                <div class="font-medium">{{ $documento['nombre'] }}</div>
+                                                @if(isset($documento['descripcion']) && $documento['descripcion'])
+                                                    <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
+                                                @endif
+                                                <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                            </div>
+                                        </div>
                                     @endforeach
                                     <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['accionistas']) }} doc(s)</span>
                                 </div>
@@ -547,11 +585,19 @@
                             @if(isset($documentosPorSeccion['apoderado']) && count($documentosPorSeccion['apoderado']) > 0)
                                 <div class="flex items-center space-x-1">
                                     @foreach($documentosPorSeccion['apoderado'] as $documento)
-                                        <button onclick="mostrarDocumento('apoderado', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                               class="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg transition-all duration-200 border border-red-300 relative z-50"
-                                               title="{{ $documento['nombre'] }} - {{ $documento['descripcion'] }}">
-                                            <i class="fas fa-file-pdf text-sm"></i>
-                                        </button>
+                                        <div class="tooltip-container tooltip-pdf">
+                                            <button onclick="mostrarDocumento('apoderado', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   class="documento-btn bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg border border-red-300">
+                                                <i class="fas fa-file-pdf text-sm"></i>
+                                            </button>
+                                            <div class="custom-tooltip">
+                                                <div class="font-medium">{{ $documento['nombre'] }}</div>
+                                                @if(isset($documento['descripcion']) && $documento['descripcion'])
+                                                    <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
+                                                @endif
+                                                <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                            </div>
+                                        </div>
                                     @endforeach
                                     <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['apoderado']) }} doc(s)</span>
                                 </div>
@@ -646,11 +692,19 @@
                             @if(isset($documentosPorSeccion['documentos']) && count($documentosPorSeccion['documentos']) > 0)
                                 <div class="flex items-center space-x-1">
                                     @foreach($documentosPorSeccion['documentos'] as $documento)
-                                        <button onclick="mostrarDocumento('documentos', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                               class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 p-2 rounded-lg transition-all duration-200 border border-indigo-300 relative z-50"
-                                               title="{{ $documento['nombre'] }} - {{ $documento['descripcion'] }}">
-                                            <i class="fas fa-file-pdf text-sm"></i>
-                                        </button>
+                                        <div class="tooltip-container tooltip-general">
+                                            <button onclick="mostrarDocumento('documentos', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   class="documento-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 p-2 rounded-lg border border-indigo-300">
+                                                <i class="fas fa-file-pdf text-sm"></i>
+                                            </button>
+                                            <div class="custom-tooltip">
+                                                <div class="font-medium">{{ $documento['nombre'] }}</div>
+                                                @if(isset($documento['descripcion']) && $documento['descripcion'])
+                                                    <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
+                                                @endif
+                                                <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                            </div>
+                                        </div>
                                     @endforeach
                                     <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['documentos']) }} doc(s)</span>
                                 </div>
@@ -810,60 +864,123 @@
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-/* Asegurar que los tooltips se vean por encima de todo */
-[title]:hover::after {
-    z-index: 9999 !important;
+/* Contenedores de sección con overflow visible para tooltips */
+.bg-white.rounded-xl.shadow-lg {
+    position: relative;
+    overflow: visible !important;
 }
 
-/* Mejorar la visibilidad de tooltips en botones */
-button[title] {
+.bg-gradient-to-r.from-gray-100.to-gray-200 {
+    overflow: visible !important;
+}
+
+/* Tooltips elegantes que salen fuera del contenedor */
+.tooltip-container {
+    position: relative;
+    z-index: 100;
+}
+
+.tooltip-container:hover .custom-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
+}
+
+.custom-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(5px);
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease-in-out;
+    pointer-events: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 250px;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.custom-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1f2937;
+    z-index: 10001;
+}
+
+/* Estilos específicos para botones de documentos */
+.documento-btn {
+    transition: all 0.2s ease-in-out;
     position: relative;
     z-index: 50;
 }
 
-button[title]:hover {
-    z-index: 60;
+.documento-btn:hover {
+    transform: translateY(-1px);
+    z-index: 100;
 }
 
-/* Asegurar que los contenedores de sección no interfieran con tooltips */
-.bg-white.rounded-xl.shadow-lg {
-    position: relative;
+/* Diferentes colores para diferentes tipos de tooltips */
+.tooltip-pdf .custom-tooltip {
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
 }
 
-/* Tooltip personalizado para mejor visibilidad */
-button[title]:hover {
-    position: relative;
+.tooltip-pdf .custom-tooltip::after {
+    border-top-color: #dc2626;
 }
 
-button[title]:hover::before {
-    content: attr(title);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    white-space: nowrap;
-    z-index: 9999;
-    margin-bottom: 5px;
-    pointer-events: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.tooltip-map .custom-tooltip {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
 }
 
-button[title]:hover::after {
-    content: '';
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: rgba(0, 0, 0, 0.9);
-    z-index: 9999;
-    pointer-events: none;
-    margin-bottom: 0px;
+.tooltip-map .custom-tooltip::after {
+    border-top-color: #2563eb;
+}
+
+.tooltip-general .custom-tooltip {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+}
+
+.tooltip-general .custom-tooltip::after {
+    border-top-color: #059669;
+}
+
+/* Asegurar que los contenedores padre no corten los tooltips */
+.min-h-screen, .max-w-full, .space-y-6 {
+    overflow: visible !important;
+}
+
+/* Ajustes para responsive */
+@media (max-width: 768px) {
+    .custom-tooltip {
+        font-size: 10px;
+        padding: 6px 8px;
+        max-width: 200px;
+        bottom: calc(100% + 8px);
+    }
+}
+
+/* Animación suave para los iconos */
+.documento-btn i, .tooltip-container i {
+    transition: transform 0.2s ease-in-out;
+}
+
+.documento-btn:hover i, .tooltip-container:hover i {
+    transform: scale(1.1);
 }
 </style>
 @endpush

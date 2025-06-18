@@ -63,40 +63,170 @@ class MapHandler {
             return;
         }
 
-        // Configuración del mapa
+        // Crear el layout del mapa con panel de información
+        this.createMapLayout(mapContainer, seccion);
+
+        // Configuración del mapa con estilo elegante
         const mapOptions = {
-            zoom: 15,
+            zoom: 16,
             center: { lat: 19.4326, lng: -99.1332 }, // Ciudad de México por defecto
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             streetViewControl: true,
             mapTypeControl: true,
             fullscreenControl: true,
             zoomControl: true,
-            scaleControl: true
+            scaleControl: true,
+            gestureHandling: 'cooperative',
+            // Estilo elegante y profesional
+            styles: [
+                {
+                    featureType: 'all',
+                    elementType: 'geometry',
+                    stylers: [{ saturation: -10 }, { lightness: 5 }]
+                },
+                {
+                    featureType: 'water',
+                    elementType: 'all',
+                    stylers: [{ color: '#4A90E2' }, { lightness: 20 }]
+                },
+                {
+                    featureType: 'road.highway',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#E8E8E8' }, { weight: 0.8 }]
+                },
+                {
+                    featureType: 'road.arterial',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#F0F0F0' }, { weight: 0.6 }]
+                },
+                {
+                    featureType: 'road.local',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#FAFAFA' }, { weight: 0.4 }]
+                },
+                {
+                    featureType: 'poi',
+                    elementType: 'labels',
+                    stylers: [{ visibility: 'simplified' }, { color: '#666666' }]
+                },
+                {
+                    featureType: 'transit',
+                    elementType: 'all',
+                    stylers: [{ visibility: 'simplified' }, { saturation: -20 }]
+                },
+                {
+                    featureType: 'landscape',
+                    elementType: 'all',
+                    stylers: [{ color: '#F8F8F8' }]
+                }
+            ]
         };
 
-        // Crear el mapa
-        this.currentMap = new google.maps.Map(mapContainer, mapOptions);
+        // Crear el mapa en el contenedor específico
+        const actualMapContainer = document.getElementById('actual-map-' + seccion);
+        this.currentMap = new google.maps.Map(actualMapContainer, mapOptions);
 
         // Geocodificar la dirección si está disponible
         if (direccion && direccion !== 'Dirección no disponible') {
-            this.geocodeAndMarkLocation(direccion);
+            this.geocodeAndMarkLocation(direccion, seccion);
         } else {
             console.warn('⚠️ No hay dirección válida para geocodificar');
         }
     }
 
     /**
+     * Crea el layout del mapa con panel de información lateral
+     * @param {Element} container - Contenedor principal del mapa
+     * @param {string} seccion - ID de la sección
+     */
+    createMapLayout(container, seccion) {
+        container.innerHTML = `
+            <div class="flex h-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <!-- Panel de información lateral -->
+                <div class="w-80 bg-gradient-to-b from-gray-50 to-white border-r border-gray-200 flex flex-col">
+                    <!-- Header del panel -->
+                    <div class="p-4 border-b border-gray-200 bg-white">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-map-marked-alt text-white text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800 text-sm">Análisis de Ubicación</h3>
+                                <p class="text-xs text-gray-500">Domicilio empresarial</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Información de dirección -->
+                    <div class="p-4 border-b border-gray-200">
+                        <h4 class="font-medium text-gray-700 text-sm mb-2 flex items-center">
+                            <i class="fas fa-building text-blue-500 mr-2 text-xs"></i>
+                            Dirección Registrada
+                        </h4>
+                        <div id="direccion-info-${seccion}" class="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+                            <div class="animate-pulse">
+                                <div class="h-3 bg-gray-300 rounded mb-2"></div>
+                                <div class="h-3 bg-gray-300 rounded w-3/4"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Panel de calles cercanas -->
+                    <div class="flex-1 p-4">
+                        <h4 class="font-medium text-gray-700 text-sm mb-3 flex items-center">
+                            <i class="fas fa-road text-green-500 mr-2 text-xs"></i>
+                            Calles Cercanas
+                        </h4>
+                        <div id="calles-cercanas-${seccion}" class="space-y-2">
+                            <div class="text-xs text-gray-500 italic">Cargando información...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Panel de coordenadas -->
+                    <div class="p-4 border-t border-gray-200 bg-gray-50">
+                        <h4 class="font-medium text-gray-700 text-sm mb-2 flex items-center">
+                            <i class="fas fa-crosshairs text-purple-500 mr-2 text-xs"></i>
+                            Coordenadas
+                        </h4>
+                        <div id="coordenadas-${seccion}" class="text-xs text-gray-600 font-mono bg-white rounded px-2 py-1 border">
+                            <div class="animate-pulse">
+                                <div class="h-3 bg-gray-300 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contenedor del mapa -->
+                <div class="flex-1 relative">
+                    <div id="actual-map-${seccion}" class="w-full h-full"></div>
+                    
+                    <!-- Overlay de carga -->
+                    <div id="map-loading-${seccion}" class="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-3"></div>
+                            <p class="text-sm text-gray-600">Cargando mapa...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
      * Geocodifica una dirección y coloca un marcador
      * @param {string} direccion - Dirección a geocodificar
+     * @param {string} seccion - ID de la sección
      */
-    geocodeAndMarkLocation(direccion) {
+    geocodeAndMarkLocation(direccion, seccion) {
         if (!this.currentMap) {
             console.error('❌ No hay mapa inicializado');
             return;
         }
 
         const geocoder = new google.maps.Geocoder();
+        
+        // Actualizar información de dirección en el panel
+        this.updateAddressInfo(seccion, direccion);
         
         // Agregar "México" al final para mejorar la precisión
         const direccionCompleta = direccion.includes('México') ? direccion : direccion + ', México';
@@ -105,34 +235,62 @@ class MapHandler {
             address: direccionCompleta,
             region: 'MX' // Limitar a México
         }, (results, status) => {
+            // Ocultar overlay de carga
+            const loadingOverlay = document.getElementById('map-loading-' + seccion);
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
+
             if (status === google.maps.GeocoderStatus.OK && results[0]) {
                 const location = results[0].geometry.location;
+                const lat = location.lat();
+                const lng = location.lng();
                 
                 // Centrar el mapa en la ubicación
                 this.currentMap.setCenter(location);
-                this.currentMap.setZoom(16);
+                this.currentMap.setZoom(17);
+
+                // Actualizar coordenadas en el panel
+                this.updateCoordinates(seccion, lat, lng);
 
                 // Limpiar marcador anterior si existe
                 if (this.currentMarker) {
                     this.currentMarker.setMap(null);
                 }
 
-                // Crear nuevo marcador
+                // Crear nuevo marcador elegante
                 this.currentMarker = new google.maps.Marker({
                     position: location,
                     map: this.currentMap,
                     title: 'Domicilio de la empresa',
                     animation: google.maps.Animation.DROP,
                     icon: {
-                        url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                        scaledSize: new google.maps.Size(32, 32)
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: '#DC2626',
+                        fillOpacity: 1,
+                        strokeColor: '#FFFFFF',
+                        strokeWeight: 3,
+                        scale: 12
                     }
                 });
 
-                // Crear ventana de información
+                // Crear círculo de área de influencia
+                const circle = new google.maps.Circle({
+                    strokeColor: '#DC2626',
+                    strokeOpacity: 0.4,
+                    strokeWeight: 2,
+                    fillColor: '#DC2626',
+                    fillOpacity: 0.1,
+                    map: this.currentMap,
+                    center: location,
+                    radius: 200 // 200 metros
+                });
+
+                // Crear ventana de información elegante
                 const infoWindow = new google.maps.InfoWindow({
-                    content: this.createInfoWindowContent(direccion, results[0]),
-                    maxWidth: 300
+                    content: this.createElegantInfoWindow(direccion, results[0]),
+                    maxWidth: 320,
+                    pixelOffset: new google.maps.Size(0, -10)
                 });
 
                 // Eventos del marcador
@@ -140,17 +298,260 @@ class MapHandler {
                     infoWindow.open(this.currentMap, this.currentMarker);
                 });
 
-                // Mostrar info automáticamente
-                setTimeout(() => {
-                    infoWindow.open(this.currentMap, this.currentMarker);
-                }, 500);
+                // Detectar calles cercanas
+                this.detectNearbyStreets(location, seccion);
 
                 console.log('✅ Ubicación geocodificada correctamente:', direccion);
             } else {
                 console.warn('⚠️ No se pudo geocodificar la dirección:', direccion, 'Status:', status);
                 this.showGeocodeError(direccion);
+                this.updateStreetsError(seccion);
             }
         });
+    }
+
+    /**
+     * Actualiza la información de dirección en el panel lateral
+     * @param {string} seccion - ID de la sección
+     * @param {string} direccion - Dirección a mostrar
+     */
+    updateAddressInfo(seccion, direccion) {
+        const addressContainer = document.getElementById('direccion-info-' + seccion);
+        if (addressContainer) {
+            addressContainer.innerHTML = `
+                <div class="space-y-1">
+                    <p class="text-sm font-medium text-gray-800">${direccion}</p>
+                    <div class="flex items-center text-xs text-gray-500">
+                        <i class="fas fa-shield-alt mr-1 text-green-500"></i>
+                        <span>Dirección verificada</span>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Actualiza las coordenadas en el panel lateral
+     * @param {string} seccion - ID de la sección
+     * @param {number} lat - Latitud
+     * @param {number} lng - Longitud
+     */
+    updateCoordinates(seccion, lat, lng) {
+        const coordContainer = document.getElementById('coordenadas-' + seccion);
+        if (coordContainer) {
+            coordContainer.innerHTML = `
+                <div class="space-y-1">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Lat:</span>
+                        <span class="text-gray-800">${lat.toFixed(6)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Lng:</span>
+                        <span class="text-gray-800">${lng.toFixed(6)}</span>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Detecta las calles cercanas a una ubicación
+     * @param {Object} location - Ubicación de Google Maps
+     * @param {string} seccion - ID de la sección
+     */
+    detectNearbyStreets(location, seccion) {
+        const service = new google.maps.places.PlacesService(this.currentMap);
+        
+        // Buscar calles y lugares cercanos
+        const request = {
+            location: location,
+            radius: 300,
+            type: ['route']
+        };
+
+        // También usar geocoding inverso para obtener componentes de dirección
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: location }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+                this.processNearbyInfo(results, seccion);
+            }
+        });
+
+        // Buscar lugares cercanos para contexto adicional
+        const nearbyRequest = {
+            location: location,
+            radius: 200,
+            type: ['establishment', 'point_of_interest']
+        };
+
+        service.nearbySearch(nearbyRequest, (results, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                this.updateNearbyPlaces(results.slice(0, 3), seccion);
+            }
+        });
+    }
+
+    /**
+     * Procesa la información de ubicación cercana
+     * @param {Array} results - Resultados de geocodificación
+     * @param {string} seccion - ID de la sección
+     */
+    processNearbyInfo(results, seccion) {
+        const streetsContainer = document.getElementById('calles-cercanas-' + seccion);
+        if (!streetsContainer) return;
+
+        const streets = [];
+        const neighborhoods = [];
+        
+        // Procesar todos los resultados para extraer calles y colonias
+        results.forEach(result => {
+            result.address_components.forEach(component => {
+                if (component.types.includes('route')) {
+                    const streetName = component.long_name;
+                    if (!streets.includes(streetName) && streetName.length > 3) {
+                        streets.push(streetName);
+                    }
+                }
+                if (component.types.includes('sublocality') || component.types.includes('neighborhood')) {
+                    const neighborhood = component.long_name;
+                    if (!neighborhoods.includes(neighborhood)) {
+                        neighborhoods.push(neighborhood);
+                    }
+                }
+            });
+        });
+
+        // Actualizar el contenedor
+        let content = '';
+        
+        if (streets.length > 0) {
+            content += `
+                <div class="mb-3">
+                    <h5 class="text-xs font-medium text-gray-700 mb-2 flex items-center">
+                        <i class="fas fa-road text-blue-500 mr-1"></i>
+                        Calles Principales
+                    </h5>
+                    <div class="space-y-1">
+                        ${streets.slice(0, 5).map(street => `
+                            <div class="bg-white rounded border px-2 py-1 text-xs text-gray-700 flex items-center">
+                                <i class="fas fa-minus text-gray-400 mr-2"></i>
+                                ${street}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (neighborhoods.length > 0) {
+            content += `
+                <div class="mb-3">
+                    <h5 class="text-xs font-medium text-gray-700 mb-2 flex items-center">
+                        <i class="fas fa-map-signs text-green-500 mr-1"></i>
+                        Zona
+                    </h5>
+                    <div class="bg-green-50 border border-green-200 rounded px-2 py-1 text-xs text-green-700">
+                        ${neighborhoods[0]}
+                    </div>
+                </div>
+            `;
+        }
+
+        streetsContainer.innerHTML = content || '<div class="text-xs text-gray-500 italic">No se encontraron calles cercanas</div>';
+    }
+
+    /**
+     * Actualiza información de lugares cercanos
+     * @param {Array} places - Lugares cercanos
+     * @param {string} seccion - ID de la sección
+     */
+    updateNearbyPlaces(places, seccion) {
+        const streetsContainer = document.getElementById('calles-cercanas-' + seccion);
+        if (!streetsContainer || places.length === 0) return;
+
+        let nearbyContent = `
+            <div class="mt-4 pt-3 border-t border-gray-200">
+                <h5 class="text-xs font-medium text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-map-marker text-purple-500 mr-1"></i>
+                    Referencias Cercanas
+                </h5>
+                <div class="space-y-1">
+                    ${places.map(place => `
+                        <div class="bg-purple-50 border border-purple-200 rounded px-2 py-1 text-xs text-purple-700 flex items-center">
+                            <i class="fas fa-circle text-purple-400 mr-2" style="font-size: 6px;"></i>
+                            <span class="truncate">${place.name}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        streetsContainer.innerHTML += nearbyContent;
+    }
+
+    /**
+     * Actualiza el panel cuando hay error al detectar calles
+     * @param {string} seccion - ID de la sección
+     */
+    updateStreetsError(seccion) {
+        const streetsContainer = document.getElementById('calles-cercanas-' + seccion);
+        if (streetsContainer) {
+            streetsContainer.innerHTML = `
+                <div class="text-xs text-amber-600 italic flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    No se pudo cargar información de calles
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Crea ventana de información elegante
+     * @param {string} direccion - Dirección original
+     * @param {Object} result - Resultado de geocodificación
+     * @returns {string} HTML del contenido
+     */
+    createElegantInfoWindow(direccion, result) {
+        const formattedAddress = result.formatted_address || direccion;
+        
+        return `
+            <div class="p-4 max-w-sm bg-white rounded-lg shadow-lg">
+                <div class="flex items-center mb-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-building text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h6 class="font-semibold text-gray-800 text-sm">Domicilio Empresarial</h6>
+                        <p class="text-xs text-gray-500">Ubicación verificada</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-3 mb-3">
+                    <p class="text-sm text-gray-700 leading-relaxed">${direccion}</p>
+                </div>
+                
+                ${formattedAddress !== direccion ? `
+                    <div class="mb-3">
+                        <p class="text-xs text-gray-500 mb-1">
+                            <i class="fas fa-map-pin mr-1"></i>
+                            <strong>Dirección encontrada:</strong>
+                        </p>
+                        <p class="text-xs text-gray-600 italic">${formattedAddress}</p>
+                    </div>
+                ` : ''}
+                
+                <div class="flex items-center justify-between pt-3 border-t border-gray-200">
+                    <div class="flex items-center text-xs text-green-600">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        <span>Geocodificado</span>
+                    </div>
+                    <button onclick="mapHandler.openInGoogleMaps('${formattedAddress}')" 
+                            class="text-xs bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1.5 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center">
+                        <i class="fas fa-external-link-alt mr-1"></i>Abrir Maps
+                    </button>
+                </div>
+            </div>
+        `;
     }
 
     /**
