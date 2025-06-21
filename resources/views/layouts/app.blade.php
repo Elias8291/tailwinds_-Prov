@@ -17,6 +17,11 @@
 
     <!-- Scripts -->
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Validador de formularios -->
+    <script src="{{ asset('js/validators/form-validator.js') }}" defer></script>
+    <script src="{{ asset('js/validators/tramite-validator.js') }}" defer></script>
+    <!-- Sistema de estados de carga -->
+    <script src="{{ asset('js/components/loading-states.js') }}" defer></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Styles -->

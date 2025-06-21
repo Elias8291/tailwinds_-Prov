@@ -71,7 +71,7 @@ class LoginController extends Controller
 
         // Redirigir al dashboard
         Log::info('Redirigiendo a dashboard');
-        return redirect()->route('dashboard');
+        return redirect()->intended(route('dashboard'));
     }
 
     /** Handle user login with email verification check */
@@ -125,6 +125,12 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
+            
+            Log::info('Login exitoso, procesando redirección', [
+                'user_id' => Auth::user()->id,
+                'intended_url' => session('url.intended', 'no_intended')
+            ]);
+            
             return $this->authenticated($request, Auth::user());
         }
 

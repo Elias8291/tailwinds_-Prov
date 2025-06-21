@@ -29,6 +29,81 @@
     position: relative;
     z-index: 1;
 }
+
+/* Estilos adicionales para el carrusel */
+#carouselContainer {
+    min-height: 400px;
+}
+
+.carousel-card {
+    min-height: 380px;
+}
+
+/* Animaciones suaves */
+#carouselContainer {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Responsivo para pantallas pequeñas */
+@media (max-width: 768px) {
+    #carouselContainer .flex-none {
+        width: 100% !important;
+        margin-right: 0 !important;
+    }
+    
+    #historyControls {
+        display: none !important;
+    }
+}
+
+/* Estilos para botones de navegación */
+.nav-button {
+    transition: all 0.2s ease-in-out;
+}
+
+.nav-button:hover:not(:disabled) {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Estilos para indicadores de estado */
+.status-dot {
+    position: relative;
+    display: inline-block;
+}
+
+.status-dot::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(180, 50, 94, 0.7);
+    }
+    
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(180, 50, 94, 0);
+    }
+    
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(180, 50, 94, 0);
+    }
+}
 </style>
 @endpush
 
@@ -403,6 +478,89 @@
                 </div>
             </div>
         </div>
+
+        <!-- Historial del RFC como Proveedor Section - Solo mostrar si hay registros -->
+        @if(auth()->user()->rfc)
+            @php
+                $rfc = auth()->user()->rfc;
+                $solicitantes = \App\Models\Solicitante::where('rfc', $rfc)->get();
+                $totalProveedores = 0;
+                foreach($solicitantes as $solicitante) {
+                    $totalProveedores += \App\Models\Proveedor::where('solicitante_id', $solicitante->id)->count();
+                }
+            @endphp
+            
+            @if($totalProveedores > 0)
+                <div class="max-w-4xl mx-auto mt-8">
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                                <div class="p-2 bg-[#B4325E]/10 rounded-lg mr-3">
+                                    <svg class="w-6 h-6 text-[#B4325E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                Historial del RFC como Proveedor
+                            </h3>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-500">RFC:</span>
+                                    <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+                                        {{ $rfc }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-500">Registros:</span>
+                                    <span class="bg-[#B4325E] text-white px-3 py-1 rounded-full text-sm font-medium">
+                                        {{ $totalProveedores }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-[#B4325E] mr-3"></div>
+                                <span class="text-sm text-gray-600">Cargando historial del RFC...</span>
+                            </div>
+                        </div>
+
+                        <!-- Controles del Carrusel -->
+                        <div class="mb-6 flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <h4 class="text-lg font-semibold text-gray-800">Todos los Registros PV</h4>
+                                <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                                    <i class="fas fa-arrow-left mr-1"></i>
+                                    <i class="fas fa-arrow-right mr-1"></i>
+                                    Navega con las flechas
+                                </span>
+                            </div>
+                            <div id="historyControls" class="flex items-center space-x-3">
+                                <button id="prevBtn" onclick="navigateCarousel('prev')" class="nav-button p-3 bg-white border border-gray-300 hover:bg-gray-50 rounded-full shadow-sm transition-all duration-200" disabled>
+                                    <i class="fas fa-chevron-left text-gray-600"></i>
+                                </button>
+                                <div class="flex items-center space-x-2 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
+                                    <span id="carouselIndicator" class="text-sm font-medium text-gray-700">1 / 1</span>
+                                    <i class="fas fa-history text-gray-400 text-xs"></i>
+                                </div>
+                                <button id="nextBtn" onclick="navigateCarousel('next')" class="nav-button p-3 bg-white border border-gray-300 hover:bg-gray-50 rounded-full shadow-sm transition-all duration-200" disabled>
+                                    <i class="fas fa-chevron-right text-gray-600"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Carrusel de Todos los PV -->
+                        <div class="relative">
+                            <div class="overflow-hidden">
+                                <div id="carouselContainer" class="flex transition-transform duration-300 ease-in-out">
+                                    <!-- Los cards se cargarán aquí dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        @endif
     </div>
 </div>
 
@@ -494,6 +652,365 @@ function closeErrorModal() {
     document.getElementById('errorModal').classList.remove('hidden');
     document.getElementById('errorModalMessage').textContent = 'La contraseña actual es incorrecta';
 @endif
+
+// Variables globales para el carrusel
+let currentIndex = 0;
+let historialProveedoresData = [];
+
+// Cargar historial del RFC como proveedor al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    @if(auth()->user()->rfc)
+        @php
+            $rfc = auth()->user()->rfc;
+            $solicitantes = \App\Models\Solicitante::where('rfc', $rfc)->get();
+            $totalProveedores = 0;
+            foreach($solicitantes as $solicitante) {
+                $totalProveedores += \App\Models\Proveedor::where('solicitante_id', $solicitante->id)->count();
+            }
+        @endphp
+        @if($totalProveedores > 0)
+            loadRfcProveedorHistoryFromDatabase();
+        @endif
+    @endif
+});
+
+// Función para cargar el historial del RFC desde la base de datos local
+function loadRfcProveedorHistoryFromDatabase() {
+    const loadingDiv = document.querySelector('.bg-blue-50');
+    
+    // Obtener los datos del historial desde el backend (renderizados en el HTML)
+    historialProveedoresData = [
+        @if(auth()->user()->rfc)
+            @php
+                // Buscar todos los solicitantes con este RFC
+                $rfc = auth()->user()->rfc;
+                $solicitantes = \App\Models\Solicitante::where('rfc', $rfc)->get();
+                $historialProveedores = collect();
+                
+                foreach($solicitantes as $solicitante) {
+                    $proveedores = \App\Models\Proveedor::where('solicitante_id', $solicitante->id)
+                        ->orderBy('fecha_registro', 'desc')
+                        ->get();
+                    $historialProveedores = $historialProveedores->merge($proveedores);
+                }
+                
+                // Ordenar por fecha de registro descendente
+                $historialProveedores = $historialProveedores->sortByDesc('fecha_registro');
+            @endphp
+            
+            @if($historialProveedores->count() > 0)
+                @foreach($historialProveedores as $proveedor)
+                {
+                    pv: '{{ $proveedor->pv }}',
+                    fecha_registro: '{{ $proveedor->fecha_registro }}',
+                    fecha_vencimiento: '{{ $proveedor->fecha_vencimiento }}',
+                    estado: '{{ $proveedor->estado }}',
+                    observaciones: '{{ $proveedor->observaciones ?? "" }}',
+                    solicitante_nombre: '{{ $proveedor->solicitante->nombre_completo ?? $proveedor->solicitante->razon_social ?? "Sin nombre" }}',
+                    tipo_persona: '{{ $proveedor->solicitante->tipo_persona }}',
+                    rfc: '{{ $proveedor->solicitante->rfc }}',
+                    created_at: '{{ $proveedor->created_at }}',
+                    updated_at: '{{ $proveedor->updated_at }}'
+                }@if(!$loop->last),@endif
+                @endforeach
+            @endif
+        @endif
+    ];
+    
+    if (loadingDiv) {
+        loadingDiv.style.display = 'none';
+    }
+    
+    // Cargar contenido en el carrusel
+    loadCarouselView();
+    updateCarouselControls();
+}
+
+// Función para generar el HTML de un card de proveedor para el carrusel
+function generateProveedorCard(proveedor) {
+    const fechaRegistro = proveedor.fecha_registro ? new Date(proveedor.fecha_registro) : null;
+    const fechaVencimiento = proveedor.fecha_vencimiento ? new Date(proveedor.fecha_vencimiento) : null;
+    const tiempoRestante = calcularTiempoRestanteProveedor(proveedor.fecha_vencimiento);
+    const estadoInfo = determinarEstadoProveedorYClases(proveedor.estado || (tiempoRestante?.vencido ? 'Inactivo' : 'Activo'));
+    
+    let tipoInscripcion = 'Inscripción como Proveedor';
+    if (fechaRegistro) {
+        const añoRegistro = fechaRegistro.getFullYear();
+        tipoInscripcion = `Inscripción ${añoRegistro}`;
+    }
+
+    return `
+        <div class="flex-none w-80 mr-6 card-animation">
+            <div class="bg-white rounded-xl border ${estadoInfo.border} shadow-lg carousel-card ${estadoInfo.hover} h-full">
+                <!-- Header del card -->
+                <div class="p-4 gradient-header rounded-t-xl border-b">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 ${estadoInfo.dot} rounded-full status-dot"></div>
+                            <span class="font-bold text-gray-800">PV: ${proveedor.pv}</span>
+                        </div>
+                        <span class="px-3 py-1 text-xs font-medium rounded-full ${estadoInfo.badge}">
+                            ${proveedor.estado || 'Sin estado'}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Contenido del card -->
+                <div class="p-4 space-y-4">
+                    <div>
+                        <h4 class="font-bold text-gray-900 text-lg mb-2">${tipoInscripcion}</h4>
+                        <p class="text-sm text-gray-600">
+                            RFC ${proveedor.rfc} - ${proveedor.tipo_persona === 'Física' ? 'Persona Física' : 'Persona Moral'}
+                        </p>
+                        <p class="text-sm text-gray-800 font-medium mt-1">
+                            ${proveedor.solicitante_nombre}
+                        </p>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">Fecha de registro:</span>
+                            <span class="font-medium">${fechaRegistro ? fechaRegistro.toLocaleDateString('es-MX') : 'N/A'}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">Vencimiento:</span>
+                            <span class="font-medium">${fechaVencimiento ? fechaVencimiento.toLocaleDateString('es-MX') : 'N/A'}</span>
+                        </div>
+                    </div>
+                    
+                    ${tiempoRestante ? `
+                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <p class="text-xs font-medium text-gray-700 mb-1">Estado de vigencia:</p>
+                            <p class="text-sm ${tiempoRestante.clase} font-medium">
+                                ${tiempoRestante.texto}
+                            </p>
+                        </div>
+                    ` : ''}
+                    
+                    ${proveedor.observaciones ? `
+                        <div class="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                            <p class="text-xs font-medium text-gray-700 mb-1">Observaciones:</p>
+                            <p class="text-xs text-gray-600">${proveedor.observaciones}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <button onclick="showProveedorInscripcionDetails('${proveedor.pv}')" 
+                            class="w-full bg-gradient-to-r from-[#B4325E] to-[#93264B] hover:from-[#93264B] hover:to-[#B4325E] text-white py-2 px-4 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
+                        <i class="fas fa-eye mr-2"></i>
+                        Ver Detalles Completos
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Función para cargar el carrusel de proveedores
+function loadCarouselView() {
+    const carouselContainer = document.getElementById('carouselContainer');
+    
+    if (historialProveedoresData.length > 0) {
+        carouselContainer.innerHTML = historialProveedoresData.map(proveedor => 
+            generateProveedorCard(proveedor)
+        ).join('');
+    } else {
+        carouselContainer.innerHTML = `
+            <div class="flex-none w-full">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-lg p-8 text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gray-100 mb-4">
+                        <i class="fas fa-history text-gray-400 text-2xl"></i>
+                    </div>
+                    <h4 class="text-xl font-medium text-gray-900 mb-2">Sin registros PV</h4>
+                    <p class="text-gray-500 mb-4">
+                        Este RFC ({{ auth()->user()->rfc }}) no tiene registros como proveedor en el sistema.
+                    </p>
+                    <p class="text-sm text-gray-400">
+                        Si consideras que esto es un error, contacta al administrador del sistema.
+                    </p>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Funciones de navegación del carrusel
+function navigateCarousel(direction) {
+    const container = document.getElementById('carouselContainer');
+    const cardWidth = 320; // 80 (w-80) * 4 (rem base) = 320px + margin
+    
+    if (direction === 'next' && currentIndex < historialProveedoresData.length - 1) {
+        currentIndex++;
+    } else if (direction === 'prev' && currentIndex > 0) {
+        currentIndex--;
+    }
+    
+    const translateX = -currentIndex * cardWidth;
+    container.style.transform = `translateX(${translateX}px)`;
+    updateCarouselControls();
+}
+
+// Actualizar controles del carrusel
+function updateCarouselControls() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const indicator = document.getElementById('carouselIndicator');
+    
+    if (historialProveedoresData.length === 0) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        indicator.textContent = '0 / 0';
+        return;
+    }
+    
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.disabled = currentIndex === historialProveedoresData.length - 1;
+    
+    indicator.textContent = `${currentIndex + 1} / ${historialProveedoresData.length}`;
+    
+    // Actualizar estilos de los botones
+    prevBtn.className = `p-2 rounded-full transition-colors duration-200 ${
+        prevBtn.disabled 
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+            : 'bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer'
+    }`;
+    
+    nextBtn.className = `p-2 rounded-full transition-colors duration-200 ${
+        nextBtn.disabled 
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+            : 'bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer'
+    }`;
+}
+
+
+
+function calcularTiempoRestanteProveedor(fechaVencimiento) {
+    if (!fechaVencimiento) return null;
+
+    const ahora = new Date();
+    const vencimiento = new Date(fechaVencimiento);
+    const diferencia = vencimiento - ahora;
+
+    // Si ya venció
+    if (diferencia < 0) {
+        const tiempoVencido = Math.abs(diferencia);
+        const diasVencidos = Math.floor(tiempoVencido / (1000 * 60 * 60 * 24));
+        return {
+            texto: `Vencido hace ${diasVencidos} días`,
+            clase: 'text-red-600',
+            vencido: true,
+            detalle: `Fecha de vencimiento: ${vencimiento.toLocaleDateString('es-MX', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            })}`
+        };
+    }
+
+    // Calcular tiempo restante
+    const milisegundosEnHora = 1000 * 60 * 60;
+    const milisegundosEnDia = milisegundosEnHora * 24;
+    const milisegundosEnMes = milisegundosEnDia * 30.44;
+
+    const mesesTotales = Math.floor(diferencia / milisegundosEnMes);
+    const restoDespuesMeses = diferencia % milisegundosEnMes;
+    const diasTotales = Math.floor(restoDespuesMeses / milisegundosEnDia);
+    const restoDespuesDias = restoDespuesMeses % milisegundosEnDia;
+    const horasTotales = Math.floor(restoDespuesDias / milisegundosEnHora);
+
+    // Determinar clase de color
+    let clase = '';
+    if (mesesTotales > 3) {
+        clase = 'text-green-600';
+    } else if (mesesTotales > 0 || diasTotales > 15) {
+        clase = 'text-yellow-600';
+    } else {
+        clase = 'text-red-600';
+    }
+
+    const partesMensaje = [];
+    partesMensaje.push(`${mesesTotales} ${mesesTotales === 1 ? 'mes' : 'meses'}`);
+    partesMensaje.push(`${diasTotales} ${diasTotales === 1 ? 'día' : 'días'}`);
+    partesMensaje.push(`${horasTotales} ${horasTotales === 1 ? 'hora' : 'horas'}`);
+
+    return {
+        texto: `Tiempo para vencer: ${partesMensaje.join(', ')}`,
+        clase,
+        vencido: false,
+        detalle: `Fecha de vencimiento: ${vencimiento.toLocaleDateString('es-MX', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        })} a las ${vencimiento.toLocaleTimeString('es-MX', {
+            hour: '2-digit',
+            minute: '2-digit'
+        })}`
+    };
+}
+
+function determinarEstadoProveedorYClases(estado) {
+    const clases = {
+        'Activo': {
+            dot: 'bg-green-500',
+            badge: 'bg-green-100 text-green-800',
+            border: 'border-green-200',
+            hover: 'hover:border-green-300',
+            textColor: 'text-green-600'
+        },
+        'Vigente': {
+            dot: 'bg-green-500',
+            badge: 'bg-green-100 text-green-800',
+            border: 'border-green-200',
+            hover: 'hover:border-green-300',
+            textColor: 'text-green-600'
+        },
+        'Pendiente Renovación': {
+            dot: 'bg-yellow-500',
+            badge: 'bg-yellow-100 text-yellow-800',
+            border: 'border-yellow-200',
+            hover: 'hover:border-yellow-300',
+            textColor: 'text-yellow-600'
+        },
+        'Por Vencer': {
+            dot: 'bg-yellow-500',
+            badge: 'bg-yellow-100 text-yellow-800',
+            border: 'border-yellow-200',
+            hover: 'hover:border-yellow-300',
+            textColor: 'text-yellow-600'
+        },
+        'Vencido': {
+            dot: 'bg-red-500',
+            badge: 'bg-red-100 text-red-800',
+            border: 'border-red-200',
+            hover: 'hover:border-red-300',
+            textColor: 'text-red-600'
+        },
+        'Inactivo': {
+            dot: 'bg-red-500',
+            badge: 'bg-red-100 text-red-800',
+            border: 'border-red-200',
+            hover: 'hover:border-red-300',
+            textColor: 'text-red-600'
+        },
+        'Suspendido': {
+            dot: 'bg-red-500',
+            badge: 'bg-red-100 text-red-800',
+            border: 'border-red-200',
+            hover: 'hover:border-red-300',
+            textColor: 'text-red-600'
+        }
+    };
+
+    return clases[estado] || clases['Inactivo'];
+}
+
+// Función para mostrar detalles de una inscripción específica como proveedor
+function showProveedorInscripcionDetails(pv) {
+    console.log('Mostrar detalles del proveedor PV:', pv);
+    // Redirigir a la página de detalles del proveedor
+    window.location.href = `/proveedores/${pv}`;
+}
 </script>
 @endpush
 @endsection 
