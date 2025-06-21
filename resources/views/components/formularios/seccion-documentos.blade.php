@@ -579,8 +579,9 @@ function documentosData() {
                     this.mostrarExito('¡Trámite enviado correctamente! Redirigiendo...');
                     
                     // Esperar un momento para que se vea el mensaje y luego redirigir
+                    const redirectUrl = data.redirect_url || `/tramites-solicitante/estado/${this.tramiteId}`;
                     setTimeout(() => {
-                        window.location.href = `/tramites-solicitante/estado/${this.tramiteId}`;
+                        window.location.href = redirectUrl;
                     }, 2000);
                 } else {
                     this.mostrarError(data.message || 'Error al finalizar el trámite');

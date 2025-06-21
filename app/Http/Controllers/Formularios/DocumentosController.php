@@ -287,12 +287,14 @@ class DocumentosController extends Controller
 
         // Si se han subido todos los documentos requeridos, actualizar progreso
         if ($documentosSubidos >= $totalDocumentosRequeridos) {
-            // Actualizar progreso del trámite - Sección 6: Documentos
-            $tramite->actualizarProgresoSeccion(6);
+            // Actualizar progreso según el tipo de persona
+            $progresoFinal = $tipoPersona === 'Física' ? 3 : 6;
+            $tramite->actualizarProgresoSeccion($progresoFinal);
             
-            Log::info('✅ Progreso actualizado a 6 - Documentos completados', [
+            Log::info('✅ Progreso actualizado - Documentos completados', [
                 'tramite_id' => $tramite->id,
-                'tipo_persona' => $tipoPersona
+                'tipo_persona' => $tipoPersona,
+                'progreso_final' => $progresoFinal
             ]);
         }
     }
@@ -358,10 +360,11 @@ class DocumentosController extends Controller
                 ], 400);
             }
 
-            // Actualizar el trámite
+            // Actualizar el trámite según el tipo de persona
+            $progresoFinal = $tipoPersona === 'Física' ? 3 : 6;
             $tramite->update([
                 'estado' => 'En Revision',
-                'progreso_tramite' => 6,
+                'progreso_tramite' => $progresoFinal,
                 'fecha_finalizacion' => now()
             ]);
 
@@ -376,7 +379,8 @@ class DocumentosController extends Controller
                 'success' => true,
                 'message' => 'Trámite enviado correctamente para revisión',
                 'tramite_id' => $tramite->id,
-                'estado' => $tramite->estado
+                'estado' => $tramite->estado,
+                'redirect_url' => route('tramites.solicitante.estado', $tramite->id)
             ]);
 
         } catch (\Exception $e) {
