@@ -110,17 +110,17 @@
         <!-- Secciones de Revisión -->
         <div class="space-y-6">
             <!-- 01. Datos Generales -->
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-                <div class="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-gray-700 flex items-center">
-                            <span class="bg-[#9d2449] text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold mr-3">01</span>
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 mb-8">
+                <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-8 py-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h2 class="text-2xl font-bold text-white flex items-center">
+                            <span class="bg-white/20 text-white rounded-full w-12 h-12 flex items-center justify-center text-base font-bold mr-4">01</span>
                             <div class="flex items-center">
-                                <i class="fas fa-user-circle mr-2 text-lg text-[#9d2449]"></i>
+                                <i class="fas fa-user-circle mr-3 text-2xl"></i>
                                 <span>Datos Generales</span>
                             </div>
                         </h2>
-                        <div class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-4">
                             @php
                                 $estado = $revisionesExistentes[1]['estado'] ?? 'pendiente';
                                 $statusClass = $estado === 'aprobado' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
@@ -128,14 +128,14 @@
                                 $iconClass = $estado === 'aprobado' ? 'fas fa-check-circle text-emerald-500' : 
                                             ($estado === 'rechazado' ? 'fas fa-times-circle text-rose-500' : 'fas fa-clock text-amber-500');
                             @endphp
-                            <div class="flex items-center px-2 py-1 rounded-full border text-xs font-medium {{ $statusClass }}">
-                                <i class="{{ $iconClass }} mr-1 text-xs"></i>
+                            <div class="flex items-center px-4 py-2 rounded-full border text-sm font-medium {{ $statusClass }}">
+                                <i class="{{ $iconClass }} mr-2 text-lg"></i>
                                 <span>{{ ucfirst($estado) }}</span>
                             </div>
                             
                             <!-- Documentos de la sección -->
                             @if(isset($documentosPorSeccion['datos_generales']) && count($documentosPorSeccion['datos_generales']) > 0)
-                                <div class="flex items-center space-x-1">
+                                <div class="flex items-center space-x-3">
                                     @foreach($documentosPorSeccion['datos_generales'] as $documento)
                                         <div class="tooltip-container tooltip-pdf">
                                         <button onclick="mostrarDocumento('datos_generales', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
@@ -153,10 +153,10 @@
                                             </div>
                                         </div>
                                     @endforeach
-                                    <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['datos_generales']) }} doc(s)</span>
+                                    <span class="text-sm font-medium text-gray-600">{{ count($documentosPorSeccion['datos_generales']) }} doc(s)</span>
                                 </div>
                             @else
-                                <span class="text-xs text-gray-400 italic">Sin documentos</span>
+                                <span class="text-sm text-gray-400 italic">Sin documentos</span>
                             @endif
                         </div>
                     </div>
@@ -165,7 +165,7 @@
                 <!-- Contenido dinámico: Formulario completo o dividido -->
                 <div id="contenido-datos_generales">
                     <!-- Inicialmente solo el formulario -->
-                    <div class="p-4">
+                    <div class="p-8">
                         @include('components.formularios.seccion-datos-generales', [
                             'datosTramite' => $datosTramite,
                             'datosSolicitante' => $tramite->solicitante ? [
@@ -180,26 +180,26 @@
                         ])
                         
                         <!-- Panel de revisión compacto -->
-                        <div class="mt-6 pt-4 border-t border-gray-200">
-                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                                    <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xs"></i>
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 shadow-sm">
+                                <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                    <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xl"></i>
                                     Revisión
                                 </h4>
                                 
                                 <!-- Formularios compactos -->
-                                <div class="flex flex-col sm:flex-row gap-3">
+                                <div class="flex flex-col sm:flex-row gap-6">
                                     <!-- Formulario de Aprobar -->
                                     <form method="POST" action="{{ route('revision.seccion.aprobar', [$tramite->id, 1]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                        <div class="space-y-4">
                                             <textarea name="comentario"
                                                       placeholder="Comentarios opcionales..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-3 py-2 leading-relaxed" 
+                                                      class="w-full text-sm rounded-xl border-gray-300 focus:border-green-400 focus:ring-2 focus:ring-green-200 resize-none px-4 py-3 leading-relaxed shadow-sm" 
                                                       rows="3">{{ $revisionesExistentes[1]['comentario'] ?? '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-check mr-1"></i>Aprobar
+                                                    class="w-full px-4 py-3 text-sm font-medium bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all duration-150 flex items-center justify-center shadow-sm hover:shadow-md">
+                                                <i class="fas fa-check mr-2 text-base"></i>Aprobar
                                             </button>
                                         </div>
                                     </form>
@@ -207,14 +207,14 @@
                                     <!-- Formulario de Rechazar -->
                                     <form method="POST" action="{{ route('revision.seccion.rechazar', [$tramite->id, 1]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                        <div class="space-y-4">
                                             <textarea name="comentario"
                                                       placeholder="Motivo del rechazo (requerido)..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-3 py-2 leading-relaxed" 
+                                                      class="w-full text-sm rounded-xl border-gray-300 focus:border-red-400 focus:ring-2 focus:ring-red-200 resize-none px-4 py-3 leading-relaxed shadow-sm" 
                                                       rows="3" required>{{ $estado === 'rechazado' ? ($revisionesExistentes[1]['comentario'] ?? '') : '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-times mr-1"></i>Rechazar
+                                                    class="w-full px-4 py-3 text-sm font-medium bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-all duration-150 flex items-center justify-center shadow-sm hover:shadow-md">
+                                                <i class="fas fa-times mr-2 text-base"></i>Rechazar
                                             </button>
                                         </div>
                                     </form>
@@ -226,17 +226,17 @@
             </div>
 
             <!-- 02. Domicilio -->
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-                <div class="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-gray-700 flex items-center">
-                            <span class="bg-[#9d2449] text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold mr-3">02</span>
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 mb-8">
+                <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-8 py-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h2 class="text-2xl font-bold text-white flex items-center">
+                            <span class="bg-white/20 text-white rounded-full w-12 h-12 flex items-center justify-center text-base font-bold mr-4">02</span>
                             <div class="flex items-center">
-                                <i class="fas fa-map-marker-alt mr-2 text-lg text-[#9d2449]"></i>
+                                <i class="fas fa-map-marker-alt mr-3 text-2xl"></i>
                                 <span>Domicilio</span>
                             </div>
                         </h2>
-                        <div class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-4">
                             @php
                                 $estado = $revisionesExistentes[2]['estado'] ?? 'pendiente';
                                 $statusClass = $estado === 'aprobado' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
@@ -244,15 +244,15 @@
                                 $iconClass = $estado === 'aprobado' ? 'fas fa-check-circle text-emerald-500' : 
                                             ($estado === 'rechazado' ? 'fas fa-times-circle text-rose-500' : 'fas fa-clock text-amber-500');
                             @endphp
-                            <div class="flex items-center px-2 py-1 rounded-full border text-xs font-medium {{ $statusClass }}">
-                                <i class="{{ $iconClass }} mr-1 text-xs"></i>
+                            <div class="flex items-center px-4 py-2 rounded-full border text-sm font-medium {{ $statusClass }}">
+                                <i class="{{ $iconClass }} mr-2 text-lg"></i>
                                 <span>{{ ucfirst($estado) }}</span>
                             </div>
                             
                             <!-- Documentos de la sección y Mapa -->
-                            <div class="flex items-center space-x-3">
+                            <div class="flex items-center space-x-4">
                                 @if(isset($documentosPorSeccion['domicilio']) && count($documentosPorSeccion['domicilio']) > 0)
-                                    <div class="flex items-center space-x-1">
+                                    <div class="flex items-center space-x-3">
                                         @foreach($documentosPorSeccion['domicilio'] as $documento)
                                             <div class="tooltip-container tooltip-general">
                                             <button onclick="mostrarDocumento('domicilio', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
@@ -270,10 +270,10 @@
                                                 </div>
                                             </div>
                                         @endforeach
-                                        <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['domicilio']) }} doc(s)</span>
+                                        <span class="text-sm font-medium text-gray-600">{{ count($documentosPorSeccion['domicilio']) }} doc(s)</span>
                                     </div>
                                 @else
-                                    <span class="text-xs text-gray-400 italic">Sin documentos</span>
+                                    <span class="text-sm text-gray-400 italic">Sin documentos</span>
                                 @endif
                                 
                                 <!-- Botón del Mapa -->
@@ -296,33 +296,33 @@
                 <!-- Contenido dinámico: Formulario completo o dividido -->
                 <div id="contenido-domicilio">
                     <!-- Inicialmente solo el formulario -->
-                    <div class="p-4">
+                    <div class="p-8">
                         @include('components.formularios.seccion-domicilio', [
                             'datosDomicilio' => $datosDomicilio,
                             'readonly' => true
                         ])
                         
                         <!-- Panel de revisión compacto -->
-                        <div class="mt-6 pt-4 border-t border-gray-200">
-                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                                    <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xs"></i>
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 shadow-sm">
+                                <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                    <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xl"></i>
                                     Revisión
                                 </h4>
                                 
                                 <!-- Formularios compactos -->
-                                <div class="flex flex-col sm:flex-row gap-3">
+                                <div class="flex flex-col sm:flex-row gap-6">
                                     <!-- Formulario de Aprobar -->
                                     <form method="POST" action="{{ route('revision.seccion.aprobar', [$tramite->id, 2]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                        <div class="space-y-4">
                                             <textarea name="comentario"
                                                       placeholder="Comentarios opcionales..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-3 py-2 leading-relaxed" 
+                                                      class="w-full text-sm rounded-xl border-gray-300 focus:border-green-400 focus:ring-2 focus:ring-green-200 resize-none px-4 py-3 leading-relaxed shadow-sm" 
                                                       rows="3">{{ $revisionesExistentes[2]['comentario'] ?? '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-check mr-1"></i>Aprobar
+                                                    class="w-full px-4 py-3 text-sm font-medium bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all duration-150 flex items-center justify-center shadow-sm hover:shadow-md">
+                                                <i class="fas fa-check mr-2 text-base"></i>Aprobar
                                             </button>
                                         </div>
                                     </form>
@@ -330,14 +330,14 @@
                                     <!-- Formulario de Rechazar -->
                                     <form method="POST" action="{{ route('revision.seccion.rechazar', [$tramite->id, 2]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                        <div class="space-y-4">
                                             <textarea name="comentario"
                                                       placeholder="Motivo del rechazo (requerido)..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-3 py-2 leading-relaxed" 
+                                                      class="w-full text-sm rounded-xl border-gray-300 focus:border-red-400 focus:ring-2 focus:ring-red-200 resize-none px-4 py-3 leading-relaxed shadow-sm" 
                                                       rows="3" required>{{ $estado === 'rechazado' ? ($revisionesExistentes[2]['comentario'] ?? '') : '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-times mr-1"></i>Rechazar
+                                                    class="w-full px-4 py-3 text-sm font-medium bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-all duration-150 flex items-center justify-center shadow-sm hover:shadow-md">
+                                                <i class="fas fa-times mr-2 text-base"></i>Rechazar
                                             </button>
                                         </div>
                                     </form>
@@ -825,69 +825,76 @@
         </div>
 
         <!-- Panel de Comentarios Generales de Revisión -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 mt-6">
-            <div class="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3">
-                <h3 class="text-lg font-semibold text-gray-700 flex items-center">
-                    <span class="bg-[#9d2449] text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold mr-3">
-                        <i class="fas fa-comments"></i>
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 mt-8">
+            <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-8 py-5">
+                <h3 class="text-2xl font-bold text-white flex items-center">
+                    <span class="bg-white/20 text-white rounded-full w-12 h-12 flex items-center justify-center text-base font-bold mr-4">
+                        <i class="fas fa-comments text-xl"></i>
                     </span>
                     <span>Comentarios Generales</span>
                 </h3>
             </div>
             
             <!-- Panel de revisión compacto -->
-            <div class="mt-6 pt-4 border-t border-gray-200">
-                <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4">
-                    <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                        <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xs"></i>
+            <div class="p-8">
+                <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 shadow-sm">
+                    <h4 class="text-lg font-semibold text-gray-700 mb-6 flex items-center">
+                        <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xl"></i>
                         Comentarios Existentes
                     </h4>
                     
                     <!-- Comentarios existentes -->
-                    <div class="mb-4">
+                    <div class="mb-8">
                         @if(isset($comentariosGenerales) && count($comentariosGenerales) > 0)
-                            <div class="space-y-2">
+                            <div class="space-y-4">
                                 @foreach($comentariosGenerales as $comentario)
-                                    <div class="bg-white rounded-lg p-2 shadow-sm border border-gray-200">
-                                        <div class="flex items-start justify-between mb-1">
-                                <div class="flex items-center">
-                                                <div class="bg-[#9d2449] rounded-full w-5 h-5 flex items-center justify-center mr-2">
-                                                    <i class="fas fa-user text-white text-xs"></i>
-                                    </div>
-                                    <div>
-                                                    <p class="text-xs font-medium text-gray-900">{{ $comentario['autor'] }}</p>
+                                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
+                                        <div class="flex items-start justify-between mb-3">
+                                            <div class="flex items-center">
+                                                <div class="bg-[#9d2449] rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                                                    <i class="fas fa-user text-white text-lg"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-semibold text-gray-900">{{ $comentario['autor'] }}</p>
                                                     <p class="text-xs text-gray-500">{{ $comentario['fecha'] }}</p>
+                                                </div>
+                                            </div>
+                                            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">General</span>
+                                        </div>
+                                        <div class="bg-gray-50 rounded-lg p-3">
+                                            <p class="text-gray-700 text-sm leading-relaxed">{{ trim($comentario['texto']) }}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">General</span>
-                            </div>
-                                        <p class="text-gray-700 text-xs">{{ trim($comentario['texto']) }}</p>
-                        </div>
                                 @endforeach
                             </div>
                         @else
-                            <div class="flex items-center justify-center h-16 bg-gray-50 rounded-lg">
+                            <div class="flex items-center justify-center h-32 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
                                 <div class="text-center text-gray-400">
-                                    <i class="fas fa-comment-slash text-lg mb-1"></i>
-                                    <p class="text-xs">No hay comentarios</p>
+                                    <i class="fas fa-comment-slash text-3xl mb-2"></i>
+                                    <p class="text-sm font-medium">No hay comentarios</p>
                                 </div>
                             </div>
                         @endif
-                </div>
+                    </div>
                 
                     <!-- Formulario compacto -->
-                    <form method="POST" action="{{ route('revision.agregar-comentario', $tramite->id) }}" class="space-y-2">
+                    <form method="POST" action="{{ route('revision.agregar-comentario', $tramite->id) }}" class="space-y-4">
                         @csrf
-                        <textarea name="comentario_general" rows="2" required
-                                  class="w-full text-xs rounded-lg border-gray-300 focus:border-[#9d2449] focus:ring-1 focus:ring-[#9d2449]/20 resize-none"
-                                  placeholder="Nuevo comentario general..."></textarea>
+                        <div class="relative">
+                            <textarea name="comentario_general" rows="3" required
+                                    class="w-full text-sm rounded-xl border-gray-300 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 resize-none px-4 py-3 leading-relaxed shadow-sm"
+                                    placeholder="Escribe un nuevo comentario general..."></textarea>
+                            <div class="absolute bottom-3 right-3 text-xs text-gray-400">
+                                <i class="fas fa-pencil-alt"></i>
+                            </div>
+                        </div>
                         
                         <div class="flex justify-end">
                             <button type="submit" 
-                                    class="px-3 py-2 text-xs font-medium bg-[#9d2449] hover:bg-[#7a1d37] text-white rounded-lg transition-colors duration-150 flex items-center">
-                                <i class="fas fa-paper-plane mr-1 text-xs"></i>Agregar
-                        </button>
-                    </div>
+                                    class="px-6 py-3 text-sm font-medium bg-[#9d2449] hover:bg-[#7a1d37] text-white rounded-xl transition-all duration-200 flex items-center shadow-sm hover:shadow-md">
+                                <i class="fas fa-paper-plane mr-2 text-base"></i>Agregar Comentario
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
