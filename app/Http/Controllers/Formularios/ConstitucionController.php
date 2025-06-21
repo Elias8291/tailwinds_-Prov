@@ -90,8 +90,8 @@ class ConstitucionController extends Controller
             $detalleTramite->save();
         });
 
-        // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 3: Constitución
-            $tramite->actualizarProgresoSeccion(3);
+        // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 3: Constitución → 4
+            $tramite->actualizarProgresoSeccion(4);
 
             return true;
     }

@@ -159,8 +159,12 @@ class DireccionController extends Controller
             // Guardar los datos usando el método de la clase
             $this->guardar($request, $tramite);
 
+            // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 2: Domicilio → 3
+            $tramite->actualizarProgresoSeccion(3);
+
             Log::info('✅ Domicilio guardado exitosamente', [
-                'tramite_id' => $tramite->id
+                'tramite_id' => $tramite->id,
+                'progreso_actualizado' => 3
             ]);
 
             return response()->json([

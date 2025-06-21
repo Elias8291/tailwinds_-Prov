@@ -37,8 +37,8 @@ class ApoderadoLegalController extends Controller
             $detalleTramite->save();
         });
 
-        // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 5: Apoderado Legal
-            $tramite->actualizarProgresoSeccion(5);
+        // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 5: Apoderado Legal → 6
+            $tramite->actualizarProgresoSeccion(6);
 
             return true;
     }
@@ -97,8 +97,8 @@ class ApoderadoLegalController extends Controller
                 ]);
             });
 
-            // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 5: Apoderado Legal
-            $tramite->actualizarProgresoSeccion(5);
+            // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 5: Apoderado Legal → 6
+            $tramite->actualizarProgresoSeccion(6);
 
             Log::info('✅ Apoderado legal guardado exitosamente para tramite_id: ' . $validated['tramite_id']);
 

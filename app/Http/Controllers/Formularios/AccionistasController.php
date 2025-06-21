@@ -31,8 +31,8 @@ class AccionistasController extends Controller
             $this->validateTotalPorcentaje($totalPorcentaje, $tramite);
         });
 
-        // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 4: Accionistas
-            $tramite->actualizarProgresoSeccion(4);
+        // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 4: Accionistas → 5
+            $tramite->actualizarProgresoSeccion(5);
 
             return true;
     }
@@ -102,8 +102,8 @@ class AccionistasController extends Controller
                 Log::info('Total porcentaje accionistas: ' . $totalPorcentaje . '%');
             });
 
-            // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 4: Accionistas
-            $tramite->actualizarProgresoSeccion(4);
+            // Actualizar progreso del trámite DESPUÉS de confirmar la transacción - Sección 4: Accionistas → 5
+            $tramite->actualizarProgresoSeccion(5);
 
             Log::info('✅ Accionistas guardados exitosamente para tramite_id: ' . $validated['tramite_id']);
 
