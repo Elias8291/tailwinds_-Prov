@@ -21,14 +21,8 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                // Si el usuario ya está autenticado, redirigir al dashboard
                 return redirect(RouteServiceProvider::HOME);
-            }
-        }
-
-        // Siempre redirigir a welcome si estamos en login o registro
-        if ($request->is('iniciar-sesion') || $request->is('registro')) {
-            if ($request->isMethod('get')) {
-                return redirect()->route('welcome');
             }
         }
 

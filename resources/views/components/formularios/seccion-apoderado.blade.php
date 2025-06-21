@@ -186,6 +186,7 @@
                                    class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
                                    placeholder="Ej: Lic. Juan Pérez González"
                                maxlength="100"
+                               aria-label="Nombre del apoderado"
                                required>
                         </div>
                     </div>
@@ -204,6 +205,7 @@
                                    class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
                                    placeholder="Ej: 12345"
                                maxlength="15"
+                               aria-label="Número de escritura"
                                required>
                         </div>
                     </div>
@@ -222,6 +224,7 @@
                                    class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
                                    placeholder="Ej: Lic. María López Ramírez"
                                maxlength="100"
+                               aria-label="Nombre del notario"
                                required>
                         </div>
                     </div>
@@ -240,6 +243,7 @@
                                    class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
                                    placeholder="Ej: 123"
                                maxlength="10"
+                               aria-label="Número del notario"
                                required>
                         </div>
                     </div>
@@ -255,6 +259,7 @@
                                 name="entidad_federativa"
                                 x-model="entidadFederativa"
                                 class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40 appearance-none"
+                                aria-label="Seleccionar entidad federativa"
                                 required>
                                 <option value="">Seleccione un estado</option>
                             <option value="1">Aguascalientes</option>
@@ -308,6 +313,7 @@
                                name="fecha_escritura"
                                x-model="fechaEscritura"
                                    class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
+                               aria-label="Fecha de escritura"
                                required>
                         </div>
                     </div>
@@ -335,6 +341,7 @@
                                        class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
                                        placeholder="Ej: 987654"
                                    maxlength="20"
+                                   aria-label="Número de registro"
                                    required>
                             </div>
                         </div>
@@ -351,6 +358,7 @@
                                    name="fecha_inscripcion"
                                    x-model="fechaInscripcion"
                                        class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-300 hover:border-[#4F46E5]/40"
+                                   aria-label="Fecha de inscripción"
                                    required>
                         </div>
                     </div>

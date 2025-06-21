@@ -138,16 +138,18 @@
                                 <div class="flex items-center space-x-1">
                                     @foreach($documentosPorSeccion['datos_generales'] as $documento)
                                         <div class="tooltip-container tooltip-pdf">
-                                            <button onclick="mostrarDocumento('datos_generales', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   class="documento-btn bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg border border-blue-300">
-                                                <i class="fas fa-file-pdf text-sm"></i>
-                                            </button>
+                                        <button onclick="mostrarDocumento('datos_generales', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   class="documento-btn bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg border border-blue-300"
+                                                   data-doc-seccion="datos_generales" 
+                                                   data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
+                                                   data-doc-nombre="{{ $documento['nombre'] }}"
+                                                   oncontextmenu="seleccionarParaComparar(event, 'datos_generales', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
+                                            <i class="fas fa-file-pdf text-sm"></i>
+                                        </button>
                                             <div class="custom-tooltip">
                                                 <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                @if(isset($documento['descripcion']) && $documento['descripcion'])
-                                                    <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
-                                                @endif
-                                                <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                                <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -253,16 +255,18 @@
                                     <div class="flex items-center space-x-1">
                                         @foreach($documentosPorSeccion['domicilio'] as $documento)
                                             <div class="tooltip-container tooltip-general">
-                                                <button onclick="mostrarDocumento('domicilio', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                       class="documento-btn bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-lg border border-green-300">
-                                                    <i class="fas fa-file-pdf text-sm"></i>
-                                                </button>
+                                            <button onclick="mostrarDocumento('domicilio', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                       class="documento-btn bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-lg border border-green-300"
+                                                       data-doc-seccion="domicilio" 
+                                                       data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
+                                                       data-doc-nombre="{{ $documento['nombre'] }}"
+                                                       oncontextmenu="seleccionarParaComparar(event, 'domicilio', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                       title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
+                                                <i class="fas fa-file-pdf text-sm"></i>
+                                            </button>
                                                 <div class="custom-tooltip">
                                                     <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                    @if(isset($documento['descripcion']) && $documento['descripcion'])
-                                                        <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
-                                                    @endif
-                                                    <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                                    <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
                                                 </div>
                                             </div>
                                         @endforeach
@@ -274,10 +278,10 @@
                                 
                                 <!-- Botón del Mapa -->
                                 <div class="tooltip-container tooltip-map">
-                                    <button onclick="mostrarMapa('domicilio')"
+                                <button onclick="mostrarMapa('domicilio')"
                                            class="documento-btn bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg border border-blue-300">
-                                        <i class="fas fa-map-marker-alt text-sm"></i>
-                                    </button>
+                                    <i class="fas fa-map-marker-alt text-sm"></i>
+                                </button>
                                     <div class="custom-tooltip">
                                         <div class="font-medium">Ver Ubicación</div>
                                         <div class="text-xs opacity-90 mt-1">Mapa interactivo con análisis de zona</div>
@@ -374,16 +378,18 @@
                                 <div class="flex items-center space-x-1">
                                     @foreach($documentosPorSeccion['constitucion'] as $documento)
                                         <div class="tooltip-container tooltip-pdf">
-                                            <button onclick="mostrarDocumento('constitucion', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   class="documento-btn bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-lg border border-purple-300">
-                                                <i class="fas fa-file-pdf text-sm"></i>
-                                            </button>
+                                        <button onclick="mostrarDocumento('constitucion', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   class="documento-btn bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-lg border border-purple-300"
+                                                   data-doc-seccion="constitucion" 
+                                                   data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
+                                                   data-doc-nombre="{{ $documento['nombre'] }}"
+                                                   oncontextmenu="seleccionarParaComparar(event, 'constitucion', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
+                                            <i class="fas fa-file-pdf text-sm"></i>
+                                        </button>
                                             <div class="custom-tooltip">
                                                 <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                @if(isset($documento['descripcion']) && $documento['descripcion'])
-                                                    <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
-                                                @endif
-                                                <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                                <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -480,16 +486,18 @@
                                 <div class="flex items-center space-x-1">
                                     @foreach($documentosPorSeccion['accionistas'] as $documento)
                                         <div class="tooltip-container tooltip-general">
-                                            <button onclick="mostrarDocumento('accionistas', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   class="documento-btn bg-amber-100 hover:bg-amber-200 text-amber-700 p-2 rounded-lg border border-amber-300">
-                                                <i class="fas fa-file-pdf text-sm"></i>
-                                            </button>
+                                        <button onclick="mostrarDocumento('accionistas', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   class="documento-btn bg-amber-100 hover:bg-amber-200 text-amber-700 p-2 rounded-lg border border-amber-300"
+                                                   data-doc-seccion="accionistas" 
+                                                   data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
+                                                   data-doc-nombre="{{ $documento['nombre'] }}"
+                                                   oncontextmenu="seleccionarParaComparar(event, 'accionistas', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
+                                            <i class="fas fa-file-pdf text-sm"></i>
+                                        </button>
                                             <div class="custom-tooltip">
                                                 <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                @if(isset($documento['descripcion']) && $documento['descripcion'])
-                                                    <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
-                                                @endif
-                                                <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                                <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -586,16 +594,18 @@
                                 <div class="flex items-center space-x-1">
                                     @foreach($documentosPorSeccion['apoderado'] as $documento)
                                         <div class="tooltip-container tooltip-pdf">
-                                            <button onclick="mostrarDocumento('apoderado', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   class="documento-btn bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg border border-red-300">
-                                                <i class="fas fa-file-pdf text-sm"></i>
-                                            </button>
+                                        <button onclick="mostrarDocumento('apoderado', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   class="documento-btn bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg border border-red-300"
+                                                   data-doc-seccion="apoderado" 
+                                                   data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
+                                                   data-doc-nombre="{{ $documento['nombre'] }}"
+                                                   oncontextmenu="seleccionarParaComparar(event, 'apoderado', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
+                                            <i class="fas fa-file-pdf text-sm"></i>
+                                        </button>
                                             <div class="custom-tooltip">
                                                 <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                @if(isset($documento['descripcion']) && $documento['descripcion'])
-                                                    <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
-                                                @endif
-                                                <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                                <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -693,16 +703,18 @@
                                 <div class="flex items-center space-x-1">
                                     @foreach($documentosPorSeccion['documentos'] as $documento)
                                         <div class="tooltip-container tooltip-general">
-                                            <button onclick="mostrarDocumento('documentos', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   class="documento-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 p-2 rounded-lg border border-indigo-300">
-                                                <i class="fas fa-file-pdf text-sm"></i>
-                                            </button>
+                                        <button onclick="mostrarDocumento('documentos', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   class="documento-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 p-2 rounded-lg border border-indigo-300"
+                                                   data-doc-seccion="documentos" 
+                                                   data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
+                                                   data-doc-nombre="{{ $documento['nombre'] }}"
+                                                   oncontextmenu="seleccionarParaComparar(event, 'documentos', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+                                                   title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
+                                            <i class="fas fa-file-pdf text-sm"></i>
+                                        </button>
                                             <div class="custom-tooltip">
                                                 <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                @if(isset($documento['descripcion']) && $documento['descripcion'])
-                                                    <div class="text-xs opacity-90 mt-1">{{ $documento['descripcion'] }}</div>
-                                                @endif
-                                                <div class="text-xs opacity-75 mt-1">Clic para ver documento</div>
+                                                <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -767,6 +779,47 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Comparación de Documentos -->
+        <div id="panel-comparacion" class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 mt-6 hidden">
+            <div class="bg-gradient-to-r from-blue-100 to-indigo-200 px-4 py-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-700 flex items-center">
+                        <span class="bg-[#9d2449] text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold mr-3">
+                            <i class="fas fa-columns"></i>
+                        </span>
+                        <span>Comparación de Documentos</span>
+                    </h3>
+                    <div class="flex items-center space-x-2">
+                        <span id="contador-seleccionados" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">0/2 seleccionados</span>
+                        <button onclick="limpiarSeleccionComparacion()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1 rounded">
+                            <i class="fas fa-eraser mr-1"></i>Limpiar
+                        </button>
+                        <button onclick="cerrarComparacion()" class="text-xs bg-red-200 hover:bg-red-300 text-red-700 px-2 py-1 rounded">
+                            <i class="fas fa-times mr-1"></i>Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4">
+                <!-- Lista de documentos seleccionados -->
+                <div id="documentos-seleccionados" class="mb-4">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Documentos seleccionados:</h4>
+                    <div id="lista-seleccionados" class="space-y-2 text-sm text-gray-600">
+                        <p class="italic">Haga clic derecho en los documentos para seleccionarlos</p>
+                    </div>
+                </div>
+                
+                <!-- Botón para comparar -->
+                <div class="flex justify-center">
+                    <button id="btn-comparar" onclick="iniciarComparacion()" disabled 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+                        <i class="fas fa-eye mr-2"></i>Comparar Documentos
+                    </button>
                 </div>
             </div>
         </div>
@@ -843,6 +896,56 @@
 </div>
 
 <!-- Modales -->
+
+<!-- Modal de Comparación de Documentos -->
+<div id="modal-comparacion-documentos" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50">
+    <div class="h-full flex flex-col">
+        <!-- Header del modal -->
+        <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-columns text-blue-600 mr-3 text-xl"></i>
+                <h3 class="text-lg font-semibold text-gray-900">Comparación de Documentos</h3>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div id="info-documentos-comparacion" class="text-sm text-gray-600"></div>
+                <button onclick="cerrarModalComparacion()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Contenido del modal - documentos lado a lado -->
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Documento 1 -->
+            <div class="flex-1 flex flex-col border-r border-gray-300">
+                <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                    <div class="flex items-center">
+                        <div class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2">1</div>
+                        <span id="nombre-documento-1" class="text-sm font-medium text-gray-700"></span>
+                        <span id="seccion-documento-1" class="text-xs text-gray-500 ml-2"></span>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-hidden">
+                    <iframe id="iframe-documento-1" class="w-full h-full border-0"></iframe>
+                </div>
+            </div>
+            
+            <!-- Documento 2 -->
+            <div class="flex-1 flex flex-col">
+                <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                    <div class="flex items-center">
+                        <div class="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2">2</div>
+                        <span id="nombre-documento-2" class="text-sm font-medium text-gray-700"></span>
+                        <span id="seccion-documento-2" class="text-xs text-gray-500 ml-2"></span>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-hidden">
+                    <iframe id="iframe-documento-2" class="w-full h-full border-0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div id="modalRechazarTodo" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
     <div class="bg-white rounded-lg p-4 max-w-sm w-full mx-4">
@@ -982,6 +1085,64 @@
 .documento-btn:hover i, .tooltip-container:hover i {
     transform: scale(1.1);
 }
+
+/* Estilos para comparación de documentos */
+.documento-seleccionado {
+    position: relative;
+    box-shadow: 0 0 0 2px #3b82f6 !important;
+    background: #eff6ff !important;
+}
+
+.documento-seleccionado::after {
+    content: '✓';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #3b82f6;
+    color: white;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 10;
+}
+
+/* Prevenir selección de texto en botones */
+.documento-btn {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Estilos para el modal de comparación */
+#modal-comparacion-documentos {
+    backdrop-filter: blur(4px);
+}
+
+#modal-comparacion-documentos iframe {
+    background: white;
+}
+
+/* Indicador de carga para iframes */
+.iframe-loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
 </style>
 @endpush
 
@@ -1105,19 +1266,202 @@ function cerrarMapa(seccion) {
     }
 }
 
+// Estado global para comparación de documentos
+window.estadoComparacion = {
+    documentosSeleccionados: [],
+    maxDocumentos: 2
+};
+
+// Función para seleccionar documento para comparar
+function seleccionarParaComparar(event, seccion, ruta, nombre) {
+    event.preventDefault(); // Prevenir menú contextual
+    event.stopPropagation(); // Prevenir propagación del evento
+    
+    const boton = event.target.closest('.documento-btn');
+    const docId = `${seccion}_${ruta}`;
+    
+    // Verificar si ya está seleccionado
+    const indiceExistente = window.estadoComparacion.documentosSeleccionados.findIndex(doc => doc.id === docId);
+    
+    if (indiceExistente !== -1) {
+        // Deseleccionar
+        window.estadoComparacion.documentosSeleccionados.splice(indiceExistente, 1);
+        boton.classList.remove('documento-seleccionado');
+    } else {
+        // Verificar límite máximo
+        if (window.estadoComparacion.documentosSeleccionados.length >= window.estadoComparacion.maxDocumentos) {
+            // Deseleccionar el primer documento
+            const primerDoc = window.estadoComparacion.documentosSeleccionados.shift();
+            const primerBoton = document.querySelector(`[data-doc-seccion="${primerDoc.seccion}"][data-doc-ruta="${primerDoc.ruta}"]`);
+            if (primerBoton) {
+                primerBoton.classList.remove('documento-seleccionado');
+            }
+        }
+        
+        // Seleccionar nuevo documento
+        window.estadoComparacion.documentosSeleccionados.push({
+            id: docId,
+            seccion: seccion,
+            ruta: ruta,
+            nombre: nombre
+        });
+        boton.classList.add('documento-seleccionado');
+    }
+    
+    actualizarPanelComparacion();
+}
+
+// Función para actualizar el panel de comparación
+function actualizarPanelComparacion() {
+    const panel = document.getElementById('panel-comparacion');
+    const contador = document.getElementById('contador-seleccionados');
+    const listaSeleccionados = document.getElementById('lista-seleccionados');
+    const btnComparar = document.getElementById('btn-comparar');
+    
+    const numSeleccionados = window.estadoComparacion.documentosSeleccionados.length;
+    
+    // Mostrar u ocultar panel
+    if (numSeleccionados > 0) {
+        panel.classList.remove('hidden');
+    } else {
+        panel.classList.add('hidden');
+        return;
+    }
+    
+    // Actualizar contador
+    contador.textContent = `${numSeleccionados}/${window.estadoComparacion.maxDocumentos} seleccionados`;
+    
+    // Actualizar lista
+    if (numSeleccionados === 0) {
+        listaSeleccionados.innerHTML = '<p class="italic">Haga clic derecho en los documentos para seleccionarlos</p>';
+    } else {
+        listaSeleccionados.innerHTML = window.estadoComparacion.documentosSeleccionados.map((doc, index) => 
+            `<div class="flex items-center justify-between bg-gray-50 p-2 rounded">
+                <div class="flex items-center">
+                    <span class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2">${index + 1}</span>
+                    <span class="font-medium">${doc.nombre}</span>
+                    <span class="text-xs text-gray-500 ml-2">(${doc.seccion})</span>
+                </div>
+                <button onclick="deseleccionarDocumento('${doc.id}')" class="text-red-500 hover:text-red-700">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>`
+        ).join('');
+    }
+    
+    // Habilitar/deshabilitar botón de comparar
+    btnComparar.disabled = numSeleccionados !== 2;
+}
+
+// Función para deseleccionar un documento específico
+function deseleccionarDocumento(docId) {
+    const indice = window.estadoComparacion.documentosSeleccionados.findIndex(doc => doc.id === docId);
+    if (indice !== -1) {
+        const doc = window.estadoComparacion.documentosSeleccionados[indice];
+        const boton = document.querySelector(`[data-doc-seccion="${doc.seccion}"][data-doc-ruta="${doc.ruta}"]`);
+        if (boton) {
+            boton.classList.remove('documento-seleccionado');
+        }
+        window.estadoComparacion.documentosSeleccionados.splice(indice, 1);
+        actualizarPanelComparacion();
+    }
+}
+
+// Función para limpiar selección
+function limpiarSeleccionComparacion() {
+    // Deseleccionar todos los botones
+    document.querySelectorAll('.documento-seleccionado').forEach(boton => {
+        boton.classList.remove('documento-seleccionado');
+    });
+    
+    // Limpiar estado
+    window.estadoComparacion.documentosSeleccionados = [];
+    actualizarPanelComparacion();
+}
+
+// Función para cerrar panel de comparación
+function cerrarComparacion() {
+    limpiarSeleccionComparacion();
+}
+
+// Función para iniciar comparación
+function iniciarComparacion() {
+    if (window.estadoComparacion.documentosSeleccionados.length !== 2) {
+        alert('Debe seleccionar exactamente 2 documentos para comparar');
+        return;
+    }
+    
+    mostrarModalComparacion();
+}
+
+// Función para mostrar modal de comparación
+function mostrarModalComparacion() {
+    const modal = document.getElementById('modal-comparacion-documentos');
+    const docs = window.estadoComparacion.documentosSeleccionados;
+    
+    // Actualizar información en el header
+    document.getElementById('info-documentos-comparacion').textContent = 
+        `Comparando: ${docs[0].nombre} vs ${docs[1].nombre}`;
+    
+    // Actualizar nombres y secciones
+    document.getElementById('nombre-documento-1').textContent = docs[0].nombre;
+    document.getElementById('seccion-documento-1').textContent = `(${docs[0].seccion})`;
+    document.getElementById('nombre-documento-2').textContent = docs[1].nombre;
+    document.getElementById('seccion-documento-2').textContent = `(${docs[1].seccion})`;
+    
+    // Configurar iframes
+    const iframe1 = document.getElementById('iframe-documento-1');
+    const iframe2 = document.getElementById('iframe-documento-2');
+    
+    // Agregar clase de carga
+    iframe1.classList.add('iframe-loading');
+    iframe2.classList.add('iframe-loading');
+    
+    // Cargar documentos
+    iframe1.src = docs[0].ruta;
+    iframe2.src = docs[1].ruta;
+    
+    // Remover clase de carga cuando termine de cargar
+    iframe1.onload = () => iframe1.classList.remove('iframe-loading');
+    iframe2.onload = () => iframe2.classList.remove('iframe-loading');
+    
+    // Mostrar modal
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+// Función para cerrar modal de comparación
+function cerrarModalComparacion() {
+    const modal = document.getElementById('modal-comparacion-documentos');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    
+    // Limpiar iframes
+    document.getElementById('iframe-documento-1').src = '';
+    document.getElementById('iframe-documento-2').src = '';
+}
+
 // JavaScript mínimo para cerrar modales al hacer clic fuera
 document.addEventListener('click', function(e) {
     if (e.target.id === 'modalRechazarTodo') {
         document.getElementById('modalRechazarTodo').classList.add('hidden');
+    }
+    if (e.target.id === 'modal-comparacion-documentos') {
+        cerrarModalComparacion();
     }
 });
 
 // Cerrar modal con ESC
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        const modal = document.getElementById('modalRechazarTodo');
-        if (modal && !modal.classList.contains('hidden')) {
-            modal.classList.add('hidden');
+        const modalRechazo = document.getElementById('modalRechazarTodo');
+        const modalComparacion = document.getElementById('modal-comparacion-documentos');
+        
+        if (modalRechazo && !modalRechazo.classList.contains('hidden')) {
+            modalRechazo.classList.add('hidden');
+        }
+        if (modalComparacion && !modalComparacion.classList.contains('hidden')) {
+            cerrarModalComparacion();
         }
     }
 });

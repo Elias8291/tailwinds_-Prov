@@ -138,6 +138,7 @@
                                placeholder="Ej: 1234 o 1234/2024"
                                maxlength="15"
                                x-model="numeroEscritura"
+                               aria-label="Número de escritura"
                                required>
                     </div>
                 </div>
@@ -152,6 +153,7 @@
                         <input type="date" id="fecha_constitucion" name="fecha_constitucion"
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                                x-model="fechaConstitucion"
+                               aria-label="Fecha de constitución"
                                required>
                     </div>
                 </div>
@@ -168,6 +170,7 @@
                                placeholder="Ej: Lic. Juan Pérez González"
                                maxlength="100"
                                x-model="nombreNotario"
+                               aria-label="Nombre del notario"
                                required>
                     </div>
                 </div>
@@ -182,6 +185,7 @@
                         <select id="entidad_federativa" name="entidad_federativa"
                                 class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                                 x-model="entidadFederativa"
+                                aria-label="Seleccionar entidad federativa"
                                 required>
                             <option value="">Seleccione un estado</option>
                             @php
@@ -220,6 +224,7 @@
                                placeholder="Ej: 123"
                                maxlength="10"
                                x-model="numeroNotario"
+                               aria-label="Número de notario"
                                required>
                     </div>
                 </div>
@@ -236,6 +241,7 @@
                                placeholder="Ej: 0123456789 o FME123456789"
                                maxlength="14"
                                x-model="numeroRegistro"
+                               aria-label="Número de registro"
                                required>
                     </div>
                 </div>
@@ -250,6 +256,7 @@
                         <input type="date" id="fecha_inscripcion" name="fecha_inscripcion"
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                                x-model="fechaInscripcion"
+                               aria-label="Fecha de inscripción"
                                required>
                     </div>
                 </div>
@@ -265,10 +272,20 @@
                 </button>
                 
                 <button type="button" 
+                        id="btn-guardar-constitucion"
                         onclick="guardarConstitucionYSiguiente()"
-                        class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20">
-                    <i class="fas fa-save mr-2"></i> Guardar y Continuar
-                    <i class="fas fa-arrow-right ml-2"></i>
+                        class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                    <span id="btn-text-constitucion">
+                        <i class="fas fa-save mr-2"></i> Guardar y Continuar
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </span>
+                    <span id="btn-loading-constitucion" class="hidden">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Guardando...
+                    </span>
                 </button>
             </div>
         </form>
@@ -419,6 +436,9 @@ function navegarAnteriorConstitucion() {
 
 // Función para guardar constitución y navegar al siguiente paso
 async function guardarConstitucionYSiguiente() {
+    // Mostrar estado de carga
+    mostrarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
+    
     try {
         // 1. Buscar el componente Alpine.js de constitución
         const constitucionContainer = document.querySelector('[x-data*="constitucionData"]');
@@ -430,6 +450,8 @@ async function guardarConstitucionYSiguiente() {
                 
                 if (guardado) {
                     navegarSiguienteDesdeConstitucion();
+                } else {
+                    ocultarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
                 }
                 return;
             }
@@ -439,6 +461,7 @@ async function guardarConstitucionYSiguiente() {
         navegarSiguienteDesdeConstitucion();
         
     } catch (error) {
+        ocultarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
         navegarSiguienteDesdeConstitucion();
     }
 }
@@ -473,6 +496,8 @@ function navegarSiguienteDesdeConstitucion() {
         return;
     }
 }
+
+
 </script>
 @endif
 

@@ -218,6 +218,7 @@
                                        accept=".pdf"
                                        class="hidden" 
                                    :id="`documento_${documento.id}`"
+                                   :aria-label="`Seleccionar archivo para ${documento.nombre}`"
                                    @change="handleFileSelect($event, documento)"
                                        required>
                             <label :for="`documento_${documento.id}`" 

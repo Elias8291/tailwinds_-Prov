@@ -103,7 +103,7 @@
         </div>
     @else
         <!-- Formulario editable normal -->
-        <form class="space-y-8" @submit.prevent="guardarDomicilio" x-ref="domicilioForm">
+        <form class="space-y-8" @submit.prevent="guardarDomicilio" x-ref="domicilioForm" data-validate="true">
             <input type="hidden" name="action" value="next">
             <input type="hidden" name="seccion" value="2">
             <input type="hidden" name="tramite_id" value="{{ $datosDomicilio['tramite_id'] ?? ($tramite->id ?? '') }}">
@@ -122,7 +122,10 @@
                                placeholder="Ej: 12345"
                                pattern="[0-9]{4,5}"
                                maxlength="5"
+                               minlength="4"
+                               data-validation="required|cp"
                                x-model="cp"
+                               aria-label="Código postal"
                                required>
                     </div>
                     <p class="mt-1 text-sm text-gray-500">Al ingresar el código postal se llenarán automáticamente algunos campos</p>
@@ -139,6 +142,7 @@
                                class="block w-full px-4 py-2.5 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
                                placeholder="Ej: Jalisco"
                                x-model="estado"
+                               aria-label="Estado"
                                readonly
                                required>
                     </div>
@@ -155,6 +159,7 @@
                                class="block w-full px-4 py-2.5 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
                                placeholder="Ej: Guadalajara"
                                x-model="municipio"
+                               aria-label="Municipio"
                                readonly
                                required>
                     </div>
@@ -170,7 +175,8 @@
                         <select id="colonia" name="colonia"
                                 class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                                 x-model="colonia"
-                                required>
+                                required
+                                aria-label="Seleccionar asentamiento">
                             <option value="">Seleccione un Asentamiento</option>
                             <template x-for="asentamiento in asentamientos" :key="asentamiento.id">
                                 <option :value="asentamiento.id" x-text="asentamiento.nombre"></option>
@@ -196,7 +202,10 @@
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                                placeholder="Ej: Av. Principal"
                                maxlength="100"
+                               minlength="2"
+                               data-validation="required|minLength:2|maxLength:100"
                                x-model="nombreVialidad"
+                               aria-label="Calle"
                                required>
                     </div>
                 </div>
@@ -214,6 +223,7 @@
                                pattern="[A-Za-z0-9\/]+"
                                maxlength="10"
                                x-model="numeroExterior"
+                               aria-label="Número exterior"
                                required>
                     </div>
                 </div>
@@ -229,7 +239,8 @@
                                placeholder="Ej: 5A"
                                pattern="[A-Za-z0-9]+"
                                maxlength="10"
-                               x-model="numeroInterior">
+                               x-model="numeroInterior"
+                               aria-label="Número interior">
                     </div>
                 </div>
 
@@ -245,6 +256,7 @@
                                placeholder="Ej: Calle Independencia"
                                pattern="[A-Za-z0-9\s]+"
                                maxlength="100"
+                               aria-label="Entre calle"
                                required>
                     </div>
                 </div>
@@ -260,6 +272,7 @@
                                placeholder="Ej: Calle Morelos"
                                pattern="[A-Za-z0-9\s]+"
                                maxlength="100"
+                               aria-label="Y calle"
                                required>
                     </div>
                 </div>
@@ -275,10 +288,20 @@
                 </button>
                 
                 <button type="button" 
+                        id="btn-guardar-domicilio"
                         onclick="guardarDomicilioYSiguiente()"
-                        class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20">
-                    <i class="fas fa-save mr-2"></i> Guardar y Continuar
-                    <i class="fas fa-arrow-right ml-2"></i>
+                        class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                    <span id="btn-text-domicilio">
+                        <i class="fas fa-save mr-2"></i> Guardar y Continuar
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </span>
+                    <span id="btn-loading-domicilio" class="hidden">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Guardando...
+                    </span>
                 </button>
             </div>
         </form>
@@ -606,6 +629,9 @@ function navegarAnteriorDomicilio() {
 
 // Función para guardar domicilio y navegar al siguiente paso
 async function guardarDomicilioYSiguiente() {
+    // Mostrar estado de carga
+    mostrarEstadoCarga('btn-guardar-domicilio', 'btn-text-domicilio', 'btn-loading-domicilio');
+    
     try {
         // 1. Buscar el componente Alpine.js de domicilio
         const domicilioContainer = document.querySelector('[x-data*="domicilioData"]');
@@ -617,6 +643,8 @@ async function guardarDomicilioYSiguiente() {
                 
                 if (guardado) {
                     navegarSiguienteDesdeDomicilio();
+                } else {
+                    ocultarEstadoCarga('btn-guardar-domicilio', 'btn-text-domicilio', 'btn-loading-domicilio');
                 }
                 return;
             }
@@ -626,6 +654,7 @@ async function guardarDomicilioYSiguiente() {
         navegarSiguienteDesdeDomicilio();
         
     } catch (error) {
+        ocultarEstadoCarga('btn-guardar-domicilio', 'btn-text-domicilio', 'btn-loading-domicilio');
         navegarSiguienteDesdeDomicilio();
     }
 }
@@ -660,6 +689,8 @@ function navegarSiguienteDesdeDomicilio() {
         return;
     }
 }
+
+
 </script>
 
 <style>

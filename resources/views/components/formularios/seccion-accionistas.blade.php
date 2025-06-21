@@ -117,52 +117,59 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <!-- Nombre -->
                                 <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <label :for="`accionista_nombre_${index}`" class="block text-sm font-medium text-gray-700 mb-2">
                                         Nombre
                                             <span class="text-[#9d2449]">*</span>
                                         </label>
                                         <input type="text" 
+                                               :id="`accionista_nombre_${index}`"
                                                :name="`accionistas[${index}][nombre]`"
                                                x-model="accionista.nombre"
                                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200" 
                                                placeholder="Nombre(s)"
+                                               :aria-label="`Nombre del accionista ${index + 1}`"
                                                required>
                                 </div>
 
                                 <!-- Apellido Paterno -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <label :for="`accionista_apellido_paterno_${index}`" class="block text-sm font-medium text-gray-700 mb-2">
                                         Apellido Paterno
                                         <span class="text-[#9d2449]">*</span>
                                 </label>
                                     <input type="text" 
+                                           :id="`accionista_apellido_paterno_${index}`"
                                            :name="`accionistas[${index}][apellido_paterno]`"
                                            x-model="accionista.apellido_paterno"
                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200" 
                                            placeholder="Apellido paterno"
+                                           :aria-label="`Apellido paterno del accionista ${index + 1}`"
                                            required>
                             </div>
 
                                 <!-- Apellido Materno -->
                             <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <label :for="`accionista_apellido_materno_${index}`" class="block text-sm font-medium text-gray-700 mb-2">
                                         Apellido Materno
                                 </label>
                                     <input type="text" 
+                                           :id="`accionista_apellido_materno_${index}`"
                                            :name="`accionistas[${index}][apellido_materno]`"
                                            x-model="accionista.apellido_materno"
                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200" 
-                                           placeholder="Apellido materno">
+                                           placeholder="Apellido materno"
+                                           :aria-label="`Apellido materno del accionista ${index + 1}`">
                             </div>
 
                                 <!-- Porcentaje de Acciones -->
                             <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <label :for="`accionista_porcentaje_${index}`" class="block text-sm font-medium text-gray-700 mb-2">
                                     % Acciones
                                         <span class="text-[#9d2449]">*</span>
                                 </label>
                                     <div class="flex">
                                         <input type="number" 
+                                               :id="`accionista_porcentaje_${index}`"
                                                :name="`accionistas[${index}][porcentaje]`"
                                                x-model="accionista.porcentaje"
                                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200" 
@@ -170,6 +177,7 @@
                                                min="0" 
                                                max="100"
                                                step="0.01"
+                                               :aria-label="`Porcentaje de acciones del accionista ${index + 1}`"
                                                required>
                                         <button type="button" 
                                                 @click="eliminarAccionista(index)"

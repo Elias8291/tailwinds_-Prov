@@ -46,7 +46,7 @@ function datosGeneralesData() {
         <span class="text-sm text-amber-700 font-medium">Editando datos existentes</span>
     </div>
 
-    <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-6">
+    <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-6" data-validate="true">
         @csrf
         <input type="hidden" name="action" value="next">
         <input type="hidden" name="seccion" value="1">
@@ -71,9 +71,11 @@ function datosGeneralesData() {
                     </label>
                     <div class="relative">
                         <input type="text" 
+                               id="tipo_persona"
                                name="tipo_persona"
                                value="{{ $datosSolicitante['tipo_persona'] ?? '' }}" 
                                class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                               aria-label="Tipo de proveedor"
                                readonly>
                         </div>
                 </div>
@@ -86,9 +88,11 @@ function datosGeneralesData() {
                     </label>
                     <div class="relative">
                         <input type="text" 
+                               id="rfc"
                                name="rfc"
                                value="{{ $datosSolicitante['rfc'] ?? '' }}" 
                                class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                               aria-label="RFC"
                                readonly>
                     </div>
                 </div>
@@ -103,9 +107,11 @@ function datosGeneralesData() {
                 </label>
                 <div class="relative">
                     <input type="text" 
+                           id="curp"
                            name="curp"
                            value="{{ $datosSolicitante['curp'] ?? '' }}" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                           aria-label="CURP"
                            readonly>
                 </div>
                 </div>
@@ -120,9 +126,11 @@ function datosGeneralesData() {
                 </label>
                 <div class="relative">
                     <input type="text" 
+                           id="nombre_completo"
                            name="nombre_completo"
                            value="{{ $datosSolicitante['nombre_completo'] ?? auth()->user()->name ?? '' }}" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                           aria-label="Nombre completo"
                            readonly>
                 </div>
             </div>
@@ -137,9 +145,11 @@ function datosGeneralesData() {
                 </label>
                 <div class="relative">
                     <input type="text" 
+                           id="razon_social"
                            name="razon_social"
                            value="{{ $datosSolicitante['razon_social'] ?? auth()->user()->name ?? '' }}" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                           aria-label="Razón social"
                            readonly>
                 </div>
             </div>
@@ -157,6 +167,7 @@ function datosGeneralesData() {
                               placeholder="{{ $readonly ? '' : 'Describa el giro de la empresa' }}"
                               x-model="giro"
                               maxlength="500" 
+                              aria-label="Giro de la empresa"
                               {{ $readonly ? 'readonly' : 'required' }}>{{ old('giro', $datosTramite['giro'] ?? '') }}</textarea>
                     @if(!$readonly)
                     <div class="absolute bottom-2 right-2 text-xs text-gray-400">
@@ -166,7 +177,7 @@ function datosGeneralesData() {
                 </div>
                 @if(!$readonly)
                     @error('giro')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('giro') }}</p>
                     @enderror
                 @endif
             </div>
@@ -184,7 +195,8 @@ function datosGeneralesData() {
                     </label>
                     <div class="relative group">
                         <select id="sector_id" name="sector_id"
-                                class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50 @error('sector_id') border-red-500 @enderror">
+                                class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50 @error('sector_id') border-red-500 @enderror"
+                                aria-label="Seleccionar sector">
                             <option value="">Seleccione un Sector</option>
                             @foreach(\App\Models\Sector::all() as $sector)
                                 <option value="{{ $sector->id }}" 
@@ -212,6 +224,7 @@ function datosGeneralesData() {
                     <div class="relative group">
                         <select id="actividad_id" name="actividad_id"
                                 class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50 @error('actividad_id') border-red-500 @enderror"
+                                aria-label="Seleccionar actividad"
                                 disabled>
                             <option value="">Primero seleccione un sector</option>
                         </select>
@@ -250,6 +263,7 @@ function datosGeneralesData() {
                     <input type="url" id="pagina_web" name="pagina_web"
                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('pagina_web') border-red-500 @enderror"
                            placeholder="https://www.ejemplo.com"
+                           aria-label="Página web"
                            value="{{ old('pagina_web', $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? '') }}">
                 </div>
                 @error('pagina_web')
@@ -282,11 +296,14 @@ function datosGeneralesData() {
                         <input type="text" id="contacto_nombre" name="contacto_nombre"
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('contacto_nombre') border-red-500 @enderror"
                                placeholder="Nombre completo del contacto"
-                               maxlength="40"
+                               maxlength="100"
+                               minlength="2"
+                               data-validation="required|minLength:2|maxLength:100|alphanumeric"
+                               aria-label="Nombre del contacto"
                                value="{{ old('contacto_nombre', $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? '') }}" required>
                     </div>
                     @error('contacto_nombre')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_nombre') }}</p>
                     @enderror
                 </div>
 
@@ -301,6 +318,9 @@ function datosGeneralesData() {
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('contacto_cargo') border-red-500 @enderror"
                                placeholder="Cargo en la empresa"
                                maxlength="50"
+                               minlength="2"
+                               data-validation="required|minLength:2|maxLength:50|alphanumeric"
+                               aria-label="Cargo del contacto"
                                value="{{ old('contacto_cargo', $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? '') }}" required>
                     </div>
                     @error('contacto_cargo')
@@ -318,6 +338,8 @@ function datosGeneralesData() {
                         <input type="email" id="contacto_correo" name="contacto_correo"
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all group-hover:border-[#9d2449]/50 @error('contacto_correo') border-red-500 @enderror"
                                placeholder="correo@ejemplo.com"
+                               data-validation="required|email"
+                               aria-label="Correo del contacto"
                                value="{{ old('contacto_correo', $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? '') }}" required>
                     </div>
                     @error('contacto_correo')
@@ -337,7 +359,10 @@ function datosGeneralesData() {
                                placeholder="10 dígitos"
                                pattern="[0-9]{10}"
                                maxlength="10"
+                               minlength="10"
                                inputmode="numeric"
+                               data-validation="required|phone"
+                               aria-label="Teléfono del contacto"
                                value="{{ old('contacto_telefono', $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? '') }}" required>
                     </div>
                     @error('contacto_telefono')
@@ -353,18 +378,38 @@ function datosGeneralesData() {
             <!-- Botones de navegación -->
             <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
                 <button type="button" 
+                        id="btn-guardar-datos-generales"
                         onclick="guardarYSiguiente()"
-                        class="w-full sm:w-auto px-6 py-3 bg-[#9d2449] text-white rounded-lg hover:bg-[#8a203f] transition-all duration-300 transform-gpu hover:-translate-y-0.5">
-                    <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
+                        class="w-full sm:w-auto px-6 py-3 bg-[#9d2449] text-white rounded-lg hover:bg-[#8a203f] transition-all duration-300 transform-gpu hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                    <span id="btn-text-datos-generales">
+                        <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
+                    </span>
+                    <span id="btn-loading-datos-generales" class="hidden">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Guardando...
+                    </span>
                 </button>
             </div>
             @else
             <!-- Botón navegación integrado cuando mostrar_navegacion es false -->
             <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
                 <button type="button" 
+                        id="btn-guardar-datos-generales-alt"
                         onclick="guardarYSiguiente()"
-                        class="w-full sm:w-auto px-6 py-3 bg-[#9d2449] text-white rounded-lg hover:bg-[#8a203f] transition-all duration-300 transform-gpu hover:-translate-y-0.5">
-                    <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
+                        class="w-full sm:w-auto px-6 py-3 bg-[#9d2449] text-white rounded-lg hover:bg-[#8a203f] transition-all duration-300 transform-gpu hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                    <span id="btn-text-datos-generales-alt">
+                        <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
+                    </span>
+                    <span id="btn-loading-datos-generales-alt" class="hidden">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Guardando...
+                    </span>
                 </button>
             </div>
             @endif
@@ -921,11 +966,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Función para guardar datos y navegar al siguiente paso
 async function guardarYSiguiente() {
+    // Mostrar estado de carga
+    mostrarEstadoCargaFormulario('datos-generales');
+    
     try {
         // 1. Obtener el formulario y preparar datos
         const form = document.getElementById('datos-generales-form');
         if (!form) {
             alert('Error: No se encontró el formulario');
+            ocultarEstadoCargaFormulario('datos-generales');
             return;
         }
         
@@ -970,10 +1019,12 @@ async function guardarYSiguiente() {
             // 4. Navegar al siguiente paso
             navegarSiguienteSeccion();
         } else {
+            ocultarEstadoCargaFormulario('datos-generales');
             alert('Error al guardar: ' + (result.message || JSON.stringify(result.errors) || 'Error desconocido'));
         }
         
     } catch (error) {
+        ocultarEstadoCargaFormulario('datos-generales');
         // Si falla el guardado, preguntar al usuario si quiere continuar
         const continuar = confirm('Error al guardar los datos. ¿Desea continuar sin guardar?');
         if (continuar) {
@@ -1021,4 +1072,6 @@ function navegarSiguienteSeccion() {
     
     alert('Error: No se puede navegar al siguiente paso. Verifique que la página esté cargada correctamente.');
 }
+
+
 </script> 

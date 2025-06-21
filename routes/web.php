@@ -88,6 +88,13 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/cerrar-sesion', [LoginController::class, 'logout'])->name('logout');
 });
 
+// RUTA DE PRUEBA PARA VALIDACIONES (solo en desarrollo)
+if (config('app.debug')) {
+    Route::middleware(['auth'])->get('/test-validation', function () {
+        return view('test-validation');
+    })->name('test.validation');
+}
+
 // VERIFICACIÓN DE EMAIL
 Route::get('/verificar-email/{id}/{token}', [VerificationController::class, 'verify'])
     ->name('verification.verify');
