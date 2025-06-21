@@ -139,6 +139,7 @@
                                     @foreach($documentosPorSeccion['datos_generales'] as $documento)
                                         <div class="tooltip-container tooltip-pdf">
                                         <button onclick="mostrarDocumento('datos_generales', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+<<<<<<< HEAD
                                                    class="documento-btn bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg border border-blue-300"
                                                    data-doc-seccion="datos_generales" 
                                                    data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
@@ -146,6 +147,11 @@
                                                    oncontextmenu="seleccionarParaComparar(event, 'datos_generales', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
                                                    title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
                                             <i class="fas fa-file-pdf text-sm"></i>
+=======
+                                               class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-3 rounded-xl transition-all duration-200 border border-blue-300 relative z-50 hover:scale-105"
+                                               title="{{ $documento['nombre'] }} - {{ $documento['descripcion'] }}">
+                                            <i class="fas fa-file-pdf text-base"></i>
+>>>>>>> 7da0074dcfac1c8bf40176272177a4fa8c3b0daa
                                         </button>
                                             <div class="custom-tooltip">
                                                 <div class="font-medium">{{ $documento['nombre'] }}</div>
@@ -256,6 +262,7 @@
                                         @foreach($documentosPorSeccion['domicilio'] as $documento)
                                             <div class="tooltip-container tooltip-general">
                                             <button onclick="mostrarDocumento('domicilio', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
+<<<<<<< HEAD
                                                        class="documento-btn bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-lg border border-green-300"
                                                        data-doc-seccion="domicilio" 
                                                        data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
@@ -263,6 +270,11 @@
                                                        oncontextmenu="seleccionarParaComparar(event, 'domicilio', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
                                                        title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
                                                 <i class="fas fa-file-pdf text-sm"></i>
+=======
+                                                   class="bg-green-100 hover:bg-green-200 text-green-700 p-3 rounded-xl transition-all duration-200 border border-green-300 relative z-50 hover:scale-105"
+                                                   title="{{ $documento['nombre'] }} - {{ $documento['descripcion'] }}">
+                                                <i class="fas fa-file-pdf text-base"></i>
+>>>>>>> 7da0074dcfac1c8bf40176272177a4fa8c3b0daa
                                             </button>
                                                 <div class="custom-tooltip">
                                                     <div class="font-medium">{{ $documento['nombre'] }}</div>
@@ -279,8 +291,14 @@
                                 <!-- Botón del Mapa -->
                                 <div class="tooltip-container tooltip-map">
                                 <button onclick="mostrarMapa('domicilio')"
+<<<<<<< HEAD
                                            class="documento-btn bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg border border-blue-300">
                                     <i class="fas fa-map-marker-alt text-sm"></i>
+=======
+                                       class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-3 rounded-xl transition-all duration-200 border border-blue-300 relative z-50 hover:scale-105"
+                                       title="Ver ubicación en mapa">
+                                    <i class="fas fa-map-marker-alt text-base"></i>
+>>>>>>> 7da0074dcfac1c8bf40176272177a4fa8c3b0daa
                                 </button>
                                     <div class="custom-tooltip">
                                         <div class="font-medium">Ver Ubicación</div>
