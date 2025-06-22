@@ -43,6 +43,50 @@ class TramiteController extends Controller
                 return redirect()->route('tramites.solicitante.index')->with('error', 'Solicitante no encontrado.');
             }
 
+            // ✅ VERIFICAR SI EL TRÁMITE YA ESTÁ COMPLETADO
+            // Si el trámite está completado según el tipo de persona, redirigir al estado
+            if ($tramite->estaCompletadoSegunTipo() && $tramite->estado !== 'Pendiente') {
+                Log::info('Trámite completado, redirigiendo al estado:', [
+                    'tramite_id' => $tramite->id,
+                    'progreso' => $tramite->progreso_tramite,
+                    'tipo_persona' => $solicitante->tipo_persona,
+                    'estado' => $tramite->estado
+                ]);
+
+                return redirect()->route('tramites.solicitante.estado', ['tramite' => $tramite->id]);
+            }
+
+            // ✅ VERIFICAR SI EL TRÁMITE FUE ENVIADO PARA REVISIÓN
+            // Personas Físicas: sección 3 completada + estado diferente de 'Pendiente'
+            // Personas Morales: sección 6 completada + estado diferente de 'Pendiente'
+            $tipoPersona = $solicitante->tipo_persona;
+            $seccionCompleta = ($tipoPersona === 'Física' && $tramite->progreso_tramite >= 3) || 
+                              ($tipoPersona === 'Moral' && $tramite->progreso_tramite >= 6);
+            
+            if ($seccionCompleta && in_array($tramite->estado, ['En Revision', 'Aprobado', 'Rechazado'])) {
+                Log::info('Trámite enviado para revisión, redirigiendo al estado:', [
+                    'tramite_id' => $tramite->id,
+                    'progreso' => $tramite->progreso_tramite,
+                    'tipo_persona' => $tipoPersona,
+                    'estado' => $tramite->estado
+                ]);
+
+                return redirect()->route('tramites.solicitante.estado', ['tramite' => $tramite->id]);
+            }
+
+            // ✅ PERMITIR EDICIÓN SOLO PARA TRÁMITES PENDIENTES O RECHAZADOS
+            // Si el trámite NO puede ser editado (no está en estado Pendiente o Rechazado), 
+            // redirigir al estado
+            if (!$tramite->puedeSerEditado()) {
+                Log::info('Trámite no puede ser editado, redirigiendo al estado:', [
+                    'tramite_id' => $tramite->id,
+                    'estado' => $tramite->estado,
+                    'puede_editar' => false
+                ]);
+
+                return redirect()->route('tramites.solicitante.estado', ['tramite' => $tramite->id]);
+            }
+
             Log::info('Cargando formulario de trámite:', [
                 'tramite_id' => $tramite->id,
                 'tipo_tramite' => $tipoTramite,

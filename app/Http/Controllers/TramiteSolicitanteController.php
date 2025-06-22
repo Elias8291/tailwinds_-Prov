@@ -872,7 +872,7 @@ class TramiteSolicitanteController extends Controller
 
             // Actualizar el estado del trámite
             $tramite->update([
-                'estado' => 'Enviado',
+                'estado' => 'En Revision', // Cambiar a 'En Revision' para que sea consistente con el estado.blade.php
                 'fecha_finalizacion' => now(),
                 'progreso_tramite' => $solicitante->tipo_persona === 'Física' ? 3 : 6
             ]);
@@ -882,7 +882,8 @@ class TramiteSolicitanteController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Trámite finalizado correctamente'
+                'message' => 'Trámite finalizado correctamente',
+                'redirect' => route('tramites.solicitante.estado', ['tramite' => $tramite->id])
             ]);
 
         } catch (\Exception $e) {
