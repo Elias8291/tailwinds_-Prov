@@ -15,9 +15,33 @@ class RoleController extends Controller
         $this->middleware('can:roles.ver');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $roles = Role::all();
+        $query = Role::with('permissions');
+
+        // Aplicar filtros
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        // Ordenamiento
+        $sortBy = $request->get('sort', 'name');
+        $sortDirection = $request->get('direction', 'asc');
+        
+        $validSorts = ['name', 'created_at', 'permissions_count'];
+        if (in_array($sortBy, $validSorts)) {
+            if ($sortBy === 'permissions_count') {
+                $query->withCount('permissions')->orderBy('permissions_count', $sortDirection);
+            } else {
+                $query->orderBy($sortBy, $sortDirection);
+            }
+        }
+
+        // Paginación
+        $perPage = $request->get('perPage', 10);
+        $roles = $query->paginate($perPage)->appends($request->query());
+
         return view('roles.index', compact('roles'));
     }
 

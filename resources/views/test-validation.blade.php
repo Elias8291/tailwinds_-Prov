@@ -16,7 +16,7 @@
         <div class="bg-white rounded-2xl shadow-lg p-6">
             <h2 class="text-lg font-semibold text-gray-800 mb-6">Formulario de Prueba</h2>
             
-            <form id="test-form" data-validate="true" class="space-y-6">
+            <form id="test-form" class="space-y-6">
                 @csrf
                 
                 <!-- RFC -->
@@ -32,7 +32,6 @@
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                placeholder="XAXX010101000"
                                maxlength="13"
-                               data-validation="required|rfc"
                                required>
                     </div>
                 </div>
@@ -50,7 +49,7 @@
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                placeholder="XAXX010101HDFXXX00"
                                maxlength="18"
-                               data-validation="required|curp"
+
                                required>
                     </div>
                 </div>
@@ -67,7 +66,7 @@
                                name="email"
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                placeholder="usuario@ejemplo.com"
-                               data-validation="required|email"
+
                                required>
                     </div>
                 </div>
@@ -85,7 +84,7 @@
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                placeholder="1234567890"
                                maxlength="10"
-                               data-validation="required|phone"
+
                                required>
                     </div>
                 </div>
@@ -103,7 +102,7 @@
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                placeholder="68000"
                                maxlength="5"
-                               data-validation="required|cp"
+
                                required>
                     </div>
                 </div>
@@ -122,7 +121,7 @@
                                placeholder="Juan Pérez García"
                                minlength="2"
                                maxlength="100"
-                               data-validation="required|minLength:2|maxLength:100|alphanumeric"
+
                                required>
                     </div>
                 </div>
@@ -141,13 +140,13 @@
                             class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
                             placeholder="Ingrese cualquier observación adicional..."
                             maxlength="500"
-                            data-validation="maxLength:500"></textarea>
+</textarea>
                     </div>
                 </div>
 
                 <!-- Botones -->
                 <div class="flex justify-between pt-6 border-t border-gray-200">
-                    <button type="button" onclick="clearFormErrors('#test-form')" 
+                    <button type="button" onclick="alert('Función por implementar')" 
                             class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
                         <i class="fas fa-eraser mr-2"></i>
                         Limpiar Errores
@@ -190,18 +189,14 @@
 
 <script>
 function validateFormManually() {
-    const isValid = validateForm('#test-form');
-    if (isValid) {
-        showValidationToast('¡Todos los campos son válidos!', 'success');
-    } else {
-        showValidationToast('Hay errores en el formulario', 'error');
-    }
+    // Función de validación manual - por implementar
+    alert('Validación manual por implementar');
 }
 
 // Manejar envío del formulario
 document.getElementById('test-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    showValidationToast('¡Formulario enviado correctamente!', 'success');
+    alert('¡Formulario enviado correctamente!');
 });
 </script>
 @endsection 

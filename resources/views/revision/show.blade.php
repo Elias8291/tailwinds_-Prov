@@ -1,232 +1,229 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen py-8">
-    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header de Revisión -->
-        <div class="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
+<div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8 bg-gray-50 min-h-screen">
+    <!-- Título del Trámite de Revisión -->
+    <div class="max-w-5xl mx-auto mb-6">
+        <div class="bg-white rounded-2xl shadow-lg p-6 backdrop-blur-lg border border-gray-100">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <!-- Información del Trámite -->
+                <div class="flex items-center gap-4">
                     <a href="{{ route('revision.index') }}" 
-                       class="h-8 w-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200">
-                        <i class="fas fa-arrow-left text-sm"></i>
+                       class="flex items-center justify-center w-12 h-12 bg-gray-100 text-gray-600 rounded-xl hover:bg-[#B4325E] hover:text-white transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                        <i class="fas fa-arrow-left text-lg"></i>
                     </a>
-                    <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-[#9d2449] to-[#7a1d37] text-white">
-                        <i class="fas fa-search text-sm"></i>
+                    <div class="bg-gradient-to-br from-[#B4325E] to-[#93264B] rounded-xl p-3 shadow-md">
+                        <i class="fas fa-file-search text-white text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-lg font-bold bg-gradient-to-r from-[#9d2449] to-[#7a1d37] bg-clip-text text-transparent">
-                            Revisión #{{ str_pad($tramite->id, 6, '0', STR_PAD_LEFT) }}
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-[#B4325E] to-[#93264B] bg-clip-text text-transparent">
+                            Revisión de Trámite #{{ str_pad($tramite->id, 6, '0', STR_PAD_LEFT) }}
                         </h1>
-                        <p class="text-xs text-gray-500">
-                            {{ ucfirst($tramite->tipo_tramite) }} • 
+                        <p class="text-sm text-gray-600 mt-1">
                             {{ $tramite->solicitante->razon_social ?? $tramite->solicitante->nombre_completo ?? 'Sin información' }}
                         </p>
                     </div>
                 </div>
                 
                 <!-- Estado y Acciones -->
-                <div class="flex items-center space-x-3">
-                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                        {{ $tramite->estado == 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
-                           ($tramite->estado == 'En Revision' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') }}">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm {{ 
+                        $tramite->estado == 'Pendiente' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 
+                        ($tramite->estado == 'En Revision' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 
+                        ($tramite->estado == 'Por Cotejar' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-gray-50 text-gray-700 border border-gray-200')) 
+                    }}">
+                        <i class="fas fa-clock mr-2"></i>
                         {{ $tramite->estado }}
                     </span>
                     
-                    <!-- Botones de Acción -->
-                    <div class="flex items-center space-x-2">
-                        <!-- Aprobar Todo -->
+                    <div class="flex items-center space-x-3">
                         <form method="POST" action="{{ route('revision.aprobar-todo', $tramite->id) }}" style="display: inline;" 
                               onsubmit="return confirm('¿Está seguro de que desea aprobar todo el trámite?')">
                             @csrf
-                            <button type="submit" class="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
-                                <i class="fas fa-check mr-1 text-xs"></i>Aprobar Todo
+                            <button type="submit" class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl text-sm font-medium hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                                <i class="fas fa-check-double mr-2"></i>
+                                Aprobar Todo
                             </button>
                         </form>
                         
-                        <!-- Rechazar Todo -->
                         <button type="button" onclick="document.getElementById('modalRechazarTodo').classList.remove('hidden')" 
-                                class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
-                            <i class="fas fa-times mr-1 text-xs"></i>Rechazar Todo
+                                class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm font-medium hover:from-red-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                            <i class="fas fa-times mr-2"></i>
+                            Rechazar Todo
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Mensajes Flash -->
-        @if(session('success'))
-            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 mb-8">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-check-circle text-emerald-400 text-xl"></i>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-emerald-800">Éxito</h3>
-                        <div class="mt-2 text-sm text-emerald-700">
-                            <p>{{ session('success') }}</p>
                         </div>
-                    </div>
-                </div>
-            </div>
-        @endif
 
-        @if(session('error'))
-            <div class="bg-red-50 border border-red-200 rounded-2xl p-6 mb-8">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle text-red-400 text-xl"></i>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-red-800">Error</h3>
-                        <div class="mt-2 text-sm text-red-700">
-                            <p>{{ session('error') }}</p>
+    <!-- Form Container de Revisión -->
+    <div class="max-w-5xl mx-auto mt-4 sm:mt-8 bg-white rounded-2xl shadow-xl p-3 sm:p-4 md:p-8 relative z-10"
+         x-data="{ 
+            currentStep: 1,
+            totalSteps: 0,
+            tipoPersona: '{{ $tramite->solicitante->tipo_persona ?? 'Física' }}',
+            isPersonaFisica: '{{ $tramite->solicitante->tipo_persona ?? 'Física' }}' === 'Física',
+            tramiteId: '{{ $tramite->id }}',
+            steps: [],
+            init() {
+                this.totalSteps = this.isPersonaFisica ? 3 : 6;
+                this.steps = this.isPersonaFisica ? 
+                    [
+                        {number: '01', label: 'Datos Generales', icon: 'fas fa-user-circle'},
+                        {number: '02', label: 'Domicilio', icon: 'fas fa-map-marker-alt'},
+                        {number: '03', label: 'Documentos', icon: 'fas fa-folder'}
+                    ] : 
+                    [
+                        {number: '01', label: 'Datos Generales', icon: 'fas fa-user-circle'},
+                        {number: '02', label: 'Domicilio', icon: 'fas fa-map-marker-alt'},
+                        {number: '03', label: 'Constitución', icon: 'fas fa-building'},
+                        {number: '04', label: 'Accionistas', icon: 'fas fa-users'},
+                        {number: '05', label: 'Apoderado Legal', icon: 'fas fa-user-tie'},
+                        {number: '06', label: 'Documentos', icon: 'fas fa-folder'}
+                    ];
+            },
+            nextStep() {
+                if (this.currentStep < this.totalSteps) {
+                    this.currentStep++;
+                }
+            },
+            prevStep() {
+                if (this.currentStep > 1) {
+                    this.currentStep--;
+                }
+            },
+            goToStep(step) {
+                if (step >= 1 && step <= this.totalSteps) {
+                    this.currentStep = step;
+                }
+            }
+         }">
+         
+        <!-- Progress Indicator -->
+        <div class="mb-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#B4325E] to-[#93264B] text-white shadow-lg">
+                <span class="text-xl font-bold" x-text="currentStep">1</span>
+                <span class="text-sm">/</span>
+                <span class="text-lg" x-text="totalSteps">3</span>
                         </div>
+            <div class="mt-3 text-sm text-gray-600 font-medium" x-text="steps[currentStep - 1]?.label || ''">Datos Generales</div>
+            <div class="mt-1 text-xs text-gray-500">
+                Sección <span x-text="currentStep">1</span> de <span x-text="totalSteps">3</span>
                     </div>
-                </div>
-            </div>
-        @endif
+                    </div>
 
-        @if($errors->any())
-            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-8">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle text-amber-400 text-xl"></i>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-amber-800">Errores de validación</h3>
-                        <div class="mt-2 text-sm text-amber-700">
-                            <ul class="list-disc list-inside">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+        <!-- Desktop Progress Container -->
+        <div class="hidden md:block mb-8">
+            <div class="flex items-center justify-center space-x-4">
+                <template x-for="(step, index) in steps" :key="step.number">
+                    <div class="flex items-center">
+                        <button @click="goToStep(index + 1)" 
+                                class="relative flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 transform hover:scale-110"
+                                :class="currentStep === (index + 1) ? 'bg-gradient-to-br from-[#B4325E] to-[#93264B] text-white shadow-lg' : 
+                                        currentStep > (index + 1) ? 'bg-emerald-500 text-white shadow-md' : 'bg-gray-200 text-gray-500'">
+                            <i :class="step.icon" class="text-sm"></i>
+                        </button>
+                        <div x-show="index < steps.length - 1" class="w-16 h-0.5 mx-2"
+                             :class="currentStep > (index + 1) ? 'bg-emerald-500' : 'bg-gray-300'"></div>
                         </div>
+                </template>
                     </div>
+            <div class="flex items-center justify-center mt-3">
+                <template x-for="(step, index) in steps" :key="step.number">
+                    <div class="flex items-center">
+                        <div class="text-center">
+                            <div class="text-xs font-medium text-gray-600" x-text="step.number"></div>
+                            <div class="text-xs text-gray-500 mt-1" x-text="step.label"></div>
+                    </div>
+                        <div x-show="index < steps.length - 1" class="w-16"></div>
                 </div>
+                </template>
             </div>
-        @endif
+        </div>
 
-        <!-- Secciones de Revisión -->
-        <div class="space-y-6">
+        <!-- Contenido de las Secciones -->
+        <div class="max-w-4xl mx-auto">
             <!-- 01. Datos Generales -->
-            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 mb-8">
+            <div x-show="currentStep === 1" x-cloak class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
                 <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-8 py-5">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <h2 class="text-2xl font-bold text-white flex items-center">
                             <span class="bg-white/20 text-white rounded-full w-12 h-12 flex items-center justify-center text-base font-bold mr-4">01</span>
-                            <div class="flex items-center">
+                        <div class="flex items-center">
                                 <i class="fas fa-user-circle mr-3 text-2xl"></i>
                                 <span>Datos Generales</span>
                             </div>
-                        </h2>
+                                </h2>
+                        
                         <div class="flex items-center space-x-4">
                             @php
-                                $estado = $revisionesExistentes[1]['estado'] ?? 'pendiente';
+                                $estado = ($revisionesExistentes[1] ?? [])['estado'] ?? 'pendiente';
                                 $statusClass = $estado === 'aprobado' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
                                               ($estado === 'rechazado' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200');
                                 $iconClass = $estado === 'aprobado' ? 'fas fa-check-circle text-emerald-500' : 
                                             ($estado === 'rechazado' ? 'fas fa-times-circle text-rose-500' : 'fas fa-clock text-amber-500');
                             @endphp
-                            <div class="flex items-center px-4 py-2 rounded-full border text-sm font-medium {{ $statusClass }}">
-                                <i class="{{ $iconClass }} mr-2 text-lg"></i>
+                            <div class="flex items-center px-3 py-2 rounded-full border text-sm font-medium {{ $statusClass }}">
+                                <i class="{{ $iconClass }} mr-2"></i>
                                 <span>{{ ucfirst($estado) }}</span>
-                            </div>
-                            
-                            <!-- Documentos de la sección -->
-                            @if(isset($documentosPorSeccion['datos_generales']) && count($documentosPorSeccion['datos_generales']) > 0)
-                                <div class="flex items-center space-x-3">
-                                    @foreach($documentosPorSeccion['datos_generales'] as $documento)
-                                        <div class="tooltip-container tooltip-pdf">
-                                        <button onclick="mostrarDocumento('datos_generales', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                               class="documento-btn bg-blue-100 hover:bg-blue-200 text-blue-700 p-3 rounded-xl transition-all duration-200 border border-blue-300 relative z-50 hover:scale-105"
-                                               data-doc-seccion="datos_generales" 
-                                               data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
-                                               data-doc-nombre="{{ $documento['nombre'] }}"
-                                               oncontextmenu="seleccionarParaComparar(event, 'datos_generales', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                               title="{{ $documento['nombre'] }} - {{ $documento['descripcion'] }} | Clic derecho: Seleccionar para comparar">
-                                            <i class="fas fa-file-pdf text-base"></i>
-                                        </button>
-                                            <div class="custom-tooltip">
-                                                <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                    <span class="text-sm font-medium text-gray-600">{{ count($documentosPorSeccion['datos_generales']) }} doc(s)</span>
                                 </div>
-                            @else
-                                <span class="text-sm text-gray-400 italic">Sin documentos</span>
-                            @endif
                         </div>
                     </div>
                 </div>
                 
-                <!-- Contenido dinámico: Formulario completo o dividido -->
-                <div id="contenido-datos_generales">
-                    <!-- Inicialmente solo el formulario -->
                     <div class="p-8">
                         @include('components.formularios.seccion-datos-generales', [
-                            'datosTramite' => $datosTramite,
-                            'datosSolicitante' => $tramite->solicitante ? [
-                                'rfc' => $tramite->solicitante->rfc ?? $datosTramite['rfc'] ?? '',
-                                'curp' => $tramite->solicitante->curp ?? $datosTramite['curp'] ?? '',
-                                'tipo_persona' => $tramite->solicitante->tipo_persona ?? $datosTramite['tipo_persona'] ?? 'Física',
-                                'nombre_completo' => $tramite->solicitante->nombre_completo ?? $datosTramite['nombre_completo'] ?? '',
-                                'razon_social' => $tramite->solicitante->razon_social ?? $datosTramite['razon_social'] ?? '',
-                                'giro' => $tramite->solicitante->giro ?? $datosTramite['giro'] ?? ''
-                            ] : [],
+                        'datosGenerales' => $datosGenerales ?? null,
                             'readonly' => true
                         ])
                         
-                        <!-- Panel de revisión compacto -->
-                        <div class="mt-8 pt-6 border-t border-gray-200">
-                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 shadow-sm">
-                                <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-                                    <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xl"></i>
-                                    Revisión
-                                </h4>
+                    <!-- Panel de revisión -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6">
+                            <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                <i class="fas fa-clipboard-check text-[#9d2449] mr-3"></i>
+                                Revisión
+                            </h4>
+                            
+                            <div class="flex flex-col lg:flex-row gap-4">
+                                <!-- Formulario de Aprobar -->
+                                <form method="POST" action="{{ route('revision.seccion.aprobar', [$tramite->id, 1]) }}" class="flex-1">
+                                    @csrf
+                                    <div class="space-y-3">
+                                            <textarea name="comentario"
+                                                  placeholder="Comentarios opcionales..." 
+                                                  class="w-full rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-4 py-3" 
+                                                  rows="3">{{ ($revisionesExistentes[1] ?? [])['comentario'] ?? '' }}</textarea>
+                                        <button type="submit" 
+                                                class="w-full px-4 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-check mr-2"></i>Aprobar
+                                        </button>
+                                            </div>
+                                </form>
                                 
-                                <!-- Formularios compactos -->
-                                <div class="flex flex-col sm:flex-row gap-6">
-                                    <!-- Formulario de Aprobar -->
-                                    <form method="POST" action="{{ route('revision.seccion.aprobar', [$tramite->id, 1]) }}" class="flex-1">
-                                        @csrf
-                                        <div class="space-y-4">
-                                            <textarea name="comentario"
-                                                      placeholder="Comentarios opcionales..." 
-                                                      class="w-full text-sm rounded-xl border-gray-300 focus:border-green-400 focus:ring-2 focus:ring-green-200 resize-none px-4 py-3 leading-relaxed shadow-sm" 
-                                                      rows="3">{{ $revisionesExistentes[1]['comentario'] ?? '' }}</textarea>
-                                            <button type="submit" 
-                                                    class="w-full px-4 py-3 text-sm font-medium bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all duration-150 flex items-center justify-center shadow-sm hover:shadow-md">
-                                                <i class="fas fa-check mr-2 text-base"></i>Aprobar
-                                            </button>
-                                        </div>
-                                    </form>
-                                    
-                                    <!-- Formulario de Rechazar -->
-                                    <form method="POST" action="{{ route('revision.seccion.rechazar', [$tramite->id, 1]) }}" class="flex-1">
-                                        @csrf
-                                        <div class="space-y-4">
-                                            <textarea name="comentario"
-                                                      placeholder="Motivo del rechazo (requerido)..." 
-                                                      class="w-full text-sm rounded-xl border-gray-300 focus:border-red-400 focus:ring-2 focus:ring-red-200 resize-none px-4 py-3 leading-relaxed shadow-sm" 
-                                                      rows="3" required>{{ $estado === 'rechazado' ? ($revisionesExistentes[1]['comentario'] ?? '') : '' }}</textarea>
-                                            <button type="submit" 
-                                                    class="w-full px-4 py-3 text-sm font-medium bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-all duration-150 flex items-center justify-center shadow-sm hover:shadow-md">
-                                                <i class="fas fa-times mr-2 text-base"></i>Rechazar
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
+                                <!-- Formulario de Rechazar -->
+                                <form method="POST" action="{{ route('revision.seccion.rechazar', [$tramite->id, 1]) }}" class="flex-1">
+                                    @csrf
+                                    <div class="space-y-3">
+                                        <textarea name="comentario"
+                                                  placeholder="Motivo del rechazo (requerido)..." 
+                                                  class="w-full rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-4 py-3" 
+                                                  rows="3" required>{{ $estado === 'rechazado' ? (($revisionesExistentes[1] ?? [])['comentario'] ?? '') : '' }}</textarea>
+                                        <button type="submit" 
+                                                class="w-full px-4 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-times mr-2"></i>Rechazar
+                                        </button>
+                                    </div>
+                                </form>
+                                                        </div>
+                                                    </div>
                     </div>
                 </div>
             </div>
 
             <!-- 02. Domicilio -->
-            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 mb-8">
+            <div x-show="currentStep === 2" x-cloak class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
                 <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-8 py-5">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <h2 class="text-2xl font-bold text-white flex items-center">
@@ -236,94 +233,54 @@
                                 <span>Domicilio</span>
                             </div>
                         </h2>
+                        
                         <div class="flex items-center space-x-4">
                             @php
-                                $estado = $revisionesExistentes[2]['estado'] ?? 'pendiente';
+                                $estado = ($revisionesExistentes[2] ?? [])['estado'] ?? 'pendiente';
                                 $statusClass = $estado === 'aprobado' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
                                               ($estado === 'rechazado' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200');
                                 $iconClass = $estado === 'aprobado' ? 'fas fa-check-circle text-emerald-500' : 
                                             ($estado === 'rechazado' ? 'fas fa-times-circle text-rose-500' : 'fas fa-clock text-amber-500');
                             @endphp
-                            <div class="flex items-center px-4 py-2 rounded-full border text-sm font-medium {{ $statusClass }}">
-                                <i class="{{ $iconClass }} mr-2 text-lg"></i>
+                            <div class="flex items-center px-3 py-2 rounded-full border text-sm font-medium {{ $statusClass }}">
+                                <i class="{{ $iconClass }} mr-2"></i>
                                 <span>{{ ucfirst($estado) }}</span>
                             </div>
                             
-                            <!-- Documentos de la sección y Mapa -->
-                            <div class="flex items-center space-x-4">
-                                @if(isset($documentosPorSeccion['domicilio']) && count($documentosPorSeccion['domicilio']) > 0)
-                                    <div class="flex items-center space-x-3">
-                                        @foreach($documentosPorSeccion['domicilio'] as $documento)
-                                            <div class="tooltip-container tooltip-general">
-                                            <button onclick="mostrarDocumento('domicilio', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   class="documento-btn bg-green-100 hover:bg-green-200 text-green-700 p-3 rounded-xl transition-all duration-200 border border-green-300 relative z-50 hover:scale-105"
-                                                   data-doc-seccion="domicilio" 
-                                                   data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
-                                                   data-doc-nombre="{{ $documento['nombre'] }}"
-                                                   oncontextmenu="seleccionarParaComparar(event, 'domicilio', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   title="{{ $documento['nombre'] }} - {{ $documento['descripcion'] }} | Clic derecho: Seleccionar para comparar">
-                                                <i class="fas fa-file-pdf text-base"></i>
-                                            </button>
-                                                <div class="custom-tooltip">
-                                                    <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                    <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                        <span class="text-sm font-medium text-gray-600">{{ count($documentosPorSeccion['domicilio']) }} doc(s)</span>
-                                    </div>
-                                @else
-                                    <span class="text-sm text-gray-400 italic">Sin documentos</span>
-                                @endif
-                                
-                                <!-- Botón del Mapa -->
-                                <div class="tooltip-container tooltip-map">
                                 <button onclick="mostrarMapa('domicilio')"
-                                       class="documento-btn bg-blue-100 hover:bg-blue-200 text-blue-700 p-3 rounded-xl transition-all duration-200 border border-blue-300 relative z-50 hover:scale-105"
-                                       title="Ver ubicación en mapa">
-                                    <i class="fas fa-map-marker-alt text-base"></i>
+                                    class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg text-sm transition-colors flex items-center">
+                                <i class="fas fa-map mr-2"></i>Ver Mapa
                                 </button>
-                                    <div class="custom-tooltip">
-                                        <div class="font-medium">Ver Ubicación</div>
-                                        <div class="text-xs opacity-90 mt-1">Mapa interactivo con análisis de zona</div>
-                                        <div class="text-xs opacity-75 mt-1">Clic para abrir mapa</div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Contenido dinámico: Formulario completo o dividido -->
-                <div id="contenido-domicilio">
-                    <!-- Inicialmente solo el formulario -->
-                    <div class="p-8">
+                <div id="contenido-domicilio" class="p-8">
                         @include('components.formularios.seccion-domicilio', [
-                            'datosDomicilio' => $datosDomicilio,
+                        'datosDomicilio' => $domicilio ?? null,
                             'readonly' => true
                         ])
                         
-                        <!-- Panel de revisión compacto -->
+                    <!-- Panel de revisión -->
                         <div class="mt-8 pt-6 border-t border-gray-200">
-                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 shadow-sm">
+                        <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6">
                                 <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-                                    <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xl"></i>
+                                <i class="fas fa-clipboard-check text-[#9d2449] mr-3"></i>
                                     Revisión
                                 </h4>
                                 
-                                <!-- Formularios compactos -->
-                                <div class="flex flex-col sm:flex-row gap-6">
+                            <div class="flex flex-col lg:flex-row gap-4">
                                     <!-- Formulario de Aprobar -->
                                     <form method="POST" action="{{ route('revision.seccion.aprobar', [$tramite->id, 2]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-4">
+                                    <div class="space-y-3">
                                             <textarea name="comentario"
                                                       placeholder="Comentarios opcionales..." 
-                                                      class="w-full text-sm rounded-xl border-gray-300 focus:border-green-400 focus:ring-2 focus:ring-green-200 resize-none px-4 py-3 leading-relaxed shadow-sm" 
-                                                      rows="3">{{ $revisionesExistentes[2]['comentario'] ?? '' }}</textarea>
+                                                  class="w-full rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-4 py-3" 
+                                                  rows="3">{{ ($revisionesExistentes[2] ?? [])['comentario'] ?? '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-4 py-3 text-sm font-medium bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all duration-150 flex items-center justify-center shadow-sm hover:shadow-md">
-                                                <i class="fas fa-check mr-2 text-base"></i>Aprobar
+                                                class="w-full px-4 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-check mr-2"></i>Aprobar
                                             </button>
                                         </div>
                                     </form>
@@ -331,108 +288,77 @@
                                     <!-- Formulario de Rechazar -->
                                     <form method="POST" action="{{ route('revision.seccion.rechazar', [$tramite->id, 2]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-4">
+                                    <div class="space-y-3">
                                             <textarea name="comentario"
                                                       placeholder="Motivo del rechazo (requerido)..." 
-                                                      class="w-full text-sm rounded-xl border-gray-300 focus:border-red-400 focus:ring-2 focus:ring-red-200 resize-none px-4 py-3 leading-relaxed shadow-sm" 
-                                                      rows="3" required>{{ $estado === 'rechazado' ? ($revisionesExistentes[2]['comentario'] ?? '') : '' }}</textarea>
+                                                  class="w-full rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-4 py-3" 
+                                                  rows="3" required>{{ $estado === 'rechazado' ? (($revisionesExistentes[2] ?? [])['comentario'] ?? '') : '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-4 py-3 text-sm font-medium bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-all duration-150 flex items-center justify-center shadow-sm hover:shadow-md">
-                                                <i class="fas fa-times mr-2 text-base"></i>Rechazar
+                                                class="w-full px-4 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-times mr-2"></i>Rechazar
                                             </button>
                                         </div>
                                     </form>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            @if($tramite->solicitante && strtolower($tramite->solicitante->tipo_persona) === 'moral')
-            <!-- 03. Constitución -->
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-                <div class="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-gray-700 flex items-center">
-                            <span class="bg-[#9d2449] text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold mr-3">03</span>
+            <!-- 03. Constitución (Solo Persona Moral) -->
+            <div x-show="currentStep === 3 && !isPersonaFisica" x-cloak class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-8 py-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h2 class="text-2xl font-bold text-white flex items-center">
+                            <span class="bg-white/20 text-white rounded-full w-12 h-12 flex items-center justify-center text-base font-bold mr-4">03</span>
                             <div class="flex items-center">
-                                <i class="fas fa-building mr-2 text-lg text-[#9d2449]"></i>
+                                <i class="fas fa-building mr-3 text-2xl"></i>
                                 <span>Constitución</span>
                             </div>
                         </h2>
-                        <div class="flex items-center space-x-3">
+                        
+                        <div class="flex items-center space-x-4">
                             @php
-                                $estado = $revisionesExistentes[3]['estado'] ?? 'pendiente';
+                                $estado = ($revisionesExistentes[3] ?? [])['estado'] ?? 'pendiente';
                                 $statusClass = $estado === 'aprobado' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
                                               ($estado === 'rechazado' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200');
                                 $iconClass = $estado === 'aprobado' ? 'fas fa-check-circle text-emerald-500' : 
                                             ($estado === 'rechazado' ? 'fas fa-times-circle text-rose-500' : 'fas fa-clock text-amber-500');
                             @endphp
-                            <div class="flex items-center px-2 py-1 rounded-full border text-xs font-medium {{ $statusClass }}">
-                                <i class="{{ $iconClass }} mr-1 text-xs"></i>
+                            <div class="flex items-center px-3 py-2 rounded-full border text-sm font-medium {{ $statusClass }}">
+                                <i class="{{ $iconClass }} mr-2"></i>
                                 <span>{{ ucfirst($estado) }}</span>
                             </div>
-                            
-                            <!-- Documentos de la sección -->
-                            @if(isset($documentosPorSeccion['constitucion']) && count($documentosPorSeccion['constitucion']) > 0)
-                                <div class="flex items-center space-x-1">
-                                    @foreach($documentosPorSeccion['constitucion'] as $documento)
-                                        <div class="tooltip-container tooltip-pdf">
-                                        <button onclick="mostrarDocumento('constitucion', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   class="documento-btn bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-lg border border-purple-300"
-                                                   data-doc-seccion="constitucion" 
-                                                   data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
-                                                   data-doc-nombre="{{ $documento['nombre'] }}"
-                                                   oncontextmenu="seleccionarParaComparar(event, 'constitucion', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
-                                            <i class="fas fa-file-pdf text-sm"></i>
-                                        </button>
-                                            <div class="custom-tooltip">
-                                                <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                    <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['constitucion']) }} doc(s)</span>
-                                </div>
-                            @else
-                                <span class="text-xs text-gray-400 italic">Sin documentos</span>
-                            @endif
                         </div>
                     </div>
                 </div>
                 
-                <!-- Contenido dinámico: Formulario completo o dividido -->
-                <div id="contenido-constitucion">
-                    <!-- Inicialmente solo el formulario -->
-                    <div class="p-4">
+                <div class="p-8">
                         @include('components.formularios.seccion-constitucion', [
-                            'datosConstitucion' => $constitucion,
+                        'datosConstitutivos' => $datosConstitutivos ?? null,
                             'readonly' => true
                         ])
                         
-                        <!-- Panel de revisión compacto -->
-                        <div class="mt-6 pt-4 border-t border-gray-200">
-                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                                    <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xs"></i>
+                    <!-- Panel de revisión -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6">
+                            <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                <i class="fas fa-clipboard-check text-[#9d2449] mr-3"></i>
                                     Revisión
                                 </h4>
                                 
-                                <!-- Formularios compactos -->
-                                <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="flex flex-col lg:flex-row gap-4">
                                     <!-- Formulario de Aprobar -->
                                     <form method="POST" action="{{ route('revision.seccion.aprobar', [$tramite->id, 3]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                    <div class="space-y-3">
                                             <textarea name="comentario"
                                                       placeholder="Comentarios opcionales..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-3 py-2 leading-relaxed" 
-                                                      rows="3">{{ $revisionesExistentes[3]['comentario'] ?? '' }}</textarea>
+                                                  class="w-full rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-4 py-3" 
+                                                  rows="3">{{ ($revisionesExistentes[3] ?? [])['comentario'] ?? '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-check mr-1"></i>Aprobar
+                                                class="w-full px-4 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-check mr-2"></i>Aprobar
                                             </button>
                                         </div>
                                     </form>
@@ -440,107 +366,77 @@
                                     <!-- Formulario de Rechazar -->
                                     <form method="POST" action="{{ route('revision.seccion.rechazar', [$tramite->id, 3]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                    <div class="space-y-3">
                                             <textarea name="comentario"
                                                       placeholder="Motivo del rechazo (requerido)..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-3 py-2 leading-relaxed" 
-                                                      rows="3" required>{{ $estado === 'rechazado' ? ($revisionesExistentes[3]['comentario'] ?? '') : '' }}</textarea>
+                                                  class="w-full rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-4 py-3" 
+                                                  rows="3" required>{{ $estado === 'rechazado' ? (($revisionesExistentes[3] ?? [])['comentario'] ?? '') : '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-times mr-1"></i>Rechazar
+                                                class="w-full px-4 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-times mr-2"></i>Rechazar
                                             </button>
                                         </div>
                                     </form>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 04. Accionistas -->
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-                <div class="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-gray-700 flex items-center">
-                            <span class="bg-[#9d2449] text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold mr-3">04</span>
+            <!-- 04. Accionistas (Solo Persona Moral) -->
+            <div x-show="currentStep === 4 && !isPersonaFisica" x-cloak class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-8 py-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h2 class="text-2xl font-bold text-white flex items-center">
+                            <span class="bg-white/20 text-white rounded-full w-12 h-12 flex items-center justify-center text-base font-bold mr-4">04</span>
                             <div class="flex items-center">
-                                <i class="fas fa-users mr-2 text-lg text-[#9d2449]"></i>
+                                <i class="fas fa-users mr-3 text-2xl"></i>
                                 <span>Accionistas</span>
                             </div>
                         </h2>
-                        <div class="flex items-center space-x-3">
+                        
+                        <div class="flex items-center space-x-4">
                             @php
-                                $estado = $revisionesExistentes[4]['estado'] ?? 'pendiente';
+                                $estado = ($revisionesExistentes[4] ?? [])['estado'] ?? 'pendiente';
                                 $statusClass = $estado === 'aprobado' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
                                               ($estado === 'rechazado' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200');
                                 $iconClass = $estado === 'aprobado' ? 'fas fa-check-circle text-emerald-500' : 
                                             ($estado === 'rechazado' ? 'fas fa-times-circle text-rose-500' : 'fas fa-clock text-amber-500');
                             @endphp
-                            <div class="flex items-center px-2 py-1 rounded-full border text-xs font-medium {{ $statusClass }}">
-                                <i class="{{ $iconClass }} mr-1 text-xs"></i>
+                            <div class="flex items-center px-3 py-2 rounded-full border text-sm font-medium {{ $statusClass }}">
+                                <i class="{{ $iconClass }} mr-2"></i>
                                 <span>{{ ucfirst($estado) }}</span>
                             </div>
-                            
-                            <!-- Documentos de la sección -->
-                            @if(isset($documentosPorSeccion['accionistas']) && count($documentosPorSeccion['accionistas']) > 0)
-                                <div class="flex items-center space-x-1">
-                                    @foreach($documentosPorSeccion['accionistas'] as $documento)
-                                        <div class="tooltip-container tooltip-general">
-                                        <button onclick="mostrarDocumento('accionistas', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   class="documento-btn bg-amber-100 hover:bg-amber-200 text-amber-700 p-2 rounded-lg border border-amber-300"
-                                                   data-doc-seccion="accionistas" 
-                                                   data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
-                                                   data-doc-nombre="{{ $documento['nombre'] }}"
-                                                   oncontextmenu="seleccionarParaComparar(event, 'accionistas', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
-                                            <i class="fas fa-file-pdf text-sm"></i>
-                                        </button>
-                                            <div class="custom-tooltip">
-                                                <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                    <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['accionistas']) }} doc(s)</span>
-                                </div>
-                            @else
-                                <span class="text-xs text-gray-400 italic">Sin documentos</span>
-                            @endif
                         </div>
                     </div>
                 </div>
                 
-                <!-- Contenido dinámico: Formulario completo o dividido -->
-                <div id="contenido-accionistas">
-                    <!-- Inicialmente solo el formulario -->
-                    <div class="p-4">
+                <div class="p-8">
                         @include('components.formularios.seccion-accionistas', [
-                            'accionistas' => $accionistas,
+                        'accionistas' => $accionistas ?? null,
                             'readonly' => true
                         ])
                         
-                        <!-- Panel de revisión compacto -->
-                        <div class="mt-6 pt-4 border-t border-gray-200">
-                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                                    <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xs"></i>
+                    <!-- Panel de revisión -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6">
+                            <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                <i class="fas fa-clipboard-check text-[#9d2449] mr-3"></i>
                                     Revisión
                                 </h4>
                                 
-                                <!-- Formularios compactos -->
-                                <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="flex flex-col lg:flex-row gap-4">
                                     <!-- Formulario de Aprobar -->
                                     <form method="POST" action="{{ route('revision.seccion.aprobar', [$tramite->id, 4]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                    <div class="space-y-3">
                                             <textarea name="comentario"
                                                       placeholder="Comentarios opcionales..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-3 py-2 leading-relaxed" 
-                                                      rows="3">{{ $revisionesExistentes[4]['comentario'] ?? '' }}</textarea>
+                                                  class="w-full rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-4 py-3" 
+                                                  rows="3">{{ ($revisionesExistentes[4] ?? [])['comentario'] ?? '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-check mr-1"></i>Aprobar
+                                                class="w-full px-4 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-check mr-2"></i>Aprobar
                                             </button>
                                         </div>
                                     </form>
@@ -548,107 +444,77 @@
                                     <!-- Formulario de Rechazar -->
                                     <form method="POST" action="{{ route('revision.seccion.rechazar', [$tramite->id, 4]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                    <div class="space-y-3">
                                             <textarea name="comentario"
                                                       placeholder="Motivo del rechazo (requerido)..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-3 py-2 leading-relaxed" 
-                                                      rows="3" required>{{ $estado === 'rechazado' ? ($revisionesExistentes[4]['comentario'] ?? '') : '' }}</textarea>
+                                                  class="w-full rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-4 py-3" 
+                                                  rows="3" required>{{ $estado === 'rechazado' ? (($revisionesExistentes[4] ?? [])['comentario'] ?? '') : '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-times mr-1"></i>Rechazar
+                                                class="w-full px-4 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-times mr-2"></i>Rechazar
                                             </button>
                                         </div>
                                     </form>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 05. Apoderado Legal -->
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-                <div class="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-gray-700 flex items-center">
-                            <span class="bg-[#9d2449] text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold mr-3">05</span>
+            <!-- 05. Apoderado Legal (Solo Persona Moral) -->
+            <div x-show="currentStep === 5 && !isPersonaFisica" x-cloak class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-8 py-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h2 class="text-2xl font-bold text-white flex items-center">
+                            <span class="bg-white/20 text-white rounded-full w-12 h-12 flex items-center justify-center text-base font-bold mr-4">05</span>
                             <div class="flex items-center">
-                                <i class="fas fa-user-tie mr-2 text-lg text-[#9d2449]"></i>
+                                <i class="fas fa-user-tie mr-3 text-2xl"></i>
                                 <span>Apoderado Legal</span>
                             </div>
                         </h2>
-                        <div class="flex items-center space-x-3">
+                        
+                        <div class="flex items-center space-x-4">
                             @php
-                                $estado = $revisionesExistentes[5]['estado'] ?? 'pendiente';
+                                $estado = ($revisionesExistentes[5] ?? [])['estado'] ?? 'pendiente';
                                 $statusClass = $estado === 'aprobado' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
                                               ($estado === 'rechazado' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200');
                                 $iconClass = $estado === 'aprobado' ? 'fas fa-check-circle text-emerald-500' : 
                                             ($estado === 'rechazado' ? 'fas fa-times-circle text-rose-500' : 'fas fa-clock text-amber-500');
                             @endphp
-                            <div class="flex items-center px-2 py-1 rounded-full border text-xs font-medium {{ $statusClass }}">
-                                <i class="{{ $iconClass }} mr-1 text-xs"></i>
+                            <div class="flex items-center px-3 py-2 rounded-full border text-sm font-medium {{ $statusClass }}">
+                                <i class="{{ $iconClass }} mr-2"></i>
                                 <span>{{ ucfirst($estado) }}</span>
                             </div>
-                            
-                            <!-- Documentos de la sección -->
-                            @if(isset($documentosPorSeccion['apoderado']) && count($documentosPorSeccion['apoderado']) > 0)
-                                <div class="flex items-center space-x-1">
-                                    @foreach($documentosPorSeccion['apoderado'] as $documento)
-                                        <div class="tooltip-container tooltip-pdf">
-                                        <button onclick="mostrarDocumento('apoderado', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   class="documento-btn bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg border border-red-300"
-                                                   data-doc-seccion="apoderado" 
-                                                   data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
-                                                   data-doc-nombre="{{ $documento['nombre'] }}"
-                                                   oncontextmenu="seleccionarParaComparar(event, 'apoderado', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
-                                            <i class="fas fa-file-pdf text-sm"></i>
-                                        </button>
-                                            <div class="custom-tooltip">
-                                                <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                    <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['apoderado']) }} doc(s)</span>
-                                </div>
-                            @else
-                                <span class="text-xs text-gray-400 italic">Sin documentos</span>
-                            @endif
                         </div>
                     </div>
                 </div>
                 
-                <!-- Contenido dinámico: Formulario completo o dividido -->
-                <div id="contenido-apoderado">
-                    <!-- Inicialmente solo el formulario -->
-                    <div class="p-4">
+                <div class="p-8">
                         @include('components.formularios.seccion-apoderado', [
-                            'datosApoderado' => $apoderado,
+                        'datosApoderado' => $apoderado ?? null,
                             'readonly' => true
                         ])
                         
-                        <!-- Panel de revisión compacto -->
-                        <div class="mt-6 pt-4 border-t border-gray-200">
-                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                                    <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xs"></i>
+                    <!-- Panel de revisión -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6">
+                            <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                <i class="fas fa-clipboard-check text-[#9d2449] mr-3"></i>
                                     Revisión
                                 </h4>
                                 
-                                <!-- Formularios compactos -->
-                                <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="flex flex-col lg:flex-row gap-4">
                                     <!-- Formulario de Aprobar -->
                                     <form method="POST" action="{{ route('revision.seccion.aprobar', [$tramite->id, 5]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                    <div class="space-y-3">
                                             <textarea name="comentario"
                                                       placeholder="Comentarios opcionales..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-3 py-2 leading-relaxed" 
-                                                      rows="3">{{ $revisionesExistentes[5]['comentario'] ?? '' }}</textarea>
+                                                  class="w-full rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-4 py-3" 
+                                                  rows="3">{{ ($revisionesExistentes[5] ?? [])['comentario'] ?? '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-check mr-1"></i>Aprobar
+                                                class="w-full px-4 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-check mr-2"></i>Aprobar
                                             </button>
                                         </div>
                                     </form>
@@ -656,14 +522,14 @@
                                     <!-- Formulario de Rechazar -->
                                     <form method="POST" action="{{ route('revision.seccion.rechazar', [$tramite->id, 5]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                    <div class="space-y-3">
                                             <textarea name="comentario"
                                                       placeholder="Motivo del rechazo (requerido)..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-3 py-2 leading-relaxed" 
-                                                      rows="3" required>{{ $estado === 'rechazado' ? ($revisionesExistentes[5]['comentario'] ?? '') : '' }}</textarea>
+                                                  class="w-full rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-4 py-3" 
+                                                  rows="3" required>{{ $estado === 'rechazado' ? (($revisionesExistentes[5] ?? [])['comentario'] ?? '') : '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-times mr-1"></i>Rechazar
+                                                class="w-full px-4 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-times mr-2"></i>Rechazar
                                             </button>
                                         </div>
                                     </form>
@@ -672,484 +538,199 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            @endif
 
-            <!-- 06. Documentos -->
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-                <div class="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-gray-700 flex items-center">
-                            <span class="bg-[#9d2449] text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold mr-3">06</span>
+            <!-- Documentos - Para Persona Física en paso 3, para Moral en paso 6 -->
+            <div x-show="(isPersonaFisica && currentStep === 3) || (!isPersonaFisica && currentStep === 6)" x-cloak class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-8 py-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h2 class="text-2xl font-bold text-white flex items-center">
+                            <span class="bg-white/20 text-white rounded-full w-12 h-12 flex items-center justify-center text-base font-bold mr-4" x-text="isPersonaFisica ? '03' : '06'">03</span>
                             <div class="flex items-center">
-                                <i class="fas fa-folder mr-2 text-lg text-[#9d2449]"></i>
+                                <i class="fas fa-folder mr-3 text-2xl"></i>
                                 <span>Documentos</span>
                             </div>
                         </h2>
-                        <div class="flex items-center space-x-3">
+                        
+                        <div class="flex items-center space-x-4">
                             @php
-                                $estado = $revisionesExistentes[6]['estado'] ?? 'pendiente';
+                                $numSeccionDoc = $tramite->solicitante->tipo_persona === 'Física' ? 3 : 6;
+                                $estado = ($revisionesExistentes[$numSeccionDoc] ?? [])['estado'] ?? 'pendiente';
                                 $statusClass = $estado === 'aprobado' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
                                               ($estado === 'rechazado' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200');
                                 $iconClass = $estado === 'aprobado' ? 'fas fa-check-circle text-emerald-500' : 
                                             ($estado === 'rechazado' ? 'fas fa-times-circle text-rose-500' : 'fas fa-clock text-amber-500');
                             @endphp
-                            <div class="flex items-center px-2 py-1 rounded-full border text-xs font-medium {{ $statusClass }}">
-                                <i class="{{ $iconClass }} mr-1 text-xs"></i>
+                            <div class="flex items-center px-3 py-2 rounded-full border text-sm font-medium {{ $statusClass }}">
+                                <i class="{{ $iconClass }} mr-2"></i>
                                 <span>{{ ucfirst($estado) }}</span>
                             </div>
-                            
-                            <!-- Documentos de la sección -->
-                            @if(isset($documentosPorSeccion['documentos']) && count($documentosPorSeccion['documentos']) > 0)
-                                <div class="flex items-center space-x-1">
-                                    @foreach($documentosPorSeccion['documentos'] as $documento)
-                                        <div class="tooltip-container tooltip-general">
-                                        <button onclick="mostrarDocumento('documentos', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   class="documento-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 p-2 rounded-lg border border-indigo-300"
-                                                   data-doc-seccion="documentos" 
-                                                   data-doc-ruta="{{ $documento['ruta_archivo'] }}" 
-                                                   data-doc-nombre="{{ $documento['nombre'] }}"
-                                                   oncontextmenu="seleccionarParaComparar(event, 'documentos', '{{ $documento['ruta_archivo'] }}', '{{ $documento['nombre'] }}')"
-                                                   title="Clic izquierdo: Ver | Clic derecho: Seleccionar para comparar">
-                                            <i class="fas fa-file-pdf text-sm"></i>
-                                        </button>
-                                            <div class="custom-tooltip">
-                                                <div class="font-medium">{{ $documento['nombre'] }}</div>
-                                                <div class="text-xs opacity-75 mt-1">Clic izquierdo: Ver | Clic derecho: Comparar</div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                    <span class="text-xs text-gray-500 ml-2">{{ count($documentosPorSeccion['documentos']) }} doc(s)</span>
-                                </div>
-                            @else
-                                <span class="text-xs text-gray-400 italic">Sin documentos</span>
-                            @endif
                         </div>
                     </div>
                 </div>
                 
-                <!-- Contenido dinámico: Formulario completo o dividido -->
-                <div id="contenido-documentos">
-                    <!-- Inicialmente solo el formulario -->
-                    <div class="p-4">
+                <div class="p-8">
                         @include('components.formularios.seccion-documentos', [
-                            'documentos' => $documentos,
+                        'documentos' => $documentos ?? null,
                             'readonly' => true
                         ])
                         
-                        <!-- Panel de revisión compacto -->
-                        <div class="mt-6 pt-4 border-t border-gray-200">
-                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                                    <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xs"></i>
+                    <!-- Panel de revisión -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6">
+                            <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                <i class="fas fa-clipboard-check text-[#9d2449] mr-3"></i>
                                     Revisión
                                 </h4>
                                 
-                                <!-- Formularios compactos -->
-                                <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="flex flex-col lg:flex-row gap-4">
                                     <!-- Formulario de Aprobar -->
-                                    <form method="POST" action="{{ route('revision.seccion.aprobar', [$tramite->id, 6]) }}" class="flex-1">
+                                <form method="POST" action="{{ route('revision.seccion.aprobar', [$tramite->id, $numSeccionDoc]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                    <div class="space-y-3">
                                             <textarea name="comentario"
                                                       placeholder="Comentarios opcionales..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-3 py-2 leading-relaxed" 
-                                                      rows="3">{{ $revisionesExistentes[6]['comentario'] ?? '' }}</textarea>
+                                                  class="w-full rounded-lg border-gray-300 focus:border-green-400 focus:ring-1 focus:ring-green-200 resize-none px-4 py-3" 
+                                                  rows="3">{{ ($revisionesExistentes[$numSeccionDoc] ?? [])['comentario'] ?? '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-check mr-1"></i>Aprobar
+                                                class="w-full px-4 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-check mr-2"></i>Aprobar
                                             </button>
                                         </div>
                                     </form>
                                     
                                     <!-- Formulario de Rechazar -->
-                                    <form method="POST" action="{{ route('revision.seccion.rechazar', [$tramite->id, 6]) }}" class="flex-1">
+                                <form method="POST" action="{{ route('revision.seccion.rechazar', [$tramite->id, $numSeccionDoc]) }}" class="flex-1">
                                         @csrf
-                                        <div class="space-y-2">
+                                    <div class="space-y-3">
                                             <textarea name="comentario"
                                                       placeholder="Motivo del rechazo (requerido)..." 
-                                                      class="w-full text-sm rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-3 py-2 leading-relaxed" 
-                                                      rows="3" required>{{ $estado === 'rechazado' ? ($revisionesExistentes[6]['comentario'] ?? '') : '' }}</textarea>
+                                                  class="w-full rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 resize-none px-4 py-3" 
+                                                  rows="3" required>{{ $estado === 'rechazado' ? (($revisionesExistentes[$numSeccionDoc] ?? [])['comentario'] ?? '') : '' }}</textarea>
                                             <button type="submit" 
-                                                    class="w-full px-3 py-2 text-xs font-medium bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center">
-                                                <i class="fas fa-times mr-1"></i>Rechazar
+                                                class="w-full px-4 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors duration-150 flex items-center justify-center font-medium">
+                                            <i class="fas fa-times mr-2"></i>Rechazar
                                             </button>
                                         </div>
                                     </form>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Panel de Comparación de Documentos -->
-        <div id="panel-comparacion" class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 mt-6 hidden">
-            <div class="bg-gradient-to-r from-blue-100 to-indigo-200 px-4 py-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-700 flex items-center">
-                        <span class="bg-[#9d2449] text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold mr-3">
-                            <i class="fas fa-columns"></i>
-                        </span>
-                        <span>Comparación de Documentos</span>
-                    </h3>
-                    <div class="flex items-center space-x-2">
-                        <span id="contador-seleccionados" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">0/2 seleccionados</span>
-                        <button onclick="limpiarSeleccionComparacion()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1 rounded">
-                            <i class="fas fa-eraser mr-1"></i>Limpiar
+            <!-- Navegación entre Secciones -->
+            <div class="flex flex-col sm:flex-row justify-between gap-4 mt-8">
+                <button @click="prevStep()" 
+                        :disabled="currentStep === 1"
+                        :class="currentStep === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'"
+                        class="flex items-center px-6 py-3 bg-gray-500 text-white rounded-xl transition-all duration-300 font-medium">
+                    <i class="fas fa-chevron-left mr-2"></i>
+                    Anterior
                         </button>
-                        <button onclick="cerrarComparacion()" class="text-xs bg-red-200 hover:bg-red-300 text-red-700 px-2 py-1 rounded">
-                            <i class="fas fa-times mr-1"></i>Cerrar
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="p-4">
-                <!-- Lista de documentos seleccionados -->
-                <div id="documentos-seleccionados" class="mb-4">
-                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Documentos seleccionados:</h4>
-                    <div id="lista-seleccionados" class="space-y-2 text-sm text-gray-600">
-                        <p class="italic">Haga clic derecho en los documentos para seleccionarlos</p>
-                    </div>
-                </div>
                 
-                <!-- Botón para comparar -->
-                <div class="flex justify-center">
-                    <button id="btn-comparar" onclick="iniciarComparacion()" disabled 
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
-                        <i class="fas fa-eye mr-2"></i>Comparar Documentos
+                <button @click="nextStep()" 
+                        :disabled="currentStep === totalSteps"
+                        :class="currentStep === totalSteps ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'"
+                        class="flex items-center px-6 py-3 bg-[#9d2449] text-white rounded-xl transition-all duration-300 font-medium">
+                    Siguiente
+                    <i class="fas fa-chevron-right ml-2"></i>
                     </button>
                 </div>
             </div>
-        </div>
+    </div>
+</div>
 
-        <!-- Panel de Comentarios Generales de Revisión -->
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 mt-8">
-            <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-8 py-5">
-                <h3 class="text-2xl font-bold text-white flex items-center">
-                    <span class="bg-white/20 text-white rounded-full w-12 h-12 flex items-center justify-center text-base font-bold mr-4">
-                        <i class="fas fa-comments text-xl"></i>
-                    </span>
-                    <span>Comentarios Generales</span>
+<!-- Modal Rechazar Todo -->
+<div id="modalRechazarTodo" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50">
+    <div class="h-full flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
+            <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 rounded-t-2xl">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-3"></i>
+                    Rechazar Todo el Trámite
                 </h3>
             </div>
             
-            <!-- Panel de revisión compacto -->
-            <div class="p-8">
-                <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 shadow-sm">
-                    <h4 class="text-lg font-semibold text-gray-700 mb-6 flex items-center">
-                        <i class="fas fa-clipboard-check text-[#9d2449] mr-2 text-xl"></i>
-                        Comentarios Existentes
-                    </h4>
-                    
-                    <!-- Comentarios existentes -->
-                    <div class="mb-8">
-                        @if(isset($comentariosGenerales) && count($comentariosGenerales) > 0)
-                            <div class="space-y-4">
-                                @foreach($comentariosGenerales as $comentario)
-                                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
-                                        <div class="flex items-start justify-between mb-3">
-                                            <div class="flex items-center">
-                                                <div class="bg-[#9d2449] rounded-full w-10 h-10 flex items-center justify-center mr-3">
-                                                    <i class="fas fa-user text-white text-lg"></i>
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-gray-900">{{ $comentario['autor'] }}</p>
-                                                    <p class="text-xs text-gray-500">{{ $comentario['fecha'] }}</p>
-                                                </div>
-                                            </div>
-                                            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">General</span>
-                                        </div>
-                                        <div class="bg-gray-50 rounded-lg p-3">
-                                            <p class="text-gray-700 text-sm leading-relaxed">{{ trim($comentario['texto']) }}</p>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="flex items-center justify-center h-32 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                                <div class="text-center text-gray-400">
-                                    <i class="fas fa-comment-slash text-3xl mb-2"></i>
-                                    <p class="text-sm font-medium">No hay comentarios</p>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                
-                    <!-- Formulario compacto -->
-                    <form method="POST" action="{{ route('revision.agregar-comentario', $tramite->id) }}" class="space-y-4">
-                        @csrf
-                        <div class="relative">
-                            <textarea name="comentario_general" rows="3" required
-                                    class="w-full text-sm rounded-xl border-gray-300 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 resize-none px-4 py-3 leading-relaxed shadow-sm"
-                                    placeholder="Escribe un nuevo comentario general..."></textarea>
-                            <div class="absolute bottom-3 right-3 text-xs text-gray-400">
-                                <i class="fas fa-pencil-alt"></i>
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-end">
-                            <button type="submit" 
-                                    class="px-6 py-3 text-sm font-medium bg-[#9d2449] hover:bg-[#7a1d37] text-white rounded-xl transition-all duration-200 flex items-center shadow-sm hover:shadow-md">
-                                <i class="fas fa-paper-plane mr-2 text-base"></i>Agregar Comentario
-                            </button>
-                        </div>
-                    </form>
+            <form method="POST" action="{{ route('revision.rechazar-todo', $tramite->id) }}" class="p-6">
+                @csrf
+                <div class="mb-6">
+                    <p class="text-gray-700 mb-4">
+                        ¿Está seguro de que desea rechazar todo el trámite? Esta acción no se puede deshacer.
+                    </p>
+                    <label for="comentario_rechazo_todo" class="block text-sm font-medium text-gray-700 mb-2">
+                        Motivo del rechazo (requerido):
+                    </label>
+                    <textarea name="comentario" 
+                              id="comentario_rechazo_todo"
+                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-200 focus:border-red-400" 
+                              rows="4" 
+                              placeholder="Escriba el motivo del rechazo..."
+                              required></textarea>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modales -->
-
-<!-- Modal de Comparación de Documentos -->
-<div id="modal-comparacion-documentos" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50">
-    <div class="h-full flex flex-col">
-        <!-- Header del modal -->
-        <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center">
-                <i class="fas fa-columns text-blue-600 mr-3 text-xl"></i>
-                <h3 class="text-lg font-semibold text-gray-900">Comparación de Documentos</h3>
-            </div>
-            <div class="flex items-center space-x-4">
-                <div id="info-documentos-comparacion" class="text-sm text-gray-600"></div>
-                <button onclick="cerrarModalComparacion()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
+                
+                <div class="flex items-center justify-end space-x-3">
+                    <button type="button" 
+                            onclick="document.getElementById('modalRechazarTodo').classList.add('hidden')"
+                            class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Rechazar Todo
                 </button>
             </div>
-        </div>
-        
-        <!-- Contenido del modal - documentos lado a lado -->
-        <div class="flex-1 flex overflow-hidden">
-            <!-- Documento 1 -->
-            <div class="flex-1 flex flex-col border-r border-gray-300">
-                <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                        <div class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2">1</div>
-                        <span id="nombre-documento-1" class="text-sm font-medium text-gray-700"></span>
-                        <span id="seccion-documento-1" class="text-xs text-gray-500 ml-2"></span>
-                    </div>
-                </div>
-                <div class="flex-1 overflow-hidden">
-                    <iframe id="iframe-documento-1" class="w-full h-full border-0"></iframe>
-                </div>
-            </div>
-            
-            <!-- Documento 2 -->
-            <div class="flex-1 flex flex-col">
-                <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                        <div class="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2">2</div>
-                        <span id="nombre-documento-2" class="text-sm font-medium text-gray-700"></span>
-                        <span id="seccion-documento-2" class="text-xs text-gray-500 ml-2"></span>
-                    </div>
-                </div>
-                <div class="flex-1 overflow-hidden">
-                    <iframe id="iframe-documento-2" class="w-full h-full border-0"></iframe>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
-
-<div id="modalRechazarTodo" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-    <div class="bg-white rounded-lg p-4 max-w-sm w-full mx-4">
-        <form method="POST" action="{{ route('revision.rechazar-todo', $tramite->id) }}">
-            @csrf
-            <h3 class="text-lg font-semibold text-gray-900 mb-3">Rechazar Todo</h3>
-            <p class="text-gray-600 text-sm mb-3">¿Está seguro? Debe proporcionar un motivo.</p>
-            <textarea name="comentario_general" rows="3" required class="w-full text-sm rounded-lg border-gray-300 focus:border-red-400 focus:ring-1 focus:ring-red-200 mb-3" placeholder="Motivo del rechazo..."></textarea>
-            <div class="flex gap-2">
-                <button type="button" onclick="document.getElementById('modalRechazarTodo').classList.add('hidden')" class="flex-1 px-3 py-2 text-sm bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">Cancelar</button>
-                <button type="submit" class="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">Rechazar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-/* Contenedores de sección con overflow visible para tooltips */
-.bg-white.rounded-xl.shadow-lg {
-    position: relative;
-    overflow: visible !important;
+.min-h-screen {
+    background: #f9fafb;
 }
 
-.bg-gradient-to-r.from-gray-100.to-gray-200 {
-    overflow: visible !important;
+.transition-colors {
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Tooltips elegantes que salen fuera del contenedor */
-.tooltip-container {
-    position: relative;
-    z-index: 100;
+.hover\:shadow-md:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.tooltip-container:hover .custom-tooltip {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(-5px);
+/* Animaciones para Alpine.js */
+[x-cloak] {
+    display: none !important;
 }
 
-.custom-tooltip {
-    position: absolute;
-    bottom: calc(100% + 10px);
-    left: 50%;
-    transform: translateX(-50%) translateY(5px);
-    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 500;
-    white-space: nowrap;
-    z-index: 10000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.2s ease-in-out;
-    pointer-events: none;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    max-width: 250px;
-    text-align: center;
-    line-height: 1.3;
+.animate-shimmer {
+    animation: shimmer 3s linear infinite;
 }
 
-.custom-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: #1f2937;
-    z-index: 10001;
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
-/* Estilos específicos para botones de documentos */
-.documento-btn {
-    transition: all 0.2s ease-in-out;
-    position: relative;
-    z-index: 50;
+/* Mejoras para los formularios */
+.form-container {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
-.documento-btn:hover {
-    transform: translateY(-1px);
-    z-index: 100;
+/* Estilos para botones hover mejorados */
+.hover\:scale-105:hover {
+    transform: scale(1.05);
 }
 
-/* Diferentes colores para diferentes tipos de tooltips */
-.tooltip-pdf .custom-tooltip {
-    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-}
-
-.tooltip-pdf .custom-tooltip::after {
-    border-top-color: #dc2626;
-}
-
-.tooltip-map .custom-tooltip {
-    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-}
-
-.tooltip-map .custom-tooltip::after {
-    border-top-color: #2563eb;
-}
-
-.tooltip-general .custom-tooltip {
-    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-}
-
-.tooltip-general .custom-tooltip::after {
-    border-top-color: #059669;
-}
-
-/* Asegurar que los contenedores padre no corten los tooltips */
-.min-h-screen, .max-w-full, .space-y-6 {
-    overflow: visible !important;
-}
-
-/* Ajustes para responsive */
-@media (max-width: 768px) {
-    .custom-tooltip {
-        font-size: 10px;
-        padding: 6px 8px;
-        max-width: 200px;
-        bottom: calc(100% + 8px);
-    }
-}
-
-/* Animación suave para los iconos */
-.documento-btn i, .tooltip-container i {
-    transition: transform 0.2s ease-in-out;
-}
-
-.documento-btn:hover i, .tooltip-container:hover i {
+.hover\:scale-110:hover {
     transform: scale(1.1);
 }
 
-/* Estilos para comparación de documentos */
-.documento-seleccionado {
-    position: relative;
-    box-shadow: 0 0 0 2px #3b82f6 !important;
-    background: #eff6ff !important;
-}
-
-.documento-seleccionado::after {
-    content: '✓';
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: #3b82f6;
-    color: white;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: bold;
-    z-index: 10;
-}
-
-/* Prevenir selección de texto en botones */
-.documento-btn {
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-}
-
-/* Estilos para el modal de comparación */
-#modal-comparacion-documentos {
-    backdrop-filter: blur(4px);
-}
-
-#modal-comparacion-documentos iframe {
-    background: white;
-}
-
-/* Indicador de carga para iframes */
-.iframe-loading {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
+/* Gradientes mejorados */
+.bg-gradient-to-br {
+    background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
 </style>
 @endpush
@@ -1168,11 +749,19 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🗺️ MapHandler disponible:', typeof mapHandler !== 'undefined');
 });
 
-// Función para mostrar mapa usando el nuevo componente
+// Variable global para controlar el mapa abierto
+window.mapaAbierto = null;
+
+// Función para mostrar mapa (solo uno a la vez)
 function mostrarMapa(seccion) {
-    // Cerrar cualquier documento o mapa abierto en otras secciones
-    if (window.documentViewer) {
-        window.documentViewer.closeAllOtherSections(seccion);
+    // Si ya hay un mapa abierto, cerrarlo primero
+    if (window.mapaAbierto && window.mapaAbierto !== seccion) {
+        cerrarMapa(window.mapaAbierto);
+    }
+    
+    // Si ya está abierto este mapa, no hacer nada
+    if (window.mapaAbierto === seccion) {
+        return;
     }
     
     // Obtener el contenedor de la sección
@@ -1182,54 +771,38 @@ function mostrarMapa(seccion) {
         return;
     }
     
-    // Guardar contenido original si no está guardado
-    if (window.documentViewer && !window.documentViewer.originalContent.has(seccion)) {
-        window.documentViewer.originalContent.set(seccion, contenedor.innerHTML);
+    // Guardar contenido original
+    if (!contenedor.dataset.originalContent) {
+        contenedor.dataset.originalContent = contenedor.innerHTML;
     }
     
     // Obtener el contenido actual del formulario
-    const formularioActual = contenedor.innerHTML;
+    const formularioActual = contenedor.dataset.originalContent;
     
     // Obtener datos de domicilio para construir la dirección
     const direccion = window.obtenerDireccionCompleta ? window.obtenerDireccionCompleta() : 'Dirección no disponible';
     
-    // Crear el header con información del mapa
-    const headerMapa = document.createElement('div');
-    headerMapa.className = 'mb-3 p-3 bg-white rounded-lg border border-gray-200 shadow-sm flex-shrink-0';
-    headerMapa.innerHTML = `
-        <div class="flex items-center justify-between">
-            <div class="flex items-center min-w-0 flex-1">
-                <i class="fas fa-map-marker-alt text-blue-500 mr-2 flex-shrink-0"></i>
-                <span class="text-sm font-medium text-gray-700">Ubicación en Mapa</span>
-            </div>
-            <div class="flex items-center space-x-2 ml-3 flex-shrink-0">
-                <span class="text-xs text-gray-500 truncate" title="${direccion}">${direccion}</span>
-                <button onclick="cerrarMapa('${seccion}')" 
-                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs transition-colors whitespace-nowrap">
-                    <i class="fas fa-times mr-1"></i>Cerrar
-                </button>
-            </div>
-        </div>
-    `;
-    
-    // Crear el contenedor del mapa
-    const mapaDiv = document.createElement('div');
-    mapaDiv.id = 'mapa-' + seccion;
-    mapaDiv.className = 'w-full flex-1 border border-gray-300 rounded min-h-0';
-    mapaDiv.style.minHeight = '500px';
-    
     // Crear el nuevo layout dividido
     const layoutDividido = document.createElement('div');
-    layoutDividido.className = 'grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-[600px]';
+    layoutDividido.className = 'grid grid-cols-1 lg:grid-cols-2 gap-6';
     layoutDividido.setAttribute('data-map-layout', 'true');
     
     layoutDividido.innerHTML = `
-        <div class="border-r border-gray-200 pr-4">
+        <div class="space-y-6">
             ${formularioActual}
         </div>
-        <div class="bg-gray-50 p-4 rounded-lg">
-            <div id="visor-${seccion}" class="h-full flex flex-col">
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-map-marker-alt text-blue-500 mr-2 text-xl"></i>
+                    <span class="text-lg font-semibold text-gray-700">Ubicación en Mapa</span>
             </div>
+                <button onclick="cerrarMapa('${seccion}')" 
+                        class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-lg text-sm transition-colors">
+                    <i class="fas fa-times mr-1"></i>Cerrar Mapa
+                </button>
+            </div>
+            <div id="mapa-${seccion}" class="w-full h-96 border border-gray-300 rounded-xl"></div>
         </div>
     `;
     
@@ -1237,15 +810,8 @@ function mostrarMapa(seccion) {
     contenedor.innerHTML = '';
     contenedor.appendChild(layoutDividido);
     
-    // Agregar el header y el mapa al visor
-    const visor = document.getElementById('visor-' + seccion);
-    visor.appendChild(headerMapa);
-    visor.appendChild(mapaDiv);
-    
-    // Agregar a secciones abiertas si hay documentViewer
-    if (window.documentViewer) {
-        window.documentViewer.openSections.add(seccion);
-    }
+    // Marcar este mapa como abierto
+    window.mapaAbierto = seccion;
     
     // Inicializar el mapa después de que el DOM esté listo
     setTimeout(() => {
@@ -1254,199 +820,33 @@ function mostrarMapa(seccion) {
         } else if (window.inicializarMapa) {
             window.inicializarMapa(seccion, direccion);
         }
-        
-        // Scroll a la sección
-        if (window.documentViewer) {
-            window.documentViewer.scrollToSection(seccion);
-        }
     }, 100);
 }
 
 // Función para cerrar mapa
 function cerrarMapa(seccion) {
-    if (window.documentViewer) {
-        window.documentViewer.closeDocument(seccion);
+    const contenedor = document.getElementById('contenido-' + seccion);
+    if (!contenedor) return;
+    
+    // Restaurar contenido original
+    if (contenedor.dataset.originalContent) {
+        contenedor.innerHTML = contenedor.dataset.originalContent;
     }
     
     // Limpiar el mapa
     if (window.mapHandler) {
         window.mapHandler.cleanup();
     }
+    
+    // Marcar que no hay mapa abierto
+    window.mapaAbierto = null;
 }
 
-// Estado global para comparación de documentos
-window.estadoComparacion = {
-    documentosSeleccionados: [],
-    maxDocumentos: 2
-};
-
-// Función para seleccionar documento para comparar
-function seleccionarParaComparar(event, seccion, ruta, nombre) {
-    event.preventDefault(); // Prevenir menú contextual
-    event.stopPropagation(); // Prevenir propagación del evento
-    
-    const boton = event.target.closest('.documento-btn');
-    const docId = `${seccion}_${ruta}`;
-    
-    // Verificar si ya está seleccionado
-    const indiceExistente = window.estadoComparacion.documentosSeleccionados.findIndex(doc => doc.id === docId);
-    
-    if (indiceExistente !== -1) {
-        // Deseleccionar
-        window.estadoComparacion.documentosSeleccionados.splice(indiceExistente, 1);
-        boton.classList.remove('documento-seleccionado');
-    } else {
-        // Verificar límite máximo
-        if (window.estadoComparacion.documentosSeleccionados.length >= window.estadoComparacion.maxDocumentos) {
-            // Deseleccionar el primer documento
-            const primerDoc = window.estadoComparacion.documentosSeleccionados.shift();
-            const primerBoton = document.querySelector(`[data-doc-seccion="${primerDoc.seccion}"][data-doc-ruta="${primerDoc.ruta}"]`);
-            if (primerBoton) {
-                primerBoton.classList.remove('documento-seleccionado');
-            }
-        }
-        
-        // Seleccionar nuevo documento
-        window.estadoComparacion.documentosSeleccionados.push({
-            id: docId,
-            seccion: seccion,
-            ruta: ruta,
-            nombre: nombre
-        });
-        boton.classList.add('documento-seleccionado');
+// Función para mostrar documento (si existe el sistema de documentos)
+function mostrarDocumento(seccion, ruta, nombre) {
+    if (window.documentViewer) {
+        window.documentViewer.showDocument(seccion, ruta, nombre);
     }
-    
-    actualizarPanelComparacion();
-}
-
-// Función para actualizar el panel de comparación
-function actualizarPanelComparacion() {
-    const panel = document.getElementById('panel-comparacion');
-    const contador = document.getElementById('contador-seleccionados');
-    const listaSeleccionados = document.getElementById('lista-seleccionados');
-    const btnComparar = document.getElementById('btn-comparar');
-    
-    const numSeleccionados = window.estadoComparacion.documentosSeleccionados.length;
-    
-    // Mostrar u ocultar panel
-    if (numSeleccionados > 0) {
-        panel.classList.remove('hidden');
-    } else {
-        panel.classList.add('hidden');
-        return;
-    }
-    
-    // Actualizar contador
-    contador.textContent = `${numSeleccionados}/${window.estadoComparacion.maxDocumentos} seleccionados`;
-    
-    // Actualizar lista
-    if (numSeleccionados === 0) {
-        listaSeleccionados.innerHTML = '<p class="italic">Haga clic derecho en los documentos para seleccionarlos</p>';
-    } else {
-        listaSeleccionados.innerHTML = window.estadoComparacion.documentosSeleccionados.map((doc, index) => 
-            `<div class="flex items-center justify-between bg-gray-50 p-2 rounded">
-                <div class="flex items-center">
-                    <span class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2">${index + 1}</span>
-                    <span class="font-medium">${doc.nombre}</span>
-                    <span class="text-xs text-gray-500 ml-2">(${doc.seccion})</span>
-                </div>
-                <button onclick="deseleccionarDocumento('${doc.id}')" class="text-red-500 hover:text-red-700">
-                    <i class="fas fa-times text-xs"></i>
-                </button>
-            </div>`
-        ).join('');
-    }
-    
-    // Habilitar/deshabilitar botón de comparar
-    btnComparar.disabled = numSeleccionados !== 2;
-}
-
-// Función para deseleccionar un documento específico
-function deseleccionarDocumento(docId) {
-    const indice = window.estadoComparacion.documentosSeleccionados.findIndex(doc => doc.id === docId);
-    if (indice !== -1) {
-        const doc = window.estadoComparacion.documentosSeleccionados[indice];
-        const boton = document.querySelector(`[data-doc-seccion="${doc.seccion}"][data-doc-ruta="${doc.ruta}"]`);
-        if (boton) {
-            boton.classList.remove('documento-seleccionado');
-        }
-        window.estadoComparacion.documentosSeleccionados.splice(indice, 1);
-        actualizarPanelComparacion();
-    }
-}
-
-// Función para limpiar selección
-function limpiarSeleccionComparacion() {
-    // Deseleccionar todos los botones
-    document.querySelectorAll('.documento-seleccionado').forEach(boton => {
-        boton.classList.remove('documento-seleccionado');
-    });
-    
-    // Limpiar estado
-    window.estadoComparacion.documentosSeleccionados = [];
-    actualizarPanelComparacion();
-}
-
-// Función para cerrar panel de comparación
-function cerrarComparacion() {
-    limpiarSeleccionComparacion();
-}
-
-// Función para iniciar comparación
-function iniciarComparacion() {
-    if (window.estadoComparacion.documentosSeleccionados.length !== 2) {
-        alert('Debe seleccionar exactamente 2 documentos para comparar');
-        return;
-    }
-    
-    mostrarModalComparacion();
-}
-
-// Función para mostrar modal de comparación
-function mostrarModalComparacion() {
-    const modal = document.getElementById('modal-comparacion-documentos');
-    const docs = window.estadoComparacion.documentosSeleccionados;
-    
-    // Actualizar información en el header
-    document.getElementById('info-documentos-comparacion').textContent = 
-        `Comparando: ${docs[0].nombre} vs ${docs[1].nombre}`;
-    
-    // Actualizar nombres y secciones
-    document.getElementById('nombre-documento-1').textContent = docs[0].nombre;
-    document.getElementById('seccion-documento-1').textContent = `(${docs[0].seccion})`;
-    document.getElementById('nombre-documento-2').textContent = docs[1].nombre;
-    document.getElementById('seccion-documento-2').textContent = `(${docs[1].seccion})`;
-    
-    // Configurar iframes
-    const iframe1 = document.getElementById('iframe-documento-1');
-    const iframe2 = document.getElementById('iframe-documento-2');
-    
-    // Agregar clase de carga
-    iframe1.classList.add('iframe-loading');
-    iframe2.classList.add('iframe-loading');
-    
-    // Cargar documentos
-    iframe1.src = docs[0].ruta;
-    iframe2.src = docs[1].ruta;
-    
-    // Remover clase de carga cuando termine de cargar
-    iframe1.onload = () => iframe1.classList.remove('iframe-loading');
-    iframe2.onload = () => iframe2.classList.remove('iframe-loading');
-    
-    // Mostrar modal
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-// Función para cerrar modal de comparación
-function cerrarModalComparacion() {
-    const modal = document.getElementById('modal-comparacion-documentos');
-    modal.classList.add('hidden');
-    document.body.style.overflow = 'auto';
-    
-    // Limpiar iframes
-    document.getElementById('iframe-documento-1').src = '';
-    document.getElementById('iframe-documento-2').src = '';
 }
 
 // JavaScript mínimo para cerrar modales al hacer clic fuera
@@ -1454,22 +854,14 @@ document.addEventListener('click', function(e) {
     if (e.target.id === 'modalRechazarTodo') {
         document.getElementById('modalRechazarTodo').classList.add('hidden');
     }
-    if (e.target.id === 'modal-comparacion-documentos') {
-        cerrarModalComparacion();
-    }
 });
 
 // Cerrar modal con ESC
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         const modalRechazo = document.getElementById('modalRechazarTodo');
-        const modalComparacion = document.getElementById('modal-comparacion-documentos');
-        
         if (modalRechazo && !modalRechazo.classList.contains('hidden')) {
             modalRechazo.classList.add('hidden');
-        }
-        if (modalComparacion && !modalComparacion.classList.contains('hidden')) {
-            cerrarModalComparacion();
         }
     }
 });

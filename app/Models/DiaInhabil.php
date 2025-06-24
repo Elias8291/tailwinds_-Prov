@@ -10,6 +10,8 @@ class DiaInhabil extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'dias_inhabiles';
+
     protected $fillable = ['fecha', 'descripcion'];
     
     protected $casts = [

@@ -8,9 +8,40 @@ use Illuminate\Http\Request;
 
 class DocumentoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $documentos = Documento::with('secciones')->get();
+        $query = Documento::with('secciones');
+
+        // Aplicar filtros
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function($q) use ($search) {
+                $q->where('nombre', 'like', "%{$search}%")
+                  ->orWhere('descripcion', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('tipo_persona')) {
+            $query->where('tipo_persona', $request->get('tipo_persona'));
+        }
+
+        if ($request->filled('es_visible')) {
+            $query->where('es_visible', $request->get('es_visible'));
+        }
+
+        // Ordenamiento
+        $sortBy = $request->get('sort', 'nombre');
+        $sortDirection = $request->get('direction', 'asc');
+        
+        $validSorts = ['nombre', 'tipo_persona', 'created_at'];
+        if (in_array($sortBy, $validSorts)) {
+            $query->orderBy($sortBy, $sortDirection);
+        }
+
+        // Paginación
+        $perPage = $request->get('perPage', 10);
+        $documentos = $query->paginate($perPage)->appends($request->query());
+
         return view('documentos.index', compact('documentos'));
     }
 

@@ -452,3 +452,15 @@ function accionistasData() {
     }
 }
 </script>
+
+@push('scripts')
+<script src="{{ asset('js/validators/accionistas-validator.js') }}"></script>
+@endpush
+
+@push('scripts')
+<script src="{{ asset('js/validators/accionistas-validator.js') }}"></script>
+@endpush
+
+@push('scripts')
+<script src="{{ asset('js/validators/accionistas-validator.js') }}"></script>
+@endpush

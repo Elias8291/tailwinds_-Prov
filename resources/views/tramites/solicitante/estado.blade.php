@@ -142,16 +142,16 @@
                     <div class="text-center">
                         <div class="mx-auto mb-4 h-20 w-20 flex items-center justify-center rounded-2xl shadow-lg
                             {{ $tramite->getColorEstado() === 'green' ? 'bg-emerald-100' : '' }}
-                            {{ $tramite->getColorEstado() === 'blue' ? 'bg-blue-100' : '' }}
-                            {{ $tramite->getColorEstado() === 'red' ? 'bg-red-100' : '' }}
+                        {{ $tramite->getColorEstado() === 'blue' ? 'bg-blue-100' : '' }}
+                        {{ $tramite->getColorEstado() === 'red' ? 'bg-red-100' : '' }}
                             {{ $tramite->getColorEstado() === 'yellow' ? 'bg-amber-100' : '' }}">
                             <i class="fas text-3xl
                                 {{ $tramite->estado === 'Aprobado' ? 'fa-check-circle text-emerald-600' : '' }}
                                 {{ $tramite->estado === 'En Revision' ? 'fa-eye text-blue-600 animate-pulse' : '' }}
-                                {{ $tramite->estado === 'Rechazado' ? 'fa-times-circle text-red-600' : '' }}
+                            {{ $tramite->estado === 'Rechazado' ? 'fa-times-circle text-red-600' : '' }}
                                 {{ $tramite->estado === 'Pendiente' ? 'fa-hourglass-half text-amber-600' : '' }}"></i>
-                        </div>
-                        
+                    </div>
+                    
                         <h3 class="text-2xl font-bold mb-2
                             {{ $tramite->getColorEstado() === 'green' ? 'text-emerald-700' : '' }}
                             {{ $tramite->getColorEstado() === 'blue' ? 'text-blue-700' : '' }}
@@ -188,24 +188,30 @@
                             </svg>
                             <div class="absolute inset-0 flex items-center justify-center">
                                 <span class="text-2xl font-bold text-[#9d2449]">{{ number_format($tramite->getPorcentajeProgreso(), 0) }}%</span>
-                            </div>
-                        </div>
+                    </div>
+                </div>
                         
                         <div class="text-sm text-gray-500 mb-4">
                             {{ $tramite->progreso_tramite }}/6 secciones completadas
                         </div>
-                        
-                        @if($tramite->estado === 'Rechazado' && $tramite->puedeSerEditado())
-                            <button onclick="habilitarEdicion({{ $tramite->id }})" 
+                
+                @if($tramite->estado === 'Rechazado' && $tramite->puedeSerEditado())
+                    <button onclick="habilitarEdicion({{ $tramite->id }})" 
                                     class="w-full px-4 py-3 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                                <i class="fas fa-edit mr-2"></i>
+                        <i class="fas fa-edit mr-2"></i>
                                 <span class="font-medium">Editar Trámite</span>
-                            </button>
-                        @endif
-                    </div>
+                    </button>
+                @elseif($tramite->estado === 'Aprobado')
+                    <a href="{{ route('citas.agendar', $tramite->id) }}" 
+                       class="w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-emerald-700 text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 animate-pulse text-center block">
+                        <i class="fas fa-calendar-check mr-2"></i>
+                        <span class="font-medium">Agendar Cita</span>
+                    </a>
+                @endif
+            </div>
                 </div>
             </div>
-
+            
             <!-- Contenido Principal -->
             <div class="xl:col-span-3 space-y-8">
                 <!-- Progreso del Trámite -->
@@ -272,9 +278,9 @@
                     </div>
                     
                     <!-- Secciones Grid -->
-                    @php
-                        $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
-                        $secciones = $tipoPersona === 'Moral' ? [
+                @php
+                    $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
+                    $secciones = $tipoPersona === 'Moral' ? [
                             1 => ['nombre' => 'Datos Generales', 'icono' => 'fa-user-circle', 'descripcion' => 'Información básica del solicitante'],
                             2 => ['nombre' => 'Domicilio', 'icono' => 'fa-map-marker-alt', 'descripcion' => 'Dirección fiscal y comercial'],
                             3 => ['nombre' => 'Constitución', 'icono' => 'fa-building', 'descripcion' => 'Datos constitutivos de la empresa'],
@@ -285,83 +291,83 @@
                             1 => ['nombre' => 'Datos Generales', 'icono' => 'fa-user-circle', 'descripcion' => 'Información personal del solicitante'],
                             2 => ['nombre' => 'Domicilio', 'icono' => 'fa-map-marker-alt', 'descripcion' => 'Dirección de residencia'],
                             3 => ['nombre' => 'Documentos', 'icono' => 'fa-file-upload', 'descripcion' => 'Documentación personal requerida']
-                        ];
-                        
-                        $progresoMaximo = $tipoPersona === 'Moral' ? 6 : 3;
-                        $progresoMostrado = min($tramite->progreso_tramite, $progresoMaximo);
-                    @endphp
+                    ];
                     
+                    $progresoMaximo = $tipoPersona === 'Moral' ? 6 : 3;
+                    $progresoMostrado = min($tramite->progreso_tramite, $progresoMaximo);
+                @endphp
+                
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        @foreach($secciones as $numero => $seccion)
-                            @php
-                                $seccionRechazada = $tramite->seccionEstaRechazada($numero);
-                                $seccionAprobada = $tramite->seccionEstaAprobada($numero);
-                                $estadoRevision = $tramite->getEstadoSeccion($numero);
-                                
-                                if ($seccionRechazada) {
-                                    $bgColor = 'border-red-200 bg-red-50';
-                                    $iconBg = 'bg-red-100 text-red-600';
+                @foreach($secciones as $numero => $seccion)
+                    @php
+                        $seccionRechazada = $tramite->seccionEstaRechazada($numero);
+                        $seccionAprobada = $tramite->seccionEstaAprobada($numero);
+                        $estadoRevision = $tramite->getEstadoSeccion($numero);
+                        
+                        if ($seccionRechazada) {
+                            $bgColor = 'border-red-200 bg-red-50';
+                            $iconBg = 'bg-red-100 text-red-600';
                                     $textColor = 'text-red-700';
-                                    $statusText = 'Rechazado - Requiere Corrección';
+                            $statusText = 'Rechazado - Requiere Corrección';
                                     $statusIcon = 'fas fa-exclamation-triangle text-red-500';
-                                } elseif ($seccionAprobada) {
+                        } elseif ($seccionAprobada) {
                                     $bgColor = 'border-emerald-200 bg-emerald-50';
                                     $iconBg = 'bg-emerald-100 text-emerald-600';
                                     $textColor = 'text-emerald-700';
                                     $statusText = 'Aprobado ✓';
                                     $statusIcon = 'fas fa-check-circle text-emerald-500';
-                                } elseif ($progresoMostrado >= $numero) {
-                                    $bgColor = 'border-blue-200 bg-blue-50';
-                                    $iconBg = 'bg-blue-100 text-blue-600';
+                        } elseif ($progresoMostrado >= $numero) {
+                            $bgColor = 'border-blue-200 bg-blue-50';
+                            $iconBg = 'bg-blue-100 text-blue-600';
                                     $textColor = 'text-blue-700';
-                                    $statusText = 'En Revisión';
+                            $statusText = 'En Revisión';
                                     $statusIcon = 'fas fa-eye text-blue-500 animate-pulse';
-                                } else {
-                                    $bgColor = 'border-gray-200 bg-gray-50';
+                        } else {
+                            $bgColor = 'border-gray-200 bg-gray-50';
                                     $iconBg = 'bg-gray-100 text-gray-500';
-                                    $textColor = 'text-gray-600';
-                                    $statusText = 'Pendiente';
-                                    $statusIcon = 'fas fa-hourglass-half text-gray-400';
-                                }
-                            @endphp
-                            
+                            $textColor = 'text-gray-600';
+                            $statusText = 'Pendiente';
+                            $statusIcon = 'fas fa-hourglass-half text-gray-400';
+                        }
+                    @endphp
+                    
                             <div class="relative p-6 rounded-xl border-2 {{ $bgColor }} shadow-md hover:shadow-lg transition-all duration-300">
                                 <!-- Status Badge -->
                                 <div class="absolute top-4 right-4">
-                                    <i class="{{ $statusIcon }} text-lg"></i>
-                                </div>
-                                
+                            <i class="{{ $statusIcon }} text-lg"></i>
+                        </div>
+                        
                                 <div class="flex items-start space-x-4">
                                     <div class="h-12 w-12 flex items-center justify-center rounded-xl {{ $iconBg }} shadow-sm">
                                         <i class="fas {{ $seccion['icono'] }} text-lg"></i>
-                                    </div>
+                        </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-bold text-lg {{ $textColor }} mb-1">
-                                            {{ $seccion['nombre'] }}
-                                        </h4>
+                                {{ $seccion['nombre'] }}
+                            </h4>
                                         <p class="text-sm text-gray-600 mb-3">{{ $seccion['descripcion'] }}</p>
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $textColor }} bg-white bg-opacity-80">
-                                            {{ $statusText }}
+                                {{ $statusText }}
                                         </span>
-                                        
-                                        @if($seccionRechazada && $estadoRevision && $estadoRevision->comentario)
+                            
+                            @if($seccionRechazada && $estadoRevision && $estadoRevision->comentario)
                                             <div class="mt-4 p-3 bg-red-100 bg-opacity-80 rounded-lg">
                                                 <p class="text-sm text-red-700 font-medium mb-2">
                                                     <i class="fas fa-comment-alt mr-2"></i>Comentario del revisor:
-                                                </p>
+                                </p>
                                                 <p class="text-sm text-red-800 italic mb-3">{{ $estadoRevision->comentario }}</p>
-                                                <button onclick="corregirSeccion({{ $tramite->id }}, {{ $numero }})" 
+                                <button onclick="corregirSeccion({{ $tramite->id }}, {{ $numero }})" 
                                                         class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors duration-200 shadow-md">
                                                     <i class="fas fa-edit mr-2"></i>Corregir Ahora
-                                                </button>
+                                </button>
                                             </div>
-                                        @endif
+                            @endif
                                     </div>
-                                </div>
-                            </div>
-                        @endforeach
+                        </div>
                     </div>
-                </div>
+                @endforeach
+            </div>
+        </div>
 
                 <!-- Información del Trámite -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
@@ -383,24 +389,24 @@
                                 <div class="flex flex-col space-y-1">
                                     <span class="text-sm text-gray-600">Fecha de inicio</span>
                                     <span class="font-semibold text-gray-900">{{ $tramite->fecha_inicio ? $tramite->fecha_inicio->format('d/m/Y H:i') : 'N/A' }}</span>
-                                </div>
-                                @if($tramite->fecha_finalizacion)
+                        </div>
+                        @if($tramite->fecha_finalizacion)
                                     <div class="flex flex-col space-y-1">
                                         <span class="text-sm text-gray-600">Fecha de finalización</span>
                                         <span class="font-semibold text-emerald-700">{{ $tramite->fecha_finalizacion->format('d/m/Y H:i') }}</span>
-                                    </div>
-                                @endif
-                                @if($tramite->fecha_revision)
+                            </div>
+                        @endif
+                        @if($tramite->fecha_revision)
                                     <div class="flex flex-col space-y-1">
                                         <span class="text-sm text-gray-600">Fecha de revisión</span>
                                         <span class="font-semibold text-blue-700">{{ $tramite->fecha_revision->format('d/m/Y H:i') }}</span>
-                                    </div>
-                                @endif
                             </div>
-                        </div>
-                        
+                        @endif
+                    </div>
+                </div>
+                
                         <!-- Detalles -->
-                        <div>
+                <div>
                             <h3 class="font-semibold text-gray-900 mb-4 flex items-center text-lg">
                                 <i class="fas fa-clipboard-list mr-3 text-[#9d2449]"></i>
                                 Detalles del Trámite
@@ -409,40 +415,40 @@
                                 <div class="flex flex-col space-y-1">
                                     <span class="text-sm text-gray-600">Tipo de trámite</span>
                                     <span class="font-semibold text-gray-900">{{ ucfirst($tramite->tipo_tramite) }}</span>
-                                </div>
+                        </div>
                                 <div class="flex flex-col space-y-1">
                                     <span class="text-sm text-gray-600">Sección actual</span>
                                     <span class="font-semibold text-gray-900">{{ $tramite->getNombreSeccionActual() }}</span>
-                                </div>
-                                @if($tramite->revisor)
+                        </div>
+                        @if($tramite->revisor)
                                     <div class="flex flex-col space-y-1">
                                         <span class="text-sm text-gray-600">Revisado por</span>
                                         <span class="font-semibold text-gray-900">{{ $tramite->revisor->nombre }}</span>
-                                    </div>
-                                @endif
                             </div>
-                        </div>
+                        @endif
                     </div>
-                    
-                    @if($tramite->observaciones)
+                </div>
+            </div>
+            
+            @if($tramite->observaciones)
                         <div class="mt-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
                             <h3 class="font-semibold text-gray-900 mb-3 flex items-center">
                                 <i class="fas fa-sticky-note mr-2 text-[#9d2449]"></i>
                                 Observaciones
                             </h3>
                             <p class="text-gray-700 leading-relaxed">{{ $tramite->observaciones }}</p>
-                        </div>
-                    @endif
                 </div>
+            @endif
+        </div>
 
-                <!-- Información sobre qué sigue -->
+        <!-- Información sobre qué sigue -->
                 <div class="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-8 shadow-lg">
                     <h3 class="font-bold text-blue-900 mb-6 text-xl flex items-center">
                         <i class="fas fa-lightbulb mr-3 text-yellow-500 text-2xl"></i>
-                        ¿Qué sigue?
-                    </h3>
+                ¿Qué sigue?
+            </h3>
                     <div class="text-blue-800 space-y-4">
-                        @if($tramite->estado === 'En Revision')
+                @if($tramite->estado === 'En Revision')
                             <div class="flex items-start space-x-4">
                                 <i class="fas fa-search text-blue-600 mt-1 text-lg"></i>
                                 <p>Su trámite está siendo revisado por nuestro equipo especializado</p>
@@ -455,7 +461,7 @@
                                 <i class="fas fa-clock text-blue-600 mt-1 text-lg"></i>
                                 <p>Tiempo estimado de revisión: 3-5 días hábiles</p>
                             </div>
-                        @elseif($tramite->estado === 'Rechazado')
+                @elseif($tramite->estado === 'Rechazado')
                             <div class="flex items-start space-x-4">
                                 <i class="fas fa-exclamation-triangle text-red-600 mt-1 text-lg"></i>
                                 <p>Su trámite requiere correcciones específicas</p>
@@ -468,7 +474,7 @@
                                 <i class="fas fa-redo text-red-600 mt-1 text-lg"></i>
                                 <p>Una vez corregido, será enviado automáticamente para revisión</p>
                             </div>
-                        @elseif($tramite->estado === 'Aprobado')
+                @elseif($tramite->estado === 'Aprobado')
                             <div class="flex items-start space-x-4">
                                 <i class="fas fa-trophy text-emerald-600 mt-1 text-lg"></i>
                                 <p>¡Felicidades! Su trámite ha sido aprobado exitosamente</p>
@@ -481,7 +487,7 @@
                                 <i class="fas fa-shield-alt text-emerald-600 mt-1 text-lg"></i>
                                 <p>Conserve este documento para sus registros oficiales</p>
                             </div>
-                        @else
+                @else
                             <div class="flex items-start space-x-4">
                                 <i class="fas fa-tasks text-amber-600 mt-1 text-lg"></i>
                                 <p>Complete todas las secciones del formulario paso a paso</p>
@@ -494,13 +500,15 @@
                                 <i class="fas fa-paper-plane text-amber-600 mt-1 text-lg"></i>
                                 <p>Envíe el trámite completo para iniciar la revisión</p>
                             </div>
-                        @endif
+                @endif
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
 
 <style>
 @keyframes fade-in {
@@ -614,6 +622,52 @@
 .animate-progress-smooth {
     animation: progress-smooth 3s ease-out forwards;
 }
+
+/* Time slot hover and selection effects */
+.time-slot {
+    position: relative;
+    overflow: hidden;
+}
+
+.time-slot::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(157, 36, 73, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.time-slot:hover::before {
+    left: 100%;
+}
+
+/* Enhanced modal backdrop */
+#appointmentModal {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Custom scrollbar for modal content */
+.modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #9d2449;
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #8a203f;
+}
 </style>
 
 <script>
@@ -695,5 +749,7 @@ async function corregirSeccion(tramiteId, seccionId) {
         alert('Error al habilitar la corrección de la sección');
     }
 }
+
+
 </script>
 @endsection 

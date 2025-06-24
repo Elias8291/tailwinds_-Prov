@@ -98,9 +98,13 @@
                     </div>
                     @endforeach
                 </div>
-            </div>
-            @endif
-        </div>
+                    </div>
+    @endif
+</div>
+
+@push('scripts')
+<script src="{{ asset('js/validators/domicilio-validator.js') }}"></script>
+@endpush
     @else
         <!-- Formulario editable normal -->
         <form class="space-y-8" @submit.prevent="guardarDomicilio" x-ref="domicilioForm" data-validate="true">
@@ -122,8 +126,6 @@
                                placeholder="Ej: 12345"
                                pattern="[0-9]{4,5}"
                                maxlength="5"
-                               minlength="4"
-                               data-validation="required|cp"
                                x-model="cp"
                                aria-label="Código postal"
                                required>
@@ -202,8 +204,6 @@
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                                placeholder="Ej: Av. Principal"
                                maxlength="100"
-                               minlength="2"
-                               data-validation="required|minLength:2|maxLength:100"
                                x-model="nombreVialidad"
                                aria-label="Calle"
                                required>

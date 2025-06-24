@@ -138,9 +138,13 @@
                         <i class="fas fa-user-tie text-gray-400 text-3xl mb-3"></i>
                         <p class="text-gray-500">No hay información del apoderado legal registrada para este trámite.</p>
                     </div>
-                </div>
-            @endif
-        </div>
+                        </div>
+    @endif
+</div>
+
+@push('scripts')
+<script src="{{ asset('js/validators/apoderado-validator.js') }}"></script>
+@endpush
     @else
         <!-- Vista editable normal (código existente) -->
         <!-- Alert de Errores -->
@@ -748,6 +752,14 @@ input:focus, select:focus {
     @apply from-[#8a203f] to-[#7a1c38];
     transform: translateY(-1px);
     box-shadow: 0 4px 6px -1px rgba(157, 36, 73, 0.1),
+                0 2px 4px -1px rgba(157, 36, 73, 0.06);
+}
+</style>
+
+                0 2px 4px -1px rgba(157, 36, 73, 0.06);
+}
+</style>
+
                 0 2px 4px -1px rgba(157, 36, 73, 0.06);
 }
 </style>

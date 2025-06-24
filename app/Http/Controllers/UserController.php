@@ -23,9 +23,41 @@ class UserController extends Controller
         $this->middleware('can:usuarios.destroy')->only('destroy');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('roles')->get();
+        $query = User::with('roles');
+
+        // Aplicar filtros
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function($q) use ($search) {
+                $q->where('nombre', 'like', "%{$search}%")
+                  ->orWhere('correo', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $status = $request->get('status');
+            if ($status === 'verified') {
+                $query->whereNotNull('email_verified_at');
+            } elseif ($status === 'pending') {
+                $query->whereNull('email_verified_at');
+            }
+        }
+
+        // Ordenamiento
+        $sortBy = $request->get('sort', 'nombre');
+        $sortDirection = $request->get('direction', 'asc');
+        
+        $validSorts = ['nombre', 'correo', 'created_at'];
+        if (in_array($sortBy, $validSorts)) {
+            $query->orderBy($sortBy, $sortDirection);
+        }
+
+        // Paginación
+        $perPage = $request->get('perPage', 10);
+        $users = $query->paginate($perPage)->appends($request->query());
+
         return view('users.index', compact('users'));
     }
 

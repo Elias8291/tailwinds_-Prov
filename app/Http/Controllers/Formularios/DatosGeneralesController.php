@@ -43,24 +43,90 @@ class DatosGeneralesController extends Controller
         ]);
 
         try {
+            // Validaciones personalizadas según las reglas del JavaScript
             $request->validate([
                 'tramite_id' => 'required|exists:tramite,id',
-                'giro' => 'required|string|max:500',
+                'giro' => [
+                    'required',
+                    'string',
+                    'min:10',
+                    'max:500',
+                    'regex:/^[a-zA-ZÀ-ÿ0-9\s\.\,\-\(\)]+$/'
+                ],
                 'sector_id' => 'nullable|exists:sector,id',
                 'actividades_seleccionadas' => 'nullable|string',
-                'contacto_nombre' => 'required|string|max:40',
-                'contacto_cargo' => 'required|string|max:50',
-                'contacto_correo' => 'required|email',
-                'contacto_telefono' => 'required|string|max:10',
-                'pagina_web' => 'nullable|url|max:255',
+                'contacto_nombre' => [
+                    'required',
+                    'string',
+                    'min:2',
+                    'max:100',
+                    'regex:/^[a-zA-ZÀ-ÿ\s]+$/'
+                ],
+                'contacto_cargo' => [
+                    'required',
+                    'string',
+                    'min:2',
+                    'max:50',
+                    'regex:/^[a-zA-ZÀ-ÿ\s]+$/'
+                ],
+                'contacto_correo' => [
+                    'required',
+                    'email',
+                    'regex:/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/'
+                ],
+                'contacto_telefono' => [
+                    'required',
+                    'string',
+                    'regex:/^\d{10}$/'
+                ],
+                'pagina_web' => [
+                    'nullable',
+                    'regex:/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/'
+                ],
+            ], [
+                // Mensajes personalizados que coinciden con el JavaScript
+                'giro.required' => 'El giro es obligatorio.',
+                'giro.min' => 'El giro debe tener entre 10 y 500 caracteres. Solo se permiten letras, números y signos básicos.',
+                'giro.max' => 'El giro debe tener entre 10 y 500 caracteres. Solo se permiten letras, números y signos básicos.',
+                'giro.regex' => 'El giro debe tener entre 10 y 500 caracteres. Solo se permiten letras, números y signos básicos.',
+                'contacto_nombre.required' => 'El nombre es obligatorio.',
+                'contacto_nombre.min' => 'El nombre debe tener entre 2 y 100 caracteres. Solo se permiten letras y espacios.',
+                'contacto_nombre.max' => 'El nombre debe tener entre 2 y 100 caracteres. Solo se permiten letras y espacios.',
+                'contacto_nombre.regex' => 'El nombre debe tener entre 2 y 100 caracteres. Solo se permiten letras y espacios.',
+                'contacto_cargo.required' => 'El cargo es obligatorio.',
+                'contacto_cargo.min' => 'El cargo debe tener entre 2 y 50 caracteres. Solo se permiten letras y espacios.',
+                'contacto_cargo.max' => 'El cargo debe tener entre 2 y 50 caracteres. Solo se permiten letras y espacios.',
+                'contacto_cargo.regex' => 'El cargo debe tener entre 2 y 50 caracteres. Solo se permiten letras y espacios.',
+                'contacto_correo.required' => 'El correo electrónico es obligatorio.',
+                'contacto_correo.email' => 'Ingrese un correo electrónico válido.',
+                'contacto_correo.regex' => 'Ingrese un correo electrónico válido.',
+                'contacto_telefono.required' => 'El teléfono es obligatorio.',
+                'contacto_telefono.regex' => 'El teléfono debe tener exactamente 10 dígitos.',
+                'pagina_web.regex' => 'Ingrese una URL válida (ej: https://www.ejemplo.com)',
             ]);
+
+            // Validación adicional para actividades seleccionadas
+            $this->validateActividadesSeleccionadas($request);
+
         } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Errores de validación en datos generales', [
+                'user_id' => Auth::id(),
+                'request_data' => $request->except(['_token']),
+                'validation_errors' => $e->errors(),
+                'is_ajax' => $request->ajax()
+            ]);
+
             // Si es una petición AJAX, devolver errores de validación como JSON
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Errores de validación',
-                    'errors' => $e->errors()
+                    'errors' => $e->errors(),
+                    'debug_info' => [
+                        'giro_received' => $request->input('giro'),
+                        'giro_length' => strlen($request->input('giro', '')),
+                        'all_fields' => $request->except(['_token'])
+                    ]
                 ], 422);
             }
             
@@ -219,13 +285,22 @@ class DatosGeneralesController extends Controller
     {
         $detalle = DetalleTramite::firstOrNew(['tramite_id' => $tramite->id]);
 
-        $detalle->giro = $request->input('giro');
-        $detalle->telefono = $request->input('contacto_telefono');
-        $detalle->razon_social = Auth::user()->name;
-        $detalle->email = Auth::user()->email;
-        $detalle->sitio_web = $request->input('pagina_web');
+        $detalle->giro = $request->input('giro') ?: null;
+        $detalle->telefono = $request->input('contacto_telefono') ?: null;
+        $detalle->razon_social = Auth::user()->name ?: 'Sin especificar';
+        $detalle->email = Auth::user()->email ?: null;
+        $detalle->sitio_web = $request->input('pagina_web') ?: null;
 
         $detalle->save();
+
+        Log::info('DetalleTramite guardado', [
+            'tramite_id' => $tramite->id,
+            'giro' => $detalle->giro,
+            'razon_social' => $detalle->razon_social,
+            'telefono' => $detalle->telefono,
+            'email' => $detalle->email,
+            'sitio_web' => $detalle->sitio_web
+        ]);
 
         return $detalle;
     }
@@ -327,6 +402,77 @@ class DatosGeneralesController extends Controller
                 'success' => false,
                 'message' => 'Error al cargar actividades'
             ], 500);
+        }
+    }
+
+    /**
+     * Muestra los datos generales de un trámite
+     */
+    public function mostrar(Tramite $tramite)
+    {
+        try {
+            // Verificar permisos
+            $user = Auth::user();
+            $solicitante = $user->solicitante;
+            
+            if (!$solicitante || $tramite->solicitante_id != $solicitante->id) {
+                abort(403, 'No tiene permisos para ver este trámite');
+            }
+
+            $sectores = Sector::all();
+            $actividades = $tramite->actividades()->with('actividad')->get()->pluck('actividad');
+            
+            $datosTramite = $this->obtenerDatos($tramite);
+
+            return view('revision.datos-generales', compact(
+                'tramite',
+                'datosTramite', 
+                'sectores',
+                'actividades'
+            ));
+
+        } catch (\Exception $e) {
+            Log::error('Error al mostrar datos generales', [
+                'tramite_id' => $tramite->id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('revision.index')
+                ->with('error', 'Error al cargar los datos del trámite');
+        }
+    }
+
+    /**
+     * Valida que se hayan seleccionado actividades (similar al JavaScript)
+     */
+    private function validateActividadesSeleccionadas(Request $request)
+    {
+        $actividadesSeleccionadas = $request->input('actividades_seleccionadas', '');
+        $tieneActividades = false;
+
+        if (!empty($actividadesSeleccionadas)) {
+            try {
+                $actividades = json_decode($actividadesSeleccionadas, true);
+                if (is_array($actividades) && count($actividades) > 0) {
+                    // Verificar que al menos una actividad no esté vacía
+                    foreach ($actividades as $actividad) {
+                        if (!empty($actividad)) {
+                            $tieneActividades = true;
+                            break;
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                // Si no se puede decodificar el JSON, asumir que no hay actividades
+                $tieneActividades = false;
+            }
+        }
+
+        if (!$tieneActividades) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'actividades_seleccionadas' => 'Debe seleccionar al menos una actividad.'
+            ]);
         }
     }
 }

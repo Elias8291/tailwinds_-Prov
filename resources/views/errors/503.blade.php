@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>403 - Acceso No Autorizado</title>
+    <title>503 - Servicio No Disponible</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -67,7 +67,7 @@
             display: inline-block;
         }
         .number-container::before {
-            content: '403';
+            content: '503';
             position: absolute;
             left: 0;
             top: 0;
@@ -136,6 +136,14 @@
             border-radius: 0.3em;
             font-weight: 500;
         }
+        @keyframes maintenance {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+        .maintenance-icon {
+            animation: maintenance 2s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -146,7 +154,7 @@
                 <!-- Imagen de Error -->
                 <div class="flex justify-center order-1 md:order-none">
                     <div class="float-animation">
-                        <img src="{{ asset('images/ImagenError.png') }}" alt="Error 403" class="w-48 sm:w-64 h-auto drop-shadow-xl">
+                        <img src="{{ asset('images/ImagenError.png') }}" alt="Error 503" class="w-48 sm:w-64 h-auto drop-shadow-xl">
                     </div>
                 </div>
 
@@ -154,44 +162,58 @@
                 <div class="text-center md:text-left order-2 md:order-none">
                     <div class="relative mb-6">
                         <div class="number-container">
-                            <h1 class="text-8xl sm:text-9xl font-bold glow-effect tracking-wider">403</h1>
+                            <h1 class="text-8xl sm:text-9xl font-bold glow-effect tracking-wider">503</h1>
                         </div>
                     </div>
 
                     <div class="relative">
                         <div class="space-y-6">
                             <h2 class="text-2xl sm:text-3xl font-semibold text-gray-800">
-                                Acceso no autorizado <span class="sparkle">🔒</span>
+                                Servicio en mantenimiento <span class="sparkle maintenance-icon">🔧</span>
                             </h2>
                             
                             <div class="message-box">
                                 <p class="text-gray-700 text-sm sm:text-base leading-relaxed">
-                                    No dispone de los permisos necesarios para acceder a esta página. 
-                                    <br><span class="highlight-text">Contacte al administrador</span> si considera que debería tener acceso a este recurso.
+                                    El sitio web está temporalmente fuera de servicio por mantenimiento programado. 
+                                    <br><span class="highlight-text">El servicio será restablecido</span> una vez completadas las mejoras del sistema.
                                 </p>
                                 
                                 <div class="mt-4 text-xs sm:text-sm text-gray-600">
                                     <p>
-                                        <span class="font-medium">Posibles causas:</span>
+                                        <span class="font-medium">Durante este tiempo:</span>
                                     </p>
                                     <ul class="list-disc list-inside mt-2 space-y-1">
-                                        <li>Su cuenta no tiene los permisos requeridos</li>
-                                        <li>El recurso está restringido a ciertos roles</li>
-                                        <li>Su sesión pudo haber expirado</li>
+                                        <li>Estamos mejorando la experiencia del usuario</li>
+                                        <li>Actualizando nuestros sistemas de seguridad</li>
+                                        <li>Optimizando el rendimiento del sitio</li>
                                     </ul>
+                                    
+                                    <div class="mt-3 p-3 bg-primary-50 rounded-lg border border-primary-100">
+                                        <p class="text-primary-dark font-medium text-xs">
+                                            ⏱️ Tiempo estimado: 30-60 minutos
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Botón para regresar -->
-                    <div class="mt-8 flex justify-center md:justify-start">
-                        <button onclick="window.history.back()" 
+                    <!-- Botones -->
+                    <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+                        <button onclick="window.location.reload()" 
                                 class="btn-back inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                             </svg>
-                            <span class="relative">Regresar</span>
+                            <span class="relative">Verificar estado</span>
+                        </button>
+                        
+                        <button onclick="setTimeout(() => window.location.reload(), 300000)" 
+                                class="btn-back inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-primary bg-white border border-primary hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="relative">Esperar 5 min</span>
                         </button>
                     </div>
                 </div>

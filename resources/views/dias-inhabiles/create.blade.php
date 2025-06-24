@@ -26,7 +26,7 @@
                     
                     <!-- Campo de Fecha -->
                     <div>
-                        <label for="fecha" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="fecha_inicio" class="block text-sm font-medium text-gray-700 mb-1">
                             Fecha <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
@@ -35,11 +35,11 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                             </div>
-                            <input type="date" name="fecha" id="fecha" required
+                            <input type="date" name="fecha_inicio" id="fecha_inicio" required
                                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B4325E] focus:border-[#B4325E] transition-colors duration-200"
-                                   value="{{ old('fecha') }}">
+                                   value="{{ old('fecha_inicio') }}">
                         </div>
-                        @error('fecha')
+                        @error('fecha_inicio')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>

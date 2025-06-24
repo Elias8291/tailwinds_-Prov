@@ -2,33 +2,27 @@
     <div class="w-full">
         <div class="flex justify-between h-16">
             <div class="flex items-center">
-                <!-- Mobile menu button -->
                 <button type="button" @click="sidebarOpen = !sidebarOpen" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
                     <span class="sr-only">Toggle sidebar</span>
                     <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
-
-                <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center -ml-0.5">
+                <div class="flex-shrink-0 flex items-center ml-3">
                     <img class="h-11 w-auto" src="{{ asset('images/logoColor.png') }}" alt="Logo">
                 </div>
             </div>
 
             <div class="hidden md:flex items-center space-x-4 pr-4">
-                <!-- Notifications dropdown -->
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="relative p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                         <span class="sr-only">Ver notificaciones</span>
-                        <!-- Notification badge -->
                         <span class="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-500 text-white text-xs rounded-full">3</span>
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                     </button>
 
-                    <!-- Notifications panel -->
                     <div x-show="open" 
                          @click.away="open = false"
                          x-transition:enter="transition ease-out duration-100"
@@ -42,7 +36,6 @@
                             <h3 class="text-sm font-semibold text-primary">Notificaciones</h3>
                         </div>
                         <div class="max-h-[40vh] overflow-y-auto">
-                            <!-- Urgent notification -->
                             <div class="px-4 py-3 hover:bg-gray-50 transition-colors duration-200">
                                 <div class="flex items-start space-x-3">
                                     <div class="flex-shrink-0">
@@ -60,7 +53,6 @@
                                 </div>
                             </div>
 
-                            <!-- Success notification -->
                             <div class="px-4 py-3 hover:bg-gray-50 transition-colors duration-200">
                                 <div class="flex items-start space-x-3">
                                     <div class="flex-shrink-0">
@@ -78,7 +70,6 @@
                                 </div>
                             </div>
 
-                            <!-- Info notification -->
                             <div class="px-4 py-3 hover:bg-gray-50 transition-colors duration-200">
                                 <div class="flex items-start space-x-3">
                                     <div class="flex-shrink-0">
@@ -102,7 +93,6 @@
                     </div>
                 </div>
 
-                <!-- Profile dropdown -->
                 <div class="relative" x-data="{ open: false }">
                     <div>
                         <button @click="open = !open" class="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" id="user-menu-button">

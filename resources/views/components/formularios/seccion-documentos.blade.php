@@ -616,3 +616,15 @@ function documentosData() {
     }
 }
 </script>
+
+@push('scripts')
+<script src="{{ asset('js/validators/documentos-validator.js') }}"></script>
+@endpush
+
+@push('scripts')
+<script src="{{ asset('js/validators/documentos-validator.js') }}"></script>
+@endpush
+
+@push('scripts')
+<script src="{{ asset('js/validators/documentos-validator.js') }}"></script>
+@endpush

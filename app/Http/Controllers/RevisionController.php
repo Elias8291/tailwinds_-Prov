@@ -27,6 +27,11 @@ class RevisionController extends Controller
         // Obtener trámites con información del solicitante
         $query = Tramite::with(['solicitante', 'revisor']);
 
+        // Excluir trámites aprobados por defecto (solo mostrar si se filtra específicamente por "Aprobado")
+        if (!$request->filled('estado') || $request->estado !== 'Aprobado') {
+            $query->where('estado', '!=', 'Aprobado');
+        }
+
         // Aplicar filtros
         if ($request->filled('estado')) {
             $query->where('estado', $request->estado);

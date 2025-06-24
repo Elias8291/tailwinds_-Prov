@@ -75,16 +75,7 @@ class DomicilioController extends Controller
             ]);
 
             // Validar los datos del formulario
-            $validated = $request->validate([
-                'tramite_id' => 'required|integer|exists:tramite,id',
-                'codigo_postal' => 'required|string|regex:/^\d{4,5}$/', // Acepta 4 o 5 dígitos
-                'colonia' => 'required|integer|exists:asentamiento,id',
-                'calle' => 'required|string|max:100',
-                'numero_exterior' => 'required|string|max:10',
-                'numero_interior' => 'nullable|string|max:10',
-                'entre_calle_1' => 'required|string|max:100',
-                'entre_calle_2' => 'required|string|max:100',
-            ]);
+            $validated = $this->validateDomicilioData($request);
 
             // Buscar el trámite
             $tramite = Tramite::with('detalleTramite')->find($validated['tramite_id']);
@@ -368,5 +359,191 @@ class DomicilioController extends Controller
     public function getAddressData(Tramite $tramite)
     {
         return $this->obtenerDatos($tramite);
+    }
+
+    /**
+     * Valida los datos del formulario de domicilio
+     *
+     * @param Request $request
+     * @return array
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function validateDomicilioData(Request $request)
+    {
+        $rules = [
+            'tramite_id' => 'required|integer|exists:tramite,id',
+            'codigo_postal' => [
+                'required',
+                'string',
+                'regex:/^[0-9]{4,5}$/'
+            ],
+            'colonia' => 'required|integer|exists:asentamiento,id',
+            'calle' => [
+                'required',
+                'string',
+                'min:3',
+                'max:100',
+                'regex:/^.{3,100}$/'
+            ],
+            'numero_exterior' => [
+                'required',
+                'string',
+                'max:10',
+                'regex:/^[a-zA-Z0-9\s\-\.]{1,10}$/'
+            ],
+            'numero_interior' => [
+                'nullable',
+                'string',
+                'max:10',
+                'regex:/^[a-zA-Z0-9\s\-\.]{0,10}$/'
+            ],
+            'entre_calle_1' => [
+                'nullable',
+                'string',
+                'max:100'
+            ],
+            'entre_calle_2' => [
+                'nullable',
+                'string',
+                'max:100'
+            ]
+        ];
+
+        $messages = [
+            'codigo_postal.required' => 'El código postal es obligatorio',
+            'codigo_postal.regex' => 'El código postal debe tener 4 o 5 dígitos',
+            'colonia.required' => 'Debe seleccionar un asentamiento',
+            'colonia.exists' => 'El asentamiento seleccionado no es válido',
+            'calle.required' => 'La calle es obligatoria',
+            'calle.min' => 'La calle debe tener al menos 3 caracteres',
+            'calle.max' => 'La calle debe tener máximo 100 caracteres',
+            'numero_exterior.required' => 'El número exterior es obligatorio',
+            'numero_exterior.max' => 'El número exterior debe tener máximo 10 caracteres',
+            'numero_exterior.regex' => 'El número exterior solo puede contener letras, números, espacios, guiones y puntos',
+            'numero_interior.max' => 'El número interior debe tener máximo 10 caracteres',
+            'numero_interior.regex' => 'El número interior solo puede contener letras, números, espacios, guiones y puntos',
+            'entre_calle_1.max' => 'La primera calle de referencia debe tener máximo 100 caracteres',
+            'entre_calle_2.max' => 'La segunda calle de referencia debe tener máximo 100 caracteres'
+        ];
+
+        return $request->validate($rules, $messages);
+    }
+} 
+        $rules = [
+            'tramite_id' => 'required|integer|exists:tramite,id',
+            'codigo_postal' => [
+                'required',
+                'string',
+                'regex:/^[0-9]{4,5}$/'
+            ],
+            'colonia' => 'required|integer|exists:asentamiento,id',
+            'calle' => [
+                'required',
+                'string',
+                'min:3',
+                'max:100',
+                'regex:/^.{3,100}$/'
+            ],
+            'numero_exterior' => [
+                'required',
+                'string',
+                'max:10',
+                'regex:/^[a-zA-Z0-9\s\-\.]{1,10}$/'
+            ],
+            'numero_interior' => [
+                'nullable',
+                'string',
+                'max:10',
+                'regex:/^[a-zA-Z0-9\s\-\.]{0,10}$/'
+            ],
+            'entre_calle_1' => [
+                'nullable',
+                'string',
+                'max:100'
+            ],
+            'entre_calle_2' => [
+                'nullable',
+                'string',
+                'max:100'
+            ]
+        ];
+
+        $messages = [
+            'codigo_postal.required' => 'El código postal es obligatorio',
+            'codigo_postal.regex' => 'El código postal debe tener 4 o 5 dígitos',
+            'colonia.required' => 'Debe seleccionar un asentamiento',
+            'colonia.exists' => 'El asentamiento seleccionado no es válido',
+            'calle.required' => 'La calle es obligatoria',
+            'calle.min' => 'La calle debe tener al menos 3 caracteres',
+            'calle.max' => 'La calle debe tener máximo 100 caracteres',
+            'numero_exterior.required' => 'El número exterior es obligatorio',
+            'numero_exterior.max' => 'El número exterior debe tener máximo 10 caracteres',
+            'numero_exterior.regex' => 'El número exterior solo puede contener letras, números, espacios, guiones y puntos',
+            'numero_interior.max' => 'El número interior debe tener máximo 10 caracteres',
+            'numero_interior.regex' => 'El número interior solo puede contener letras, números, espacios, guiones y puntos',
+            'entre_calle_1.max' => 'La primera calle de referencia debe tener máximo 100 caracteres',
+            'entre_calle_2.max' => 'La segunda calle de referencia debe tener máximo 100 caracteres'
+        ];
+
+        return $request->validate($rules, $messages);
+    }
+} 
+        $rules = [
+            'tramite_id' => 'required|integer|exists:tramite,id',
+            'codigo_postal' => [
+                'required',
+                'string',
+                'regex:/^[0-9]{4,5}$/'
+            ],
+            'colonia' => 'required|integer|exists:asentamiento,id',
+            'calle' => [
+                'required',
+                'string',
+                'min:3',
+                'max:100',
+                'regex:/^.{3,100}$/'
+            ],
+            'numero_exterior' => [
+                'required',
+                'string',
+                'max:10',
+                'regex:/^[a-zA-Z0-9\s\-\.]{1,10}$/'
+            ],
+            'numero_interior' => [
+                'nullable',
+                'string',
+                'max:10',
+                'regex:/^[a-zA-Z0-9\s\-\.]{0,10}$/'
+            ],
+            'entre_calle_1' => [
+                'nullable',
+                'string',
+                'max:100'
+            ],
+            'entre_calle_2' => [
+                'nullable',
+                'string',
+                'max:100'
+            ]
+        ];
+
+        $messages = [
+            'codigo_postal.required' => 'El código postal es obligatorio',
+            'codigo_postal.regex' => 'El código postal debe tener 4 o 5 dígitos',
+            'colonia.required' => 'Debe seleccionar un asentamiento',
+            'colonia.exists' => 'El asentamiento seleccionado no es válido',
+            'calle.required' => 'La calle es obligatoria',
+            'calle.min' => 'La calle debe tener al menos 3 caracteres',
+            'calle.max' => 'La calle debe tener máximo 100 caracteres',
+            'numero_exterior.required' => 'El número exterior es obligatorio',
+            'numero_exterior.max' => 'El número exterior debe tener máximo 10 caracteres',
+            'numero_exterior.regex' => 'El número exterior solo puede contener letras, números, espacios, guiones y puntos',
+            'numero_interior.max' => 'El número interior debe tener máximo 10 caracteres',
+            'numero_interior.regex' => 'El número interior solo puede contener letras, números, espacios, guiones y puntos',
+            'entre_calle_1.max' => 'La primera calle de referencia debe tener máximo 100 caracteres',
+            'entre_calle_2.max' => 'La segunda calle de referencia debe tener máximo 100 caracteres'
+        ];
+
+        return $request->validate($rules, $messages);
     }
 } 

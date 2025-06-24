@@ -421,6 +421,8 @@ Route::prefix('api')->group(function () {
     // API DE DATOS GENERALES
     Route::get('/datos-generales/{tramite}', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'obtenerDatos'])
         ->name('api.datos-generales.obtener');
+    Route::get('/datos-generales/{tramite}/mostrar', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'mostrar'])
+        ->name('datos-generales.mostrar');
 });
 
 // ============================================================================
@@ -448,5 +450,41 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
+
+// ============================================================================
+// RUTAS DE PRUEBA PARA PÁGINAS DE ERROR (Solo en desarrollo)
+// ============================================================================
+
+if (config('app.debug')) {
+    
+    // Página de índice para probar errores
+    Route::get('/test-errors', function() {
+        return view('test-errors');
+    })->name('test.errors.index');
+    
+    Route::get('/test-errors/403', function() {
+        abort(403);
+    })->name('test.error.403');
+    
+    Route::get('/test-errors/404', function() {
+        abort(404);
+    })->name('test.error.404');
+    
+    Route::get('/test-errors/419', function() {
+        abort(419);
+    })->name('test.error.419');
+    
+    Route::get('/test-errors/429', function() {
+        abort(429);
+    })->name('test.error.429');
+    
+    Route::get('/test-errors/500', function() {
+        abort(500);
+    })->name('test.error.500');
+    
+    Route::get('/test-errors/503', function() {
+        abort(503);
+    })->name('test.error.503');
+}
 
 

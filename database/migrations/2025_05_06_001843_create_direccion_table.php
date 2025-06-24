@@ -10,7 +10,7 @@ class CreateDireccionTable extends Migration
     {
         Schema::create('direccion', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('codigo_postal');
+            $table->string('codigo_postal', 5);
             $table->bigInteger('asentamiento_id')->unsigned()->nullable();
             $table->string('calle', 255)->nullable();
             $table->string('numero_exterior', 255)->nullable();

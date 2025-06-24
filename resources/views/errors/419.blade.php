@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>403 - Acceso No Autorizado</title>
+    <title>419 - Página Expirada</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -67,7 +67,7 @@
             display: inline-block;
         }
         .number-container::before {
-            content: '403';
+            content: '419';
             position: absolute;
             left: 0;
             top: 0;
@@ -136,6 +136,13 @@
             border-radius: 0.3em;
             font-weight: 500;
         }
+        @keyframes clockTick {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(6deg); }
+        }
+        .clock-icon {
+            animation: clockTick 1s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -146,7 +153,7 @@
                 <!-- Imagen de Error -->
                 <div class="flex justify-center order-1 md:order-none">
                     <div class="float-animation">
-                        <img src="{{ asset('images/ImagenError.png') }}" alt="Error 403" class="w-48 sm:w-64 h-auto drop-shadow-xl">
+                        <img src="{{ asset('images/ImagenError.png') }}" alt="Error 419" class="w-48 sm:w-64 h-auto drop-shadow-xl">
                     </div>
                 </div>
 
@@ -154,44 +161,61 @@
                 <div class="text-center md:text-left order-2 md:order-none">
                     <div class="relative mb-6">
                         <div class="number-container">
-                            <h1 class="text-8xl sm:text-9xl font-bold glow-effect tracking-wider">403</h1>
+                            <h1 class="text-8xl sm:text-9xl font-bold glow-effect tracking-wider">419</h1>
                         </div>
                     </div>
 
                     <div class="relative">
                         <div class="space-y-6">
                             <h2 class="text-2xl sm:text-3xl font-semibold text-gray-800">
-                                Acceso no autorizado <span class="sparkle">🔒</span>
+                                Sesión expirada <span class="sparkle clock-icon">⏰</span>
                             </h2>
                             
                             <div class="message-box">
                                 <p class="text-gray-700 text-sm sm:text-base leading-relaxed">
-                                    No dispone de los permisos necesarios para acceder a esta página. 
-                                    <br><span class="highlight-text">Contacte al administrador</span> si considera que debería tener acceso a este recurso.
+                                    Su sesión ha expirado por motivos de seguridad. 
+                                    <br><span class="highlight-text">Esto es normal</span> cuando se permanece inactivo durante un período prolongado.
                                 </p>
                                 
                                 <div class="mt-4 text-xs sm:text-sm text-gray-600">
                                     <p>
-                                        <span class="font-medium">Posibles causas:</span>
+                                        <span class="font-medium">¿Por qué pasó esto?</span>
                                     </p>
                                     <ul class="list-disc list-inside mt-2 space-y-1">
-                                        <li>Su cuenta no tiene los permisos requeridos</li>
-                                        <li>El recurso está restringido a ciertos roles</li>
-                                        <li>Su sesión pudo haber expirado</li>
+                                        <li>La página estuvo abierta durante mucho tiempo</li>
+                                        <li>El token de seguridad ha expirado</li>
+                                        <li>Es una medida de protección automática del sistema</li>
                                     </ul>
+                                    
+                                    <div class="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                                        <p class="text-amber-800 font-medium text-xs flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                            </svg>
+                                            Su información no se ha perdido, simplemente recargue la página
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Botón para regresar -->
-                    <div class="mt-8 flex justify-center md:justify-start">
-                        <button onclick="window.history.back()" 
+                    <!-- Botones -->
+                    <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+                        <button onclick="window.location.reload()" 
                                 class="btn-back inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            <span class="relative">Recargar página</span>
+                        </button>
+                        
+                        <button onclick="window.history.back()" 
+                                class="btn-back inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-primary bg-white border border-primary hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                             </svg>
-                            <span class="relative">Regresar</span>
+                            <span class="relative">Página anterior</span>
                         </button>
                     </div>
                 </div>

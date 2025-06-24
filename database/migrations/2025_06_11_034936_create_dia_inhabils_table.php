@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dia_inhabils', function (Blueprint $table) {
+        Schema::create('dias_inhabiles', function (Blueprint $table) {
             $table->id();
-            $table->date('fecha');
-            $table->string('descripcion');
+            $table->date('fecha_inicio');
+            $table->date('fecha_fin')->nullable();
+            $table->string('descripcion', 255);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dia_inhabils');
+        Schema::dropIfExists('dias_inhabiles');
     }
 };

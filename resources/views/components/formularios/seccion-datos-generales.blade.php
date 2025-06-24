@@ -3,6 +3,10 @@
 <!-- Asegúrate de incluir Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+<!-- Incluir dependencias para validación y carga -->
+<script src="{{ asset('js/components/loading-states.js') }}" defer></script>
+<script src="{{ asset('js/validators/datos-generales-validator.js') }}" defer></script>
+
 <script>
 function datosGeneralesData() {
     return {
@@ -500,6 +504,55 @@ select option:hover {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
     backdrop-filter: blur(10px);
     border: 1px solid rgba(157, 36, 73, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Estados de validación para el contenedor de actividades */
+#actividades-seleccionadas.border-green-300 {
+    border-color: rgb(34, 197, 94) !important;
+    box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.1), 0 2px 4px rgba(34, 197, 94, 0.05);
+}
+
+#actividades-seleccionadas.bg-green-50 {
+    /* Se aplica junto con border-green-300 pero sin cambiar el fondo */
+}
+
+#actividades-seleccionadas.border-red-300 {
+    border-color: rgb(239, 68, 68) !important;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.12)) !important;
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.1), 0 2px 4px rgba(239, 68, 68, 0.05);
+}
+
+#actividades-seleccionadas.bg-red-50 {
+    /* Se aplica junto con border-red-300 */
+}
+
+/* Efecto de pulso suave para estado válido */
+#actividades-seleccionadas.border-green-300 {
+    animation: gentle-pulse-green 2s infinite;
+}
+
+@keyframes gentle-pulse-green {
+    0%, 100% {
+        box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.1), 0 2px 4px rgba(34, 197, 94, 0.05);
+    }
+    50% {
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15), 0 4px 8px rgba(34, 197, 94, 0.1);
+    }
+}
+
+/* Efecto de pulso para estado inválido */
+#actividades-seleccionadas.border-red-300 {
+    animation: gentle-pulse-red 1.5s infinite;
+}
+
+@keyframes gentle-pulse-red {
+    0%, 100% {
+        box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.1), 0 2px 4px rgba(239, 68, 68, 0.05);
+    }
+    50% {
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2), 0 4px 8px rgba(239, 68, 68, 0.1);
+    }
 }
 
 #actividades-seleccionadas .tag {
@@ -808,6 +861,180 @@ button:hover {
 #actividad_id option {
     @apply py-1;
 }
+
+/* Estilos específicos para validación de formulario */
+.formulario__grupo-correcto input,
+.formulario__grupo-correcto textarea,
+.formulario__grupo-correcto select {
+    @apply border-green-500 bg-green-50;
+}
+
+.formulario__grupo-incorrecto input,
+.formulario__grupo-incorrecto textarea,
+.formulario__grupo-incorrecto select {
+    @apply border-red-500 bg-red-50;
+}
+
+.formulario__input-error {
+    @apply text-red-600 text-sm mt-1;
+}
+
+.formulario__input-error-activo {
+    @apply block;
+}
+
+.formulario__validacion-estado {
+    @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-lg z-10;
+}
+
+/* Animaciones para los iconos de validación */
+.formulario__validacion-estado {
+    transition: all 0.3s ease;
+}
+
+.formulario__grupo-correcto .formulario__validacion-estado {
+    @apply text-green-500;
+    animation: bounce-in 0.4s ease-out;
+}
+
+.formulario__grupo-incorrecto .formulario__validacion-estado {
+    @apply text-red-500;
+    animation: shake 0.4s ease-out;
+}
+
+@keyframes bounce-in {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translate(-50%, -50%) translateX(0);
+    }
+    25% {
+        transform: translate(-50%, -50%) translateX(-5px);
+    }
+    75% {
+        transform: translate(-50%, -50%) translateX(5px);
+    }
+}
+
+/* Estilos para mensajes de notificación */
+#mensaje-validacion-general {
+    z-index: 9999;
+}
+
+#mensaje-validacion-general > div {
+    animation: slide-in-right 0.3s ease-out;
+}
+
+@keyframes slide-in-right {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Animación para notificaciones */
+.animate-slide-in {
+    animation: slide-in-right 0.3s ease-out;
+}
+
+/* Estilos para mensajes de error en campos */
+.error-message {
+    animation: fade-in 0.3s ease-out;
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animaciones para el modal de errores */
+.animate-modal-appear {
+    animation: modal-appear 0.3s ease-out;
+}
+
+.animate-modal-disappear {
+    animation: modal-disappear 0.3s ease-in;
+}
+
+@keyframes modal-appear {
+    0% {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes modal-disappear {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+}
+
+/* Scrollbar personalizada para el modal */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Efecto hover para botones del modal */
+.bg-red-600:hover {
+    background-color: #dc2626 !important;
+}
+
+/* Animación suave para el backdrop del modal */
+#modal-errores-validacion {
+    animation: backdrop-appear 0.3s ease-out;
+}
+
+@keyframes backdrop-appear {
+    0% {
+        background-color: rgba(0, 0, 0, 0);
+    }
+    100% {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+}
 </style>
 
 <script>
@@ -1020,16 +1247,33 @@ async function guardarYSiguiente() {
             navegarSiguienteSeccion();
         } else {
             ocultarEstadoCargaFormulario('datos-generales');
-            alert('Error al guardar: ' + (result.message || JSON.stringify(result.errors) || 'Error desconocido'));
+            
+            // Mostrar errores de validación específicos
+            if (result.errors && Object.keys(result.errors).length > 0) {
+                mostrarErroresValidacion(result.errors);
+            } else {
+                mostrarNotificacion('Error al guardar: ' + (result.message || 'Error desconocido'), 'error');
+            }
         }
         
     } catch (error) {
         ocultarEstadoCargaFormulario('datos-generales');
-        // Si falla el guardado, preguntar al usuario si quiere continuar
-        const continuar = confirm('Error al guardar los datos. ¿Desea continuar sin guardar?');
-        if (continuar) {
-            navegarSiguienteSeccion();
+        
+        // Si es un error HTTP 422 (validación), extraer errores
+        if (error.message.includes('422')) {
+            try {
+                const errorText = error.message.split(' - ')[1];
+                const errorData = JSON.parse(errorText);
+                if (errorData.errors) {
+                    mostrarErroresValidacion(errorData.errors);
+                    return;
+                }
+            } catch (parseError) {
+                // Si no se puede parsear, continuar con el manejo normal
+            }
         }
+        
+        mostrarNotificacion('Error de conexión: ' + error.message, 'error');
     }
 }
 
@@ -1073,5 +1317,376 @@ function navegarSiguienteSeccion() {
     alert('Error: No se puede navegar al siguiente paso. Verifique que la página esté cargada correctamente.');
 }
 
+// Función para mostrar errores de validación específicos
+function mostrarErroresValidacion(errors) {
+    // Limpiar errores anteriores
+    limpiarErroresValidacion();
+    
+    let camposConError = [];
+    
+    Object.keys(errors).forEach(campo => {
+        const mensajes = Array.isArray(errors[campo]) ? errors[campo] : [errors[campo]];
+        
+        // Buscar el campo en el formulario
+        let input = document.querySelector(`[name="${campo}"]`);
+        
+        // Para actividades seleccionadas, usar el contenedor
+        if (campo === 'actividades_seleccionadas') {
+            const contenedor = document.getElementById('actividades-seleccionadas');
+            if (contenedor) {
+                mostrarErrorEnContenedor(contenedor, mensajes);
+                camposConError.push({
+                    nombre: 'Actividades',
+                    errores: mensajes
+                });
+            }
+            return;
+        }
+        
+        if (input) {
+            mostrarErrorEnCampo(input, mensajes);
+            // Obtener el label del campo para el modal
+            const label = input.closest('.form-group')?.querySelector('label')?.textContent?.replace('*', '').trim() || campo;
+            camposConError.push({
+                nombre: label,
+                errores: mensajes
+            });
+        }
+    });
+    
+    // Mostrar modal de errores bonito
+    mostrarModalErrores(camposConError);
+}
+
+// Función para mostrar error en un campo específico
+function mostrarErrorEnCampo(input, mensajes) {
+    const grupo = input.closest('.form-group');
+    if (!grupo) return;
+    
+    // Agregar clases de error
+    input.classList.add('border-red-500', 'bg-red-50');
+    
+    // Agregar mensaje de error (solo el primero para no sobrecargar)
+    let mensajeError = grupo.querySelector('.error-message');
+    if (!mensajeError) {
+        mensajeError = document.createElement('p');
+        mensajeError.className = 'error-message mt-1 text-sm text-red-600';
+        grupo.appendChild(mensajeError);
+    }
+    
+    const primerMensaje = Array.isArray(mensajes) ? mensajes[0] : mensajes;
+    mensajeError.textContent = primerMensaje;
+    
+    // Scroll al primer error
+    if (!document.querySelector('.border-red-500:not([name="' + input.name + '"])')) {
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+// Función para mostrar error en el contenedor de actividades
+function mostrarErrorEnContenedor(contenedor, mensajes) {
+    contenedor.classList.add('border-red-500', 'bg-red-50');
+    
+    let mensajeError = contenedor.parentElement.querySelector('.error-message');
+    if (!mensajeError) {
+        mensajeError = document.createElement('p');
+        mensajeError.className = 'error-message mt-1 text-sm text-red-600';
+        contenedor.parentElement.appendChild(mensajeError);
+    }
+    
+    const primerMensaje = Array.isArray(mensajes) ? mensajes[0] : mensajes;
+    mensajeError.textContent = primerMensaje;
+    contenedor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Función para limpiar errores anteriores
+function limpiarErroresValidacion() {
+    // Limpiar clases de error en inputs
+    document.querySelectorAll('.border-red-500').forEach(element => {
+        element.classList.remove('border-red-500', 'bg-red-50');
+    });
+    
+    // Eliminar mensajes de error
+    document.querySelectorAll('.error-message').forEach(element => {
+        element.remove();
+    });
+    
+    // Cerrar modal de errores si existe
+    cerrarModalErrores();
+}
+
+// Función para mostrar notificaciones simples
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const contenedor = document.createElement('div');
+    contenedor.className = 'fixed top-4 right-4 z-50 max-w-md';
+    
+    const clasesTipo = tipo === 'error' 
+        ? 'bg-red-100 border border-red-400 text-red-700' 
+        : tipo === 'success'
+        ? 'bg-green-100 border border-green-400 text-green-700'
+        : 'bg-blue-100 border border-blue-400 text-blue-700';
+    
+    const icono = tipo === 'error' 
+        ? 'fa-exclamation-circle' 
+        : tipo === 'success'
+        ? 'fa-check-circle'
+        : 'fa-info-circle';
+    
+    contenedor.innerHTML = `
+        <div class="${clasesTipo} px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 animate-slide-in">
+            <div class="flex items-start">
+                <i class="fas ${icono} mr-2 mt-0.5 flex-shrink-0"></i>
+                <span class="flex-1">${mensaje}</span>
+                <button onclick="this.closest('.fixed').remove()" class="ml-4 text-lg leading-none flex-shrink-0">
+                    &times;
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(contenedor);
+    
+    // Auto-remover después de 8 segundos para errores, 5 para otros
+    const timeout = tipo === 'error' ? 8000 : 5000;
+    setTimeout(() => {
+        if (contenedor && contenedor.parentNode) {
+            contenedor.remove();
+        }
+    }, timeout);
+}
+
+// Función para mostrar modal de errores bonito con todos los detalles
+function mostrarModalErrores(camposConError) {
+    // Remover modal anterior si existe
+    const modalAnterior = document.getElementById('modal-errores-validacion');
+    if (modalAnterior) {
+        modalAnterior.remove();
+    }
+    
+    const totalErrores = camposConError.reduce((total, campo) => total + campo.errores.length, 0);
+    
+    const modal = document.createElement('div');
+    modal.id = 'modal-errores-validacion';
+    modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    
+    let erroresHTML = '';
+    camposConError.forEach((campo, index) => {
+        erroresHTML += `
+            <div class="mb-4 border-l-4 border-red-400 pl-4 py-2 bg-red-50 rounded-r-lg">
+                <h4 class="font-semibold text-red-800 mb-2 flex items-center cursor-pointer hover:text-red-900 transition-colors" onclick="irACampo('${campo.nombre}', ${index})">
+                    <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+                    ${campo.nombre}
+                    <i class="fas fa-external-link-alt ml-2 text-xs text-red-500"></i>
+                </h4>
+                <ul class="space-y-1">
+                    ${campo.errores.map(error => `
+                        <li class="text-red-700 text-sm flex items-start">
+                            <i class="fas fa-circle mr-2 text-red-400 text-xs mt-1.5 flex-shrink-0"></i>
+                            <span>${error}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    });
+    
+    modal.innerHTML = `
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true"></div>
+            
+            <!-- Centrar modal -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full animate-modal-appear">
+                <!-- Header del modal -->
+                <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-white bg-opacity-20 rounded-full p-2 mr-3">
+                                <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">
+                                    Errores en el Formulario
+                                </h3>
+                                <p class="text-red-100 text-sm">
+                                    Se encontraron ${totalErrores} error${totalErrores !== 1 ? 'es' : ''} que necesitan corrección
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="cerrarModalErrores()" class="text-white hover:text-red-200 transition-colors">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Contenido del modal -->
+                <div class="bg-white px-6 py-4 max-h-96 overflow-y-auto custom-scrollbar">
+                    <div class="mb-4">
+                        <p class="text-gray-700 text-sm mb-4">
+                            Por favor, corrija los siguientes errores antes de continuar:
+                        </p>
+                        ${erroresHTML}
+                    </div>
+                </div>
+                
+                <!-- Footer del modal -->
+                <div class="bg-gray-50 px-6 py-4 flex justify-between items-center">
+                    <div class="text-sm text-gray-500 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span>Haga clic en un campo para ir directamente a él</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-medium">
+                            ${camposConError.length} campo${camposConError.length !== 1 ? 's' : ''} con errores
+                        </div>
+                        <button onclick="cerrarModalErrores()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
+                            <i class="fas fa-check mr-2"></i>
+                            Entendido
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Cerrar con ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarModalErrores();
+        }
+    });
+    
+    // Cerrar al hacer click fuera del modal
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            cerrarModalErrores();
+        }
+    });
+}
+
+// Función para cerrar el modal de errores
+function cerrarModalErrores() {
+    const modal = document.getElementById('modal-errores-validacion');
+    if (modal) {
+        modal.classList.add('animate-modal-disappear');
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+}
+
+// Función para ir a un campo específico desde el modal
+function irACampo(nombreCampo, index) {
+    // Cerrar el modal primero
+    cerrarModalErrores();
+    
+    // Esperar a que se cierre el modal
+    setTimeout(() => {
+        let elemento = null;
+        
+        // Buscar el campo por diferentes criterios
+        if (nombreCampo === 'Actividades') {
+            elemento = document.getElementById('actividades-seleccionadas');
+        } else {
+            // Buscar por el label text
+            const labels = document.querySelectorAll('label');
+            for (let label of labels) {
+                if (label.textContent.replace('*', '').trim() === nombreCampo) {
+                    const input = label.nextElementSibling || document.querySelector(`[name="${label.getAttribute('for')}"]`);
+                    if (input) {
+                        elemento = input;
+                        break;
+                    }
+                }
+            }
+            
+            // Si no se encontró, buscar directamente por name
+            if (!elemento) {
+                elemento = document.querySelector(`[name*="${nombreCampo.toLowerCase()}"]`);
+            }
+        }
+        
+        if (elemento) {
+            // Scroll al elemento
+            elemento.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center',
+                inline: 'nearest'
+            });
+            
+            // Hacer focus si es un input
+            if (elemento.tagName === 'INPUT' || elemento.tagName === 'TEXTAREA' || elemento.tagName === 'SELECT') {
+                setTimeout(() => {
+                    elemento.focus();
+                    // Efecto de resaltado temporal
+                    elemento.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.5)';
+                    setTimeout(() => {
+                        elemento.style.boxShadow = '';
+                    }, 2000);
+                }, 500);
+            } else {
+                // Para contenedores como actividades
+                elemento.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.5)';
+                setTimeout(() => {
+                    elemento.style.boxShadow = '';
+                }, 2000);
+            }
+        }
+    }, 350);
+}
+
+// Función para limpiar error de un campo específico
+function limpiarErrorCampo(input) {
+    input.classList.remove('border-red-500', 'bg-red-50');
+    
+    const grupo = input.closest('.form-group');
+    if (grupo) {
+        const errorMsg = grupo.querySelector('.error-message');
+        if (errorMsg) {
+            errorMsg.remove();
+        }
+    }
+}
+
+// Agregar event listeners cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar event listeners para limpiar errores al escribir
+    const inputs = document.querySelectorAll('#datos-generales-form input, #datos-generales-form textarea, #datos-generales-form select');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            limpiarErrorCampo(this);
+        });
+        
+        input.addEventListener('change', function() {
+            limpiarErrorCampo(this);
+        });
+    });
+    
+    // Limpiar errores del contenedor de actividades cuando se modifique
+    const actividadesContainer = document.getElementById('actividades-seleccionadas');
+    if (actividadesContainer) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    // Limpiar error del contenedor cuando se agregan/quitan actividades
+                    actividadesContainer.classList.remove('border-red-500', 'bg-red-50');
+                    const errorMsg = actividadesContainer.parentElement.querySelector('.error-message');
+                    if (errorMsg) {
+                        errorMsg.remove();
+                    }
+                }
+            });
+        });
+        
+        observer.observe(actividadesContainer, {
+            childList: true,
+            subtree: true
+        });
+    }
+});
 
 </script> 

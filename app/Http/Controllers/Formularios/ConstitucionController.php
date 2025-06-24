@@ -111,16 +111,7 @@ class ConstitucionController extends Controller
             ]);
 
             // Validar los datos del formulario
-            $validated = $request->validate([
-                'tramite_id' => 'required|integer',
-                'numero_escritura' => 'required|string|max:15',
-                'nombre_notario' => 'required|string|max:100',
-                'entidad_federativa' => 'required|integer|min:1|max:32',
-                'fecha_constitucion' => 'required|date|before_or_equal:today',
-                'numero_notario' => 'required|string|max:10',
-                'numero_registro' => 'required|string|max:20',
-                'fecha_inscripcion' => 'required|date|before_or_equal:today',
-            ]);
+            $validated = $this->validateConstitucionData($request);
 
             // Buscar el trámite
             $tramite = Tramite::with('detalleTramite')->find($validated['tramite_id']);
@@ -350,5 +341,242 @@ class ConstitucionController extends Controller
             return $value;
         }
         return $default;
+    }
+
+    /**
+     * Valida los datos del formulario de constitución
+     *
+     * @param Request $request
+     * @return array
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function validateConstitucionData(Request $request)
+    {
+        $rules = [
+            'tramite_id' => 'required|integer|exists:tramite,id',
+            'numero_escritura' => [
+                'required',
+                'string',
+                'max:15',
+                'regex:/^[a-zA-Z0-9\s\/\-\.]{1,15}$/'
+            ],
+            'fecha_constitucion' => [
+                'required',
+                'date',
+                'before_or_equal:today'
+            ],
+            'nombre_notario' => [
+                'required',
+                'string',
+                'min:3',
+                'max:100',
+                'regex:/^[a-zA-ZÀ-ÿñÑ\s\.]{3,100}$/'
+            ],
+            'entidad_federativa' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:32'
+            ],
+            'numero_notario' => [
+                'required',
+                'string',
+                'max:5',
+                'regex:/^[0-9]{1,5}$/'
+            ],
+            'numero_registro' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^[a-zA-Z0-9\s\/\-\.]{1,20}$/'
+            ],
+            'fecha_inscripcion' => [
+                'required',
+                'date',
+                'before_or_equal:today',
+                'after_or_equal:fecha_constitucion'
+            ]
+        ];
+
+        $messages = [
+            'numero_escritura.required' => 'El número de escritura es obligatorio',
+            'numero_escritura.max' => 'El número de escritura debe tener máximo 15 caracteres',
+            'numero_escritura.regex' => 'El número de escritura debe tener entre 1 y 15 caracteres (letras, números, espacios, /, -, .)',
+            'fecha_constitucion.required' => 'La fecha de constitución es obligatoria',
+            'fecha_constitucion.date' => 'Debe seleccionar una fecha válida',
+            'fecha_constitucion.before_or_equal' => 'La fecha de constitución no puede ser futura',
+            'nombre_notario.required' => 'El nombre del notario es obligatorio',
+            'nombre_notario.min' => 'El nombre del notario debe tener al menos 3 caracteres',
+            'nombre_notario.max' => 'El nombre del notario debe tener máximo 100 caracteres',
+            'nombre_notario.regex' => 'El nombre del notario debe tener entre 3 y 100 caracteres (solo letras, espacios y puntos)',
+            'entidad_federativa.required' => 'Debe seleccionar una entidad federativa',
+            'entidad_federativa.integer' => 'La entidad federativa debe ser válida',
+            'entidad_federativa.min' => 'Debe seleccionar una entidad federativa válida',
+            'entidad_federativa.max' => 'La entidad federativa seleccionada no es válida',
+            'numero_notario.required' => 'El número del notario es obligatorio',
+            'numero_notario.max' => 'El número del notario debe tener máximo 5 dígitos',
+            'numero_notario.regex' => 'El número del notario debe ser numérico y tener máximo 5 dígitos',
+            'numero_registro.required' => 'El número de registro es obligatorio',
+            'numero_registro.max' => 'El número de registro debe tener máximo 20 caracteres',
+            'numero_registro.regex' => 'El número de registro debe tener entre 1 y 20 caracteres',
+            'fecha_inscripcion.required' => 'La fecha de inscripción es obligatoria',
+            'fecha_inscripcion.date' => 'Debe seleccionar una fecha válida',
+            'fecha_inscripcion.before_or_equal' => 'La fecha de inscripción no puede ser futura',
+            'fecha_inscripcion.after_or_equal' => 'La fecha de inscripción debe ser posterior a la fecha de constitución'
+        ];
+
+        return $request->validate($rules, $messages);
+    }
+} 
+        $rules = [
+            'tramite_id' => 'required|integer|exists:tramite,id',
+            'numero_escritura' => [
+                'required',
+                'string',
+                'max:15',
+                'regex:/^[a-zA-Z0-9\s\/\-\.]{1,15}$/'
+            ],
+            'fecha_constitucion' => [
+                'required',
+                'date',
+                'before_or_equal:today'
+            ],
+            'nombre_notario' => [
+                'required',
+                'string',
+                'min:3',
+                'max:100',
+                'regex:/^[a-zA-ZÀ-ÿñÑ\s\.]{3,100}$/'
+            ],
+            'entidad_federativa' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:32'
+            ],
+            'numero_notario' => [
+                'required',
+                'string',
+                'max:5',
+                'regex:/^[0-9]{1,5}$/'
+            ],
+            'numero_registro' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^[a-zA-Z0-9\s\/\-\.]{1,20}$/'
+            ],
+            'fecha_inscripcion' => [
+                'required',
+                'date',
+                'before_or_equal:today',
+                'after_or_equal:fecha_constitucion'
+            ]
+        ];
+
+        $messages = [
+            'numero_escritura.required' => 'El número de escritura es obligatorio',
+            'numero_escritura.max' => 'El número de escritura debe tener máximo 15 caracteres',
+            'numero_escritura.regex' => 'El número de escritura debe tener entre 1 y 15 caracteres (letras, números, espacios, /, -, .)',
+            'fecha_constitucion.required' => 'La fecha de constitución es obligatoria',
+            'fecha_constitucion.date' => 'Debe seleccionar una fecha válida',
+            'fecha_constitucion.before_or_equal' => 'La fecha de constitución no puede ser futura',
+            'nombre_notario.required' => 'El nombre del notario es obligatorio',
+            'nombre_notario.min' => 'El nombre del notario debe tener al menos 3 caracteres',
+            'nombre_notario.max' => 'El nombre del notario debe tener máximo 100 caracteres',
+            'nombre_notario.regex' => 'El nombre del notario debe tener entre 3 y 100 caracteres (solo letras, espacios y puntos)',
+            'entidad_federativa.required' => 'Debe seleccionar una entidad federativa',
+            'entidad_federativa.integer' => 'La entidad federativa debe ser válida',
+            'entidad_federativa.min' => 'Debe seleccionar una entidad federativa válida',
+            'entidad_federativa.max' => 'La entidad federativa seleccionada no es válida',
+            'numero_notario.required' => 'El número del notario es obligatorio',
+            'numero_notario.max' => 'El número del notario debe tener máximo 5 dígitos',
+            'numero_notario.regex' => 'El número del notario debe ser numérico y tener máximo 5 dígitos',
+            'numero_registro.required' => 'El número de registro es obligatorio',
+            'numero_registro.max' => 'El número de registro debe tener máximo 20 caracteres',
+            'numero_registro.regex' => 'El número de registro debe tener entre 1 y 20 caracteres',
+            'fecha_inscripcion.required' => 'La fecha de inscripción es obligatoria',
+            'fecha_inscripcion.date' => 'Debe seleccionar una fecha válida',
+            'fecha_inscripcion.before_or_equal' => 'La fecha de inscripción no puede ser futura',
+            'fecha_inscripcion.after_or_equal' => 'La fecha de inscripción debe ser posterior a la fecha de constitución'
+        ];
+
+        return $request->validate($rules, $messages);
+    }
+} 
+        $rules = [
+            'tramite_id' => 'required|integer|exists:tramite,id',
+            'numero_escritura' => [
+                'required',
+                'string',
+                'max:15',
+                'regex:/^[a-zA-Z0-9\s\/\-\.]{1,15}$/'
+            ],
+            'fecha_constitucion' => [
+                'required',
+                'date',
+                'before_or_equal:today'
+            ],
+            'nombre_notario' => [
+                'required',
+                'string',
+                'min:3',
+                'max:100',
+                'regex:/^[a-zA-ZÀ-ÿñÑ\s\.]{3,100}$/'
+            ],
+            'entidad_federativa' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:32'
+            ],
+            'numero_notario' => [
+                'required',
+                'string',
+                'max:5',
+                'regex:/^[0-9]{1,5}$/'
+            ],
+            'numero_registro' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^[a-zA-Z0-9\s\/\-\.]{1,20}$/'
+            ],
+            'fecha_inscripcion' => [
+                'required',
+                'date',
+                'before_or_equal:today',
+                'after_or_equal:fecha_constitucion'
+            ]
+        ];
+
+        $messages = [
+            'numero_escritura.required' => 'El número de escritura es obligatorio',
+            'numero_escritura.max' => 'El número de escritura debe tener máximo 15 caracteres',
+            'numero_escritura.regex' => 'El número de escritura debe tener entre 1 y 15 caracteres (letras, números, espacios, /, -, .)',
+            'fecha_constitucion.required' => 'La fecha de constitución es obligatoria',
+            'fecha_constitucion.date' => 'Debe seleccionar una fecha válida',
+            'fecha_constitucion.before_or_equal' => 'La fecha de constitución no puede ser futura',
+            'nombre_notario.required' => 'El nombre del notario es obligatorio',
+            'nombre_notario.min' => 'El nombre del notario debe tener al menos 3 caracteres',
+            'nombre_notario.max' => 'El nombre del notario debe tener máximo 100 caracteres',
+            'nombre_notario.regex' => 'El nombre del notario debe tener entre 3 y 100 caracteres (solo letras, espacios y puntos)',
+            'entidad_federativa.required' => 'Debe seleccionar una entidad federativa',
+            'entidad_federativa.integer' => 'La entidad federativa debe ser válida',
+            'entidad_federativa.min' => 'Debe seleccionar una entidad federativa válida',
+            'entidad_federativa.max' => 'La entidad federativa seleccionada no es válida',
+            'numero_notario.required' => 'El número del notario es obligatorio',
+            'numero_notario.max' => 'El número del notario debe tener máximo 5 dígitos',
+            'numero_notario.regex' => 'El número del notario debe ser numérico y tener máximo 5 dígitos',
+            'numero_registro.required' => 'El número de registro es obligatorio',
+            'numero_registro.max' => 'El número de registro debe tener máximo 20 caracteres',
+            'numero_registro.regex' => 'El número de registro debe tener entre 1 y 20 caracteres',
+            'fecha_inscripcion.required' => 'La fecha de inscripción es obligatoria',
+            'fecha_inscripcion.date' => 'Debe seleccionar una fecha válida',
+            'fecha_inscripcion.before_or_equal' => 'La fecha de inscripción no puede ser futura',
+            'fecha_inscripcion.after_or_equal' => 'La fecha de inscripción debe ser posterior a la fecha de constitución'
+        ];
+
+        return $request->validate($rules, $messages);
     }
 } 

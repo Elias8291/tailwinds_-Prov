@@ -39,7 +39,9 @@ class LogController extends Controller
             $query->where('message', 'like', '%' . $request->search . '%');
         }
 
-        $logs = $query->orderBy('created_at', 'desc')->paginate(20);
+        // Paginación con parámetros de filtros
+        $perPage = $request->get('perPage', 20);
+        $logs = $query->orderBy('created_at', 'desc')->paginate($perPage)->appends($request->query());
 
         // Obtener niveles únicos para el filtro
         $levels = Log::select('level')->distinct()->pluck('level');

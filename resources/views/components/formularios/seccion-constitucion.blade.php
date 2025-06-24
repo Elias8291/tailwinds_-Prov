@@ -115,9 +115,13 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            @endif
-        </div>
+                        </div>
+    @endif
+</div>
+
+@push('scripts')
+<script src="{{ asset('js/validators/constitucion-validator.js') }}"></script>
+@endpush
     @else
         <!-- Vista editable normal (código existente) -->
         <form class="space-y-8" @submit.prevent="guardarConstitucion" x-ref="constitucionForm">
@@ -591,6 +595,14 @@ input:focus, select:focus, textarea:focus {
 
 .form-group:hover input,
 .form-group:hover select,
+.form-group:hover textarea {
+    @apply border-[#4F46E5]/40;
+}
+</style> 
+.form-group:hover textarea {
+    @apply border-[#4F46E5]/40;
+}
+</style> 
 .form-group:hover textarea {
     @apply border-[#4F46E5]/40;
 }

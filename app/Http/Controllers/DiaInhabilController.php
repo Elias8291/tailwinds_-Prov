@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DiaInhabil;
+use App\Models\DiasInhabiles;
 use Illuminate\Http\Request;
 
 class DiaInhabilController extends Controller
@@ -29,11 +29,14 @@ class DiaInhabilController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'fecha' => 'required|date|unique:dia_inhabils,fecha',
+            'fecha_inicio' => 'required|date|unique:dias_inhabiles,fecha_inicio',
             'descripcion' => 'required|string|max:255',
         ]);
 
-        DiaInhabil::create($request->all());
+        DiasInhabiles::create([
+            'fecha_inicio' => $request->fecha_inicio,
+            'descripcion' => $request->descripcion,
+        ]);
 
         return redirect()->route('citas.index')
             ->with('success', 'Día inhábil registrado correctamente.');
@@ -42,7 +45,7 @@ class DiaInhabilController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(DiaInhabil $diaInhabil)
+    public function show(DiasInhabiles $diaInhabil)
     {
         //
     }
@@ -50,7 +53,7 @@ class DiaInhabilController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(DiaInhabil $diaInhabil)
+    public function edit(DiasInhabiles $diaInhabil)
     {
         //
     }
@@ -58,7 +61,7 @@ class DiaInhabilController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, DiaInhabil $diaInhabil)
+    public function update(Request $request, DiasInhabiles $diaInhabil)
     {
         //
     }
@@ -66,7 +69,7 @@ class DiaInhabilController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DiaInhabil $diasInhabile)
+    public function destroy(DiasInhabiles $diasInhabile)
     {
         $diasInhabile->delete();
 
