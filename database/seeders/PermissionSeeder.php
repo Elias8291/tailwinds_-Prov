@@ -97,6 +97,18 @@ class PermissionSeeder extends Seeder
             'configuracion.backup',
             'configuracion.logs',
 
+            // === ENTRENAMIENTO DE IA ===
+            'ai-training.ver',
+            'ai-training.gestionar',
+            'ai-training.subir',
+            'ai-training.aprobar',
+            'ai-training.rechazar',
+            'ai-training.entrenar',
+
+            // === LOGS DEL SISTEMA ===
+            'logs.ver',
+            'logs.eliminar',
+
             // === PERMISOS ESPECIALES ===
             'super-admin',
             'admin-sistema',

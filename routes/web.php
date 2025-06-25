@@ -44,6 +44,10 @@ use App\Http\Controllers\API\SectorController;
 
 // Controladores de Documentos
 use App\Http\Controllers\DocumentoMembretadoController;
+use App\Http\Controllers\MembreteController;
+
+// Controladores de IA
+use App\Http\Controllers\AI\DocumentTrainingController;
 
 // ============================================================================
 // RUTAS PÚBLICAS (Sin autenticación requerida)
@@ -443,6 +447,20 @@ Route::middleware(['auth'])->prefix('documento-membretado')->group(function () {
     Route::get('/ejemplo', [DocumentoMembretadoController::class, 'ejemplo'])->name('documento.ejemplo');
 });
 
+// ============================================================================
+// MÓDULO DE MEMBRETES OFICIALES
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('membretes')->group(function () {
+    // Página principal de membretes
+    Route::get('/', [MembreteController::class, 'index'])->name('membretes.index');
+    
+    // Ejemplos de documentos (descarga directa)
+    Route::get('/ejemplo/inscripcion', [MembreteController::class, 'ejemploInscripcion'])->name('membretes.ejemplo.inscripcion');
+    Route::get('/ejemplo/renovacion', [MembreteController::class, 'ejemploRenovacion'])->name('membretes.ejemplo.renovacion');
+    Route::get('/ejemplo/actualizacion', [MembreteController::class, 'ejemploActualizacion'])->name('membretes.ejemplo.actualizacion');
+});
+
 // Profile Routes
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
@@ -454,6 +472,37 @@ Route::middleware('auth')->group(function () {
 // ============================================================================
 // RUTAS DE PRUEBA PARA PÁGINAS DE ERROR (Solo en desarrollo)
 // ============================================================================
+
+// ============================================================================
+// MÓDULO DE ENTRENAMIENTO DE IA
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('ai/training')->name('ai.training.')->group(function () {
+    
+    // Dashboard principal del módulo de entrenamiento
+    Route::get('/', [DocumentTrainingController::class, 'index'])->name('index');
+    
+    // Subida de documentos para entrenamiento
+    Route::get('/upload', [DocumentTrainingController::class, 'uploadForm'])->name('upload');
+    Route::post('/upload', [DocumentTrainingController::class, 'upload'])->name('upload.store');
+    
+    // Revisión y aprobación de documentos
+    Route::get('/review', [DocumentTrainingController::class, 'review'])->name('review');
+    Route::post('/approve/{trainingData}', [DocumentTrainingController::class, 'approve'])->name('approve');
+    Route::post('/reject/{trainingData}', [DocumentTrainingController::class, 'reject'])->name('reject');
+    
+    // Entrenamiento de modelos
+    Route::post('/train', [DocumentTrainingController::class, 'trainModel'])->name('train');
+    
+    // Ver detalles de documento de entrenamiento
+    Route::get('/document/{trainingData}', [DocumentTrainingController::class, 'showDocument'])->name('document.show');
+    
+    // Servir archivos de entrenamiento
+    Route::get('/file/{trainingData}', [DocumentTrainingController::class, 'serveTrainingFile'])->name('file.serve');
+    
+    // Eliminar datos de entrenamiento
+    Route::delete('/training-data/{trainingData}', [DocumentTrainingController::class, 'deleteTrainingData'])->name('training-data.delete');
+});
 
 if (config('app.debug')) {
     

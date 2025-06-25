@@ -1,6 +1,83 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+.input-floating {
+    position: relative;
+    width: 100%;
+}
+
+.input-floating input {
+    width: 100%;
+    height: 3rem;
+    padding: 1rem 3rem 0.5rem 3rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(4px);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.input-floating input:focus {
+    border-color: #9d2449;
+    box-shadow: 0 0 0 3px rgba(157, 36, 73, 0.1);
+}
+
+.input-floating input.error {
+    border-color: #ef4444;
+}
+
+.input-floating .input-floating-label {
+    position: absolute;
+    left: 3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: #6b7280;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    background: white;
+    padding: 0 0.5rem;
+}
+
+.input-floating input:focus + .input-floating-label,
+.input-floating input:not(:placeholder-shown) + .input-floating-label {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 0.875rem;
+    color: #9d2449;
+}
+
+.input-floating .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    transition: color 0.3s ease;
+    pointer-events: none;
+}
+
+.input-floating input:focus ~ .input-icon {
+    color: #9d2449;
+}
+
+.input-floating .toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.input-floating .toggle-password:hover {
+    color: #9d2449;
+}
+</style>
 <div class="min-h-screen w-full overflow-x-hidden">
     <div class="py-6 px-3 sm:px-4">
         <div class="w-full max-w-3xl mx-auto">
@@ -11,7 +88,14 @@
 
                     <!-- Encabezado -->
                     <div class="p-4">
-                        <div class="flex flex-col items-center text-center">
+                        <div class="flex flex-col items-center text-center relative">
+                            <!-- Flecha de regresar -->
+                            <a href="{{ route('users.index') }}" 
+                               class="absolute left-0 top-0 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-all duration-300 group">
+                                <i class="fas fa-arrow-left text-sm group-hover:translate-x-[-2px] transition-transform duration-300"></i>
+                                <span class="text-sm font-medium">Regresar</span>
+                            </a>
+                            
                             <div class="bg-gradient-to-br from-[#9d2449] to-[#8a203f] rounded-xl p-3 shadow-lg mb-3">
                                 <i class="fas fa-user text-white text-xl"></i>
                             </div>
@@ -33,126 +117,88 @@
 
                         <div class="w-full max-w-lg mx-auto space-y-6">
                             <!-- Nombre -->
-                            <div class="form-group">
-                                <div class="relative group">
-                                    <input type="text" 
-                                           id="name"
-                                           name="name"
-                                           value="{{ old('name', $user->name) }}"
-                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('name') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
-                                           placeholder=" "
-                                           required>
-                                    <label for="name" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
-                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
-                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
-                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
-                                        Nombre<span class="text-[#9d2449] ml-1">*</span>
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-user text-lg transition-colors duration-300"></i>
-                                    </div>
-                                    @error('name')
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
-                                        <i class="fas fa-exclamation-circle text-red-500"></i>
-                                    </div>
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ $message }}
-                                    </p>
-                                    @enderror
-                                </div>
+                            <div class="input-floating">
+                                <input type="text" 
+                                       id="name"
+                                       name="name"
+                                       value="{{ old('name', $user->nombre) }}"
+                                       autocomplete="off"
+                                       placeholder=" "
+                                       class="@error('name') error @enderror"
+                                       required>
+                                <label class="input-floating-label" for="name">
+                                    Nombre<span class="text-[#9d2449] ml-1">*</span>
+                                </label>
+                                <i class="fas fa-user input-icon"></i>
+                                @error('name')
+                                <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
                             </div>
 
                             <!-- Email -->
-                            <div class="form-group">
-                                <div class="relative group">
-                                    <input type="email" 
-                                           id="email"
-                                           name="email"
-                                           value="{{ old('email', $user->email) }}"
-                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('email') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
-                                           placeholder=" "
-                                           required>
-                                    <label for="email" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
-                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
-                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
-                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
-                                        Correo Electrónico<span class="text-[#9d2449] ml-1">*</span>
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-envelope text-lg transition-colors duration-300"></i>
-                                    </div>
-                                    @error('email')
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
-                                        <i class="fas fa-exclamation-circle text-red-500"></i>
-                                    </div>
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ $message }}
-                                    </p>
-                                    @enderror
-                                </div>
+                            <div class="input-floating">
+                                <input type="email" 
+                                       id="email"
+                                       name="email"
+                                       value="{{ old('email', $user->correo) }}"
+                                       autocomplete="off"
+                                       placeholder=" "
+                                       class="@error('email') error @enderror"
+                                       required>
+                                <label class="input-floating-label" for="email">
+                                    Correo Electrónico<span class="text-[#9d2449] ml-1">*</span>
+                                </label>
+                                <i class="fas fa-envelope input-icon"></i>
+                                @error('email')
+                                <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
                             </div>
 
                             <!-- Contraseña -->
-                            <div class="form-group">
-                                <div class="relative group">
-                                    <input type="password" 
-                                           id="password"
-                                           name="password"
-                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('password') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
-                                           placeholder=" ">
-                                    <label for="password" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
-                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
-                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
-                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
-                                        Nueva Contraseña
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-lock text-lg transition-colors duration-300"></i>
-                                    </div>
-                                    <div class="flex items-center mt-1.5 ml-1">
-                                        <i class="fas fa-info-circle text-gray-400 text-xs mr-1.5"></i>
-                                        <span class="text-xs text-gray-500">Dejar en blanco para mantener la actual</span>
-                                    </div>
-                                    @error('password')
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
-                                        <i class="fas fa-exclamation-circle text-red-500"></i>
-                                    </div>
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ $message }}
-                                    </p>
-                                    @enderror
+                            <div class="input-floating">
+                                <input type="password" 
+                                       id="password"
+                                       name="password"
+                                       autocomplete="new-password"
+                                       placeholder=" "
+                                       class="@error('password') error @enderror"
+                                       style="padding-right: 4rem;">
+                                <label class="input-floating-label" for="password">
+                                    Nueva Contraseña
+                                </label>
+                                <i class="fas fa-lock input-icon"></i>
+                                <i id="password-icon" class="fas fa-eye toggle-password" onclick="togglePassword('password')"></i>
+                                <div class="flex items-center mt-1.5 ml-1">
+                                    <i class="fas fa-info-circle text-gray-400 text-xs mr-1.5"></i>
+                                    <span class="text-xs text-gray-500">Dejar en blanco para mantener la actual</span>
                                 </div>
+                                @error('password')
+                                <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
                             </div>
 
                             <!-- Confirmar Contraseña -->
-                            <div class="form-group">
-                                <div class="relative group">
-                                    <input type="password" 
-                                           id="password_confirmation"
-                                           name="password_confirmation"
-                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50"
-                                           placeholder=" ">
-                                    <label for="password_confirmation" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
-                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
-                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
-                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
-                                        Confirmar Nueva Contraseña
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-lock text-lg transition-colors duration-300"></i>
-                                    </div>
-                                </div>
+                            <div class="input-floating">
+                                <input type="password" 
+                                       id="password_confirmation"
+                                       name="password_confirmation"
+                                       autocomplete="new-password"
+                                       placeholder=" "
+                                       style="padding-right: 4rem;">
+                                <label class="input-floating-label" for="password_confirmation">
+                                    Confirmar Nueva Contraseña
+                                </label>
+                                <i class="fas fa-lock input-icon"></i>
+                                <i id="password_confirmation-icon" class="fas fa-eye toggle-password" onclick="togglePassword('password_confirmation')"></i>
                             </div>
                         </div>
                     </div>
@@ -270,4 +316,27 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection
+
+<script>
+// Función para alternar visibilidad de contraseña
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(inputId + '-icon');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// Ejecutar cuando la página se carga
+document.addEventListener('DOMContentLoaded', function() {
+    // Los floating labels funcionan automáticamente con CSS
+});
+</script> 

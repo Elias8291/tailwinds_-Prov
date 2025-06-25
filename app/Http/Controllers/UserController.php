@@ -39,9 +39,9 @@ class UserController extends Controller
         if ($request->filled('status')) {
             $status = $request->get('status');
             if ($status === 'verified') {
-                $query->whereNotNull('email_verified_at');
+                $query->whereNotNull('fecha_verificacion_correo');
             } elseif ($status === 'pending') {
-                $query->whereNull('email_verified_at');
+                $query->whereNull('fecha_verificacion_correo');
             }
         }
 
@@ -71,9 +71,11 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:users,correo',
             'password' => 'required|string|min:8|confirmed',
             'roles' => 'required|array'
+        ], [
+            'roles.required' => 'Debe seleccionar al menos un rol.',
         ]);
 
         $user = User::create([
@@ -91,7 +93,7 @@ class UserController extends Controller
         event(new Registered($user));
 
         return redirect()->route('users.index')
-            ->with('success', 'Usuario creado exitosamente.');
+            ->with('success', __('custom.messages.success.created', ['resource' => __('custom.resources.user')]));
     }
 
     public function edit(User $user)
@@ -104,8 +106,10 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
+            'email' => 'required|string|email|max:255|unique:users,correo,'.$user->id,
             'roles' => 'required|array'
+        ], [
+            'roles.required' => 'Debe seleccionar al menos un rol.',
         ]);
 
         $data = [
@@ -127,7 +131,7 @@ class UserController extends Controller
         SystemLogService::userUpdated($user->id, $user->nombre, $user->correo);
 
         return redirect()->route('users.index')
-            ->with('success', 'Usuario actualizado exitosamente.');
+            ->with('success', __('custom.messages.success.updated', ['resource' => __('custom.resources.user')]));
     }
 
     public function destroy(User $user)
@@ -143,7 +147,7 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')
-            ->with('success', 'Usuario eliminado exitosamente.');
+            ->with('success', __('custom.messages.success.deleted', ['resource' => __('custom.resources.user')]));
     }
 
     /** Create user for registration process */

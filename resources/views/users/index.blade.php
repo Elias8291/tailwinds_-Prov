@@ -301,7 +301,7 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if($user->email_verified_at)
+                                @if($user->fecha_verificacion_correo)
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-100">
                                         Verificado
                                     </span>

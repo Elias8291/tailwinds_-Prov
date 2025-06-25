@@ -159,4 +159,53 @@ return [
     'uuid' => 'El campo :attribute debe ser un UUID válido.',
     'duplicate' => 'El valor :attribute ya está duplicado.',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Nombres de atributos personalizados
+    |--------------------------------------------------------------------------
+    |
+    | Las siguientes líneas se utilizan para cambiar los marcadores de posición de
+    | atributos por algo más fácil de leer, como "E-Mail Address" en lugar de "email".
+    | Esto simplemente nos ayuda a hacer que nuestro mensaje sea más expresivo.
+    |
+    */
+
+    'attributes' => [
+        'name' => 'nombre',
+        'email' => 'correo electrónico',
+        'password' => 'contraseña',
+        'password_confirmation' => 'confirmación de contraseña',
+        'roles' => 'roles',
+        'role' => 'rol',
+        'rfc' => 'RFC',
+        'phone' => 'teléfono',
+        'address' => 'dirección',
+        'first_name' => 'nombre',
+        'last_name' => 'apellido',
+        'company' => 'empresa',
+        'position' => 'puesto',
+        'description' => 'descripción',
+        'status' => 'estado',
+        'created_at' => 'fecha de creación',
+        'updated_at' => 'fecha de actualización',
+        'title' => 'título',
+        'content' => 'contenido',
+        'body' => 'cuerpo',
+        'message' => 'mensaje',
+        'subject' => 'asunto',
+        'file' => 'archivo',
+        'image' => 'imagen',
+        'document' => 'documento',
+        'date' => 'fecha',
+        'time' => 'hora',
+        'age' => 'edad',
+        'gender' => 'género',
+        'city' => 'ciudad',
+        'state' => 'estado',
+        'country' => 'país',
+        'zip_code' => 'código postal',
+        'terms' => 'términos y condiciones',
+        'privacy' => 'política de privacidad',
+    ],
+
 ];
