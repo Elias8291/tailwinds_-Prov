@@ -152,9 +152,9 @@
 
         <!-- Alert de Éxito -->
         <div x-show="showSuccess" x-cloak class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div class="flex items-center">
-                <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                <p class="text-green-700 text-sm" x-text="successMessage"></p>
+            <div class="flex items-start">
+                <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5"></i>
+                <div class="text-green-700 text-sm" x-html="successMessage"></div>
             </div>
         </div>
 
@@ -223,10 +223,14 @@
                                        required>
                             <label :for="`documento_${documento.id}`" 
                                        class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-[#9d2449] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] cursor-pointer transition-all duration-300">
-                                <span x-show="!documento.uploading" x-text="documento.estado === 'Rechazado' ? 'Subir Nuevo' : 'Seleccionar archivo'"></span>
+                                <span x-show="!documento.uploading && !documento.analyzing" x-text="documento.estado === 'Rechazado' ? 'Subir Nuevo' : 'Seleccionar archivo'"></span>
                                 <span x-show="documento.uploading" class="flex items-center">
                                     <i class="fas fa-spinner fa-spin mr-2"></i>
                                     Subiendo...
+                                </span>
+                                <span x-show="documento.analyzing" class="flex items-center">
+                                    <i class="fas fa-brain fa-pulse mr-2 text-blue-500"></i>
+                                    Analizando con IA...
                                 </span>
                                 </label>
                             </div>
@@ -248,6 +252,12 @@
                                     class="text-blue-600 hover:text-blue-800 text-xs underline">
                                 Reemplazar
                             </button>
+                            <button type="button" 
+                                    @click="verValidacionIA(documento)"
+                                    class="text-purple-600 hover:text-purple-800 text-xs underline">
+                                <i class="fas fa-brain mr-1"></i>
+                                IA
+                            </button>
                         </div>
                         
                         <!-- Estado para documentos aprobados (NO se pueden reemplazar) -->
@@ -261,6 +271,13 @@
                                     class="text-green-600 hover:text-green-800 text-xs underline">
                                 <i class="fas fa-eye mr-1"></i>
                                 Ver
+                            </button>
+                            <button type="button" 
+                                    @click="verValidacionIA(documento)"
+                                    x-show="documento.docSolicitanteId"
+                                    class="text-purple-600 hover:text-purple-800 text-xs underline">
+                                <i class="fas fa-brain mr-1"></i>
+                                IA
                             </button>
                         </div>
                         
@@ -388,6 +405,7 @@ function documentosData() {
                         ...doc,
                         estado: doc.estado || 'Pendiente',
                         uploading: false,
+                        analyzing: false,
                         archivo_seleccionado: false,
                         nombre_archivo: '',
                         observaciones: doc.observaciones || null
@@ -455,15 +473,43 @@ function documentosData() {
                     }
         });
         
+        // Mostrar estado de análisis si la respuesta tarda
+        const analysisTimeout = setTimeout(() => {
+            documento.analyzing = true;
+            documento.uploading = false;
+        }, 2000);
+        
         const data = await response.json();
+        clearTimeout(analysisTimeout);
+        documento.analyzing = false;
+        
                 console.log('📥 Respuesta del servidor:', data);
 
                 if (data.success) {
-                    documento.estado = 'Pendiente'; // Cambiado de 'Enviado' a 'Pendiente' para indicar que está en revisión
+                    documento.estado = 'Pendiente';
                     documento.ruta_archivo = data.ruta;
                     documento.docSolicitanteId = data.docSolicitanteId;
-                    documento.observaciones = null; // Limpiar observaciones previas
-                    this.mostrarExito(`Documento "${documento.nombre}" subido correctamente y en revisión`);
+                    documento.observaciones = null;
+                    
+                    // Mostrar mensaje de IA si está disponible
+                    let mensajeCompleto = data.mensaje || 'Documento subido correctamente';
+                    if (data.validacion_ia && data.validacion_ia.mensaje) {
+                        mensajeCompleto += '<br><br><strong>🤖 Validación IA:</strong><br>' + data.validacion_ia.mensaje;
+                        
+                        // Agregar información adicional según el tipo de sugerencia
+                        const sugerencia = data.validacion_ia.sugerencia;
+                        if (sugerencia === 'correcto') {
+                            mensajeCompleto += '<br><span class="text-green-600">✅ El documento será procesado automáticamente</span>';
+                        } else if (sugerencia === 'incorrecto') {
+                            mensajeCompleto += '<br><span class="text-red-600">⚠️ Por favor, verifique que subió el documento correcto</span>';
+                        } else if (sugerencia === 'entrenamiento') {
+                            mensajeCompleto += '<br><span class="text-blue-600">📚 Este documento ayudará a mejorar nuestro sistema</span>';
+                        } else if (sugerencia === 'manual') {
+                            mensajeCompleto += '<br><span class="text-gray-600">👁️ Será revisado manualmente por nuestro equipo</span>';
+                        }
+                    }
+                    
+                    this.mostrarExito(mensajeCompleto);
                 } else {
                     this.mostrarError(data.mensaje || 'Error al subir el documento');
                     documento.archivo_seleccionado = false;
@@ -476,6 +522,7 @@ function documentosData() {
                 documento.nombre_archivo = '';
             } finally {
                 documento.uploading = false;
+                documento.analyzing = false;
             }
         },
 
@@ -531,7 +578,7 @@ function documentosData() {
             if (!mensaje.includes('Redirigiendo')) {
                 setTimeout(() => {
                     this.showSuccess = false;
-                }, 3000);
+                }, 5000); // Aumentado a 5 segundos para dar tiempo a leer los mensajes de IA
             }
         },
 
@@ -594,8 +641,6 @@ function documentosData() {
             }
         },
 
-
-
         verDocumento(documento) {
             if (!documento.ruta_archivo || !this.tramiteId) {
                 this.mostrarError('No se puede acceder al documento');
@@ -612,6 +657,65 @@ function documentosData() {
                 // En desktop, abrir en nueva pestaña
                 window.open(`/tramites-solicitante/ver-documento/${this.tramiteId}/${documento.id}`, '_blank');
             }
+        },
+
+        verValidacionIA(documento) {
+            if (!documento.docSolicitanteId) {
+                this.mostrarError('No se puede acceder a la información de validación IA');
+                return;
+            }
+
+            // Hacer petición para obtener información de validación IA
+            fetch(`/tramites-solicitante/validacion-ia?documento_solicitante_id=${documento.docSolicitanteId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const validacion = data.validacion;
+                        const confianzaPorcentaje = Math.round(validacion.confianza * 100);
+                        
+                        let mensaje = `🤖 <strong>Análisis de IA para "${documento.nombre}"</strong><br><br>`;
+                        mensaje += `<strong>Tipo Detectado:</strong> ${validacion.tipo_predicho}<br>`;
+                        mensaje += `<strong>Confianza:</strong> ${confianzaPorcentaje}% <br>`;
+                        mensaje += `<strong>Estado:</strong> ${this.traducirEstadoValidacion(validacion.estado_validacion)}<br>`;
+                        mensaje += `<strong>Procesado:</strong> ${validacion.procesado_en}<br>`;
+                        
+                        if (validacion.tiempo_procesamiento) {
+                            mensaje += `<strong>Tiempo de análisis:</strong> ${validacion.tiempo_procesamiento}<br>`;
+                        }
+                        
+                        if (validacion.alternativas && validacion.alternativas.length > 0) {
+                            mensaje += `<br><strong>Otras posibilidades:</strong><br>`;
+                            validacion.alternativas.forEach(alt => {
+                                const altConfianza = Math.round(alt.confidence * 100);
+                                mensaje += `• ${alt.document_type} (${altConfianza}%)<br>`;
+                            });
+                        }
+                        
+                        if (validacion.extracto_texto) {
+                            mensaje += `<br><strong>Extracto del texto:</strong><br>`;
+                            mensaje += `<em style="color: #666; font-size: 0.9em;">${validacion.extracto_texto}</em>`;
+                        }
+                        
+                        this.mostrarExito(mensaje);
+                    } else {
+                        this.mostrarError(data.mensaje || 'No se pudo obtener información de validación IA');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al obtener validación IA:', error);
+                    this.mostrarError('Error al cargar información de validación IA');
+                });
+        },
+
+        traducirEstadoValidacion(estado) {
+            const traducciones = {
+                'pending_review': 'Pendiente de Revisión',
+                'human_confirmed': 'Confirmado por Humano',
+                'human_rejected': 'Rechazado por Humano',
+                'auto_approved': 'Auto-aprobado',
+                'needs_review': 'Necesita Revisión'
+            };
+            return traducciones[estado] || estado;
         }
     }
 }

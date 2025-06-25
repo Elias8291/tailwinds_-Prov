@@ -10,10 +10,12 @@ use App\Models\Tramite;
 use App\Models\Solicitante;
 use App\Models\Documento;
 use App\Models\Proveedor;
+use App\Models\DocumentoSolicitante;
 use Carbon\Carbon;
 use App\Http\Controllers\Formularios\DomicilioController;
 use App\Http\Controllers\DetalleTramiteController;
 use App\Services\SystemLogService;
+use App\Services\AI\DocumentAnalysisService;
 
 class TramiteSolicitanteController extends Controller
 {
@@ -777,7 +779,7 @@ class TramiteSolicitanteController extends Controller
     {
         try {
             $request->validate([
-                'documento' => 'required|file|mimes:pdf|max:10240', // 10MB máximo
+                'archivo' => 'required|file|mimes:pdf|max:10240', // 10MB máximo
                 'documento_id' => 'required|integer|exists:documento,id'
             ]);
 
@@ -787,7 +789,7 @@ class TramiteSolicitanteController extends Controller
             if (!$solicitante) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No se encontró información del solicitante'
+                    'mensaje' => 'No se encontró información del solicitante'
                 ], 404);
             }
 
@@ -800,22 +802,31 @@ class TramiteSolicitanteController extends Controller
             if (!$tramite) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No se encontró un trámite en progreso'
+                    'mensaje' => 'No se encontró un trámite en progreso'
                 ], 404);
             }
 
-            $file = $request->file('documento');
+            $file = $request->file('archivo');
             $documentoId = $request->documento_id;
+
+            // Obtener información del documento esperado
+            $documentoInfo = \App\Models\Documento::find($documentoId);
+            if (!$documentoInfo) {
+                return response()->json([
+                    'success' => false,
+                    'mensaje' => 'Tipo de documento no válido'
+                ], 400);
+            }
 
             // Generar nombre único para el archivo
             $extension = $file->getClientOriginalExtension();
             $nombreArchivo = uniqid('doc_' . $documentoId . '_') . '.' . $extension;
             
-            // Almacenar archivo
+            // Almacenar archivo temporalmente
             $ruta = $file->storeAs('documentos_tramite/' . $tramite->id, $nombreArchivo, 'public');
 
             // Crear o actualizar el registro del documento
-            \App\Models\DocumentoSolicitante::updateOrCreate(
+            $documentoSolicitante = \App\Models\DocumentoSolicitante::updateOrCreate(
                 [
                     'tramite_id' => $tramite->id,
                     'documento_id' => $documentoId
@@ -824,21 +835,147 @@ class TramiteSolicitanteController extends Controller
                     'fecha_entrega' => now(),
                     'estado' => 'Pendiente',
                     'version_documento' => 1,
-                    'ruta_archivo' => $ruta,
+                    'ruta_archivo' => encrypt($ruta), // Encriptar la ruta
+                    'nombre_original' => $file->getClientOriginalName()
                 ]
             );
 
+            // Análisis con IA para validación automática
+            $validacionIA = null;
+            $mensajeIA = '';
+            $sugerenciaIA = '';
+            
+            try {
+                // Solo analizar si hay modelos entrenados para este tipo de documento
+                if ($this->tieneModeloEntrenado($documentoInfo->nombre)) {
+                    $analysisService = app(\App\Services\AI\DocumentAnalysisService::class);
+                    $validacionIA = $analysisService->analyzeDocument($documentoSolicitante);
+                    
+                    $confianza = $validacionIA->confidence_score;
+                    $tipoPredicho = $validacionIA->predicted_document_type;
+                    $tipoEsperado = $documentoInfo->nombre;
+                    
+                    // Verificar si la IA predice que es el documento correcto
+                    $esDocumentoCorrecto = strtolower($tipoPredicho) === strtolower($tipoEsperado) ||
+                                         $this->sonTiposEquivalentes($tipoPredicho, $tipoEsperado);
+                    
+                    if ($esDocumentoCorrecto && $confianza >= 0.8) {
+                        // Alta confianza y tipo correcto - Auto aprobar
+                        $validacionIA->autoApprove();
+                        $mensajeIA = "✅ IA Confirmada: Este documento parece ser correcto (" . number_format($confianza * 100, 1) . "% de confianza)";
+                        $sugerenciaIA = 'correcto';
+                    } elseif ($esDocumentoCorrecto && $confianza >= 0.6) {
+                        // Confianza media pero tipo correcto
+                        $mensajeIA = "⚠️ IA Sugerencia: Parece ser el documento correcto, pero con confianza media (" . number_format($confianza * 100, 1) . "%)";
+                        $sugerenciaIA = 'posible';
+                    } elseif (!$esDocumentoCorrecto && $confianza >= 0.7) {
+                        // Alta confianza pero tipo incorrecto
+                        $mensajeIA = "❌ IA Alerta: Este documento parece ser '{$tipoPredicho}' en lugar de '{$tipoEsperado}' (" . number_format($confianza * 100, 1) . "% de confianza)";
+                        $sugerenciaIA = 'incorrecto';
+                    } else {
+                        // Baja confianza general
+                        $mensajeIA = "🤔 IA Incierta: No se puede determinar con certeza el tipo de documento (" . number_format($confianza * 100, 1) . "% de confianza)";
+                        $sugerenciaIA = 'incierto';
+                    }
+                    
+                    Log::info('Validación IA completada', [
+                        'documento_id' => $documentoId,
+                        'tipo_esperado' => $tipoEsperado,
+                        'tipo_predicho' => $tipoPredicho,
+                        'confianza' => $confianza,
+                        'sugerencia' => $sugerenciaIA
+                    ]);
+                } else {
+                    // No hay modelo entrenado para este tipo de documento
+                    $mensajeIA = "🔄 Modo Entrenamiento: Este tipo de documento ayudará a entrenar nuestro sistema de IA";
+                    $sugerenciaIA = 'entrenamiento';
+                }
+                
+            } catch (\Exception $e) {
+                Log::warning('Error en análisis IA (continuando sin validación)', [
+                    'documento_id' => $documentoId,
+                    'error' => $e->getMessage()
+                ]);
+                $mensajeIA = "ℹ️ Validación manual requerida (IA no disponible temporalmente)";
+                $sugerenciaIA = 'manual';
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Documento subido correctamente'
+                'mensaje' => 'Documento subido correctamente',
+                'ruta' => $ruta,
+                'docSolicitanteId' => $documentoSolicitante->id,
+                'validacion_ia' => [
+                    'mensaje' => $mensajeIA,
+                    'sugerencia' => $sugerenciaIA,
+                    'confianza' => $validacionIA ? $validacionIA->confidence_score : null,
+                    'tipo_predicho' => $validacionIA ? $validacionIA->predicted_document_type : null,
+                    'tiene_modelo' => $this->tieneModeloEntrenado($documentoInfo->nombre)
+                ]
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Error al subir documento', [
+                'error' => $e->getMessage(),
+                'documento_id' => $request->documento_id ?? 'N/A'
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Error al subir el documento: ' . $e->getMessage()
+                'mensaje' => 'Error al subir el documento: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Verifica si existe un modelo entrenado para el tipo de documento
+     */
+    private function tieneModeloEntrenado($tipoDocumento)
+    {
+        // Lista de documentos para los cuales tenemos modelos entrenados
+        $documentosConModelo = [
+            'Constancia de Situación Fiscal',
+            'Acta de Nacimiento', 
+            'Credencial de Elector',
+            'Comprobante de Domicilio',
+            'CURP',
+            'RFC'
+        ];
+        
+        return in_array($tipoDocumento, $documentosConModelo) ||
+               str_contains(strtolower($tipoDocumento), 'constancia') ||
+               str_contains(strtolower($tipoDocumento), 'acta') ||
+               str_contains(strtolower($tipoDocumento), 'credencial') ||
+               str_contains(strtolower($tipoDocumento), 'comprobante') ||
+               str_contains(strtolower($tipoDocumento), 'curp') ||
+               str_contains(strtolower($tipoDocumento), 'rfc');
+    }
+
+    /**
+     * Verifica si dos tipos de documento son equivalentes
+     */
+    private function sonTiposEquivalentes($tipo1, $tipo2)
+    {
+        $equivalencias = [
+            'constancia de situación fiscal' => ['constancia fiscal', 'situación fiscal', 'constancia sat'],
+            'acta de nacimiento' => ['acta nacimiento', 'certificado nacimiento'],
+            'credencial de elector' => ['ine', 'credencial ine', 'credencial elector'],
+            'comprobante de domicilio' => ['comprobante domicilio', 'recibo servicios', 'factura servicios'],
+            'curp' => ['clave única', 'curp'],
+            'rfc' => ['registro federal contribuyente', 'clave rfc']
+        ];
+        
+        $tipo1Lower = strtolower($tipo1);
+        $tipo2Lower = strtolower($tipo2);
+        
+        foreach ($equivalencias as $principal => $variantes) {
+            $todos = array_merge([$principal], $variantes);
+            if (in_array($tipo1Lower, $todos) && in_array($tipo2Lower, $todos)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**
@@ -1151,6 +1288,53 @@ class TramiteSolicitanteController extends Controller
                 'user_id' => $user->id,
                 'error' => $e->getMessage()
             ]);
+        }
+    }
+
+    /**
+     * Obtener el estado de validación IA de un documento
+     */
+    public function obtenerValidacionIA(Request $request)
+    {
+        try {
+            $documentoSolicitanteId = $request->input('documento_solicitante_id');
+            
+            $validacionIA = \App\Models\AI\AiValidationResult::where('documento_solicitante_id', $documentoSolicitanteId)
+                ->with(['documentoSolicitante.documento'])
+                ->latest()
+                ->first();
+            
+            if (!$validacionIA) {
+                return response()->json([
+                    'success' => false,
+                    'mensaje' => 'No se encontró validación IA para este documento'
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'validacion' => [
+                    'tipo_predicho' => $validacionIA->predicted_document_type,
+                    'confianza' => $validacionIA->confidence_score,
+                    'confianza_porcentaje' => $validacionIA->confidence_percentage,
+                    'estado_validacion' => $validacionIA->validation_status,
+                    'tiempo_procesamiento' => $validacionIA->processing_time_seconds,
+                    'alternativas' => $validacionIA->getAlternativePredictions(),
+                    'procesado_en' => $validacionIA->processed_at?->format('d/m/Y H:i:s'),
+                    'extracto_texto' => $validacionIA->extracted_text_summary
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error al obtener validación IA', [
+                'error' => $e->getMessage(),
+                'documento_solicitante_id' => $request->input('documento_solicitante_id')
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'mensaje' => 'Error al obtener información de validación IA'
+            ], 500);
         }
     }
 }

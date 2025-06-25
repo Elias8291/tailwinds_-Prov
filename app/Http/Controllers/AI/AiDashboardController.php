@@ -290,4 +290,105 @@ class AiDashboardController extends Controller
             'message' => 'Cache del sistema limpiado'
         ]);
     }
+
+    /**
+     * Get detailed training and model statistics
+     */
+    public function getTrainingStatus()
+    {
+        try {
+            // Estadísticas de modelos
+            $modelos = AiDocumentModel::orderBy('created_at', 'desc')->get();
+            $modeloActivo = AiDocumentModel::getDefault();
+            
+            // Estadísticas de tipos de documento
+            $tiposDocumento = [
+                'Constancia de Situación Fiscal' => [
+                    'entrenados' => AiTrainingData::where('document_type', 'Constancia de Situación Fiscal')
+                        ->where('validation_status', 'validated')->count(),
+                    'total_subidos' => AiValidationResult::where('predicted_document_type', 'Constancia de Situación Fiscal')->count(),
+                    'precision_promedio' => AiValidationResult::where('predicted_document_type', 'Constancia de Situación Fiscal')
+                        ->where('validation_status', 'human_confirmed')->avg('confidence_score') ?? 0
+                ],
+                'Acta de Nacimiento' => [
+                    'entrenados' => AiTrainingData::where('document_type', 'Acta de Nacimiento')
+                        ->where('validation_status', 'validated')->count(),
+                    'total_subidos' => AiValidationResult::where('predicted_document_type', 'Acta de Nacimiento')->count(),
+                    'precision_promedio' => AiValidationResult::where('predicted_document_type', 'Acta de Nacimiento')
+                        ->where('validation_status', 'human_confirmed')->avg('confidence_score') ?? 0
+                ],
+                'Credencial de Elector' => [
+                    'entrenados' => AiTrainingData::where('document_type', 'Credencial de Elector')
+                        ->where('validation_status', 'validated')->count(),
+                    'total_subidos' => AiValidationResult::where('predicted_document_type', 'Credencial de Elector')->count(),
+                    'precision_promedio' => AiValidationResult::where('predicted_document_type', 'Credencial de Elector')
+                        ->where('validation_status', 'human_confirmed')->avg('confidence_score') ?? 0
+                ],
+                'Comprobante de Domicilio' => [
+                    'entrenados' => AiTrainingData::where('document_type', 'Comprobante de Domicilio')
+                        ->where('validation_status', 'validated')->count(),
+                    'total_subidos' => AiValidationResult::where('predicted_document_type', 'Comprobante de Domicilio')->count(),
+                    'precision_promedio' => AiValidationResult::where('predicted_document_type', 'Comprobante de Domicilio')
+                        ->where('validation_status', 'human_confirmed')->avg('confidence_score') ?? 0
+                ],
+                'CURP' => [
+                    'entrenados' => AiTrainingData::where('document_type', 'CURP')
+                        ->where('validation_status', 'validated')->count(),
+                    'total_subidos' => AiValidationResult::where('predicted_document_type', 'CURP')->count(),
+                    'precision_promedio' => AiValidationResult::where('predicted_document_type', 'CURP')
+                        ->where('validation_status', 'human_confirmed')->avg('confidence_score') ?? 0
+                ],
+                'RFC' => [
+                    'entrenados' => AiTrainingData::where('document_type', 'RFC')
+                        ->where('validation_status', 'validated')->count(),
+                    'total_subidos' => AiValidationResult::where('predicted_document_type', 'RFC')->count(),
+                    'precision_promedio' => AiValidationResult::where('predicted_document_type', 'RFC')
+                        ->where('validation_status', 'human_confirmed')->avg('confidence_score') ?? 0
+                ]
+            ];
+
+            // Estadísticas generales
+            $estadisticasGenerales = [
+                'total_documentos_analizados' => AiValidationResult::count(),
+                'total_documentos_entrenamiento' => AiTrainingData::where('validation_status', 'validated')->count(),
+                'precision_general' => AiValidationResult::where('validation_status', 'human_confirmed')->avg('confidence_score') ?? 0,
+                'documentos_hoy' => AiValidationResult::whereDate('processed_at', today())->count(),
+                'documentos_semana' => AiValidationResult::where('processed_at', '>=', now()->subDays(7))->count(),
+                'auto_aprobaciones' => AiValidationResult::where('validation_status', 'auto_approved')->count(),
+                'pendientes_revision' => AiValidationResult::where('validation_status', 'pending_review')->count()
+            ];
+
+            return response()->json([
+                'success' => true,
+                'modelo_activo' => $modeloActivo ? [
+                    'nombre' => $modeloActivo->name,
+                    'precision' => $modeloActivo->accuracy_percentage,
+                    'ultimo_uso' => $modeloActivo->last_used_at?->diffForHumans() ?? 'Nunca',
+                    'fecha_creacion' => $modeloActivo->created_at->format('d/m/Y'),
+                    'total_usos' => $modeloActivo->usage_count
+                ] : null,
+                'modelos_disponibles' => $modelos->map(function($modelo) {
+                    return [
+                        'id' => $modelo->id,
+                        'nombre' => $modelo->name,
+                        'estado' => $modelo->status,
+                        'precision' => $modelo->accuracy_percentage,
+                        'es_activo' => $modelo->is_default
+                    ];
+                }),
+                'tipos_documento' => $tiposDocumento,
+                'estadisticas_generales' => $estadisticasGenerales
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error obteniendo estado de entrenamiento', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'mensaje' => 'Error al obtener estadísticas de entrenamiento'
+            ], 500);
+        }
+    }
 } 

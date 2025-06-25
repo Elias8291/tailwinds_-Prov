@@ -264,11 +264,15 @@ Route::middleware(['auth', 'can:tramites-solicitante.ver'])->prefix('tramites-so
     // GESTIÓN DE DOCUMENTOS
     Route::get('/documentos', [TramiteSolicitanteController::class, 'obtenerDocumentos'])
         ->name('tramites.solicitante.documentos');
-    Route::post('/upload-documento', [DocumentosController::class, 'subir'])
+    Route::post('/upload-documento', [TramiteSolicitanteController::class, 'subirDocumento'])
         ->middleware('can:tramites-solicitante.subir-documentos')
         ->name('tramites.solicitante.upload-documento');
     Route::get('/ver-documento/{tramite}/{documento}', [DocumentosController::class, 'verDocumento'])
         ->name('tramites.solicitante.ver-documento');
+    
+    // VALIDACIÓN IA DE DOCUMENTOS
+    Route::get('/validacion-ia', [TramiteSolicitanteController::class, 'obtenerValidacionIA'])
+        ->name('tramites.solicitante.validacion-ia');
     
     // FINALIZAR TRÁMITES
     Route::post('/finalizar-tramite', [DocumentosController::class, 'finalizarTramite'])
@@ -502,6 +506,24 @@ Route::middleware(['auth'])->prefix('ai/training')->name('ai.training.')->group(
     
     // Eliminar datos de entrenamiento
     Route::delete('/training-data/{trainingData}', [DocumentTrainingController::class, 'deleteTrainingData'])->name('training-data.delete');
+});
+
+// ============================================================================
+// MÓDULO DE DASHBOARD DE IA
+// ============================================================================
+
+Route::middleware(['auth', 'can:ai.ver'])->prefix('ai')->name('ai.')->group(function () {
+    
+    // Dashboard principal de IA
+    Route::get('/dashboard', [\App\Http\Controllers\AI\AiDashboardController::class, 'index'])->name('dashboard.index');
+    
+    // Métricas y estadísticas
+    Route::get('/metrics', [\App\Http\Controllers\AI\AiDashboardController::class, 'getMetrics'])->name('metrics');
+    Route::get('/system-health', [\App\Http\Controllers\AI\AiDashboardController::class, 'getSystemHealth'])->name('system-health');
+    Route::get('/training-status', [\App\Http\Controllers\AI\AiDashboardController::class, 'getTrainingStatus'])->name('training-status');
+    
+    // Acciones rápidas
+    Route::post('/quick-action', [\App\Http\Controllers\AI\AiDashboardController::class, 'quickAction'])->name('quick-action');
 });
 
 if (config('app.debug')) {
