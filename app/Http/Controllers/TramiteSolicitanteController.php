@@ -11,11 +11,12 @@ use App\Models\Solicitante;
 use App\Models\Documento;
 use App\Models\Proveedor;
 use App\Models\DocumentoSolicitante;
+
 use Carbon\Carbon;
 use App\Http\Controllers\Formularios\DomicilioController;
 use App\Http\Controllers\DetalleTramiteController;
 use App\Services\SystemLogService;
-use App\Services\AI\DocumentAnalysisService;
+
 
 class TramiteSolicitanteController extends Controller
 {
@@ -731,6 +732,12 @@ class TramiteSolicitanteController extends Controller
                 $documentos = $documentos->map(function($documento) use ($documentosSubidos) {
                     $docSubido = $documentosSubidos->get($documento->id);
                     
+                    // Los modelos de IA fueron removidos del sistema
+                    $tieneModeloIA = false;
+                    
+                    // No hay validación IA disponible
+                    $validacionIA = null;
+                    
                     return [
                         'id' => $documento->id,
                         'nombre' => $documento->nombre,
@@ -739,12 +746,17 @@ class TramiteSolicitanteController extends Controller
                         'estado' => $docSubido ? ucfirst($docSubido->estado) : 'Pendiente',
                         'fecha_entrega' => $docSubido ? $docSubido->fecha_entrega : null,
                         'ruta_archivo' => $docSubido ? true : null, // Solo indicar si existe
-                        'observaciones' => $docSubido ? $docSubido->observaciones : null
+                        'observaciones' => $docSubido ? $docSubido->observaciones : null,
+                        'tiene_modelo_ia' => $tieneModeloIA,
+                        'validacion_ia' => null
                     ];
                 });
             } else {
                 // Si no hay trámite, todos los documentos están pendientes
                 $documentos = $documentos->map(function($documento) {
+                    // Los modelos de IA fueron removidos del sistema
+                    $tieneModeloIA = false;
+                    
                     return [
                         'id' => $documento->id,
                         'nombre' => $documento->nombre,
@@ -752,7 +764,8 @@ class TramiteSolicitanteController extends Controller
                         'tipo_persona' => $documento->tipo_persona,
                         'estado' => 'Pendiente',
                         'fecha_entrega' => null,
-                        'ruta_archivo' => null
+                        'ruta_archivo' => null,
+                        'tiene_modelo_ia' => $tieneModeloIA
                     ];
                 });
             }
@@ -822,8 +835,8 @@ class TramiteSolicitanteController extends Controller
             $extension = $file->getClientOriginalExtension();
             $nombreArchivo = uniqid('doc_' . $documentoId . '_') . '.' . $extension;
             
-            // Almacenar archivo temporalmente
-            $ruta = $file->storeAs('documentos_tramite/' . $tramite->id, $nombreArchivo, 'public');
+            // Almacenar archivo en la ruta correcta que espera el controlador de visualización
+            $ruta = $file->storeAs('documentos_solicitante/' . $tramite->id, $nombreArchivo, 'public');
 
             // Crear o actualizar el registro del documento
             $documentoSolicitante = \App\Models\DocumentoSolicitante::updateOrCreate(
@@ -840,78 +853,15 @@ class TramiteSolicitanteController extends Controller
                 ]
             );
 
-            // Análisis con IA para validación automática
-            $validacionIA = null;
-            $mensajeIA = '';
-            $sugerenciaIA = '';
-            
-            try {
-                // Solo analizar si hay modelos entrenados para este tipo de documento
-                if ($this->tieneModeloEntrenado($documentoInfo->nombre)) {
-                    $analysisService = app(\App\Services\AI\DocumentAnalysisService::class);
-                    $validacionIA = $analysisService->analyzeDocument($documentoSolicitante);
-                    
-                    $confianza = $validacionIA->confidence_score;
-                    $tipoPredicho = $validacionIA->predicted_document_type;
-                    $tipoEsperado = $documentoInfo->nombre;
-                    
-                    // Verificar si la IA predice que es el documento correcto
-                    $esDocumentoCorrecto = strtolower($tipoPredicho) === strtolower($tipoEsperado) ||
-                                         $this->sonTiposEquivalentes($tipoPredicho, $tipoEsperado);
-                    
-                    if ($esDocumentoCorrecto && $confianza >= 0.8) {
-                        // Alta confianza y tipo correcto - Auto aprobar
-                        $validacionIA->autoApprove();
-                        $mensajeIA = "✅ IA Confirmada: Este documento parece ser correcto (" . number_format($confianza * 100, 1) . "% de confianza)";
-                        $sugerenciaIA = 'correcto';
-                    } elseif ($esDocumentoCorrecto && $confianza >= 0.6) {
-                        // Confianza media pero tipo correcto
-                        $mensajeIA = "⚠️ IA Sugerencia: Parece ser el documento correcto, pero con confianza media (" . number_format($confianza * 100, 1) . "%)";
-                        $sugerenciaIA = 'posible';
-                    } elseif (!$esDocumentoCorrecto && $confianza >= 0.7) {
-                        // Alta confianza pero tipo incorrecto
-                        $mensajeIA = "❌ IA Alerta: Este documento parece ser '{$tipoPredicho}' en lugar de '{$tipoEsperado}' (" . number_format($confianza * 100, 1) . "% de confianza)";
-                        $sugerenciaIA = 'incorrecto';
-                    } else {
-                        // Baja confianza general
-                        $mensajeIA = "🤔 IA Incierta: No se puede determinar con certeza el tipo de documento (" . number_format($confianza * 100, 1) . "% de confianza)";
-                        $sugerenciaIA = 'incierto';
-                    }
-                    
-                    Log::info('Validación IA completada', [
-                        'documento_id' => $documentoId,
-                        'tipo_esperado' => $tipoEsperado,
-                        'tipo_predicho' => $tipoPredicho,
-                        'confianza' => $confianza,
-                        'sugerencia' => $sugerenciaIA
-                    ]);
-                } else {
-                    // No hay modelo entrenado para este tipo de documento
-                    $mensajeIA = "🔄 Modo Entrenamiento: Este tipo de documento ayudará a entrenar nuestro sistema de IA";
-                    $sugerenciaIA = 'entrenamiento';
-                }
-                
-            } catch (\Exception $e) {
-                Log::warning('Error en análisis IA (continuando sin validación)', [
-                    'documento_id' => $documentoId,
-                    'error' => $e->getMessage()
-                ]);
-                $mensajeIA = "ℹ️ Validación manual requerida (IA no disponible temporalmente)";
-                $sugerenciaIA = 'manual';
-            }
+
+
+
 
             return response()->json([
                 'success' => true,
                 'mensaje' => 'Documento subido correctamente',
                 'ruta' => $ruta,
-                'docSolicitanteId' => $documentoSolicitante->id,
-                'validacion_ia' => [
-                    'mensaje' => $mensajeIA,
-                    'sugerencia' => $sugerenciaIA,
-                    'confianza' => $validacionIA ? $validacionIA->confidence_score : null,
-                    'tipo_predicho' => $validacionIA ? $validacionIA->predicted_document_type : null,
-                    'tiene_modelo' => $this->tieneModeloEntrenado($documentoInfo->nombre)
-                ]
+                'docSolicitanteId' => $documentoSolicitante->id
             ]);
 
         } catch (\Exception $e) {
@@ -932,23 +882,99 @@ class TramiteSolicitanteController extends Controller
      */
     private function tieneModeloEntrenado($tipoDocumento)
     {
-        // Lista de documentos para los cuales tenemos modelos entrenados
+        try {
+            // Obtener modelo IA activo
+            $aiModel = \App\Models\AI\AiDocumentModel::getDefault();
+            
+            if (!$aiModel || !$aiModel->supported_document_types) {
+                // Si no hay modelo o no tiene tipos soportados, usar lógica básica
+                return $this->tieneModeloEntrenadoBasico($tipoDocumento);
+            }
+            
+            // Verificar si el modelo soporta exactamente este tipo de documento
+            if ($aiModel->supportsDocumentType($tipoDocumento)) {
+                Log::info('✅ Modelo IA encontrado para documento', [
+                    'tipo_documento' => $tipoDocumento,
+                    'modelo_id' => $aiModel->id,
+                    'modelo_nombre' => $aiModel->name
+                ]);
+                return true;
+            }
+            
+            // Verificar equivalencias y patrones
+            foreach ($aiModel->supported_document_types as $tipoSoportado) {
+                if ($this->sonTiposEquivalentes($tipoDocumento, $tipoSoportado)) {
+                    Log::info('✅ Modelo IA encontrado por equivalencia', [
+                        'tipo_documento' => $tipoDocumento,
+                        'tipo_equivalente' => $tipoSoportado,
+                        'modelo_id' => $aiModel->id
+                    ]);
+                    return true;
+                }
+            }
+            
+            Log::info('⚠️ No hay modelo IA para este tipo de documento', [
+                'tipo_documento' => $tipoDocumento,
+                'tipos_soportados' => $aiModel->supported_document_types
+            ]);
+            
+            return false;
+            
+        } catch (\Exception $e) {
+            Log::warning('Error verificando modelo entrenado, usando lógica básica', [
+                'tipo_documento' => $tipoDocumento,
+                'error' => $e->getMessage()
+            ]);
+            
+            return $this->tieneModeloEntrenadoBasico($tipoDocumento);
+        }
+    }
+    
+    /**
+     * Lógica básica para verificar modelos entrenados (fallback)
+     */
+    private function tieneModeloEntrenadoBasico($tipoDocumento)
+    {
+        // Lista de documentos para los cuales tenemos modelos entrenados (hardcoded como fallback)
         $documentosConModelo = [
             'Constancia de Situación Fiscal',
             'Acta de Nacimiento', 
             'Credencial de Elector',
             'Comprobante de Domicilio',
             'CURP',
-            'RFC'
+            'RFC',
+            'Acta Constitutiva',
+            'Identificación Oficial',
+            'Poder Notarial'
         ];
         
-        return in_array($tipoDocumento, $documentosConModelo) ||
-               str_contains(strtolower($tipoDocumento), 'constancia') ||
-               str_contains(strtolower($tipoDocumento), 'acta') ||
-               str_contains(strtolower($tipoDocumento), 'credencial') ||
-               str_contains(strtolower($tipoDocumento), 'comprobante') ||
-               str_contains(strtolower($tipoDocumento), 'curp') ||
-               str_contains(strtolower($tipoDocumento), 'rfc');
+        // Verificación exacta
+        if (in_array($tipoDocumento, $documentosConModelo)) {
+            return true;
+        }
+        
+        // Verificación por patrones
+        $tipoLower = strtolower($tipoDocumento);
+        $patrones = [
+            'constancia' => ['constancia', 'fiscal', 'sat'],
+            'acta' => ['acta', 'constitutiva', 'nacimiento'],
+            'credencial' => ['credencial', 'ine', 'elector'],
+            'comprobante' => ['comprobante', 'domicilio', 'recibo'],
+            'identificacion' => ['identificacion', 'oficial', 'id'],
+            'poder' => ['poder', 'notarial', 'apoderado'],
+            'curp' => ['curp', 'clave', 'unica'],
+            'rfc' => ['rfc', 'registro', 'federal']
+        ];
+        
+        foreach ($patrones as $categoria => $palabras) {
+            foreach ($palabras as $palabra) {
+                if (str_contains($tipoLower, $palabra)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
 
     /**
@@ -976,6 +1002,64 @@ class TramiteSolicitanteController extends Controller
         }
         
         return false;
+    }
+
+    /**
+     * Verifica si el documento es correcto según IA considerando alternativas
+     */
+    private function esDocumentoCorrectoIA($tipoPredicho, $tipoEsperado, $alternativas = [])
+    {
+        // Verificación directa
+        if (strtolower($tipoPredicho) === strtolower($tipoEsperado)) {
+            return true;
+        }
+        
+        // Verificación por equivalencias
+        if ($this->sonTiposEquivalentes($tipoPredicho, $tipoEsperado)) {
+            return true;
+        }
+        
+        // Verificar alternativas si están disponibles
+        foreach ($alternativas as $alternativa) {
+            if (isset($alternativa['document_type'])) {
+                $tipoAlternativo = $alternativa['document_type'];
+                if (strtolower($tipoAlternativo) === strtolower($tipoEsperado) ||
+                    $this->sonTiposEquivalentes($tipoAlternativo, $tipoEsperado)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Obtiene el tipo predominante considerando predicción principal y alternativas
+     */
+    private function obtenerTipoPredominante($tipoPrincipal, $alternativas = [])
+    {
+        // Si no hay alternativas, devolver el tipo principal
+        if (empty($alternativas)) {
+            return $tipoPrincipal;
+        }
+        
+        // Buscar la alternativa con mayor confianza
+        $mejorAlternativa = null;
+        $mayorConfianza = 0;
+        
+        foreach ($alternativas as $alternativa) {
+            if (isset($alternativa['confidence']) && $alternativa['confidence'] > $mayorConfianza) {
+                $mayorConfianza = $alternativa['confidence'];
+                $mejorAlternativa = $alternativa;
+            }
+        }
+        
+        // Si la mejor alternativa tiene buena confianza, usarla
+        if ($mejorAlternativa && $mayorConfianza > 0.7) {
+            return $mejorAlternativa['document_type'] ?? $tipoPrincipal;
+        }
+        
+        return $tipoPrincipal;
     }
 
     /**
@@ -1292,49 +1376,194 @@ class TramiteSolicitanteController extends Controller
     }
 
     /**
+     * Verifica si el documento predicho es correcto
+     */
+    private function esDocumentoCorrecto($tipoPredicho, $tipoEsperado)
+    {
+        if (!$tipoPredicho || !$tipoEsperado) {
+            return false;
+        }
+        
+        // Normalizar nombres para comparación
+        $predicho = strtolower(trim($tipoPredicho));
+        $esperado = strtolower(trim($tipoEsperado));
+        
+        // Comparación exacta
+        if ($predicho === $esperado) {
+            return true;
+        }
+        
+        // Comparación de equivalencias
+        return $this->sonTiposEquivalentes($tipoPredicho, $tipoEsperado);
+    }
+
+    /**
      * Obtener el estado de validación IA de un documento
      */
     public function obtenerValidacionIA(Request $request)
     {
-        try {
-            $documentoSolicitanteId = $request->input('documento_solicitante_id');
-            
-            $validacionIA = \App\Models\AI\AiValidationResult::where('documento_solicitante_id', $documentoSolicitanteId)
-                ->with(['documentoSolicitante.documento'])
-                ->latest()
-                ->first();
-            
-            if (!$validacionIA) {
-                return response()->json([
-                    'success' => false,
-                    'mensaje' => 'No se encontró validación IA para este documento'
-                ]);
+        // Los modelos de IA fueron removidos del sistema
+        return response()->json([
+            'success' => false,
+            'mensaje' => 'La validación con IA no está disponible en este momento'
+        ], 404);
+    }
+
+    /**
+     * Genera un mensaje contextual más detallado para la validación IA
+     */
+    private function generarMensajeContextualIA($esDocumentoCorrecto, $confianza, $tipoPredicho, $tipoEsperado, $validationStatus)
+    {
+        if ($esDocumentoCorrecto) {
+            if ($confianza >= 0.95) {
+                return "🎯 ¡EXCELENTE! El documento es exactamente lo que se esperaba. Reconocimiento automático con máxima precisión.";
+            } elseif ($confianza >= 0.90) {
+                return "✅ MUY BIEN. El documento coincide perfectamente con lo esperado. Alta confianza en el reconocimiento.";
+            } elseif ($confianza >= 0.80) {
+                return "✅ CORRECTO. El documento parece ser el tipo adecuado. Reconocimiento confiable.";
+            } elseif ($confianza >= 0.70) {
+                return "✅ ACEPTABLE. El documento parece correcto, aunque con algunas pequeñas dudas en el reconocimiento.";
+            } elseif ($confianza >= 0.60) {
+                return "⚠️ PROBABLEMENTE CORRECTO. El documento parece ser el adecuado, pero el sistema tiene algunas dudas.";
+            } else {
+                return "⚠️ POSIBLE COINCIDENCIA. El documento podría ser correcto, pero la calidad del reconocimiento es baja.";
             }
-            
-            return response()->json([
-                'success' => true,
-                'validacion' => [
-                    'tipo_predicho' => $validacionIA->predicted_document_type,
-                    'confianza' => $validacionIA->confidence_score,
-                    'confianza_porcentaje' => $validacionIA->confidence_percentage,
-                    'estado_validacion' => $validacionIA->validation_status,
-                    'tiempo_procesamiento' => $validacionIA->processing_time_seconds,
-                    'alternativas' => $validacionIA->getAlternativePredictions(),
-                    'procesado_en' => $validacionIA->processed_at?->format('d/m/Y H:i:s'),
-                    'extracto_texto' => $validacionIA->extracted_text_summary
-                ]
-            ]);
-            
-        } catch (\Exception $e) {
-            Log::error('Error al obtener validación IA', [
-                'error' => $e->getMessage(),
-                'documento_solicitante_id' => $request->input('documento_solicitante_id')
-            ]);
-            
-            return response()->json([
-                'success' => false,
-                'mensaje' => 'Error al obtener información de validación IA'
-            ], 500);
+        } else {
+            if ($confianza >= 0.90) {
+                return "❌ PROBLEMA DETECTADO. El documento subido NO es del tipo correcto. El sistema está muy seguro de que es '{$tipoPredicho}' y no '{$tipoEsperado}'.";
+            } elseif ($confianza >= 0.80) {
+                return "❌ POSIBLE ERROR. El documento parece ser '{$tipoPredicho}' en lugar de '{$tipoEsperado}'. Verifique que subió el archivo correcto.";
+            } elseif ($confianza >= 0.70) {
+                return "⚠️ DISCREPANCIA. Hay indicios de que el documento podría ser '{$tipoPredicho}' en lugar de '{$tipoEsperado}'.";
+            } elseif ($confianza >= 0.60) {
+                return "❓ DUDAS. El sistema no está seguro del tipo de documento. Podría ser '{$tipoPredicho}' o algo diferente.";
+            } else {
+                return "❓ INCIERTO. No se puede determinar con certeza qué tipo de documento es. La calidad o claridad del archivo podría estar afectando el reconocimiento.";
+            }
         }
+    }
+
+    /**
+     * Determina el color contextual basado en el análisis IA
+     */
+    private function determinarColorContextual($esDocumentoCorrecto, $confianza, $validationStatus)
+    {
+        if ($validationStatus === 'auto_approved') {
+            return 'text-green-700';
+        }
+        
+        if ($esDocumentoCorrecto) {
+            if ($confianza >= 0.85) {
+                return 'text-green-600';
+            } elseif ($confianza >= 0.70) {
+                return 'text-green-500';
+            } else {
+                return 'text-yellow-600';
+            }
+        } else {
+            if ($confianza >= 0.80) {
+                return 'text-red-600';
+            } elseif ($confianza >= 0.60) {
+                return 'text-orange-600';
+            } else {
+                return 'text-gray-600';
+            }
+        }
+    }
+
+    /**
+     * Determina el nivel de certeza del análisis IA
+     */
+    private function determinarNivelCerteza($confianza, $esDocumentoCorrecto)
+    {
+        if ($confianza >= 0.95 && $esDocumentoCorrecto) {
+            return 'máxima';
+        } elseif ($confianza >= 0.90) {
+            return 'muy_alta';
+        } elseif ($confianza >= 0.80) {
+            return 'alta';
+        } elseif ($confianza >= 0.70) {
+            return 'media_alta';
+        } elseif ($confianza >= 0.60) {
+            return 'media';
+        } elseif ($confianza >= 0.50) {
+            return 'baja';
+        } else {
+            return 'muy_baja';
+        }
+    }
+
+    /**
+     * Genera recomendaciones basadas en el análisis IA
+     */
+    private function generarRecomendacionIA($esDocumentoCorrecto, $confianza, $validationStatus)
+    {
+        if ($validationStatus === 'auto_approved') {
+            return "✅ El documento ha sido aprobado automáticamente. No se requiere acción adicional.";
+        }
+        
+        if ($esDocumentoCorrecto) {
+            if ($confianza >= 0.90) {
+                return "✅ Documento válido. Puede proceder con confianza.";
+            } elseif ($confianza >= 0.80) {
+                return "✅ Documento parece válido. Recomendamos continuar.";
+            } elseif ($confianza >= 0.70) {
+                return "⚠️ Documento probablemente válido. Si tiene dudas, puede resubir una copia más clara.";
+            } else {
+                return "⚠️ Documento posiblemente válido. Considere subir una copia de mejor calidad si es posible.";
+            }
+        } else {
+            if ($confianza >= 0.80) {
+                return "❌ IMPORTANTE: Verifique que subió el documento correcto. El sistema detecta un tipo diferente con alta confianza.";
+            } elseif ($confianza >= 0.60) {
+                return "⚠️ Revise el documento subido. Podría no ser del tipo correcto o la calidad afecta el reconocimiento.";
+            } else {
+                return "❓ Recomendamos subir una copia más clara del documento o verificar que es del tipo correcto.";
+            }
+        }
+    }
+
+    /**
+     * Función mejorada para verificar si el documento es correcto con análisis más detallado
+     */
+    private function esDocumentoCorrectoMejorado($tipoPredicho, $tipoEsperado, $confianza, $alternativas = [])
+    {
+        // Si la confianza es muy baja, es incierto
+        if ($confianza < 0.4) {
+            return null; // null = incierto
+        }
+        
+        // Verificación directa con alta confianza
+        if (strtolower($tipoPredicho) === strtolower($tipoEsperado) && $confianza >= 0.6) {
+            return true;
+        }
+        
+        // Verificación por equivalencias con confianza decente
+        if ($this->sonTiposEquivalentes($tipoPredicho, $tipoEsperado) && $confianza >= 0.6) {
+            return true;
+        }
+        
+        // Verificar alternativas si están disponibles
+        foreach ($alternativas as $alternativa) {
+            if (isset($alternativa['document_type']) && isset($alternativa['confidence'])) {
+                $tipoAlternativo = $alternativa['document_type'];
+                $confianzaAlternativa = $alternativa['confidence'];
+                
+                // Si una alternativa coincide con el tipo esperado y tiene buena confianza
+                if ($confianzaAlternativa >= 0.7 && 
+                    (strtolower($tipoAlternativo) === strtolower($tipoEsperado) ||
+                     $this->sonTiposEquivalentes($tipoAlternativo, $tipoEsperado))) {
+                    return true;
+                }
+            }
+        }
+        
+        // Si llegamos aquí y la confianza es alta, probablemente es incorrecto
+        if ($confianza >= 0.7) {
+            return false;
+        }
+        
+        // En casos de confianza media-baja, es incierto
+        return null;
     }
 }

@@ -412,6 +412,7 @@ class DocumentosController extends Controller
             $solicitante = Solicitante::where('usuario_id', $user->id)->first();
             
             if (!$solicitante) {
+                Log::warning('Solicitante no encontrado', ['user_id' => $user->id]);
                 return response()->json([
                     'success' => false,
                     'message' => 'No se encontró información del solicitante'
@@ -423,6 +424,10 @@ class DocumentosController extends Controller
                 ->first();
 
             if (!$tramite) {
+                Log::warning('Trámite no encontrado', [
+                    'tramite_id' => $tramiteId,
+                    'solicitante_id' => $solicitante->id
+                ]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Trámite no encontrado'
@@ -434,31 +439,77 @@ class DocumentosController extends Controller
                 ->first();
 
             if (!$documentoSolicitante || !$documentoSolicitante->ruta_archivo) {
+                Log::warning('Documento solicitante no encontrado', [
+                    'tramite_id' => $tramiteId,
+                    'documento_id' => $documentoId,
+                    'existe_registro' => $documentoSolicitante ? 'SI' : 'NO',
+                    'tiene_ruta' => $documentoSolicitante && $documentoSolicitante->ruta_archivo ? 'SI' : 'NO'
+                ]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Documento no encontrado'
                 ], 404);
             }
 
+            Log::info('Intentando acceder a documento', [
+                'tramite_id' => $tramiteId,
+                'documento_id' => $documentoId,
+                'ruta_encriptada' => $documentoSolicitante->ruta_archivo
+            ]);
+
             // Desencriptar la ruta del archivo
+            $rutaArchivo = '';
             try {
-                $rutaArchivo = Crypt::decryptString($documentoSolicitante->ruta_archivo);
-            } catch (\Exception $e) {
-                // Si no está encriptado, usar la ruta directamente
-                $rutaArchivo = $documentoSolicitante->ruta_archivo;
+                // Intentar desencriptar con el nuevo método (encrypt/decrypt)
+                $rutaArchivo = decrypt($documentoSolicitante->ruta_archivo);
+                Log::info('Ruta desencriptada con decrypt()', ['ruta' => $rutaArchivo]);
+            } catch (\Exception $e1) {
+                try {
+                    // Intentar desencriptar con Crypt
+                    $rutaArchivo = Crypt::decryptString($documentoSolicitante->ruta_archivo);
+                    Log::info('Ruta desencriptada con Crypt::decryptString()', ['ruta' => $rutaArchivo]);
+                } catch (\Exception $e2) {
+                    // Si no se puede desencriptar, usar la ruta directamente
+                    $rutaArchivo = $documentoSolicitante->ruta_archivo;
+                    Log::info('Usando ruta sin encriptar', ['ruta' => $rutaArchivo]);
+                }
             }
 
-            $rutaCompleta = storage_path('app/public/' . $rutaArchivo);
+            // Probar diferentes ubicaciones posibles del archivo
+            $rutasPosibles = [
+                storage_path('app/public/' . $rutaArchivo),
+                storage_path('app/public/documentos_solicitante/' . $tramiteId . '/' . basename($rutaArchivo)),
+                storage_path('app/public/documentos_tramite/' . $tramiteId . '/' . basename($rutaArchivo)),
+                storage_path('app/' . $rutaArchivo)
+            ];
 
-            if (!file_exists($rutaCompleta)) {
+            $rutaCompleta = null;
+            foreach ($rutasPosibles as $ruta) {
+                Log::info('Verificando ruta', ['ruta' => $ruta, 'existe' => file_exists($ruta)]);
+                if (file_exists($ruta)) {
+                    $rutaCompleta = $ruta;
+                    break;
+                }
+            }
+
+            if (!$rutaCompleta) {
+                Log::error('Archivo no encontrado en ninguna ubicación', [
+                    'tramite_id' => $tramiteId,
+                    'documento_id' => $documentoId,
+                    'ruta_original' => $rutaArchivo,
+                    'rutas_probadas' => $rutasPosibles
+                ]);
+                
                 return response()->json([
                     'success' => false,
                     'message' => 'El archivo no existe en el servidor'
                 ], 404);
             }
 
+            Log::info('Archivo encontrado', ['ruta_final' => $rutaCompleta]);
+
             $documento = Documento::find($documentoId);
-            $nombreArchivo = $documento->nombre . '.pdf';
+            $nombreArchivo = ($documento ? $documento->nombre : 'Documento') . '.pdf';
 
             // Detectar si es móvil para forzar descarga
             $userAgent = $request->header('User-Agent');
@@ -479,12 +530,13 @@ class DocumentosController extends Controller
             Log::error('Error al ver documento:', [
                 'tramite_id' => $tramiteId,
                 'documento_id' => $documentoId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al acceder al documento'
+                'message' => 'Error al acceder al documento: ' . $e->getMessage()
             ], 500);
         }
     }

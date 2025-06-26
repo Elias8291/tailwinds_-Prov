@@ -17,10 +17,10 @@ class UserController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('can:usuarios.index')->only('index');
-        $this->middleware('can:usuarios.create')->only(['create', 'store']);
-        $this->middleware('can:usuarios.edit')->only(['edit', 'update']);
-        $this->middleware('can:usuarios.destroy')->only('destroy');
+        $this->middleware('can:usuarios.ver')->only('index');
+        $this->middleware('can:usuarios.crear')->only(['create', 'store']);
+        $this->middleware('can:usuarios.editar')->only(['edit', 'update']);
+        $this->middleware('can:usuarios.eliminar')->only('destroy');
     }
 
     public function index(Request $request)
@@ -69,25 +69,43 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        // Debug: Ver qué datos llegan
+        Log::info('Datos del formulario:', $request->all());
+        
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,correo',
+            'rfc' => 'required|string|max:13|unique:users,rfc',
             'password' => 'required|string|min:8|confirmed',
             'roles' => 'required|array'
         ], [
             'roles.required' => 'Debe seleccionar al menos un rol.',
         ]);
 
-        $user = User::create([
-            'nombre' => $request->name,
-            'correo' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        try {
+            $user = User::create([
+                'nombre' => $request->name,
+                'correo' => $request->email,
+                'rfc' => $request->rfc,
+                'password' => Hash::make($request->password),
+                'estado' => 'pendiente',
+            ]);
 
-        $user->assignRole($request->roles);
+            Log::info('Usuario creado exitosamente:', ['user_id' => $user->id]);
 
-        // Log de creación de usuario
-        SystemLogService::userCreated($user->id, $user->nombre, $user->correo);
+            // Obtener los nombres de los roles basándose en los IDs
+            $roleNames = Role::whereIn('id', $request->roles)->pluck('name')->toArray();
+            $user->assignRole($roleNames);
+
+            // Log de creación de usuario
+            SystemLogService::userCreated($user->id, $user->nombre, $user->correo);
+
+        } catch (\Exception $e) {
+            Log::error('Error al crear usuario:', ['error' => $e->getMessage()]);
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error al crear usuario: ' . $e->getMessage());
+        }
 
         // Trigger verification email
         event(new Registered($user));
@@ -107,6 +125,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,correo,'.$user->id,
+            'rfc' => 'required|string|max:13|unique:users,rfc,'.$user->id,
             'roles' => 'required|array'
         ], [
             'roles.required' => 'Debe seleccionar al menos un rol.',
@@ -115,6 +134,7 @@ class UserController extends Controller
         $data = [
             'nombre' => $request->name,
             'correo' => $request->email,
+            'rfc' => $request->rfc,
         ];
 
         if ($request->filled('password')) {
@@ -125,7 +145,10 @@ class UserController extends Controller
         }
 
         $user->update($data);
-        $user->syncRoles($request->roles);
+        
+        // Obtener los nombres de los roles basándose en los IDs
+        $roleNames = Role::whereIn('id', $request->roles)->pluck('name')->toArray();
+        $user->syncRoles($roleNames);
 
         // Log de actualización de usuario
         SystemLogService::userUpdated($user->id, $user->nombre, $user->correo);

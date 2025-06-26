@@ -32,11 +32,14 @@
                     
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center">
-                            <i class="fas fa-file-pdf text-2xl mr-3
-                                @if($documento['estado'] === 'Aprobado') text-green-600
-                                @elseif($documento['estado'] === 'Pendiente' && !empty($documento['ruta_archivo'])) text-blue-600
-                                @elseif($documento['estado'] === 'Rechazado') text-red-600
-                                @else text-[#9d2449] @endif"></i>
+                            <div class="relative">
+                                <i class="fas fa-file-pdf text-2xl mr-3
+                                    @if($documento['estado'] === 'Aprobado') text-green-600
+                                    @elseif($documento['estado'] === 'Pendiente' && !empty($documento['ruta_archivo'])) text-blue-600
+                                    @elseif($documento['estado'] === 'Rechazado') text-red-600
+                                    @else text-[#9d2449] @endif"></i>
+
+                            </div>
                             <div>
                                 <h4 class="text-sm font-medium text-gray-900">{{ $documento['nombre'] }}</h4>
                                 <p class="text-xs text-gray-500">{{ $documento['descripcion'] ?? 'Documento requerido' }}</p>
@@ -128,6 +131,8 @@
                         </div>
                     </div>
                     @endif
+                    
+
                 </div>
                 @endforeach
             @else
@@ -141,7 +146,7 @@
             @endif
         </div>
     @else
-        <!-- Vista editable normal (código existente) -->
+        <!-- Vista editable normal -->
         <!-- Alert de Errores -->
         <div x-show="showError" x-cloak class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <div class="flex items-center">
@@ -159,32 +164,41 @@
         </div>
 
         <!-- Loading State -->
-        <div x-show="loading" x-cloak class="text-center py-8">
-            <div class="bg-gray-50 rounded-lg p-6">
-                <i class="fas fa-spinner fa-spin text-gray-400 text-3xl mb-3"></i>
-                <p class="text-gray-500">Cargando documentos...</p>
+        <div x-show="loading" x-cloak class="text-center py-12">
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-8 border border-blue-200">
+                <div class="flex justify-center mb-4">
+                    <div class="relative">
+                        <div class="w-12 h-12 border-4 border-blue-200 rounded-full animate-spin border-t-blue-500"></div>
+                        <div class="absolute inset-0 w-12 h-12 border-4 border-transparent rounded-full animate-ping border-t-blue-300"></div>
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-blue-800 mb-2">Cargando documentos</h3>
+                <p class="text-blue-600">Preparando la lista de documentos requeridos...</p>
             </div>
         </div>
 
         <!-- Lista de Documentos -->
-        <div x-show="!loading" x-cloak class="space-y-6">
+        <div x-show="!loading" x-cloak class="space-y-4">
             <template x-for="documento in documentos" :key="documento.id">
-                <div class="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-[#9d2449]/50 transition-all duration-300 group"
+                <div class="bg-white border rounded-xl p-6 transition-all duration-300 group shadow-sm hover:shadow-lg"
                      :class="{
-                         'border-green-300 bg-green-50': documento.estado === 'Aprobado',
-                         'border-blue-300 bg-blue-50': documento.estado === 'Pendiente' && documento.ruta_archivo,
-                         'border-red-300 bg-red-50': documento.estado === 'Rechazado'
+                         'border-green-400 bg-green-50 shadow-green-100': documento.estado === 'Aprobado',
+                         'border-blue-400 bg-blue-50 shadow-blue-100': documento.estado === 'Pendiente' && documento.ruta_archivo,
+                         'border-red-400 bg-red-50 shadow-red-100': documento.estado === 'Rechazado',
+                         'border-gray-200 hover:border-[#9d2449]/40 hover:bg-gray-50': documento.estado === 'Pendiente' && !documento.ruta_archivo
                      }">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center">
-                            <i class="fas fa-file-pdf text-2xl mr-3 group-hover:scale-110 transition-transform duration-300"
-                               :class="{
-                                   'text-green-600': documento.estado === 'Aprobado',
-                                   'text-blue-600': documento.estado === 'Pendiente' && documento.ruta_archivo,
-                                   'text-red-600': documento.estado === 'Rechazado',
-                                   'text-[#9d2449]': documento.estado === 'Pendiente' && !documento.ruta_archivo
-                               }"></i>
-                                    <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="relative">
+                                <i class="fas fa-file-pdf text-2xl mr-3 group-hover:scale-110 transition-transform duration-300"
+                                   :class="{
+                                       'text-green-600': documento.estado === 'Aprobado',
+                                       'text-blue-600': documento.estado === 'Pendiente' && documento.ruta_archivo,
+                                       'text-red-600': documento.estado === 'Rechazado',
+                                       'text-[#9d2449]': documento.estado === 'Pendiente' && !documento.ruta_archivo
+                                   }"></i>
+                            </div>
+                            <div>
                                 <h4 class="text-sm font-medium text-gray-900" x-text="documento.nombre"></h4>
                                 <p class="text-xs text-gray-500" x-text="documento.descripcion || 'PDF, máximo 10MB'"></p>
                                 
@@ -202,7 +216,7 @@
                                               'text-red-600': documento.estado === 'Rechazado'
                                           }"
                                           x-text="documento.estado === 'Pendiente' && documento.ruta_archivo ? 'En Revisión' : documento.estado"></span>
-                                    </div>
+                                </div>
                                 
                                 <!-- Observaciones para documentos rechazados -->
                                 <div x-show="documento.estado === 'Rechazado' && documento.observaciones" class="mt-1">
@@ -213,27 +227,35 @@
                         
                         <!-- Botón de selección para documentos pendientes sin archivo o rechazados -->
                         <div x-show="(documento.estado === 'Pendiente' && !documento.ruta_archivo) || documento.estado === 'Rechazado'">
-                                <input type="file" 
+                            <input type="file" 
                                    :name="`documento_${documento.id}`" 
-                                       accept=".pdf"
-                                       class="hidden" 
+                                   accept=".pdf"
+                                   class="hidden" 
                                    :id="`documento_${documento.id}`"
                                    :aria-label="`Seleccionar archivo para ${documento.nombre}`"
                                    @change="handleFileSelect($event, documento)"
-                                       required>
+                                   required>
                             <label :for="`documento_${documento.id}`" 
-                                       class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-[#9d2449] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] cursor-pointer transition-all duration-300">
-                                <span x-show="!documento.uploading && !documento.analyzing" x-text="documento.estado === 'Rechazado' ? 'Subir Nuevo' : 'Seleccionar archivo'"></span>
-                                <span x-show="documento.uploading" class="flex items-center">
-                                    <i class="fas fa-spinner fa-spin mr-2"></i>
-                                    Subiendo...
-                                </span>
-                                <span x-show="documento.analyzing" class="flex items-center">
-                                    <i class="fas fa-brain fa-pulse mr-2 text-blue-500"></i>
-                                    Analizando con IA...
-                                </span>
-                                </label>
-                            </div>
+                                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg text-sm font-medium hover:from-[#8a203f] hover:to-[#6d1a32] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] cursor-pointer transition-all duration-300 shadow-md hover:shadow-lg">
+                                
+                                <!-- Estado normal -->
+                                <template x-if="!documento.uploading">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-cloud-upload-alt mr-2"></i>
+                                        <span x-text="documento.estado === 'Rechazado' ? 'Subir Nuevo' : 'Seleccionar archivo'"></span>
+                                    </div>
+                                </template>
+                                
+                                <!-- Estado subiendo -->
+                                <template x-if="documento.uploading">
+                                    <div class="flex items-center">
+                                        <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                                        <span>Subiendo...</span>
+                                    </div>
+                                </template>
+                                
+                            </label>
+                        </div>
                         
                         <!-- Estado para documentos en revisión -->
                         <div x-show="documento.estado === 'Pendiente' && documento.ruta_archivo" class="flex items-center space-x-2">
@@ -243,18 +265,25 @@
                             </span>
                             <button type="button" 
                                     @click="verDocumento(documento)"
-                                    class="text-green-600 hover:text-green-800 text-xs underline">
+                                    class="text-green-600 hover:text-green-800 text-xs underline transition-colors duration-200">
                                 <i class="fas fa-eye mr-1"></i>
                                 Ver
                             </button>
                             <button type="button" 
                                     @click="reemplazarDocumento(documento)"
-                                    class="text-blue-600 hover:text-blue-800 text-xs underline">
+                                    class="text-blue-600 hover:text-blue-800 text-xs underline transition-colors duration-200">
                                 Reemplazar
                             </button>
                             <button type="button" 
                                     @click="verValidacionIA(documento)"
-                                    class="text-purple-600 hover:text-purple-800 text-xs underline">
+                                    x-show="documento.validacion_ia"
+                                    class="text-purple-600 hover:text-purple-800 text-xs underline transition-colors duration-200"
+                                    :class="{
+                                        'text-green-600 hover:text-green-800': documento.validacion_ia && documento.validacion_ia.es_correcto,
+                                        'text-red-600 hover:text-red-800': documento.validacion_ia && !documento.validacion_ia.es_correcto,
+                                        'text-purple-600 hover:text-purple-800': documento.validacion_ia && documento.validacion_ia.es_correcto === null
+                                    }"
+                                    :title="`IA: ${documento.validacion_ia?.confianza_porcentaje || 'N/A'} de confianza`">
                                 <i class="fas fa-brain mr-1"></i>
                                 IA
                             </button>
@@ -268,14 +297,20 @@
                             </span>
                             <button type="button" 
                                     @click="verDocumento(documento)"
-                                    class="text-green-600 hover:text-green-800 text-xs underline">
+                                    class="text-green-600 hover:text-green-800 text-xs underline transition-colors duration-200">
                                 <i class="fas fa-eye mr-1"></i>
                                 Ver
                             </button>
                             <button type="button" 
                                     @click="verValidacionIA(documento)"
-                                    x-show="documento.docSolicitanteId"
-                                    class="text-purple-600 hover:text-purple-800 text-xs underline">
+                                    x-show="documento.validacion_ia"
+                                    class="text-purple-600 hover:text-purple-800 text-xs underline transition-colors duration-200"
+                                    :class="{
+                                        'text-green-600 hover:text-green-800': documento.validacion_ia && documento.validacion_ia.es_correcto,
+                                        'text-red-600 hover:text-red-800': documento.validacion_ia && !documento.validacion_ia.es_correcto,
+                                        'text-purple-600 hover:text-purple-800': documento.validacion_ia && documento.validacion_ia.es_correcto === null
+                                    }"
+                                    :title="`IA: ${documento.validacion_ia?.confianza_porcentaje || 'N/A'} de confianza`">
                                 <i class="fas fa-brain mr-1"></i>
                                 IA
                             </button>
@@ -292,29 +327,151 @@
                     
                     <!-- Preview del archivo seleccionado -->
                     <div x-show="documento.archivo_seleccionado && documento.estado !== 'Aprobado'" 
-                         class="mt-4 p-4 bg-gray-50 rounded-lg">
+                         class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-file-pdf text-[#9d2449] mr-2"></i>
+                            <div class="flex items-center">
+                                <i class="fas fa-file-pdf text-[#9d2449] mr-2"></i>
                                 <span class="text-sm text-gray-900 font-medium" x-text="documento.nombre_archivo"></span>
-                                    </div>
+                            </div>
                             <button type="button" 
                                     @click="removerArchivo(documento)"
                                     class="text-red-600 hover:text-red-800 transition-colors duration-300">
-                                        <i class="fas fa-times"></i>
-                                    </button>
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Análisis IA Avanzado (Vista Editable) -->
+                    <div x-show="documento.validacion_ia && (documento.estado === 'Pendiente' || documento.estado === 'Aprobado')" 
+                         class="mt-4 border rounded-xl p-4 transition-all duration-300 hover:shadow-md"
+                         :class="{
+                             'bg-emerald-50 border-emerald-200': documento.validacion_ia && documento.validacion_ia.es_correcto === true && documento.validacion_ia.confianza >= 0.90,
+                             'bg-emerald-50 border-emerald-200': documento.validacion_ia && documento.validacion_ia.es_correcto === true && documento.validacion_ia.confianza >= 0.75,
+                             'bg-amber-50 border-amber-200': documento.validacion_ia && documento.validacion_ia.es_correcto === true && documento.validacion_ia.confianza < 0.75,
+                             'bg-red-50 border-red-200': documento.validacion_ia && documento.validacion_ia.es_correcto === false && documento.validacion_ia.confianza >= 0.85,
+                             'bg-orange-50 border-orange-200': documento.validacion_ia && documento.validacion_ia.es_correcto === false && documento.validacion_ia.confianza >= 0.70,
+                             'bg-slate-50 border-slate-200': documento.validacion_ia && (documento.validacion_ia.es_correcto === null || documento.validacion_ia.confianza < 0.70)
+                         }">
+                        
+                        <!-- Encabezado del análisis -->
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-2">
+                                <div class="p-1.5 bg-white rounded-lg shadow-sm">
+                                    <i :class="{
+                                        'fas fa-shield-check text-emerald-600': documento.validacion_ia && documento.validacion_ia.es_correcto === true && documento.validacion_ia.confianza >= 0.90,
+                                        'fas fa-check-circle text-emerald-600': documento.validacion_ia && documento.validacion_ia.es_correcto === true && documento.validacion_ia.confianza >= 0.75,
+                                        'fas fa-exclamation-triangle text-amber-600': documento.validacion_ia && documento.validacion_ia.es_correcto === true && documento.validacion_ia.confianza < 0.75,
+                                        'fas fa-exclamation-circle text-red-600': documento.validacion_ia && documento.validacion_ia.es_correcto === false && documento.validacion_ia.confianza >= 0.85,
+                                        'fas fa-exclamation-triangle text-orange-600': documento.validacion_ia && documento.validacion_ia.es_correcto === false && documento.validacion_ia.confianza >= 0.70,
+                                        'fas fa-search text-slate-600': documento.validacion_ia && (documento.validacion_ia.es_correcto === null || documento.validacion_ia.confianza < 0.70)
+                                    }" class="text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold"
+                                        :class="{
+                                            'text-emerald-700': documento.validacion_ia && documento.validacion_ia.es_correcto === true,
+                                            'text-red-700': documento.validacion_ia && documento.validacion_ia.es_correcto === false,
+                                            'text-slate-700': documento.validacion_ia && documento.validacion_ia.es_correcto === null
+                                        }">🎨 Análisis Visual IA</h4>
+                                    <p class="text-xs opacity-75"
+                                       :class="{
+                                           'text-emerald-700': documento.validacion_ia && documento.validacion_ia.es_correcto === true,
+                                           'text-red-700': documento.validacion_ia && documento.validacion_ia.es_correcto === false,
+                                           'text-slate-700': documento.validacion_ia && documento.validacion_ia.es_correcto === null
+                                       }"
+                                       x-text="getEstadoAnalisis(documento)"></p>
                                 </div>
                             </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 text-xs font-mono font-bold rounded-full"
+                                      :class="{
+                                          'bg-emerald-100 text-emerald-800': documento.validacion_ia && documento.validacion_ia.es_correcto === true,
+                                          'bg-red-100 text-red-800': documento.validacion_ia && documento.validacion_ia.es_correcto === false,
+                                          'bg-slate-100 text-slate-800': documento.validacion_ia && documento.validacion_ia.es_correcto === null
+                                      }"
+                                      x-text="documento.validacion_ia?.confianza_porcentaje || 'N/A'">
+                                </span>
+                                <div :class="{
+                                    'w-2 h-2 bg-green-400 rounded-full animate-pulse': documento.validacion_ia && documento.validacion_ia.confianza >= 0.85,
+                                    'w-2 h-2 bg-yellow-400 rounded-full animate-pulse': documento.validacion_ia && documento.validacion_ia.confianza >= 0.70 && documento.validacion_ia.confianza < 0.85,
+                                    'w-2 h-2 bg-red-400 rounded-full animate-pulse': documento.validacion_ia && documento.validacion_ia.confianza < 0.70
+                                }"></div>
+                            </div>
                         </div>
+                        
+                        <!-- Mensaje principal -->
+                        <p class="text-sm mb-3 leading-relaxed"
+                           :class="{
+                               'text-emerald-700': documento.validacion_ia && documento.validacion_ia.es_correcto === true,
+                               'text-red-700': documento.validacion_ia && documento.validacion_ia.es_correcto === false,
+                               'text-slate-700': documento.validacion_ia && documento.validacion_ia.es_correcto === null
+                           }"
+                           x-text="getMensajeContextualIA(documento)">
+                        </p>
+                        
+                        <!-- Características detectadas (si están disponibles) -->
+                        <div x-show="documento.validacion_ia?.caracteristicas_visuales" 
+                             class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                            
+                            <!-- Tipo detectado -->
+                            <div x-show="documento.validacion_ia?.prediccion" 
+                                 class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
+                                <span class="text-gray-600">📄 Tipo detectado:</span>
+                                <span class="font-medium"
+                                      :class="{
+                                          'text-emerald-700': documento.validacion_ia && documento.validacion_ia.es_correcto === true,
+                                          'text-red-700': documento.validacion_ia && documento.validacion_ia.es_correcto === false,
+                                          'text-slate-700': documento.validacion_ia && documento.validacion_ia.es_correcto === null
+                                      }"
+                                      x-text="documento.validacion_ia?.prediccion"></span>
+                            </div>
+                            
+                            <!-- Características visuales dinámicas -->
+                            <template x-if="documento.validacion_ia?.caracteristicas_visuales?.color_scheme">
+                                <div class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
+                                    <span class="text-gray-600">🎨 Esquema color:</span>
+                                    <span class="font-medium" x-text="getColorSchemeDisplay(documento.validacion_ia.caracteristicas_visuales.color_scheme)"></span>
+                                </div>
+                            </template>
+                            
+                            <template x-if="documento.validacion_ia?.caracteristicas_visuales?.has_logos">
+                                <div class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
+                                    <span class="text-gray-600">🏢 Logos oficiales:</span>
+                                    <span class="text-green-600 font-medium">✓ Detectados</span>
+                                </div>
+                            </template>
+                            
+                            <template x-if="documento.validacion_ia?.caracteristicas_visuales?.has_qr_code">
+                                <div class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
+                                    <span class="text-gray-600">📱 Código QR:</span>
+                                    <span class="text-blue-600 font-medium">✓ Presente</span>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <!-- Información temporal -->
+                        <div x-show="documento.validacion_ia?.procesado_en" 
+                             class="text-xs opacity-75 border-t pt-2"
+                             :class="{
+                                 'text-emerald-700 border-emerald-200': documento.validacion_ia && documento.validacion_ia.es_correcto === true,
+                                 'text-red-700 border-red-200': documento.validacion_ia && documento.validacion_ia.es_correcto === false,
+                                 'text-slate-700 border-slate-200': documento.validacion_ia && documento.validacion_ia.es_correcto === null
+                             }">
+                            <span>⏱️ Procesado: </span><span x-text="documento.validacion_ia?.procesado_en"></span>
+                            <span x-show="documento.validacion_ia?.tiempo_procesamiento" class="ml-3">⚡ </span>
+                            <span x-show="documento.validacion_ia?.tiempo_procesamiento" x-text="documento.validacion_ia?.tiempo_procesamiento"></span>
+                        </div>
+                    </div>
+                </div>
             </template>
 
             <!-- Mensaje cuando no hay documentos -->
             <div x-show="documentos.length === 0 && !loading" x-cloak class="text-center py-8">
-                            <div class="bg-gray-50 rounded-lg p-6">
-                                <i class="fas fa-exclamation-circle text-gray-400 text-3xl mb-3"></i>
-                                <p class="text-gray-500">No hay documentos configurados para este tipo de persona.</p>
-                            </div>
-                        </div>
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <i class="fas fa-exclamation-circle text-gray-400 text-3xl mb-3"></i>
+                    <p class="text-gray-500">No hay documentos configurados para este tipo de persona.</p>
+                </div>
+            </div>
         </div>
 
         <!-- Botones de navegación -->
@@ -385,8 +542,8 @@ function documentosData() {
                     await this.cargarDocumentos();
                 } else {
                     this.mostrarError('No se pudo obtener información del trámite');
-        }
-    } catch (error) {
+                }
+            } catch (error) {
                 console.error('Error al obtener datos del trámite:', error);
                 this.mostrarError('Error al cargar información del trámite');
             }
@@ -405,7 +562,6 @@ function documentosData() {
                         ...doc,
                         estado: doc.estado || 'Pendiente',
                         uploading: false,
-                        analyzing: false,
                         archivo_seleccionado: false,
                         nombre_archivo: '',
                         observaciones: doc.observaciones || null
@@ -429,17 +585,17 @@ function documentosData() {
             if (!file) return;
 
             // Validaciones
-                    if (file.size > 10 * 1024 * 1024) {
+            if (file.size > 10 * 1024 * 1024) {
                 this.mostrarError('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
                 event.target.value = '';
-                        return;
-                    }
-                    
-                    if (!file.type.includes('pdf')) {
+                return;
+            }
+            
+            if (!file.type.includes('pdf')) {
                 this.mostrarError('Solo se permiten archivos PDF.');
                 event.target.value = '';
-                        return;
-                    }
+                return;
+            }
 
             // Actualizar estado del documento
             documento.archivo_seleccionado = true;
@@ -452,7 +608,7 @@ function documentosData() {
 
         async subirDocumento(documento, file) {
             try {
-    const formData = new FormData();
+                const formData = new FormData();
                 formData.append('archivo', file);
                 formData.append('documento_id', documento.id);
 
@@ -464,25 +620,16 @@ function documentosData() {
 
                 console.log('📤 Subiendo documento:', documento.nombre);
 
-        const response = await fetch('/tramites-solicitante/upload-documento', {
-            method: 'POST',
+                const response = await fetch('/tramites-solicitante/upload-documento', {
+                    method: 'POST',
                     body: formData,
-            headers: {
+                    headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json'
                     }
-        });
+                });
         
-        // Mostrar estado de análisis si la respuesta tarda
-        const analysisTimeout = setTimeout(() => {
-            documento.analyzing = true;
-            documento.uploading = false;
-        }, 2000);
-        
-        const data = await response.json();
-        clearTimeout(analysisTimeout);
-        documento.analyzing = false;
-        
+                const data = await response.json();
                 console.log('📥 Respuesta del servidor:', data);
 
                 if (data.success) {
@@ -491,38 +638,24 @@ function documentosData() {
                     documento.docSolicitanteId = data.docSolicitanteId;
                     documento.observaciones = null;
                     
-                    // Mostrar mensaje de IA si está disponible
-                    let mensajeCompleto = data.mensaje || 'Documento subido correctamente';
-                    if (data.validacion_ia && data.validacion_ia.mensaje) {
-                        mensajeCompleto += '<br><br><strong>🤖 Validación IA:</strong><br>' + data.validacion_ia.mensaje;
-                        
-                        // Agregar información adicional según el tipo de sugerencia
-                        const sugerencia = data.validacion_ia.sugerencia;
-                        if (sugerencia === 'correcto') {
-                            mensajeCompleto += '<br><span class="text-green-600">✅ El documento será procesado automáticamente</span>';
-                        } else if (sugerencia === 'incorrecto') {
-                            mensajeCompleto += '<br><span class="text-red-600">⚠️ Por favor, verifique que subió el documento correcto</span>';
-                        } else if (sugerencia === 'entrenamiento') {
-                            mensajeCompleto += '<br><span class="text-blue-600">📚 Este documento ayudará a mejorar nuestro sistema</span>';
-                        } else if (sugerencia === 'manual') {
-                            mensajeCompleto += '<br><span class="text-gray-600">👁️ Será revisado manualmente por nuestro equipo</span>';
-                        }
-                    }
+                    this.mostrarExito(data.mensaje || 'Documento subido correctamente');
                     
-                    this.mostrarExito(mensajeCompleto);
+                    // Recargar documentos para obtener información de validación IA
+                    setTimeout(async () => {
+                        await this.cargarDocumentos();
+                    }, 1000);
                 } else {
                     this.mostrarError(data.mensaje || 'Error al subir el documento');
                     documento.archivo_seleccionado = false;
                     documento.nombre_archivo = '';
-        }
-    } catch (error) {
+                }
+            } catch (error) {
                 console.error('❌ Error al subir documento:', error);
                 this.mostrarError('Error de conexión al subir el documento');
                 documento.archivo_seleccionado = false;
                 documento.nombre_archivo = '';
             } finally {
                 documento.uploading = false;
-                documento.analyzing = false;
             }
         },
 
@@ -531,7 +664,7 @@ function documentosData() {
             if (documento.estado === 'Aprobado') {
                 this.mostrarError('No se puede reemplazar un documento que ya ha sido aprobado');
                 return;
-}
+            }
 
             documento.estado = 'Pendiente';
             documento.archivo_seleccionado = false;
@@ -574,12 +707,9 @@ function documentosData() {
             this.successMessage = mensaje;
             this.showSuccess = true;
             this.showError = false;
-            // No ocultar automáticamente si es mensaje de finalización
-            if (!mensaje.includes('Redirigiendo')) {
-                setTimeout(() => {
-                    this.showSuccess = false;
-                }, 5000); // Aumentado a 5 segundos para dar tiempo a leer los mensajes de IA
-            }
+            setTimeout(() => {
+                this.showSuccess = false;
+            }, 3000);
         },
 
         async finalizarTramite() {
@@ -660,73 +790,156 @@ function documentosData() {
         },
 
         verValidacionIA(documento) {
-            if (!documento.docSolicitanteId) {
-                this.mostrarError('No se puede acceder a la información de validación IA');
+            if (!documento.validacion_ia) {
+                this.mostrarError('No hay información de validación IA disponible para este documento');
                 return;
             }
 
-            // Hacer petición para obtener información de validación IA
-            fetch(`/tramites-solicitante/validacion-ia?documento_solicitante_id=${documento.docSolicitanteId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const validacion = data.validacion;
-                        const confianzaPorcentaje = Math.round(validacion.confianza * 100);
-                        
-                        let mensaje = `🤖 <strong>Análisis de IA para "${documento.nombre}"</strong><br><br>`;
-                        mensaje += `<strong>Tipo Detectado:</strong> ${validacion.tipo_predicho}<br>`;
-                        mensaje += `<strong>Confianza:</strong> ${confianzaPorcentaje}% <br>`;
-                        mensaje += `<strong>Estado:</strong> ${this.traducirEstadoValidacion(validacion.estado_validacion)}<br>`;
-                        mensaje += `<strong>Procesado:</strong> ${validacion.procesado_en}<br>`;
-                        
-                        if (validacion.tiempo_procesamiento) {
-                            mensaje += `<strong>Tiempo de análisis:</strong> ${validacion.tiempo_procesamiento}<br>`;
-                        }
-                        
-                        if (validacion.alternativas && validacion.alternativas.length > 0) {
-                            mensaje += `<br><strong>Otras posibilidades:</strong><br>`;
-                            validacion.alternativas.forEach(alt => {
-                                const altConfianza = Math.round(alt.confidence * 100);
-                                mensaje += `• ${alt.document_type} (${altConfianza}%)<br>`;
-                            });
-                        }
-                        
-                        if (validacion.extracto_texto) {
-                            mensaje += `<br><strong>Extracto del texto:</strong><br>`;
-                            mensaje += `<em style="color: #666; font-size: 0.9em;">${validacion.extracto_texto}</em>`;
-                        }
-                        
-                        this.mostrarExito(mensaje);
-                    } else {
-                        this.mostrarError(data.mensaje || 'No se pudo obtener información de validación IA');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al obtener validación IA:', error);
-                    this.mostrarError('Error al cargar información de validación IA');
-                });
+            const validacion = documento.validacion_ia;
+            const esCorrectoTexto = validacion.es_correcto === true ? '✅ Correcto' : 
+                                   validacion.es_correcto === false ? '❌ Incorrecto' : '❓ Incierto';
+            
+            let mensaje = `🤖 <strong>Análisis de IA para "${documento.nombre}"</strong><br><br>`;
+            
+            mensaje += `<div class="space-y-2">`;
+            mensaje += `<div class="flex justify-between items-center">`;
+            mensaje += `<strong>Tipo Detectado:</strong> <span class="text-blue-600">${validacion.prediccion}</span>`;
+            mensaje += `</div>`;
+            
+            mensaje += `<div class="flex justify-between items-center">`;
+            mensaje += `<strong>Confianza:</strong> <span class="font-mono text-lg ${validacion.confianza >= 0.8 ? 'text-green-600' : validacion.confianza >= 0.6 ? 'text-yellow-600' : 'text-red-600'}">${validacion.confianza_porcentaje}</span>`;
+            mensaje += `</div>`;
+            
+            mensaje += `<div class="flex justify-between items-center">`;
+            mensaje += `<strong>Resultado:</strong> <span class="${validacion.es_correcto ? 'text-green-600' : 'text-red-600'}">${esCorrectoTexto}</span>`;
+            mensaje += `</div>`;
+            
+            if (validacion.procesado_en) {
+                mensaje += `<div class="flex justify-between items-center">`;
+                mensaje += `<strong>Procesado:</strong> <span class="text-gray-600">${validacion.procesado_en}</span>`;
+                mensaje += `</div>`;
+            }
+            
+            if (validacion.tiempo_procesamiento) {
+                mensaje += `<div class="flex justify-between items-center">`;
+                mensaje += `<strong>Tiempo:</strong> <span class="text-gray-600">${validacion.tiempo_procesamiento}</span>`;
+                mensaje += `</div>`;
+            }
+            
+            mensaje += `</div>`;
+            
+            // Mostrar interpretación del resultado
+            if (validacion.es_correcto === true) {
+                mensaje += `<br><div class="p-3 bg-green-50 border border-green-200 rounded-lg">`;
+                mensaje += `<p class="text-green-800 text-sm">🎯 <strong>Excelente:</strong> El documento subido corresponde exactamente al tipo esperado.</p>`;
+                mensaje += `</div>`;
+            } else if (validacion.es_correcto === false) {
+                mensaje += `<br><div class="p-3 bg-red-50 border border-red-200 rounded-lg">`;
+                mensaje += `<p class="text-red-800 text-sm">⚠️ <strong>Atención:</strong> El documento no parece corresponder al tipo esperado. Verifique que subió el archivo correcto.</p>`;
+                mensaje += `</div>`;
+            } else {
+                mensaje += `<br><div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">`;
+                mensaje += `<p class="text-yellow-800 text-sm">🤔 <strong>Revisión requerida:</strong> La IA no puede determinar con certeza el tipo de documento.</p>`;
+                mensaje += `</div>`;
+            }
+            
+            this.mostrarExito(mensaje);
         },
 
-        traducirEstadoValidacion(estado) {
-            const traducciones = {
-                'pending_review': 'Pendiente de Revisión',
-                'human_confirmed': 'Confirmado por Humano',
-                'human_rejected': 'Rechazado por Humano',
-                'auto_approved': 'Auto-aprobado',
-                'needs_review': 'Necesita Revisión'
+        getMensajeContextualIA(documento) {
+            if (!documento.validacion_ia) {
+                return '';
+            }
+
+            const validacion = documento.validacion_ia;
+            const confianza = validacion.confianza || 0;
+            const esCorrectoBoolean = validacion.es_correcto;
+            
+            // Mensaje mejorado basado en análisis visual
+            if (esCorrectoBoolean === true) {
+                if (confianza >= 0.90) {
+                    return "Análisis visual y textual confirman que es el documento correcto";
+                } else if (confianza >= 0.75) {
+                    return "Las características visuales coinciden con el tipo esperado";
+                } else {
+                    return "Algunos elementos coinciden pero hay dudas menores";
+                }
+            } else if (esCorrectoBoolean === false) {
+                const tipoPredicho = validacion.prediccion || 'desconocido';
+                if (confianza >= 0.85) {
+                    return `El análisis visual indica que es '${tipoPredicho}', no '${documento.nombre}'`;
+                } else if (confianza >= 0.70) {
+                    return "Las características no coinciden completamente con lo esperado";
+                } else {
+                    return "El análisis no puede determinar el tipo con certeza";
+                }
+            } else {
+                return "Se requiere revisión manual del documento";
+            }
+        },
+
+        getEstadoAnalisis(documento) {
+            if (!documento.validacion_ia) {
+                return 'Sin análisis';
+            }
+
+            const validacion = documento.validacion_ia;
+            const confianza = validacion.confianza || 0;
+            const esCorrectoBoolean = validacion.es_correcto;
+            
+            if (esCorrectoBoolean === true) {
+                if (confianza >= 0.90) {
+                    return "Documento Verificado";
+                } else if (confianza >= 0.75) {
+                    return "Muy Probable";
+                } else {
+                    return "Posible Coincidencia";
+                }
+            } else if (esCorrectoBoolean === false) {
+                if (confianza >= 0.85) {
+                    return "Error Detectado";
+                } else if (confianza >= 0.70) {
+                    return "Posible Error";
+                } else {
+                    return "Revisión Necesaria";
+                }
+            } else {
+                return "Análisis Inconcluso";
+            }
+        },
+
+        getColorSchemeDisplay(colorScheme) {
+            const schemes = {
+                'institutional_blue': '🏛️ Institucional',
+                'government_green': '🏛️ Gubernamental', 
+                'official_multicolor': '🌈 Oficial',
+                'corporate_gray': '🏢 Corporativo',
+                'standard_black': '⚫ Estándar',
+                'security_red': '🛡️ Seguridad'
             };
-            return traducciones[estado] || estado;
+            
+            return schemes[colorScheme] || '⚫ Estándar';
         }
     }
 }
 </script>
 
-@push('scripts')
-<script src="{{ asset('js/validators/documentos-validator.js') }}"></script>
-@endpush
+@push('styles')
+<style>
+/* Mejora en la animación de bounce */
+@keyframes custom-bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
 
-@push('scripts')
-<script src="{{ asset('js/validators/documentos-validator.js') }}"></script>
+.custom-bounce {
+    animation: custom-bounce 1s ease-in-out infinite;
+}
+</style>
 @endpush
 
 @push('scripts')

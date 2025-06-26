@@ -12,21 +12,24 @@ use App\Models\Cita;
 class DashboardController extends Controller
 {
     /**
-     * Dashboard principal que redirige según el rol del usuario
+     * Dashboard principal que muestra los datos apropiados
      */
     public function index()
     {
-        $user = Auth::user();
+        // Obtener todas las estadísticas - la vista controlará la visibilidad
+        $totalUsuarios = User::count();
+        $tramitesPendientes = Tramite::whereIn('estado', ['Pendiente', 'En Revision', 'Por Cotejar'])->count();
+        $totalProveedores = Proveedor::count();
+        $citasHoy = Cita::whereDate('fecha_hora', today())->count();
+        $totalCitas = Cita::count();
         
-        // Verificar permisos y redirigir al dashboard apropiado
-        if ($user->can('dashboard.admin') || $user->can('dashboard.revisor')) {
-            return $this->adminDashboard();
-        } elseif ($user->can('dashboard.solicitante')) {
-            return $this->solicitanteDashboard();
-        }
-        
-        // Si no tiene permisos específicos, mostrar dashboard básico
-        return $this->dashboardBasico();
+        return view('dashboard', compact(
+            'totalUsuarios',
+            'tramitesPendientes', 
+            'totalProveedores',
+            'citasHoy',
+            'totalCitas'
+        ));
     }
 
     /**

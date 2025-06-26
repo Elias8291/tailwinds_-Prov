@@ -49,6 +49,9 @@ use App\Http\Controllers\MembreteController;
 // Controladores de IA
 use App\Http\Controllers\AI\DocumentTrainingController;
 
+// Controladores de Estado
+use App\Http\Controllers\MiEstadoProveedorController;
+
 // ============================================================================
 // RUTAS PÚBLICAS (Sin autenticación requerida)
 // ============================================================================
@@ -108,7 +111,7 @@ Route::post('/reenviar-verificacion', [VerificationController::class, 'resend'])
 // ============================================================================
 // DASHBOARD
 // ============================================================================
-Route::middleware(['auth', 'can:dashboard.admin,dashboard.solicitante,dashboard.revisor'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
@@ -369,6 +372,14 @@ Route::middleware(['auth', 'can:proveedores.ver'])->prefix('proveedores')->group
 });
 
 // ============================================================================
+// MÓDULO DE GESTIÓN - MI ESTADO PROVEEDOR
+// ============================================================================
+
+Route::middleware(['auth', 'can:mi-estado-proveedor.ver'])->prefix('mi-estado-proveedor')->group(function () {
+    Route::get('/', [MiEstadoProveedorController::class, 'index'])->name('mi-estado-proveedor.index');
+});
+
+// ============================================================================
 // MÓDULO DE GESTIÓN - CITAS Y CALENDARIO
 // ============================================================================
 
@@ -457,7 +468,7 @@ Route::middleware(['auth'])->prefix('documento-membretado')->group(function () {
 
 Route::middleware(['auth'])->prefix('membretes')->group(function () {
     // Página principal de membretes
-    Route::get('/', [MembreteController::class, 'index'])->name('membretes.index');
+    Route::get('/', [MembreteController::class, 'index'])->middleware('can:membretes.ver')->name('membretes.index');
     
     // Ejemplos de documentos (descarga directa)
     Route::get('/ejemplo/inscripcion', [MembreteController::class, 'ejemploInscripcion'])->name('membretes.ejemplo.inscripcion');
@@ -558,4 +569,31 @@ if (config('app.debug')) {
     })->name('test.error.503');
 }
 
+// ============================================================================
+// MÓDULO DE NOTIFICACIONES
+// ============================================================================
+
+Route::middleware(['auth'])->prefix('notificaciones')->name('notificaciones.')->group(function () {
+    
+    // Ver todas las notificaciones
+    Route::get('/', [\App\Http\Controllers\NotificacionController::class, 'index'])->name('index');
+    
+    // API para el header (AJAX)
+    Route::get('/header', [\App\Http\Controllers\NotificacionController::class, 'obtenerParaHeader'])->name('header');
+    
+    // Contador de no leídas
+    Route::get('/contador', [\App\Http\Controllers\NotificacionController::class, 'contadorNoLeidas'])->name('contador');
+    
+    // Marcar como leída una notificación específica
+    Route::post('/{id}/marcar-leida', [\App\Http\Controllers\NotificacionController::class, 'marcarComoLeida'])->name('marcar-leida');
+    
+    // Marcar todas como leídas
+    Route::post('/marcar-todas-leidas', [\App\Http\Controllers\NotificacionController::class, 'marcarTodasComoLeidas'])->name('marcar-todas-leidas');
+    
+    // Eliminar notificación
+    Route::delete('/{id}', [\App\Http\Controllers\NotificacionController::class, 'eliminar'])->name('eliminar');
+    
+    // Crear notificación (para administradores)
+    Route::post('/crear', [\App\Http\Controllers\NotificacionController::class, 'crear'])->name('crear');
+});
 

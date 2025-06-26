@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <!-- Form Container -->
+            <!-- Form Container -->
     <div class="max-w-4xl mx-auto mt-4 sm:mt-8 md:mt-16 bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-8 relative z-10"
          x-data="{ 
             currentStep: 1,
@@ -71,46 +71,161 @@
          }"
          class="invisible">
          
-        <!-- Información del Solicitante -->
-        <div class="mb-8 bg-gradient-to-r from-[#9d2449]/5 to-[#7a1d37]/5 rounded-lg border border-[#9d2449]/10 p-4">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="bg-white/80 rounded-lg p-2">
-                        <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <span class="text-xs font-medium text-gray-500">Tipo de Persona</span>
-                        <p class="text-sm font-semibold text-gray-800" x-text="tipoPersona"></p>
-                    </div>
-                </div>
+        <!-- Contador de Tiempo Límite - Dentro del contenedor -->
+        @if(isset($tiempoLimite))
+        <div class="mb-6"
+             x-data="{
+                vencido: {{ $tiempoLimite['vencido'] ? 'true' : 'false' }},
+                timestampLimite: {{ $tiempoLimite['timestamp_limite'] ?? 0 }},
+                horasRestantes: {{ $tiempoLimite['horas_restantes'] ?? 0 }},
+                minutosRestantes: {{ $tiempoLimite['minutos_restantes'] ?? 0 }},
+                segundosRestantes: {{ $tiempoLimite['segundos_restantes'] ?? 0 }},
+                color: '{{ $tiempoLimite['color'] ?? 'green' }}',
                 
-                <div class="flex items-center gap-3">
-                    <div class="bg-white/80 rounded-lg p-2">
-                        <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
-                        </svg>
+                init() {
+                    if (!this.vencido && this.timestampLimite > 0) {
+                        this.actualizarContador();
+                        setInterval(() => {
+                            this.actualizarContador();
+                        }, 1000);
+                    }
+                },
+                
+                actualizarContador() {
+                    const ahora = Math.floor(Date.now() / 1000);
+                    const diferencia = this.timestampLimite - ahora;
+                    
+                    if (diferencia <= 0) {
+                        this.vencido = true;
+                        this.horasRestantes = 0;
+                        this.minutosRestantes = 0;
+                        this.segundosRestantes = 0;
+                        this.color = 'red';
+                        return;
+                    }
+                    
+                    this.horasRestantes = Math.floor(diferencia / 3600);
+                    this.minutosRestantes = Math.floor((diferencia % 3600) / 60);
+                    this.segundosRestantes = diferencia % 60;
+                    
+                    // Actualizar color según tiempo restante
+                    if (this.horasRestantes <= 6) {
+                        this.color = 'red';
+                    } else if (this.horasRestantes <= 12) {
+                        this.color = 'yellow';
+                    } else {
+                        this.color = 'green';
+                    }
+                }
+             }">
+            <div class="rounded-lg p-3 tiempo-limite-container-mini {{ $tiempoLimite['vencido'] ? 'tiempo-vencido' : 'tiempo-color-' . $tiempoLimite['color'] }}">
+                <div class="flex items-center justify-between">
+                    <!-- Información compacta -->
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 rounded-lg flex-shrink-0" 
+                             :class="{
+                                'bg-red-500': vencido || color === 'red',
+                                'bg-yellow-500': !vencido && color === 'yellow',
+                                'bg-blue-500': !vencido && (color === 'blue' || color === 'green')
+                             }">
+                            <div class="w-4 h-4 text-white relative">
+                                <!-- Emoji como icono -->
+                                <span class="text-sm" x-show="vencido">⚠️</span>
+                                <span class="text-sm" x-show="!vencido && color === 'red'">🔥</span>
+                                <span class="text-sm" x-show="!vencido && color === 'yellow'">⚡</span>
+                                <span class="text-sm" x-show="!vencido && (color === 'blue' || color === 'green')">⏰</span>
+                            </div>
+                        </div>
+                        
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-bold truncate" 
+                                    :class="{
+                                        'text-red-800': vencido || color === 'red',
+                                        'text-yellow-800': !vencido && color === 'yellow',
+                                        'text-blue-800': !vencido && (color === 'blue' || color === 'green')
+                                    }">
+                                    <span x-show="vencido">¡Tiempo Vencido!</span>
+                                    <span x-show="!vencido && color === 'red'">¡Tiempo Crítico!</span>
+                                    <span x-show="!vencido && color === 'yellow'">¡Poco Tiempo!</span>
+                                    <span x-show="!vencido && (color === 'blue' || color === 'green')">Tiempo Límite</span>
+                                </h4>
+                                
+                                <!-- Fechas mini -->
+                                <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+                                    <span class="bg-gray-100 px-2 py-1 rounded-full">
+                                        📅 {{ $tiempoLimite['fecha_limite_corta'] }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <p class="text-xs mt-0.5" 
+                               :class="{
+                                    'text-red-600': vencido || color === 'red',
+                                    'text-yellow-600': !vencido && color === 'yellow',
+                                    'text-blue-600': !vencido && (color === 'blue' || color === 'green')
+                                }">
+                                <span x-show="vencido">El plazo de 48h ha expirado</span>
+                                <span x-show="!vencido">48 horas para completar</span>
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <span class="text-xs font-medium text-gray-500">RFC</span>
-                        <p class="text-sm font-semibold text-gray-800 font-mono" x-text="rfc"></p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3" x-show="isPersonaFisica && curp" x-cloak>
-                    <div class="bg-white/80 rounded-lg p-2">
-                        <svg class="w-5 h-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <span class="text-xs font-medium text-gray-500">CURP</span>
-                        <p class="text-sm font-semibold text-gray-800 font-mono" x-text="curp"></p>
+                    
+                    <!-- Contador compacto -->
+                    <div class="text-right flex-shrink-0">
+                        <div x-show="!vencido" class="relative">
+                            <!-- Contador principal -->
+                            <div class="text-lg sm:text-xl font-bold font-mono tiempo-contador-mini relative" 
+                                 :class="{
+                                    'text-red-700': color === 'red',
+                                    'text-yellow-700': color === 'yellow',
+                                    'text-blue-700': color === 'blue' || color === 'green'
+                                 }">
+                                <div class="flex items-center gap-1">
+                                    <div class="text-center">
+                                        <div x-text="String(horasRestantes).padStart(2, '0')" class="leading-tight">{{ str_pad($tiempoLimite['horas_restantes'], 2, '0', STR_PAD_LEFT) }}</div>
+                                        <div class="text-xs opacity-70">h</div>
+                                    </div>
+                                    <div class="text-sm">:</div>
+                                    <div class="text-center">
+                                        <div x-text="String(minutosRestantes).padStart(2, '0')" class="leading-tight">{{ str_pad($tiempoLimite['minutos_restantes'], 2, '0', STR_PAD_LEFT) }}</div>
+                                        <div class="text-xs opacity-70">m</div>
+                                    </div>
+                                    <div class="text-sm">:</div>
+                                    <div class="text-center">
+                                        <div x-text="String(segundosRestantes).padStart(2, '0')" class="leading-tight">{{ str_pad($tiempoLimite['segundos_restantes'], 2, '0', STR_PAD_LEFT) }}</div>
+                                        <div class="text-xs opacity-70">s</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Barra de progreso mini -->
+                            <div class="mt-1 w-full bg-gray-200 rounded-full h-1 overflow-hidden">
+                                <div class="h-full transition-all duration-1000 rounded-full"
+                                     :class="{
+                                        'bg-red-500': color === 'red',
+                                        'bg-yellow-500': color === 'yellow',
+                                        'bg-blue-500': color === 'blue' || color === 'green'
+                                     }"
+                                     :style="'width: ' + (100 - ((horasRestantes * 3600 + minutosRestantes * 60 + segundosRestantes) / (48 * 3600) * 100)) + '%'">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mensaje de vencido compacto -->
+                        <div x-show="vencido" class="text-center">
+                            <div class="text-lg font-bold text-red-700">
+                                💀 VENCIDO
+                            </div>
+                            <div class="text-xs text-red-500 mt-1">
+                                00:00:00
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        @endif
 
         <!-- Mobile Progress Indicator -->
         <div class="md:hidden mb-4 text-center">
@@ -633,6 +748,132 @@
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* ⏰ ESTILOS PARA CONTADOR DE TIEMPO LÍMITE - VERSIÓN MINI */
+    .tiempo-limite-container-mini {
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+    }
+
+    .tiempo-vencido {
+        background: linear-gradient(135deg, #fee2e2, #fca5a5) !important;
+        border-color: #ef4444 !important;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2) !important;
+    }
+
+    .tiempo-color-red {
+        background: linear-gradient(135deg, #fee2e2, #fca5a5) !important;
+        border-color: #ef4444 !important;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2) !important;
+    }
+
+    .tiempo-color-yellow {
+        background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+        border-color: #f59e0b !important;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2) !important;
+    }
+
+    .tiempo-color-green, .tiempo-color-blue {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2) !important;
+    }
+
+    .tiempo-contador-mini {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        letter-spacing: 1px;
+    }
+
+    /* Animación de pulso suave para tiempo crítico */
+    @keyframes pulso-suave {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.8;
+            transform: scale(1.02);
+        }
+    }
+
+    .tiempo-color-red .tiempo-contador-mini {
+        animation: pulso-suave 2s infinite;
+    }
+
+    /* Animación de parpadeo para emojis */
+    @keyframes parpadeo-emoji {
+        0%, 50%, 100% {
+            opacity: 1;
+        }
+        25%, 75% {
+            opacity: 0.6;
+        }
+    }
+
+    .tiempo-color-red .text-sm {
+        animation: parpadeo-emoji 1.5s infinite;
+    }
+
+    /* Animación sutil para la barra de progreso */
+    @keyframes progreso-glow {
+        0%, 100% {
+            box-shadow: 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        50% {
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+        }
+    }
+
+    .tiempo-limite-container-mini .bg-blue-500 {
+        animation: progreso-glow 3s infinite;
+    }
+
+    .tiempo-limite-container-mini .bg-yellow-500 {
+        animation: progreso-glow 3s infinite;
+        box-shadow: 0 0 3px rgba(245, 158, 11, 0.3);
+    }
+
+    .tiempo-limite-container-mini .bg-red-500 {
+        animation: progreso-glow 2s infinite;
+        box-shadow: 0 0 3px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Responsive para móvil - versión mini */
+    @media (max-width: 640px) {
+        .tiempo-limite-container-mini {
+            padding: 0.75rem !important;
+        }
+        
+        .tiempo-limite-container-mini .flex {
+            gap: 0.5rem;
+        }
+        
+        .tiempo-contador-mini {
+            font-size: 1.1rem !important;
+        }
+        
+        .tiempo-limite-container-mini .hidden {
+            display: none !important;
+        }
+    }
+
+    /* Hover effects para hacer más interactivo */
+    .tiempo-limite-container-mini:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Estilo especial para la fecha compacta */
+    .tiempo-limite-container-mini .bg-gray-100 {
+        background: rgba(243, 244, 246, 0.8) !important;
+        backdrop-filter: blur(5px);
+        transition: all 0.2s ease;
+    }
+
+    .tiempo-limite-container-mini .bg-gray-100:hover {
+        background: rgba(229, 231, 235, 0.9) !important;
     }
 </style>
 @endpush

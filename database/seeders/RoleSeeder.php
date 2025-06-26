@@ -32,7 +32,7 @@ class RoleSeeder extends Seeder
         
         $permisosAdmin = [
             // Dashboard
-            'dashboard.admin',
+            'dashboard.ver-estadisticas',
             
             // Roles y permisos
             'roles.ver', 'roles.crear', 'roles.editar', 'roles.eliminar',
@@ -52,6 +52,7 @@ class RoleSeeder extends Seeder
             // Proveedores
             'proveedores.ver', 'proveedores.crear', 'proveedores.editar', 'proveedores.eliminar',
             'proveedores.activar', 'proveedores.desactivar', 'proveedores.exportar', 'proveedores.historial',
+            'mi-estado-proveedor.ver',
             
             // Citas
             'citas.ver', 'citas.crear', 'citas.editar', 'citas.eliminar',
@@ -63,6 +64,9 @@ class RoleSeeder extends Seeder
             
             // Perfil
             'perfil.ver', 'perfil.editar', 'perfil.cambiar-password',
+
+            // IA
+            'ai.ver', 'ai.dashboard', 'ai.entrenar', 'ai.validar',
         ];
 
         $this->asignarPermisosSeguro($admin, $permisosAdmin);
@@ -74,7 +78,7 @@ class RoleSeeder extends Seeder
         ]);
         
         $permisosRevisor = [
-            'dashboard.revisor',
+            'dashboard.ver-estadisticas',
             'revision-tramites.ver', 'revision-tramites.revisar', 'revision-tramites.aprobar',
             'revision-tramites.rechazar', 'revision-tramites.comentarios',
             'documentos.ver', 'documentos.descargar', 'documentos.revisar', 'documentos.validar',
@@ -91,9 +95,9 @@ class RoleSeeder extends Seeder
         ]);
         
         $permisosGestor = [
-            'dashboard.admin',
             'proveedores.ver', 'proveedores.crear', 'proveedores.editar',
             'proveedores.activar', 'proveedores.desactivar', 'proveedores.exportar', 'proveedores.historial',
+            'mi-estado-proveedor.ver',
             'documentos.ver', 'documentos.descargar', 'documentos.revisar',
             'citas.ver', 'citas.crear', 'citas.editar', 'citas.eliminar',
             'citas.agendar', 'citas.cancelar', 'citas.calendario',
@@ -109,10 +113,11 @@ class RoleSeeder extends Seeder
         ]);
         
         $permisosSolicitante = [
-            'dashboard.solicitante',
+            'dashboard.iniciar-tramite',
             'tramites-solicitante.ver', 'tramites-solicitante.crear', 'tramites-solicitante.editar',
             'tramites-solicitante.inscripcion', 'tramites-solicitante.renovacion', 'tramites-solicitante.actualizacion',
             'tramites-solicitante.subir-documentos', 'tramites-solicitante.finalizar',
+            'mi-estado-proveedor.ver',
             'perfil.ver', 'perfil.editar', 'perfil.cambiar-password',
         ];
 
@@ -125,7 +130,6 @@ class RoleSeeder extends Seeder
         ]);
         
         $permisosOperador = [
-            'dashboard.admin',
             'documentos.ver', 'documentos.crear', 'documentos.editar', 'documentos.descargar',
             'citas.ver', 'citas.crear', 'citas.editar', 'citas.agendar', 'citas.cancelar', 'citas.calendario',
             'proveedores.ver', 'proveedores.historial',

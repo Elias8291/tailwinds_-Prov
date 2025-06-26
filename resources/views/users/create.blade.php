@@ -159,6 +159,28 @@
                                 @enderror
                             </div>
 
+                            <!-- RFC -->
+                            <div class="input-floating">
+                                <input type="text" 
+                                       id="rfc"
+                                       name="rfc"
+                                       value="{{ old('rfc') }}"
+                                       autocomplete="off"
+                                       placeholder=" "
+                                       class="@error('rfc') error @enderror"
+                                       required maxlength="13" minlength="12" pattern="[A-Z0-9]+">
+                                <label class="input-floating-label" for="rfc">
+                                    RFC<span class="text-[#9d2449] ml-1">*</span>
+                                </label>
+                                <i class="fas fa-id-card input-icon"></i>
+                                @error('rfc')
+                                <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
+                            </div>
+
                             <!-- Contraseña -->
                             <div class="input-floating">
                                 <input type="password" 
@@ -212,7 +234,7 @@
                         <div class="flex flex-wrap justify-center gap-2 w-full">
                             @foreach($roles as $role)
                             <label class="group relative w-[120px] flex-shrink-0">
-                                <input type="radio" 
+                                <input type="checkbox" 
                                        name="roles[]" 
                                        value="{{ $role->id }}"
                                        class="peer absolute opacity-0"

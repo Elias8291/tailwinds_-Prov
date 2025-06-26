@@ -8,21 +8,21 @@
             <div class="flex-grow flex flex-col pt-4">
                 <nav class="flex-1 px-2 space-y-2">
                     <!-- Dashboard -->
-                    @canany(['dashboard.admin', 'dashboard.solicitante', 'dashboard.revisor'])
                     <a href="{{ route('dashboard') }}" class="group/item flex items-center min-w-[250px] px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
                         {{ request()->routeIs('dashboard') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
                         <svg class="{{ request()->routeIs('dashboard') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-transform duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6a2 2 0 01-2 2H10a2 2 0 01-2-2V5z" />
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Dashboard</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Dashboard</span>
                     </a>
-                    @endcanany
 
-                    <!-- Separador: Gestión de Trámites -->
+                    <!-- Separador: Gestión de Trámites - Solo si hay elementos en la sección -->
+                    @if(auth()->user()->can('tramites-solicitante.ver') || auth()->user()->can('revision-tramites.ver') || auth()->user()->can('documentos.ver') || auth()->user()->can('citas.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                     </div>
+                    @endif
 
                     <!-- Mis Trámites (Solicitante) -->
                     @can('tramites-solicitante.ver')
@@ -31,7 +31,7 @@
                         <svg class="{{ request()->routeIs('tramites.solicitante.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Mis Trámites</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Mis Trámites</span>
                     </a>
                     @endcan
 
@@ -42,7 +42,7 @@
                         <svg class="{{ request()->routeIs('revision.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Revisión de Trámites</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Revisión de Trámites</span>
                     </a>
                     @endcan
 
@@ -53,18 +53,20 @@
                         <svg class="{{ request()->routeIs('documentos.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Documentos</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Documentos</span>
                     </a>
                     @endcan
 
                     <!-- Membretes Oficiales -->
+                    @can('membretes.ver')
                     <a href="{{ route('membretes.index') }}" class="group/item flex items-center min-w-[250px] px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
                         {{ request()->routeIs('membretes.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
                         <svg class="{{ request()->routeIs('membretes.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Membretes Oficiales</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Membretes Oficiales</span>
                     </a>
+                    @endcan
 
                     <!-- Citas -->
                     @can('citas.ver')
@@ -73,14 +75,16 @@
                         <svg class="{{ request()->routeIs('citas.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Citas</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Citas</span>
                     </a>
                     @endcan
 
-                    <!-- Separador: Administración -->
+                    <!-- Separador: Administración - Solo si hay elementos en la sección -->
+                    @if(auth()->user()->can('usuarios.ver') || auth()->user()->can('roles.ver') || auth()->user()->can('proveedores.ver') || auth()->user()->can('mi-estado-proveedor.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                     </div>
+                    @endif
 
                     <!-- Usuarios -->
                     @can('usuarios.ver')
@@ -89,7 +93,7 @@
                         <svg class="{{ request()->routeIs('users.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Usuarios</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Usuarios</span>
                     </a>
                     @endcan
 
@@ -100,7 +104,7 @@
                         <svg class="{{ request()->routeIs('roles.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1017.25 2.75z" />
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Roles y Permisos</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Roles y Permisos</span>
                     </a>
                     @endcan
 
@@ -111,14 +115,30 @@
                         <svg class="{{ request()->routeIs('proveedores.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Proveedores</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Proveedores</span>
                     </a>
                     @endcan
 
-                    <!-- Separador: Monitoreo -->
+                    <!-- Mi Estado Proveedor -->
+                    @can('mi-estado-proveedor.ver')
+                    <a href="{{ route('mi-estado-proveedor.index') }}" class="group/item flex items-center min-w-[250px] px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                        {{ request()->routeIs('mi-estado-proveedor.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                        <svg class="{{ request()->routeIs('mi-estado-proveedor.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 10l5 5 10-10" />
+                        </svg>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Mi Estado</span>
+                    </a>
+                    @endcan
+
+
+
+                    <!-- Separador: Monitoreo - Solo si hay elementos en la sección -->
+                    @if(auth()->user()->can('logs.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                     </div>
+                    @endif
 
                     <!-- Logs del Sistema -->
                     @can('logs.ver')
@@ -127,25 +147,28 @@
                         <svg class="{{ request()->routeIs('logs.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Logs del Sistema</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Logs del Sistema</span>
                     </a>
                     @endcan
 
-                    <!-- Entrenamiento IA -->
-                    @can('ai-training.ver')
-                    <a href="{{ route('ai.training.index') }}" class="group/item flex items-center min-w-[250px] px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
-                        {{ request()->routeIs('ai.training.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
-                        <svg class="{{ request()->routeIs('ai.training.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                        </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">IA Documentos</span>
+                    <!-- Notificaciones -->
+                    <a href="{{ route('notificaciones.index') }}" class="group/item flex items-center min-w-[250px] px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                        {{ request()->routeIs('notificaciones.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                        <div class="relative">
+                            <svg class="{{ request()->routeIs('notificaciones.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span id="desktop-notification-count" class="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-500 text-white text-xs rounded-full" style="display: none;">0</span>
+                        </div>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Notificaciones</span>
                     </a>
-                    @endcan
 
-                    <!-- Separador: Personal -->
+                    <!-- Separador: Personal - Solo si hay elementos en la sección -->
+                    @if(auth()->user()->can('perfil.ver') || auth()->user()->can('configuracion.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                     </div>
+                    @endif
 
                     <!-- Perfil -->
                     @can('perfil.ver')
@@ -154,7 +177,7 @@
                         <svg class="{{ request()->routeIs('profile.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Mi Perfil</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Mi Perfil</span>
                     </a>
                     @endcan
 
@@ -164,7 +187,7 @@
                         <svg class="text-gray-400 flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:text-primary group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                         </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Configuración</span>
+                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Configuración</span>
                     </a>
                     @endcan
                 </nav>
@@ -225,7 +248,6 @@
             <div class="flex-1 h-0 overflow-y-auto">
                 <nav class="px-4 py-4 space-y-2">
                     <!-- Dashboard -->
-                    @canany(['dashboard.admin', 'dashboard.solicitante', 'dashboard.revisor'])
                     <a href="{{ route('dashboard') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
                         {{ request()->routeIs('dashboard') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
                         <svg class="{{ request()->routeIs('dashboard') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} mr-4 flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -233,13 +255,14 @@
                         </svg>
                         Dashboard
                     </a>
-                    @endcanany
 
-                    <!-- Separador: Gestión de Trámites -->
+                    <!-- Separador: Gestión de Trámites - Solo si hay elementos en la sección -->
+                    @if(auth()->user()->can('tramites-solicitante.ver') || auth()->user()->can('revision-tramites.ver') || auth()->user()->can('documentos.ver') || auth()->user()->can('citas.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                         <p class="mt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gestión de Trámites</p>
                     </div>
+                    @endif
 
                     <!-- Mis Trámites en móvil -->
                     @can('tramites-solicitante.ver')
@@ -275,6 +298,7 @@
                     @endcan
 
                     <!-- Membretes Oficiales en móvil -->
+                    @can('membretes.ver')
                     <a href="{{ route('membretes.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
                         {{ request()->routeIs('membretes.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
                         <svg class="{{ request()->routeIs('membretes.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} mr-4 flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -282,6 +306,7 @@
                         </svg>
                         Membretes Oficiales
                     </a>
+                    @endcan
 
                     <!-- Citas en móvil -->
                     @can('citas.ver')
@@ -294,11 +319,13 @@
                     </a>
                     @endcan
 
-                    <!-- Separador: Administración -->
+                    <!-- Separador: Administración - Solo si hay elementos en la sección -->
+                    @if(auth()->user()->can('usuarios.ver') || auth()->user()->can('roles.ver') || auth()->user()->can('proveedores.ver') || auth()->user()->can('mi-estado-proveedor.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                         <p class="mt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Administración</p>
                     </div>
+                    @endif
 
                     <!-- Usuarios en móvil -->
                     @can('usuarios.ver')
@@ -333,11 +360,27 @@
                     </a>
                     @endcan
 
-                    <!-- Separador: Monitoreo -->
+                    <!-- Mi Estado Proveedor en móvil -->
+                    @can('mi-estado-proveedor.ver')
+                    <a href="{{ route('mi-estado-proveedor.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                        {{ request()->routeIs('mi-estado-proveedor.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                        <svg class="{{ request()->routeIs('mi-estado-proveedor.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} mr-4 flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 10l5 5 10-10" />
+                        </svg>
+                        Mi Estado
+                    </a>
+                    @endcan
+
+
+
+                    <!-- Separador: Monitoreo - Solo si hay elementos en la sección -->
+                    @if(auth()->user()->can('logs.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                         <p class="mt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Monitoreo</p>
                     </div>
+                    @endif
 
                     <!-- Logs del Sistema en móvil -->
                     @can('logs.ver')
@@ -350,22 +393,25 @@
                     </a>
                     @endcan
 
-                    <!-- Entrenamiento IA en móvil -->
-                    @can('ai-training.ver')
-                    <a href="{{ route('ai.training.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
-                        {{ request()->routeIs('ai.training.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
-                        <svg class="{{ request()->routeIs('ai.training.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} mr-4 flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                        </svg>
-                        IA Documentos
+                    <!-- Notificaciones en móvil -->
+                    <a href="{{ route('notificaciones.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
+                        {{ request()->routeIs('notificaciones.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                        <div class="relative">
+                            <svg class="{{ request()->routeIs('notificaciones.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} mr-4 flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span id="mobile-notification-count" class="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-500 text-white text-xs rounded-full" style="display: none;">0</span>
+                        </div>
+                        Notificaciones
                     </a>
-                    @endcan
 
-                    <!-- Separador: Personal -->
+                    <!-- Separador: Personal - Solo si hay elementos en la sección -->
+                    @if(auth()->user()->can('perfil.ver') || auth()->user()->can('configuracion.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                         <p class="mt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Personal</p>
                     </div>
+                    @endif
 
                     <!-- Perfil en móvil -->
                     @can('perfil.ver')

@@ -13,6 +13,7 @@ use App\Models\Asentamiento;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use App\Http\Controllers\Formularios\DomicilioController;
 use App\Http\Controllers\Formularios\DatosGeneralesController;
 
@@ -165,13 +166,17 @@ class TramiteController extends Controller
                 $datosApoderado['tramite_id'] = $tramite->id;
             }
 
+            // Calcular tiempo restante para completar el trámite (48 horas desde fecha_inicio)
+            $tiempoLimite = $this->calcularTiempoLimiteTramite($tramite);
+
             return view("tramites.create", [
                 'tramite' => $tramite,
                 'solicitante' => $solicitante,
                 'datosTramite' => $datosTramite,
                 'datosDomicilio' => $datosDomicilio,
                 'codigoPostalDomicilio' => $codigoPostalDomicilio,
-                'datosApoderado' => $datosApoderado
+                'datosApoderado' => $datosApoderado,
+                'tiempoLimite' => $tiempoLimite
             ]);
 
         } catch (\Exception $e) {
@@ -294,6 +299,7 @@ class TramiteController extends Controller
                     'tipo_tramite' => ucfirst($validated['tipo_tramite']),
                     'estado' => 'Pendiente',
                     'progreso_tramite' => 0, // Inicia en 0 y aumenta al completar secciones
+                    'fecha_inicio' => now(), // Establecer fecha de inicio del trámite (48 horas)
                 ]);
                 Log::info('Nuevo trámite creado:', ['tramite_id' => $tramite->id]);
             }
@@ -883,6 +889,93 @@ class TramiteController extends Controller
                 'success' => false,
                 'message' => 'Error al guardar los datos: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Calcula el tiempo límite para completar el trámite (48 horas desde fecha_inicio)
+     */
+    private function calcularTiempoLimiteTramite($tramite)
+    {
+        try {
+            // Si no hay fecha_inicio, usar la fecha de creación
+            $fechaInicio = $tramite->fecha_inicio ? Carbon::parse($tramite->fecha_inicio) : Carbon::parse($tramite->created_at);
+            
+            // Límite de 48 horas
+            $fechaLimite = $fechaInicio->copy()->addHours(48);
+            
+            // Fecha actual
+            $ahora = Carbon::now();
+            
+            // Si ya pasó el límite
+            if ($ahora->greaterThan($fechaLimite)) {
+                return [
+                    'vencido' => true,
+                    'mensaje' => 'Tiempo límite vencido',
+                    'fecha_inicio' => $fechaInicio->format('d/m/Y H:i'),
+                    'fecha_limite' => $fechaLimite->format('d/m/Y H:i'),
+                    'fecha_limite_corta' => $fechaLimite->format('d/m H:i'),
+                    'horas_restantes' => 0,
+                    'minutos_restantes' => 0,
+                    'segundos_restantes' => 0,
+                    'timestamp_limite' => $fechaLimite->timestamp,
+                    'porcentaje_transcurrido' => 100
+                ];
+            }
+            
+            // Calcular tiempo restante
+            $diff = $ahora->diff($fechaLimite);
+            $horasRestantes = ($diff->days * 24) + $diff->h;
+            $minutosRestantes = $diff->i;
+            $segundosRestantes = $diff->s;
+            
+            // Calcular porcentaje transcurrido
+            $tiempoTotalMinutos = 48 * 60; // 48 horas en minutos
+            $tiempoTranscurridoMinutos = $ahora->diffInMinutes($fechaInicio);
+            $porcentajeTranscurrido = min(100, ($tiempoTranscurridoMinutos / $tiempoTotalMinutos) * 100);
+            
+            return [
+                'vencido' => false,
+                'mensaje' => 'Tiempo restante para completar el trámite',
+                'fecha_inicio' => $fechaInicio->format('d/m/Y H:i'),
+                'fecha_limite' => $fechaLimite->format('d/m/Y H:i'),
+                'fecha_limite_corta' => $fechaLimite->format('d/m H:i'),
+                'horas_restantes' => $horasRestantes,
+                'minutos_restantes' => $minutosRestantes,
+                'segundos_restantes' => $segundosRestantes,
+                'timestamp_limite' => $fechaLimite->timestamp,
+                'porcentaje_transcurrido' => round($porcentajeTranscurrido, 1),
+                'color' => $this->determinarColorTiempo($horasRestantes)
+            ];
+            
+        } catch (\Exception $e) {
+            Log::error('Error calculando tiempo límite:', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'vencido' => false,
+                'mensaje' => 'Error calculando tiempo límite',
+                'horas_restantes' => 48,
+                'minutos_restantes' => 0,
+                'segundos_restantes' => 0,
+                'color' => 'green'
+            ];
+        }
+    }
+    
+    /**
+     * Determina el color del indicador según las horas restantes
+     */
+    private function determinarColorTiempo($horasRestantes)
+    {
+        if ($horasRestantes <= 6) {
+            return 'red';    // Crítico - menos de 6 horas
+        } elseif ($horasRestantes <= 12) {
+            return 'yellow'; // Advertencia - menos de 12 horas
+        } else {
+            return 'green';  // Normal - más de 12 horas
         }
     }
 } 

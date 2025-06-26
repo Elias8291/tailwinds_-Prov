@@ -224,6 +224,7 @@
                             <div>
                                 <div class="font-semibold text-gray-900">{{ $user->nombre }}</div>
                                 <div class="text-sm text-gray-500">{{ $user->correo }}</div>
+                                <div class="text-xs text-gray-400">RFC: {{ $user->rfc }}</div>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -269,6 +270,7 @@
                         <tr class="bg-[#B4325E] text-white">
                             <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider">Usuario</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider">Email</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider">RFC</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider">Roles</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider">Estado</th>
                             <th scope="col" class="px-6 py-4 text-center text-xs uppercase tracking-wider">Acciones</th>
@@ -290,6 +292,9 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ $user->correo }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ $user->rfc }}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-wrap gap-2">

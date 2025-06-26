@@ -111,80 +111,160 @@
 
             <div class="space-y-4">
                 <!-- Contenedor de Accionistas -->
-                <div id="accionistas-container">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-5 max-h-[500px] overflow-y-auto p-1">
                     <template x-for="(accionista, index) in accionistas" :key="index">
-                        <div class="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <!-- Nombre -->
-                                <div>
-                                        <label :for="`accionista_nombre_${index}`" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Nombre
-                                            <span class="text-[#9d2449]">*</span>
+                        <div class="relative bg-white rounded-lg shadow-sm transition-all duration-300 hover:shadow-md overflow-hidden border-l-3"
+                             :class="accionista.expanded ? 'col-span-full bg-white border-l-[#9d2449]' : 'border-l-blue-400 cursor-pointer'"
+                             @click="!accionista.expanded && toggleAccionista(index)">
+                            
+                            <!-- Vista compacta (no expandida) -->
+                            <div x-show="!accionista.expanded" class="relative">
+                                <!-- Porcentaje destacado en la esquina superior derecha -->
+                                <div class="absolute top-2 right-2 flex flex-col items-center">
+                                    <div class="bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white px-3 py-1 rounded-full shadow-md">
+                                        <span class="text-sm font-bold" x-text="(parseFloat(accionista.porcentaje) || 0).toFixed(1) + '%'"></span>
+                                    </div>
+                                    <div class="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-[#8a203f] -mt-[1px]"></div>
+                                </div>
+                                
+                                <!-- Contenido principal -->
+                                <div class="flex items-center p-3 pr-16">
+                                    <!-- Número del accionista -->
+                                    <div class="w-8 h-8 bg-[#9d2449] text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0 shadow-md">
+                                        <span x-text="index + 1"></span>
+                                    </div>
+                                    
+                                    <!-- Información del accionista -->
+                                    <div class="flex-grow min-w-0">
+                                        <div class="text-sm font-semibold text-gray-900 truncate mb-1">
+                                            <span x-text="accionista.nombre || 'Sin nombre'"></span>
+                                            <span x-text="accionista.apellido_paterno ? ' ' + accionista.apellido_paterno : ''"></span>
+                                        </div>
+                                        <div class="text-xs text-gray-500 flex items-center">
+                                            <i class="fas fa-user-tie mr-1"></i>
+                                            <span>Accionista</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Vista expandida -->
+                            <div x-show="accionista.expanded" x-cloak>
+                                <!-- Header de la tarjeta expandida -->
+                                <div class="flex justify-between items-center p-4 bg-gradient-to-r from-[#9d2449]/5 to-[#8a203f]/5 border-b border-gray-100">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-[#9d2449] text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 shadow-md">
+                                            <span x-text="index + 1"></span>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-base font-semibold text-gray-900" x-text="`Accionista ${index + 1}`"></h4>
+                                            <p class="text-xs text-gray-500">Información detallada</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center space-x-3">
+                                        <!-- Indicador de porcentaje actual -->
+                                        <div class="bg-white border-2 border-[#9d2449] px-3 py-1 rounded-full shadow-sm">
+                                            <span class="text-sm font-bold text-[#9d2449]" x-text="(parseFloat(accionista.porcentaje) || 0).toFixed(1) + '%'"></span>
+                                        </div>
+                                        
+                                        <!-- Botón eliminar -->
+                                        <button type="button" 
+                                                @click.stop="eliminarAccionista(index)"
+                                                x-show="accionistas.length > 1"
+                                                class="w-8 h-8 bg-red-50 text-red-500 hover:bg-red-100 rounded-full flex items-center justify-center transition-colors duration-200 shadow-sm">
+                                            <i class="fas fa-trash-alt text-sm"></i>
+                                        </button>
+                                        
+                                        <!-- Botón colapsar -->
+                                        <button type="button" 
+                                                @click.stop="toggleAccionista(index)"
+                                                class="w-8 h-8 bg-gray-50 text-gray-500 hover:bg-gray-100 rounded-full flex items-center justify-center transition-colors duration-200 shadow-sm">
+                                            <i class="fas fa-chevron-up text-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Campos del formulario expandido -->
+                                <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Nombre -->
+                                    <div>
+                                        <label :for="`accionista_nombre_${index}`" class="block text-xs font-medium text-gray-700 mb-1">
+                                            Nombre <span class="text-[#9d2449]">*</span>
                                         </label>
                                         <input type="text" 
                                                :id="`accionista_nombre_${index}`"
                                                :name="`accionistas[${index}][nombre]`"
                                                x-model="accionista.nombre"
-                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200" 
+                                               @input="updateAccionista(index)"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-[#9d2449] focus:border-[#9d2449] transition-colors duration-200" 
                                                placeholder="Nombre(s)"
-                                               :aria-label="`Nombre del accionista ${index + 1}`"
                                                required>
-                                </div>
+                                    </div>
 
-                                <!-- Apellido Paterno -->
-                                <div>
-                                    <label :for="`accionista_apellido_paterno_${index}`" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Apellido Paterno
-                                        <span class="text-[#9d2449]">*</span>
-                                </label>
-                                    <input type="text" 
-                                           :id="`accionista_apellido_paterno_${index}`"
-                                           :name="`accionistas[${index}][apellido_paterno]`"
-                                           x-model="accionista.apellido_paterno"
-                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200" 
-                                           placeholder="Apellido paterno"
-                                           :aria-label="`Apellido paterno del accionista ${index + 1}`"
-                                           required>
-                            </div>
-
-                                <!-- Apellido Materno -->
-                            <div>
-                                    <label :for="`accionista_apellido_materno_${index}`" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Apellido Materno
-                                </label>
-                                    <input type="text" 
-                                           :id="`accionista_apellido_materno_${index}`"
-                                           :name="`accionistas[${index}][apellido_materno]`"
-                                           x-model="accionista.apellido_materno"
-                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200" 
-                                           placeholder="Apellido materno"
-                                           :aria-label="`Apellido materno del accionista ${index + 1}`">
-                            </div>
-
-                                <!-- Porcentaje de Acciones -->
-                            <div>
-                                    <label :for="`accionista_porcentaje_${index}`" class="block text-sm font-medium text-gray-700 mb-2">
-                                    % Acciones
-                                        <span class="text-[#9d2449]">*</span>
-                                </label>
-                                    <div class="flex">
-                                        <input type="number" 
-                                               :id="`accionista_porcentaje_${index}`"
-                                               :name="`accionistas[${index}][porcentaje]`"
-                                               x-model="accionista.porcentaje"
-                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#9D2449] focus:ring focus:ring-[#9D2449] focus:ring-opacity-50 transition duration-200" 
-                                               placeholder="0" 
-                                               min="0" 
-                                               max="100"
-                                               step="0.01"
-                                               :aria-label="`Porcentaje de acciones del accionista ${index + 1}`"
+                                    <!-- Apellido Paterno -->
+                                    <div>
+                                        <label :for="`accionista_apellido_paterno_${index}`" class="block text-xs font-medium text-gray-700 mb-1">
+                                            Apellido Paterno <span class="text-[#9d2449]">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               :id="`accionista_apellido_paterno_${index}`"
+                                               :name="`accionistas[${index}][apellido_paterno]`"
+                                               x-model="accionista.apellido_paterno"
+                                               @input="updateAccionista(index)"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-[#9d2449] focus:border-[#9d2449] transition-colors duration-200" 
+                                               placeholder="Apellido paterno"
                                                required>
-                                        <button type="button" 
-                                                @click="eliminarAccionista(index)"
-                                                x-show="accionistas.length > 1"
-                                                class="ml-2 text-red-500 hover:text-red-700 px-3 py-2 rounded-lg hover:bg-red-50 transition duration-200">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
+                                    </div>
+
+                                    <!-- Apellido Materno -->
+                                    <div>
+                                        <label :for="`accionista_apellido_materno_${index}`" class="block text-xs font-medium text-gray-700 mb-1">
+                                            Apellido Materno
+                                        </label>
+                                        <input type="text" 
+                                               :id="`accionista_apellido_materno_${index}`"
+                                               :name="`accionistas[${index}][apellido_materno]`"
+                                               x-model="accionista.apellido_materno"
+                                               @input="updateAccionista(index)"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-[#9d2449] focus:border-[#9d2449] transition-colors duration-200" 
+                                               placeholder="Apellido materno">
+                                    </div>
+
+                                    <!-- Porcentaje de Acciones -->
+                                    <div class="col-span-1 md:col-span-2">
+                                        <label :for="`accionista_porcentaje_${index}`" class="block text-xs font-medium text-gray-700 mb-2">
+                                            Porcentaje de Participación <span class="text-[#9d2449]">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <input type="number" 
+                                                   :id="`accionista_porcentaje_${index}`"
+                                                   :name="`accionistas[${index}][porcentaje]`"
+                                                   x-model="accionista.porcentaje"
+                                                   @input="updateAccionista(index)"
+                                                   class="w-full pl-4 pr-12 py-3 text-lg font-semibold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#9d2449] focus:border-[#9d2449] transition-all duration-200 bg-gradient-to-r from-white to-gray-50" 
+                                                   placeholder="0.00" 
+                                                   min="0" 
+                                                   max="100"
+                                                   step="0.01"
+                                                   required>
+                                            <div class="absolute inset-y-0 right-0 flex items-center pr-4">
+                                                <span class="text-lg font-bold text-[#9d2449]">%</span>
+                                            </div>
+                                        </div>
+                                        <!-- Barra de progreso visual -->
+                                        <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-gradient-to-r from-[#9d2449] to-[#8a203f] h-2 rounded-full transition-all duration-300 relative overflow-hidden"
+                                                 :style="`width: ${Math.min((parseFloat(accionista.porcentaje) || 0), 100)}%`">
+                                                <div class="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                            <span>0%</span>
+                                            <span class="font-medium" :class="(parseFloat(accionista.porcentaje) || 0) > 100 ? 'text-red-500' : 'text-[#9d2449]'"
+                                                  x-text="`${(parseFloat(accionista.porcentaje) || 0).toFixed(2)}%`"></span>
+                                            <span>100%</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -250,7 +330,7 @@ function accionistasData() {
     return {
         tramiteId: null,
         accionistas: [
-            { nombre: '', apellido_paterno: '', apellido_materno: '', porcentaje: 0 }
+            { nombre: '', apellido_paterno: '', apellido_materno: '', porcentaje: 0, expanded: false }
         ],
         loading: false,
         showError: false,
@@ -279,7 +359,8 @@ function accionistasData() {
                         nombre: accionista.nombre || '',
                         apellido_paterno: accionista.apellido_paterno || '',
                         apellido_materno: accionista.apellido_materno || '',
-                        porcentaje: parseFloat(accionista.porcentaje || 0)
+                        porcentaje: parseFloat(accionista.porcentaje || 0),
+                        expanded: false
                     }));
                 }
             } catch (error) {
@@ -308,7 +389,8 @@ function accionistasData() {
                             nombre: accionista.nombre || '',
                             apellido_paterno: accionista.apellido_paterno || '',
                             apellido_materno: accionista.apellido_materno || '',
-                            porcentaje: parseFloat(accionista.porcentaje || 0)
+                            porcentaje: parseFloat(accionista.porcentaje || 0),
+                            expanded: false
                         }));
                         return true;
                     }
@@ -325,8 +407,18 @@ function accionistasData() {
                 nombre: '',
                 apellido_paterno: '',
                 apellido_materno: '',
-                porcentaje: 0
+                porcentaje: 0,
+                expanded: true
             });
+        },
+
+        toggleAccionista(index) {
+            this.accionistas[index].expanded = !this.accionistas[index].expanded;
+        },
+
+        updateAccionista(index) {
+            // Forzar actualización de la reactividad
+            this.$nextTick();
         },
 
         eliminarAccionista(index) {
@@ -453,12 +545,12 @@ function accionistasData() {
 }
 </script>
 
-@push('scripts')
-<script src="{{ asset('js/validators/accionistas-validator.js') }}"></script>
-@endpush
-
-@push('scripts')
-<script src="{{ asset('js/validators/accionistas-validator.js') }}"></script>
+@push('styles')
+<style>
+.border-l-3 {
+    border-left-width: 3px;
+}
+</style>
 @endpush
 
 @push('scripts')

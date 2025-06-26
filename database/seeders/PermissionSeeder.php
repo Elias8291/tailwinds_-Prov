@@ -20,10 +20,9 @@ class PermissionSeeder extends Seeder
         // Lista de permisos organizados y limpios
         $permisos = [
             // === DASHBOARD ===
-            'dashboard.admin',
-            'dashboard.solicitante', 
-            'dashboard.revisor',
-
+            'dashboard.ver-estadisticas',
+            'dashboard.iniciar-tramite',
+            
             // === GESTIÓN DE ROLES Y PERMISOS ===
             'roles.ver',
             'roles.crear',
@@ -75,6 +74,10 @@ class PermissionSeeder extends Seeder
             'proveedores.desactivar',
             'proveedores.exportar',
             'proveedores.historial',
+            'mi-estado-proveedor.ver',
+
+            // === MEMBRETES OFICIALES ===
+            'membretes.ver',
 
             // === GESTIÓN DE CITAS ===
             'citas.ver',
@@ -105,6 +108,12 @@ class PermissionSeeder extends Seeder
             'ai-training.rechazar',
             'ai-training.entrenar',
 
+            // === MÓDULO DE IA ===
+            'ai.ver',
+            'ai.dashboard',
+            'ai.entrenar',
+            'ai.validar',
+
             // === LOGS DEL SISTEMA ===
             'logs.ver',
             'logs.eliminar',
@@ -114,6 +123,9 @@ class PermissionSeeder extends Seeder
             'admin-sistema',
             'revisor-documentos',
             'gestor-proveedores',
+
+            // === VINCULACIÓN PRESENCIAL DE PROVEEDORES ===
+
         ];
 
         // Crear cada permiso en la base de datos
@@ -134,6 +146,11 @@ class PermissionSeeder extends Seeder
     private function limpiarPermisosObsoletos()
     {
         $permisosObsoletos = [
+            // Permisos obsoletos del dashboard
+            'dashboard.admin',
+            'dashboard.solicitante',
+            'dashboard.revisor',
+            
             // Permisos obsoletos del padrón de proveedores
             'padron-proveedores.ver',
             'padron-proveedores.registrar',
