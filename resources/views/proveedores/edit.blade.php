@@ -31,133 +31,104 @@
                             <div class="w-32 h-0.5 bg-gradient-to-r from-[#9d2449] to-[#8a203f] mt-2 rounded-full opacity-50"></div>
                         </div>
 
-                        <div class="w-full max-w-lg mx-auto space-y-6">
+                        <div class="w-full max-w-lg mx-auto space-y-5">
                             <!-- RFC -->
-                            <div class="form-group">
-                                <div class="relative group">
-                                    <input type="text" 
+                            <div>
+                                <label for="rfc" class="block text-xs font-medium text-gray-500 mb-1">
+                                    RFC <span class="text-[#9d2449]">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-fingerprint text-base"></i>
+                                    </span>
+                                    <input type="text"
                                            id="rfc"
                                            name="rfc"
                                            value="{{ old('rfc', $proveedor->solicitante->rfc) }}"
-                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('rfc') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
-                                           placeholder=" "
+                                           placeholder="Ej: XAXX010101000"
+                                           class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('rfc') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
                                            required>
-                                    <label for="rfc" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
-                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
-                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
-                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
-                                        RFC<span class="text-[#9d2449] ml-1">*</span>
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-fingerprint text-lg transition-colors duration-300"></i>
-                                    </div>
-                                    @error('rfc')
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
-                                        <i class="fas fa-exclamation-circle text-red-500"></i>
-                                    </div>
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ $message }}
-                                    </p>
-                                    @enderror
                                 </div>
+                                @error('rfc')
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
                             </div>
-
                             <!-- Tipo de Persona -->
-                            <div class="form-group">
-                                <div class="relative group">
-                                    <select name="tipo_persona" 
+                            <div>
+                                <label for="tipo_persona" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Tipo de Persona <span class="text-[#9d2449]">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-user-tag text-base"></i>
+                                    </span>
+                                    <select name="tipo_persona"
                                             id="tipo_persona"
-                                            class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 [&>option]:py-2 [&>option]:px-4 [&>option]:cursor-pointer [&>option]:transition-colors [&>option:hover]:bg-[#9d2449] [&>option:hover]:text-white @error('tipo_persona') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                            class="w-full h-11 pl-10 pr-10 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 appearance-none @error('tipo_persona') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
                                             required>
                                         <option value="" disabled>Seleccione una opción</option>
                                         <option value="Fisica" {{ old('tipo_persona', $proveedor->solicitante->tipo_persona) == 'Fisica' ? 'selected' : '' }}>Persona Física</option>
                                         <option value="Moral" {{ old('tipo_persona', $proveedor->solicitante->tipo_persona) == 'Moral' ? 'selected' : '' }}>Persona Moral</option>
                                     </select>
-                                    <label for="tipo_persona" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        Tipo de Persona<span class="text-[#9d2449] ml-1">*</span>
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-user-tag text-lg transition-colors duration-300"></i>
-                                    </div>
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-chevron-down text-sm transition-colors duration-300"></i>
-                                    </div>
-                                    @error('tipo_persona')
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ $message }}
-                                    </p>
-                                    @enderror
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </span>
                                 </div>
+                                @error('tipo_persona')
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
                             </div>
-
                             <!-- Nombre -->
-                            <div id="nombre_container" class="form-group hidden">
-                                <div class="relative group">
-                                    <input type="text" 
+                            <div id="nombre_container" class="{{ old('tipo_persona', $proveedor->solicitante->tipo_persona) == 'Fisica' ? '' : 'hidden' }}">
+                                <label for="nombre" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Nombre Completo <span class="text-[#9d2449]">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-user text-base"></i>
+                                    </span>
+                                    <input type="text"
                                            id="nombre"
                                            name="nombre"
                                            value="{{ old('nombre', $proveedor->solicitante->nombre) }}"
-                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('nombre') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
-                                           placeholder=" ">
-                                    <label for="nombre" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
-                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
-                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
-                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
-                                        Nombre Completo<span class="text-[#9d2449] ml-1">*</span>
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-user text-lg transition-colors duration-300"></i>
-                                    </div>
-                                    @error('nombre')
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
-                                        <i class="fas fa-exclamation-circle text-red-500"></i>
-                                    </div>
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ $message }}
-                                    </p>
-                                    @enderror
+                                           placeholder="Ej: Juan Pérez"
+                                           class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('nombre') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror">
                                 </div>
+                                @error('nombre')
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
                             </div>
-
                             <!-- Razón Social -->
-                            <div id="razon_social_container" class="form-group hidden">
-                                <div class="relative group">
-                                    <input type="text" 
+                            <div id="razon_social_container" class="{{ old('tipo_persona', $proveedor->solicitante->tipo_persona) == 'Moral' ? '' : 'hidden' }}">
+                                <label for="razon_social" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Razón Social <span class="text-[#9d2449]">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-building text-base"></i>
+                                    </span>
+                                    <input type="text"
                                            id="razon_social"
                                            name="razon_social"
                                            value="{{ old('razon_social', $proveedor->solicitante->razon_social) }}"
-                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('razon_social') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
-                                           placeholder=" ">
-                                    <label for="razon_social" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
-                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
-                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
-                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
-                                        Razón Social<span class="text-[#9d2449] ml-1">*</span>
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-building text-lg transition-colors duration-300"></i>
-                                    </div>
-                                    @error('razon_social')
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
-                                        <i class="fas fa-exclamation-circle text-red-500"></i>
-                                    </div>
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ $message }}
-                                    </p>
-                                    @enderror
+                                           placeholder="Ej: Empresa S.A. de C.V."
+                                           class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('razon_social') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror">
                                 </div>
+                                @error('razon_social')
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
                             </div>
                         </div>
                     </div>
@@ -171,115 +142,86 @@
                             <div class="w-32 h-0.5 bg-gradient-to-r from-[#9d2449] to-[#8a203f] mt-2 rounded-full opacity-50"></div>
                         </div>
 
-                        <div class="w-full max-w-lg mx-auto space-y-6">
+                        <div class="w-full max-w-lg mx-auto space-y-5">
                             <!-- PV -->
-                            <div class="form-group">
-                                <div class="relative group">
-                                    <input type="text" 
+                            <div>
+                                <label for="pv" class="block text-xs font-medium text-gray-500 mb-1">
+                                    PV <span class="text-[#9d2449]">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-id-badge text-base"></i>
+                                    </span>
+                                    <input type="text"
                                            id="pv"
                                            value="{{ $proveedor->pv }}"
-                                           class="peer w-full h-12 px-12 bg-gray-50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none cursor-not-allowed"
-                                           placeholder=" "
+                                           class="w-full h-11 pl-10 pr-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 shadow cursor-not-allowed"
                                            disabled>
-                                    <label for="pv" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600">
-                                        PV<span class="text-[#9d2449] ml-1">*</span>
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
-                                        <i class="fas fa-id-badge text-lg"></i>
-                                    </div>
                                 </div>
                             </div>
-
                             <!-- Estado -->
-                            <div class="form-group">
-                                <div class="relative group">
-                                    <select name="estado" 
+                            <div>
+                                <label for="estado" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Estado <span class="text-[#9d2449]">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-flag text-base"></i>
+                                    </span>
+                                    <select name="estado"
                                             id="estado"
-                                            class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 [&>option]:py-2 [&>option]:px-4 [&>option]:cursor-pointer [&>option]:transition-colors [&>option:hover]:bg-[#9d2449] [&>option:hover]:text-white @error('estado') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                            class="w-full h-11 pl-10 pr-10 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 appearance-none @error('estado') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
                                             required>
                                         <option value="" disabled>Seleccione una opción</option>
                                         <option value="Activo" {{ old('estado', $proveedor->estado) == 'Activo' ? 'selected' : '' }}>Activo</option>
                                         <option value="Inactivo" {{ old('estado', $proveedor->estado) == 'Inactivo' ? 'selected' : '' }}>Inactivo</option>
                                         <option value="Pendiente Renovacion" {{ old('estado', $proveedor->estado) == 'Pendiente Renovacion' ? 'selected' : '' }}>Pendiente Renovación</option>
                                     </select>
-                                    <label for="estado" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        Estado<span class="text-[#9d2449] ml-1">*</span>
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-toggle-on text-lg transition-colors duration-300"></i>
-                                    </div>
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-chevron-down text-sm transition-colors duration-300"></i>
-                                    </div>
-                                    @error('estado')
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ $message }}
-                                    </p>
-                                    @enderror
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </span>
                                 </div>
+                                @error('estado')
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
                             </div>
-
                             <!-- Fechas -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <!-- Fecha de Registro -->
-                                <div class="form-group">
-                                    <div class="relative group">
-                                        <input type="date" 
+                                <div>
+                                    <label for="fecha_registro" class="block text-xs font-medium text-gray-500 mb-1">
+                                        Fecha de Registro <span class="text-[#9d2449]">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                            <i class="fas fa-calendar-plus text-base"></i>
+                                        </span>
+                                        <input type="date"
                                                id="fecha_registro"
                                                name="fecha_registro"
                                                value="{{ old('fecha_registro', $proveedor->fecha_registro->format('Y-m-d')) }}"
-                                               class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('fecha_registro') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                               class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('fecha_registro') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
                                                required>
-                                        <label for="fecha_registro" 
-                                               class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                      peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                            Fecha de Registro<span class="text-[#9d2449] ml-1">*</span>
-                                        </label>
-                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                            <i class="fas fa-calendar-plus text-lg transition-colors duration-300"></i>
-                                        </div>
-                                        @error('fecha_registro')
-                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
-                                            <i class="fas fa-exclamation-circle text-red-500"></i>
-                                        </div>
-                                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                            <i class="fas fa-info-circle"></i>
-                                            {{ $message }}
-                                        </p>
-                                        @enderror
                                     </div>
                                 </div>
-
                                 <!-- Fecha de Vencimiento -->
-                                <div class="form-group">
-                                    <div class="relative group">
-                                        <input type="date" 
+                                <div>
+                                    <label for="fecha_vencimiento" class="block text-xs font-medium text-gray-500 mb-1">
+                                        Fecha de Vencimiento <span class="text-[#9d2449]">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                            <i class="fas fa-calendar-times text-base"></i>
+                                        </span>
+                                        <input type="date"
                                                id="fecha_vencimiento"
                                                name="fecha_vencimiento"
                                                value="{{ old('fecha_vencimiento', $proveedor->fecha_vencimiento->format('Y-m-d')) }}"
-                                               class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('fecha_vencimiento') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                               class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('fecha_vencimiento') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
                                                required>
-                                        <label for="fecha_vencimiento" 
-                                               class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                      peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                            Fecha de Vencimiento<span class="text-[#9d2449] ml-1">*</span>
-                                        </label>
-                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                            <i class="fas fa-calendar-times text-lg transition-colors duration-300"></i>
-                                        </div>
-                                        @error('fecha_vencimiento')
-                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
-                                            <i class="fas fa-exclamation-circle text-red-500"></i>
-                                        </div>
-                                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                            <i class="fas fa-info-circle"></i>
-                                            {{ $message }}
-                                        </p>
-                                        @enderror
                                     </div>
                                 </div>
                             </div>

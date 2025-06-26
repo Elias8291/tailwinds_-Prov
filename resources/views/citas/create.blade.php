@@ -12,110 +12,146 @@
 </style>
 @endpush
 
-<div class="min-h-screen py-8">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Encabezado -->
-        <div class="rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <div class="p-6 border-b border-gray-100 bg-white">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <div class="bg-gradient-to-br from-[#B4325E] to-[#93264B] rounded-xl p-3 shadow-md">
-                            <i class="fas fa-calendar-plus text-2xl text-white"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-[#B4325E]">Nueva Cita</h2>
-                            <p class="text-sm text-gray-500">Complete los datos para agendar una nueva cita</p>
+<div class="min-h-screen w-full overflow-x-hidden">
+    <div class="py-6 px-3 sm:px-4">
+        <div class="w-full max-w-lg mx-auto">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100/50">
+                <form action="{{ route('citas.store') }}" method="POST" class="divide-y divide-gray-100">
+                    @csrf
+
+                    <!-- Encabezado -->
+                    <div class="p-4">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="bg-gradient-to-br from-[#9d2449] to-[#8a203f] rounded-xl p-3 shadow-lg mb-3">
+                                <i class="fas fa-calendar-plus text-white text-xl"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold bg-gradient-to-r from-[#9d2449] to-[#8a203f] bg-clip-text text-transparent mb-2">
+                                Nueva Cita
+                            </h2>
+                            <p class="text-sm text-gray-600">Complete los datos para agendar una nueva cita</p>
                         </div>
                     </div>
-                    <a href="{{ route('citas.index') }}" class="inline-flex items-center text-gray-500 hover:text-[#B4325E]">
-                        <i class="fas fa-arrow-left mr-2"></i>
-                        Volver
-                    </a>
-                </div>
+
+                    <!-- Información de la Cita -->
+                    <div class="p-4">
+                        <div class="flex flex-col items-center mb-6">
+                            <h3 class="text-lg font-semibold bg-gradient-to-r from-[#9d2449] to-[#8a203f] bg-clip-text text-transparent">
+                                Información de la Cita
+                            </h3>
+                            <div class="w-32 h-0.5 bg-gradient-to-r from-[#9d2449] to-[#8a203f] mt-2 rounded-full opacity-50"></div>
+                        </div>
+                        <div class="w-full max-w-lg mx-auto space-y-5">
+                            <!-- Fecha y Hora (separados) -->
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <div class="flex-1">
+                                    <label for="fecha" class="block text-xs font-medium text-gray-500 mb-1">
+                                        Fecha <span class="text-[#9d2449]">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                            <i class="fas fa-calendar-alt text-base"></i>
+                                        </span>
+                                        <input type="date" name="fecha" id="fecha" required
+                                               class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('fecha') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
+                                               min="{{ now()->format('Y-m-d') }}"
+                                               value="{{ old('fecha', old('fecha_hora') ? explode('T', old('fecha_hora'))[0] : '') }}"
+                                               placeholder="Ej: 2024-07-01">
+                                    </div>
+                                    @error('fecha')
+                                    <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $message }}
+                                    </p>
+                                    @enderror
+                                </div>
+                                <div class="flex-1">
+                                    <label for="hora" class="block text-xs font-medium text-gray-500 mb-1">
+                                        Hora <span class="text-[#9d2449]">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                            <i class="fas fa-clock text-base"></i>
+                                        </span>
+                                        <input type="time" name="hora" id="hora" required
+                                               class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('hora') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
+                                               value="{{ old('hora', old('fecha_hora') ? explode('T', old('fecha_hora'))[1] ?? '' : '') }}"
+                                               placeholder="Ej: 09:30">
+                                    </div>
+                                    <p class="text-xs text-gray-400 mt-1 ml-1">Selecciona una hora disponible</p>
+                                    @error('hora')
+                                    <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ $message }}
+                                    </p>
+                                    @enderror
+                                </div>
+                            </div>
+                            <!-- Motivo -->
+                            <div>
+                                <label for="motivo" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Motivo de la Cita <span class="text-[#9d2449]">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-clipboard-list text-base"></i>
+                                    </span>
+                                    <input type="text" 
+                                           name="motivo" 
+                                           id="motivo" 
+                                           required
+                                           class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('motivo') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
+                                           placeholder="Ej: Revisión de documentos"
+                                           value="{{ old('motivo') }}">
+                                </div>
+                                @error('motivo')
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
+                            </div>
+                            <!-- Notas -->
+                            <div>
+                                <label for="notas" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Notas Adicionales
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute top-3 left-0 flex items-start pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-sticky-note text-base"></i>
+                                    </span>
+                                    <textarea name="notas" 
+                                              id="notas" 
+                                              rows="3"
+                                              class="w-full pl-10 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 resize-none @error('notas') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
+                                              placeholder="Agregue cualquier información adicional relevante">{{ old('notas') }}</textarea>
+                                </div>
+                                @error('notas')
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="p-4">
+                        <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            <a href="{{ route('citas.index') }}" 
+                               class="w-full sm:w-auto group inline-flex items-center justify-center px-6 py-3 rounded-xl border-2 border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300">
+                                <i class="fas fa-times mr-2 text-gray-400 group-hover:text-gray-600"></i>
+                                <span class="text-sm font-semibold text-gray-600 group-hover:text-gray-900">Cancelar</span>
+                            </a>
+                            <button type="submit"
+                                    class="w-full sm:w-auto group inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#8a203f] hover:to-[#9d2449] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] transition-all duration-300 shadow-md hover:shadow-lg">
+                                <i class="fas fa-save mr-2 text-white/90 group-hover:text-white"></i>
+                                <span class="text-sm font-semibold text-white group-hover:text-white/90">Guardar Cita</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-
-            <!-- Formulario -->
-            <form action="{{ route('citas.store') }}" method="POST" class="p-6 space-y-6 bg-white">
-                @csrf
-
-                <!-- Fecha y Hora -->
-                <div>
-                    <label for="fecha_hora" class="block text-sm font-medium text-gray-700 mb-2">
-                        Fecha y Hora <span class="text-[#B4325E]">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <input type="datetime-local" 
-                               name="fecha_hora" 
-                               id="fecha_hora" 
-                               required
-                               class="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-gray-800 focus:border-[#B4325E] focus:ring focus:ring-[#B4325E]/10 focus:outline-none transition-all duration-300 hover:border-[#B4325E]/50 @error('fecha_hora') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
-                               min="{{ now()->format('Y-m-d\TH:i') }}"
-                               value="{{ old('fecha_hora') }}">
-                    </div>
-                    @error('fecha_hora')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Motivo -->
-                <div>
-                    <label for="motivo" class="block text-sm font-medium text-gray-700 mb-2">
-                        Motivo de la Cita <span class="text-[#B4325E]">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                            <i class="fas fa-clipboard-list"></i>
-                        </div>
-                        <input type="text" 
-                               name="motivo" 
-                               id="motivo" 
-                               required
-                               class="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-gray-800 focus:border-[#B4325E] focus:ring focus:ring-[#B4325E]/10 focus:outline-none transition-all duration-300 hover:border-[#B4325E]/50 @error('motivo') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
-                               placeholder="Ej: Revisión de documentos"
-                               value="{{ old('motivo') }}">
-                    </div>
-                    @error('motivo')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Notas -->
-                <div>
-                    <label for="notas" class="block text-sm font-medium text-gray-700 mb-2">
-                        Notas Adicionales
-                    </label>
-                    <div class="relative">
-                        <div class="absolute top-3 left-0 flex items-start pl-3 pointer-events-none text-gray-400">
-                            <i class="fas fa-sticky-note"></i>
-                        </div>
-                        <textarea name="notas" 
-                                  id="notas" 
-                                  rows="4"
-                                  class="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-gray-800 focus:border-[#B4325E] focus:ring focus:ring-[#B4325E]/10 focus:outline-none transition-all duration-300 hover:border-[#B4325E]/50 @error('notas') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
-                                  placeholder="Agregue cualquier información adicional relevante">{{ old('notas') }}</textarea>
-                    </div>
-                    @error('notas')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Botones -->
-                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
-                    <a href="{{ route('citas.index') }}" 
-                       class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors duration-200">
-                        <i class="fas fa-times mr-2"></i>
-                        Cancelar
-                    </a>
-                    <button type="submit"
-                            class="px-6 py-2.5 bg-gradient-to-r from-[#B4325E] to-[#93264B] text-white rounded-xl hover:from-[#93264B] hover:to-[#B4325E] transition-all duration-300 shadow-md hover:shadow-lg">
-                        <i class="fas fa-save mr-2"></i>
-                        Guardar Cita
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 </div>

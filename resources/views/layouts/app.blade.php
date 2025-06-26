@@ -40,13 +40,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(135deg, 
-                #ffffff 0%, 
-                #f8fafc 20%, 
-                #f1f5f9 40%, 
-                #e2e8f0 60%, 
-                #f8fafc 80%, 
-                #ffffff 100%);
+            background: #fff;
             pointer-events: none;
             z-index: 0;
         }

@@ -31,101 +31,78 @@
                             <div class="w-32 h-0.5 bg-gradient-to-r from-[#9d2449] to-[#8a203f] mt-2 rounded-full opacity-50"></div>
                         </div>
 
-                        <div class="w-full max-w-lg mx-auto space-y-6">
+                        <div class="w-full max-w-lg mx-auto space-y-5">
                             <!-- Nombre del Documento -->
-                            <div class="form-group">
-                                <div class="relative group">
-                                    <input type="text" 
+                            <div>
+                                <label for="nombre" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Nombre del Documento <span class="text-[#9d2449]">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-file-signature text-base"></i>
+                                    </span>
+                                    <input type="text"
                                            id="nombre"
                                            name="nombre"
                                            value="{{ old('nombre', $documento->nombre) }}"
-                                           class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 @error('nombre') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
-                                           placeholder="Nombre del Documento"
+                                           class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('nombre') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
+                                           placeholder="Ej: Acta Constitutiva"
                                            required>
-                                    <label for="nombre" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
-                                                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
-                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
-                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
-                                        Nombre del Documento<span class="text-[#9d2449] ml-1">*</span>
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-file-signature text-lg transition-colors duration-300"></i>
-                                    </div>
-                                    @error('nombre')
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
-                                        <i class="fas fa-exclamation-circle text-red-500"></i>
-                                    </div>
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ $message }}
-                                    </p>
-                                    @enderror
                                 </div>
+                                @error('nombre')
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
                             </div>
-
                             <!-- Tipo de Persona -->
-                            <div class="form-group">
-                                <div class="relative group">
-                                    <select name="tipo_persona" 
+                            <div>
+                                <label for="tipo_persona" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Tipo de Persona <span class="text-[#9d2449]">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-user-tag text-base"></i>
+                                    </span>
+                                    <select name="tipo_persona"
                                             id="tipo_persona"
-                                            class="peer w-full h-12 px-12 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 appearance-none focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 [&>option]:py-2 [&>option]:px-4 [&>option]:cursor-pointer [&>option]:transition-colors [&>option:hover]:bg-[#9d2449] [&>option:hover]:text-white @error('tipo_persona') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
+                                            class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('tipo_persona') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
                                             required>
                                         <option value="" disabled {{ !old('tipo_persona', $documento->tipo_persona) ? 'selected' : '' }}>Seleccione una opción</option>
                                         <option value="Física" {{ old('tipo_persona', $documento->tipo_persona) == 'Física' ? 'selected' : '' }}>Persona Física</option>
                                         <option value="Moral" {{ old('tipo_persona', $documento->tipo_persona) == 'Moral' ? 'selected' : '' }}>Persona Moral</option>
                                         <option value="Ambas" {{ old('tipo_persona', $documento->tipo_persona) == 'Ambas' ? 'selected' : '' }}>Ambos Tipos</option>
                                     </select>
-                                    <label for="tipo_persona" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        Tipo de Persona<span class="text-[#9d2449] ml-1">*</span>
-                                    </label>
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-user-tag text-lg transition-colors duration-300"></i>
-                                    </div>
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-chevron-down text-sm transition-colors duration-300"></i>
-                                    </div>
-                                    @error('tipo_persona')
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ $message }}
-                                    </p>
-                                    @enderror
                                 </div>
+                                @error('tipo_persona')
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
                             </div>
-
                             <!-- Descripción -->
-                            <div class="form-group">
-                                <div class="relative group">
-                                    <textarea name="descripcion" 
-                                              id="descripcion" 
-                                              rows="4"
-                                              class="peer w-full px-12 py-3 bg-white/50 backdrop-blur-sm border-2 border-gray-200 rounded-xl text-gray-800 placeholder-transparent focus:border-[#9d2449] focus:ring focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 hover:border-[#9d2449]/50 resize-none @error('descripcion') border-red-300 hover:border-red-400 focus:border-red-500 focus:ring-red-100 @enderror"
-                                              placeholder="Descripción del Documento">{{ old('descripcion', $documento->descripcion) }}</textarea>
-                                    <label for="descripcion" 
-                                           class="absolute left-11 -top-2.5 px-2 bg-white text-sm text-gray-600 transition-all duration-300
-                                                  peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 
-                                                  peer-placeholder-shown:top-3 peer-placeholder-shown:left-12 peer-placeholder-shown:bg-transparent
-                                                  peer-focus:-top-2.5 peer-focus:left-11 peer-focus:bg-white 
-                                                  peer-focus:text-[#9d2449] peer-focus:text-sm group-hover:text-[#9d2449]">
-                                        Descripción<span class="text-[#9d2449] ml-1">*</span>
-                                    </label>
-                                    <div class="absolute top-3 left-0 flex items-start pl-3.5 pointer-events-none text-gray-400 peer-focus:text-[#9d2449] group-hover:text-[#9d2449]">
-                                        <i class="fas fa-align-left text-lg transition-colors duration-300"></i>
-                                    </div>
-                                    @error('descripcion')
-                                    <div class="absolute top-3 right-0 flex items-start pr-3.5 pointer-events-none">
-                                        <i class="fas fa-exclamation-circle text-red-500"></i>
-                                    </div>
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ $message }}
-                                    </p>
-                                    @enderror
+                            <div>
+                                <label for="descripcion" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Descripción <span class="text-[#9d2449]">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute top-3 left-0 flex items-start pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-align-left text-base"></i>
+                                    </span>
+                                    <textarea name="descripcion"
+                                              id="descripcion"
+                                              rows="3"
+                                              class="w-full pl-10 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 resize-none @error('descripcion') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
+                                              placeholder="Describe el documento...">{{ old('descripcion', $documento->descripcion) }}</textarea>
                                 </div>
+                                @error('descripcion')
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ $message }}
+                                </p>
+                                @enderror
                             </div>
 
                             <!-- Secciones -->
