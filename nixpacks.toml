@@ -3,7 +3,7 @@ cmds = ["composer install --no-dev --optimize-autoloader --no-interaction"]
 
 [phases.build]
 cmds = [
-    "npm ci --only=production",
+    "npm ci",
     "npm run build"
 ]
 
