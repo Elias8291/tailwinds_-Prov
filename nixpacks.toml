@@ -1,0 +1,37 @@
+[providers]
+php = "8.2"
+nodejs = "20"
+
+[variables]
+APP_ENV = "production"
+APP_DEBUG = "false"
+
+[phases.setup]
+nixPkgs = ["php82", "php82Extensions.mbstring", "php82Extensions.pdo", "php82Extensions.tokenizer", "php82Extensions.xml", "php82Extensions.ctype", "php82Extensions.json", "php82Extensions.bcmath", "composer"]
+
+[phases.install]
+cmds = [
+    "composer install --no-dev --optimize-autoloader --no-interaction"
+]
+
+[phases.build]
+cmds = [
+    "npm ci --only=production",
+    "npm run build",
+    "mkdir -p storage/app/public",
+    "mkdir -p storage/framework/cache", 
+    "mkdir -p storage/framework/sessions",
+    "mkdir -p storage/framework/views",
+    "mkdir -p storage/logs",
+    "mkdir -p database",
+    "touch database/database.sqlite"
+]
+
+[phases.deploy]
+cmds = [
+    "php artisan optimize:clear",
+    "php artisan config:cache"
+]
+
+[start]
+cmd = "php artisan serve --host=0.0.0.0 --port=$PORT" 
