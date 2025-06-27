@@ -492,13 +492,7 @@ Route::middleware(['auth'])->prefix('membretes')->group(function () {
     Route::get('/ejemplo/actualizacion', [MembreteController::class, 'ejemploActualizacion'])->name('membretes.ejemplo.actualizacion');
 });
 
-// Profile Routes
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
-});
+
 
 // ============================================================================
 // RUTAS DE PRUEBA PARA PÁGINAS DE ERROR (Solo en desarrollo)
