@@ -208,8 +208,6 @@ Route::middleware(['auth'])->prefix('tramites')->group(function () {
     Route::get('/{tramite}/anterior/{paso}', [TramiteNavegacionController::class, 'pasoAnterior'])
         ->where(['tramite' => '[0-9]+', 'paso' => '[0-9]+'])
         ->name('tramites.navegacion.anterior');
-    
-    Route::post('/store', [TramiteController::class, 'store'])->name('tramites.store');
 });
 
 // ============================================================================
