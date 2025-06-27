@@ -19,7 +19,7 @@
             position: relative;
             background: white;
         }
-
+        
         /* Header Section */
         .header {
             position: absolute;
@@ -28,7 +28,7 @@
             width: 100%;
             height: auto;
         }
-
+        
         .logo-encabezado {
             position: absolute;
             top: 10mm;
@@ -36,7 +36,7 @@
             width: 85mm;
             height: 18mm;
         }
-
+        
         .logo-lateral {
             position: absolute;
             top: 4mm;
@@ -44,7 +44,7 @@
             width: 35mm;
             height: 292mm;
         }
-
+        
         .lema-constitucional {
             position: absolute;
             top: 30mm;
@@ -66,21 +66,21 @@
         .document-info .label {
             font-weight: bold;
         }
-
+        
         .origen {
             position: absolute;
             top: 38mm;
             left: 131mm;
             font-size: 8pt;
         }
-
+        
         .oficio-no {
             position: absolute;
             top: 42mm;
             left: 134mm;
             font-size: 8pt;
         }
-
+        
         .asunto {
             position: absolute;
             top: 46mm;
@@ -88,14 +88,14 @@
             font-size: 8pt;
             width: 60mm;
         }
-
+        
         .fecha-lugar {
             position: absolute;
             top: 56mm;
             left: 128mm;
             font-size: 8pt;
         }
-
+        
         /* Recipient Section */
         .destinatario {
             position: absolute;
@@ -113,7 +113,7 @@
         .destinatario-persona-fisica {
             line-height: 1.2;
         }
-
+        
         /* Main Content */
         .contenido-principal {
             position: absolute;
@@ -140,7 +140,7 @@
             font-weight: bold;
             line-height: 1.3;
         }
-
+        
         /* Footer */
         .footer {
             position: absolute;
@@ -159,7 +159,7 @@
             font-size: 6pt;
             line-height: 1.2;
         }
-
+        
         /* QR Code */
         .qr-code {
             position: absolute;
@@ -168,12 +168,12 @@
             width: 20mm;
             height: 20mm;
         }
-
+        
         .qr-code svg {
             width: 100%;
             height: 100%;
         }
-
+        
         .qr-text {
             position: absolute;
             bottom: 28mm;
@@ -213,15 +213,15 @@
     </div>
 
     <!-- Document Information -->
-    <div class="origen">
+        <div class="origen">
         <span class="label">ORIGEN:</span> Dirección de Recursos Materiales
-    </div>
+        </div>
 
     <div class="oficio-no">
         <span class="label">OFICIO No.:</span> SA/DRM/DMRA/001/01/2025
-    </div>
+        </div>
 
-    <div class="asunto">
+        <div class="asunto">
         <span class="label">ASUNTO:</span> Registro en el Padrón de Proveedores de la Administración Pública Estatal
     </div>
 
@@ -253,20 +253,20 @@
     <!-- Main Content -->
     <div class="contenido-principal">
         Se hace referencia a su solicitud de registro ante el Padrón de Proveedores de la Administración Pública Estatal y anexos que acompaña fechada el 15 de enero de 2025, recibida en esta Dirección de Recursos Materiales el 16 de enero de 2025.
-        <br><br>
+            <br><br>
         Sobre el particular, y en atención a la misma, una vez revisada y analizada, así como cotejados los documentos presentados en original, se informa que se procedió al registro ante el Padrón de Proveedores de la Administración Pública Estatal, de la persona moral "EMPRESAS CONSTRUCTORAS DEL SUR S.A. DE C.V.", cuyo giro y/o clasificación se establece de manera enunciativa mas no limitativa como a continuación se describe "CONSTRUCCIÓN, REMODELACIÓN Y MANTENIMIENTO DE OBRAS CIVILES, INDUSTRIALES Y COMERCIALES", y demás actividades comerciales, profesionales, mercantiles o de negocios de conformidad con sus actividades económicas y su objeto social registrado y autorizado, con cédula de inscripción 12345 asignada, que lo acredita como Proveedor Estatal, cuya vigencia será anual a partir del 16 DE ENERO DE 2025 hasta el 15 DE ENERO DE 2026, dejando constancia de ello, en el expediente respectivo.
-        <br><br>
-        Así mismo, se informa que, para renovar este registro, deberá presentar su solicitud dentro de los siete días hábiles previos a su vencimiento, en caso de que omita presentar dicha solicitud en el plazo indicado, se cancelará el registro a su vencimiento, sin perjuicio de lo anterior, podrá formular una nueva solicitud de inscripción, es importante puntualizar que en cualquier tiempo siempre que se encuentre vigente su registro, deberá comunicar a esta Secretaría a través de esta Dirección, las modificaciones legales, de capacidad técnica, económica o productiva y aquellas que puedan implicar un cambio en su giro y/o clasificación.
-        <br><br>
-        Por último, se exhorta a que en todos los trámites, procedimientos y contratos que celebre con las Dependencias o Entidades de la Administración Pública Estatal, se abstenga de adoptar conductas que vayan en contravención de la normatividad aplicable.
-        <br><br>
+            <br><br>
+            Así mismo, se informa que, para renovar este registro, deberá presentar su solicitud dentro de los siete días hábiles previos a su vencimiento, en caso de que omita presentar dicha solicitud en el plazo indicado, se cancelará el registro a su vencimiento, sin perjuicio de lo anterior, podrá formular una nueva solicitud de inscripción, es importante puntualizar que en cualquier tiempo siempre que se encuentre vigente su registro, deberá comunicar a esta Secretaría a través de esta Dirección, las modificaciones legales, de capacidad técnica, económica o productiva y aquellas que puedan implicar un cambio en su giro y/o clasificación.
+            <br><br>
+            Por último, se exhorta a que en todos los trámites, procedimientos y contratos que celebre con las Dependencias o Entidades de la Administración Pública Estatal, se abstenga de adoptar conductas que vayan en contravención de la normatividad aplicable.
+            <br><br>
         Lo anterior con fundamento en los artículos 1, 3 fracción XIV, 6, 11, 48, 49, 50, 51, 92, 93 y 94 de la Ley de Adquisiciones, Enajenaciones, Arrendamientos, Prestación de Servicios y Administración de Bienes Muebles e Inmuebles del Estado de Oaxaca, 46, 47, 48 y 49 de su Reglamento.
-        <br><br>
-        Sin otro particular, le reitero la seguridad de mi consideración distinguida.
+            <br><br>
+            Sin otro particular, le reitero la seguridad de mi consideración distinguida.
     </div>
 
     <!-- Signature Section -->
-    <div class="firma">
+        <div class="firma">
         A T E N T A M E N T E.<br>
         SUFRAGIO EFECTIVO, NO REELECCIÓN.<br>
         "EL RESPETO AL DERECHO AJENO ES LA PAZ"<br>

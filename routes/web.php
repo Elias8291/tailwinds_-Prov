@@ -56,12 +56,10 @@ use App\Http\Controllers\MiEstadoProveedorController;
 // RUTAS PÚBLICAS (Sin autenticación requerida)
 // ============================================================================
 
-// Página principal para usuarios no autenticados
-Route::middleware(['web', 'guest'])->group(function () {
-    Route::get('/', function () {
-        return view('welcome');
-    })->name('welcome');
-});
+// Página principal (funciona para autenticados y no autenticados)
+Route::get('/', function () {
+    return view('welcome');
+})->name('welcome');
 
 // ============================================================================
 // MÓDULO DE AUTENTICACIÓN Y REGISTRO

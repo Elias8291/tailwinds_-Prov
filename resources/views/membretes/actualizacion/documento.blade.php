@@ -19,7 +19,7 @@
             position: relative;
             background: white;
         }
-
+        
         /* Header Section */
         .header {
             position: absolute;
@@ -28,7 +28,7 @@
             width: 100%;
             height: auto;
         }
-
+        
         .logo-encabezado {
             position: absolute;
             top: 10mm;
@@ -36,7 +36,7 @@
             width: 85mm;
             height: 18mm;
         }
-
+        
         .logo-lateral {
             position: absolute;
             top: 4mm;
@@ -44,7 +44,7 @@
             width: 35mm;
             height: 292mm;
         }
-
+        
         .lema-constitucional {
             position: absolute;
             top: 30mm;
@@ -66,21 +66,21 @@
         .document-info .label {
             font-weight: bold;
         }
-
+        
         .origen {
             position: absolute;
             top: 38mm;
             left: 131mm;
             font-size: 8pt;
         }
-
+        
         .oficio-no {
             position: absolute;
             top: 42mm;
             left: 134mm;
             font-size: 8pt;
         }
-
+        
         .asunto {
             position: absolute;
             top: 46mm;
@@ -88,14 +88,14 @@
             font-size: 8pt;
             width: 60mm;
         }
-
+        
         .fecha-lugar {
             position: absolute;
             top: 56mm;
             left: 128mm;
             font-size: 8pt;
         }
-
+        
         /* Recipient Section */
         .destinatario {
             position: absolute;
@@ -113,7 +113,7 @@
         .destinatario-persona-fisica {
             line-height: 1.2;
         }
-
+        
         /* Main Content */
         .contenido-principal {
             position: absolute;
@@ -140,7 +140,7 @@
             font-weight: bold;
             line-height: 1.3;
         }
-
+        
         /* Footer */
         .footer {
             position: absolute;
@@ -159,7 +159,7 @@
             font-size: 6pt;
             line-height: 1.2;
         }
-
+        
         /* QR Code */
         .qr-code {
             position: absolute;
@@ -168,12 +168,12 @@
             width: 20mm;
             height: 20mm;
         }
-
+        
         .qr-code svg {
             width: 100%;
             height: 100%;
         }
-
+        
         .qr-text {
             position: absolute;
             bottom: 28mm;
@@ -213,15 +213,15 @@
     </div>
 
     <!-- Document Information -->
-    <div class="origen">
+        <div class="origen">
         <span class="label">ORIGEN:</span> Dirección de Recursos Materiales
-    </div>
+        </div>
 
     <div class="oficio-no">
         <span class="label">OFICIO No.:</span> SA/DRM/DMRA/003/01/2025
-    </div>
+        </div>
 
-    <div class="asunto">
+        <div class="asunto">
         <span class="label">ASUNTO:</span> Actualización de Datos en el Padrón de Proveedores de la Administración Pública Estatal
     </div>
 
@@ -257,24 +257,24 @@
         Sobre el particular, y en atención a la misma, una vez revisada y analizada, así como cotejados los documentos presentados en original, se informa que se procedió a la actualización del registro ante el Padrón de Proveedores de la Administración Pública Estatal, de la persona moral "CONSTRUCTORA DEL ISTMO S.A. DE C.V.", con cédula de inscripción 54321 vigente.
         <br><br>
         Las modificaciones realizadas en su expediente son las siguientes:
-        <br><br>
+            <br><br>
         <strong>ACTUALIZACIÓN DE DOMICILIO FISCAL:</strong> Se actualizó su domicilio fiscal de "CALLE 5 DE MAYO NÚMERO 789, COL. REFORMA, OAXACA DE JUÁREZ, OAXACA, C.P. 68050" al domicilio actual "CARRETERA PANAMERICANA KM 5.5, COL. INDUSTRIAL, OAXACA DE JUÁREZ, OAXACA, C.P. 68020".
-        <br><br>
+            <br><br>
         <strong>AMPLIACIÓN DE GIRO COMERCIAL:</strong> Se amplió su giro comercial para incluir "SERVICIOS DE MANTENIMIENTO INDUSTRIAL Y COMERCIAL, INSTALACIONES ELÉCTRICAS Y MECÁNICAS", además de las actividades ya registradas de construcción de obras civiles.
-        <br><br>
+            <br><br>
         Es importante mencionar que estas modificaciones no afectan la vigencia de su registro, el cual se mantiene hasta el 15 DE MARZO DE 2025, fecha en la cual deberá presentar su solicitud de renovación correspondiente.
-        <br><br>
+            <br><br>
         Se le recuerda que en cualquier tiempo siempre que se encuentre vigente su registro, deberá comunicar a esta Secretaría a través de esta Dirección, las modificaciones legales, de capacidad técnica, económica o productiva y aquellas que puedan implicar un cambio en su giro y/o clasificación.
-        <br><br>
+            <br><br>
         Por último, se exhorta a que en todos los trámites, procedimientos y contratos que celebre con las Dependencias o Entidades de la Administración Pública Estatal, se abstenga de adoptar conductas que vayan en contravención de la normatividad aplicable.
-        <br><br>
-        Lo anterior con fundamento en los artículos 1, 3 fracción XIV, 6, 11, 48, 49, 50, 51, 92, 93 y 94 de la Ley de Adquisiciones, Enajenaciones, Arrendamientos, Prestación de Servicios y Administración de Bienes Muebles e Inmuebles del Estado de Oaxaca, 46, 47, 48 y 49 de su Reglamento.
-        <br><br>
-        Sin otro particular, le reitero la seguridad de mi consideración distinguida.
+            <br><br>
+            Lo anterior con fundamento en los artículos 1, 3 fracción XIV, 6, 11, 48, 49, 50, 51, 92, 93 y 94 de la Ley de Adquisiciones, Enajenaciones, Arrendamientos, Prestación de Servicios y Administración de Bienes Muebles e Inmuebles del Estado de Oaxaca, 46, 47, 48 y 49 de su Reglamento.
+            <br><br>
+            Sin otro particular, le reitero la seguridad de mi consideración distinguida.
     </div>
 
     <!-- Signature Section -->
-    <div class="firma">
+        <div class="firma">
         A T E N T A M E N T E.<br>
         SUFRAGIO EFECTIVO, NO REELECCIÓN.<br>
         "EL RESPETO AL DERECHO AJENO ES LA PAZ"<br>
