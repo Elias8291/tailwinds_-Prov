@@ -40,7 +40,7 @@ use App\Http\Controllers\Formularios\DocumentosController;
 use App\Http\Controllers\DireccionController;
 
 // Controladores de API
-use App\Http\Controllers\API\SectorController;
+use App\Http\Controllers\Api\SectorController;
 
 // Controladores de Documentos
 use App\Http\Controllers\DocumentoMembretadoController;

@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RfcSearchController;
 use App\Http\Controllers\HistorialProveedorController;
-use App\Http\Controllers\API\SectorController;
+use App\Http\Controllers\Api\SectorController;
 use App\Http\Controllers\LocationDataController;
 
 /*
