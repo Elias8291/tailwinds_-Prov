@@ -1,6 +1,4 @@
-[providers]
-php = "8.2"
-nodejs = "20"
+providers = ["php", "nodejs"]
 
 [variables]
 APP_ENV = "production"
