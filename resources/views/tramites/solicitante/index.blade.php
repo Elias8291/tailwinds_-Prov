@@ -687,31 +687,49 @@
     @if(isset($tramite) && isset($paso_actual))
     // Funciones de navegación globales para integración con componentes
     window.navegarSiguiente = function() {
+        console.log('🚀 Ejecutando window.navegarSiguiente()');
+        
         // Usar SOLO Alpine.js - navegación SPA sin recargar página
         const alpineContainer = document.querySelector('[x-data]');
+        
+        console.log('🔍 Alpine container encontrado:', alpineContainer);
         
         if (alpineContainer) {
             try {
                 // Intentar acceder al componente Alpine y aumentar currentStep
                 if (typeof Alpine !== 'undefined') {
+                    console.log('✅ Alpine.js disponible');
                     const alpineData = Alpine.$data(alpineContainer);
+                    console.log('📊 Datos de Alpine:', alpineData);
+                    
                     if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                        console.log(`📍 Paso actual: ${alpineData.currentStep}, Total: ${alpineData.totalSteps}`);
+                        
                         if (alpineData.currentStep < alpineData.totalSteps) {
+                            console.log('➡️ Avanzando al siguiente paso');
                             alpineData.currentStep++;
                             return;
                         } else {
+                            console.log('🏁 Ya está en el último paso');
                             return;
                         }
+                    } else {
+                        console.log('⚠️ alpineData.currentStep no encontrado');
                     }
+                } else {
+                    console.log('❌ Alpine.js no disponible');
                 }
                 
                 // Fallback: usar event dispatch para comunicarse con Alpine
+                console.log('🔄 Usando fallback: dispatch event');
                 alpineContainer.dispatchEvent(new CustomEvent('next-step'));
                 return;
                 
             } catch (error) {
-                // Error silencioso
+                console.error('💥 Error en navegarSiguiente:', error);
             }
+        } else {
+            console.log('❌ No se encontró contenedor Alpine');
         }
     };
 

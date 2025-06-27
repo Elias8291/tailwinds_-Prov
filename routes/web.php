@@ -219,7 +219,25 @@ Route::middleware(['auth'])->prefix('tramites')->group(function () {
 Route::middleware(['auth'])->prefix('formularios')->group(function () {
     Route::post('/datos-generales/guardar', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'guardar'])
         ->name('datos-generales.guardar');
+    Route::get('/datos-generales/test', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'test'])
+        ->name('datos-generales.test');
 });
+
+// Ruta de debug simple sin middleware para probar conectividad
+Route::post('/debug/datos-generales', function(\Illuminate\Http\Request $request) {
+    \Illuminate\Support\Facades\Log::info('=== DEBUG RUTA SIMPLE ===', [
+        'method' => $request->method(),
+        'url' => $request->url(),
+        'data' => $request->all(),
+        'headers' => $request->headers->all()
+    ]);
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Debug route working',
+        'data_received' => $request->except(['_token'])
+    ]);
+})->name('debug.datos-generales');
 
 // ============================================================================
 // MÓDULO PORTAL DEL SOLICITANTE - MIS TRÁMITES
@@ -432,10 +450,10 @@ Route::get('/provider-dashboard', function () {
 
 Route::prefix('api')->group(function () {
     
-    // API DE SECTORES Y ACTIVIDADES
-    Route::get('/sectores/{sector}/actividades', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'getActividadesPorSector']);
-    Route::get('/actividades', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'getAllActividades']);
-    Route::get('/actividades/{actividad}', [SectorController::class, 'getActividad']);
+    // API DE SECTORES Y ACTIVIDADES (comentadas para evitar conflicto con api.php)
+    // Route::get('/sectores/{sector}/actividades', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'getActividadesPorSector']);
+    // Route::get('/actividades', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'getAllActividades']);
+    // Route::get('/actividades/{actividad}', [SectorController::class, 'getActividad']);
     
     // API DE DATOS GENERALES
     Route::get('/datos-generales/{tramite}', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'obtenerDatos'])

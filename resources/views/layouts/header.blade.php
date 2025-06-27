@@ -9,7 +9,9 @@
                     </svg>
                 </button>
                 <div class="flex-shrink-0 flex items-center ml-3">
-                    <img class="h-11 w-auto" src="{{ asset('images/logoColor.png') }}" alt="Logo">
+                    <a href="{{ route('dashboard') }}" class="flex items-center hover:opacity-80 transition-opacity duration-200">
+                        <img class="h-11 w-auto" src="{{ asset('images/logoColor.png') }}" alt="Logo">
+                    </a>
                 </div>
             </div>
 

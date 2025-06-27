@@ -757,6 +757,12 @@ function documentosData() {
                     
                     // Esperar un momento para que se vea el mensaje y luego redirigir
                     setTimeout(() => {
+                        console.log('🔍 Redirigiendo con tramiteId:', this.tramiteId, typeof this.tramiteId);
+                        if (typeof this.tramiteId !== 'number' && typeof this.tramiteId !== 'string') {
+                            console.error('❌ tramiteId no es un valor válido:', this.tramiteId);
+                            this.mostrarError('Error: ID de trámite inválido');
+                            return;
+                        }
                         window.location.href = `/tramites-solicitante/estado/${this.tramiteId}`;
                     }, 2000);
                 } else {
@@ -777,15 +783,28 @@ function documentosData() {
                 return;
             }
 
+            console.log('🔍 Accediendo documento con tramiteId:', this.tramiteId, typeof this.tramiteId);
+            console.log('🔍 Documento ID:', documento.id, typeof documento.id);
+            
+            if (typeof this.tramiteId !== 'number' && typeof this.tramiteId !== 'string') {
+                console.error('❌ tramiteId no es un valor válido para verDocumento:', this.tramiteId);
+                this.mostrarError('Error: ID de trámite inválido');
+                return;
+            }
+
             // Detectar si es móvil
             const esMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
             if (esMobile) {
                 // En móvil, forzar descarga
-                window.location.href = `/tramites-solicitante/ver-documento/${this.tramiteId}/${documento.id}?download=1`;
+                const url = `/tramites-solicitante/ver-documento/${this.tramiteId}/${documento.id}?download=1`;
+                console.log('📱 URL móvil:', url);
+                window.location.href = url;
             } else {
                 // En desktop, abrir en nueva pestaña
-                window.open(`/tramites-solicitante/ver-documento/${this.tramiteId}/${documento.id}`, '_blank');
+                const url = `/tramites-solicitante/ver-documento/${this.tramiteId}/${documento.id}`;
+                console.log('🖥️ URL desktop:', url);
+                window.open(url, '_blank');
             }
         },
 

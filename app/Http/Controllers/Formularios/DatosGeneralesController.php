@@ -23,10 +23,39 @@ class DatosGeneralesController extends Controller
     }
 
     /**
+     * Método de prueba para verificar que el controlador está accesible
+     */
+    public function test(Request $request)
+    {
+        Log::info('=== TEST DatosGeneralesController ===', [
+            'method' => $request->method(),
+            'url' => $request->url(),
+            'user_authenticated' => Auth::check(),
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Controlador accesible',
+            'timestamp' => now()->toISOString(),
+            'user_authenticated' => Auth::check(),
+            'user_id' => Auth::id()
+        ]);
+    }
+
+    /**
      * Guarda los datos generales del trámite
      */
     public function guardar(Request $request)
     {
+        // Log inmediato para confirmar que llegamos al método
+        Log::info('🎯 DatosGeneralesController::guardar - MÉTODO ALCANZADO', [
+            'method' => $request->method(),
+            'url' => $request->url(),
+            'user_id' => Auth::id(),
+            'timestamp' => now()->toISOString()
+        ]);
+
         // Verificar primero que la sesión esté activa
         if (!session()->isStarted()) {
             session()->start();
@@ -39,8 +68,23 @@ class DatosGeneralesController extends Controller
             'session_id' => session()->getId(),
             'request_data' => $request->except(['_token']),
             'request_method' => $request->method(),
-            'request_url' => $request->url()
+            'request_url' => $request->url(),
+            'request_path' => $request->path(),
+            'request_full_url' => $request->fullUrl(),
+            'headers' => [
+                'content-type' => $request->header('Content-Type'),
+                'x-requested-with' => $request->header('X-Requested-With'),
+                'accept' => $request->header('Accept'),
+                'user-agent' => $request->header('User-Agent')
+            ],
+            'csrf_token' => $request->input('_token'),
+            'csrf_valid' => csrf_token() === $request->input('_token')
         ]);
+
+        // Respuesta inmediata para debug si es AJAX
+        if ($request->ajax() || $request->wantsJson()) {
+            Log::info('Petición AJAX detectada correctamente');
+        }
 
         try {
             // Validaciones personalizadas según las reglas del JavaScript
@@ -221,7 +265,10 @@ class DatosGeneralesController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
                 'request_data' => $request->all(),
-                'is_ajax' => $request->ajax()
+                'is_ajax' => $request->ajax(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'previous' => $e->getPrevious() ? $e->getPrevious()->getMessage() : null
             ]);
             
             // Si es una petición AJAX, devolver JSON con error
@@ -229,7 +276,13 @@ class DatosGeneralesController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage(),
-                    'error' => 'Error al guardar los datos: ' . $e->getMessage()
+                    'error' => 'Error al guardar los datos: ' . $e->getMessage(),
+                    'debug_info' => [
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'user_id' => Auth::id(),
+                        'timestamp' => now()->toISOString()
+                    ]
                 ], 500);
             }
             
