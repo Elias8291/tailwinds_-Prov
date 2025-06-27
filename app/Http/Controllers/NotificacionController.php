@@ -22,12 +22,49 @@ class NotificacionController extends Controller
     /**
      * Obtener notificaciones para el header (AJAX)
      */
-    public function obtenerParaHeader()
+    public function obtenerParaHeader(Request $request)
     {
         $user = Auth::user();
         
-        // Obtener últimas 10 notificaciones
-        $notificaciones = Notificacion::paraUsuario($user->id, 10);
+        // Obtener límite desde parámetro o usar 10 por defecto
+        $limite = $request->get('limite', 10);
+        
+        // Obtener notificaciones
+        $notificaciones = Notificacion::paraUsuario($user->id, $limite);
+        
+        // Contar no leídas
+        $noLeidas = Notificacion::contarNoLeidas($user->id);
+        
+        return response()->json([
+            'success' => true,
+            'notificaciones' => $notificaciones->map(function ($notificacion) use ($user) {
+                $pivotData = $notificacion->usuarios->where('id', $user->id)->first()->pivot ?? null;
+                
+                return [
+                    'id' => $notificacion->id,
+                    'titulo' => $notificacion->titulo,
+                    'mensaje' => $notificacion->mensaje,
+                    'tipo' => $notificacion->tipo,
+                    'icono' => $notificacion->icono,
+                    'color' => $notificacion->color,
+                    'fecha' => $notificacion->fecha->format('d/m/Y H:i'),
+                    'tiempo_transcurrido' => $notificacion->tiempo_transcurrido,
+                    'leida' => $pivotData ? $pivotData->estado === 'Leido' : false
+                ];
+            }),
+            'contador_no_leidas' => $noLeidas
+        ]);
+    }
+
+    /**
+     * Obtener TODAS las notificaciones para el módulo (AJAX)
+     */
+    public function obtenerTodas()
+    {
+        $user = Auth::user();
+        
+        // Obtener todas las notificaciones (límite de 100)
+        $notificaciones = Notificacion::paraUsuario($user->id, 100);
         
         // Contar no leídas
         $noLeidas = Notificacion::contarNoLeidas($user->id);

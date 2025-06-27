@@ -31,11 +31,24 @@
                          x-transition:leave-start="transform opacity-100 scale-100"
                          x-transition:leave-end="transform opacity-0 scale-95"
                          class="origin-top-right absolute right-0 mt-2 w-96 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none z-50">
-                        <div class="px-4 py-3 bg-primary-50 rounded-t-lg flex justify-between items-center">
-                            <h3 class="text-sm font-semibold text-primary">Notificaciones</h3>
-                            <button @click="marcarTodasComoLeidas()" x-show="contadorNoLeidas > 0" class="text-xs text-primary hover:text-primary-dark">
-                                Marcar todas como leídas
-                            </button>
+                        <div class="px-4 py-3 bg-gradient-to-r from-[#B4325E]/10 to-[#93264B]/10 rounded-t-lg border-b border-gray-100">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="bg-gradient-to-r from-[#B4325E] to-[#93264B] rounded-lg p-1 mr-2">
+                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-sm font-semibold bg-gradient-to-r from-[#B4325E] to-[#93264B] bg-clip-text text-transparent">Notificaciones</h3>
+                                </div>
+                                <button @click="marcarTodasComoLeidas()" x-show="contadorNoLeidas > 0" 
+                                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-white bg-gradient-to-r from-[#B4325E] to-[#93264B] hover:from-[#93264B] hover:to-[#7a1d37] rounded-md transition-all duration-200 shadow-sm">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Marcar todas
+                                </button>
+                            </div>
                         </div>
                         
                         <div x-show="cargando" class="px-4 py-8 text-center">
@@ -63,48 +76,75 @@
                                      }">
                                     <div class="flex items-start space-x-3">
                                         <div class="flex-shrink-0">
-                                            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full"
-                                                  :class="{
-                                                      'bg-blue-100': notificacion.color === 'blue',
-                                                      'bg-yellow-100': notificacion.color === 'yellow',
-                                                      'bg-red-100': notificacion.color === 'red',
-                                                      'bg-gray-100': notificacion.color === 'gray'
-                                                  }">
-                                                <svg class="h-5 w-5" 
+                                            <div class="relative">
+                                                <div class="inline-flex items-center justify-center h-10 w-10 rounded-xl shadow-md"
                                                      :class="{
-                                                         'text-blue-600': notificacion.color === 'blue',
-                                                         'text-yellow-600': notificacion.color === 'yellow',
-                                                         'text-red-600': notificacion.color === 'red',
-                                                         'text-gray-600': notificacion.color === 'gray'
-                                                     }"
-                                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <template x-if="notificacion.tipo === 'Informativo'">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </template>
-                                                    <template x-if="notificacion.tipo === 'Advertencia'">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                                    </template>
-                                                    <template x-if="notificacion.tipo === 'Error'">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </template>
-                                                </svg>
-                                            </span>
+                                                         'bg-gradient-to-br from-blue-400 to-blue-600': notificacion.tipo === 'Informativo',
+                                                         'bg-gradient-to-br from-yellow-400 to-yellow-600': notificacion.tipo === 'Advertencia',
+                                                         'bg-gradient-to-br from-red-400 to-red-600': notificacion.tipo === 'Error'
+                                                     }">
+                                                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <!-- Informativo -->
+                                                        <path x-show="notificacion.tipo === 'Informativo'" 
+                                                              stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        <!-- Advertencia -->
+                                                        <path x-show="notificacion.tipo === 'Advertencia'" 
+                                                              stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                                        <!-- Error -->
+                                                        <path x-show="notificacion.tipo === 'Error'" 
+                                                              stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                              d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </div>
+                                                
+                                                <span x-show="!notificacion.leida" 
+                                                      class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
+                                            </div>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-gray-900" x-text="notificacion.titulo"></p>
-                                            <p class="mt-1 text-sm text-gray-500" x-text="notificacion.mensaje"></p>
-                                            <p class="mt-2 text-xs text-gray-400" x-text="notificacion.tiempo_transcurrido"></p>
-                                        </div>
-                                        <div class="flex-shrink-0" x-show="!notificacion.leida">
-                                            <span class="inline-block h-2 w-2 bg-blue-500 rounded-full"></span>
+                                            <div class="flex items-center mb-1">
+                                                <p class="text-sm font-semibold text-gray-900 mr-2" x-text="notificacion.titulo"></p>
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium"
+                                                      :class="{
+                                                          'bg-blue-100 text-blue-700': notificacion.color === 'blue',
+                                                          'bg-yellow-100 text-yellow-700': notificacion.color === 'yellow',
+                                                          'bg-red-100 text-red-700': notificacion.color === 'red',
+                                                          'bg-gray-100 text-gray-700': notificacion.color === 'gray'
+                                                      }"
+                                                      x-text="notificacion.tipo">
+                                                </span>
+                                            </div>
+                                            <p class="text-sm text-gray-600 leading-relaxed line-clamp-2" x-text="notificacion.mensaje"></p>
+                                            <div class="mt-2 flex items-center text-xs text-gray-500">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <span x-text="notificacion.tiempo_transcurrido"></span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </template>
                         </div>
                         
-                        <div x-show="!cargando && notificaciones.length > 0" class="px-4 py-3 bg-gray-50 rounded-b-lg">
-                            <a href="{{ route('notificaciones.index') }}" class="text-sm font-medium text-primary hover:text-primary-dark">Ver todas las notificaciones</a>
+                        <div x-show="!cargando && notificaciones.length > 0" class="px-4 py-3 bg-gray-50 rounded-b-lg border-t border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500 flex items-center">
+                                    <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    <span x-text="notificaciones.length"></span> notificaciones
+                                </span>
+                                <a href="{{ route('notificaciones.index') }}" 
+                                   class="text-xs text-[#B4325E] hover:text-[#93264B] font-medium flex items-center transition-colors duration-200">
+                                    Ver todas
+                                    <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

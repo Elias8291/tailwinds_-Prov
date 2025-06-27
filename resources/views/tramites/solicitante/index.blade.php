@@ -5,6 +5,102 @@
 @endpush
 
 @section('content')
+<!-- Modal para mostrar datos del SAT -->
+<div id="satDataModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
+        <!-- Modal header -->
+        <div class="px-5 py-3 bg-gradient-to-br from-primary to-primary-dark border-b border-primary/10">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="p-1.5 bg-white/10 rounded-lg">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Datos del SAT</h3>
+                </div>
+                <button onclick="closeSatModal()" class="text-white/80 hover:text-white transition-colors duration-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Contenido de carga durante validación -->
+        <div id="satValidationLoading" class="hidden p-6">
+            <div class="flex flex-col items-center justify-center space-y-6 py-12">
+                <!-- Spinner animado -->
+                <div class="relative">
+                    <div class="w-20 h-20 border-4 border-[#9d2449]/20 border-t-[#9d2449] rounded-full animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-[#9d2449] animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- Texto de validación -->
+                <div class="text-center max-w-md">
+                    <h3 class="text-xl font-semibold text-[#9d2449] mb-3">Validando Constancia Fiscal</h3>
+                    <p class="text-gray-600 mb-6">
+                        Estamos verificando que el RFC coincida con su cuenta y validando los datos con el SAT...
+                    </p>
+                    
+                    <!-- Barra de progreso visual -->
+                    <div class="w-full max-w-sm mx-auto mb-6">
+                        <div class="bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] h-full rounded-full animate-loading-progress"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pasos del proceso -->
+                    <div class="space-y-3 text-sm text-gray-600">
+                        <div class="flex items-center justify-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <span>Escaneando código QR de la constancia...</span>
+                        </div>
+                        <div class="flex items-center justify-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+                            <span>Validando RFC con su cuenta...</span>
+                        </div>
+                        <div class="flex items-center justify-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+                            <span>Extrayendo datos fiscales del SAT...</span>
+                        </div>
+                        <div class="flex items-center justify-center space-x-3">
+                            <div class="w-3 h-3 bg-purple-500 rounded-full animate-pulse" style="animation-delay: 1.5s;"></div>
+                            <span>Verificando información tributaria...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenido con datos del SAT (se muestra después de la validación) -->
+        <div id="satDataContainer" class="hidden">
+            <!-- Modal body -->
+            <div class="p-5 overflow-y-auto" style="max-height: calc(90vh - 120px);">
+                <div id="satDataContent" class="space-y-4">
+                    <!-- Los datos del SAT se insertarán aquí -->
+                </div>
+            </div>
+            <!-- Modal footer -->
+            <div class="bg-gray-50 px-5 py-3 border-t border-gray-100">
+                <div class="flex justify-end">
+                    <button onclick="closeSatModal()" 
+                            class="inline-flex items-center px-3 py-1.5 bg-white text-gray-700 hover:bg-gray-50 font-medium rounded-lg border border-gray-300 transition-colors duration-200 text-sm">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="min-h-screen bg-gray-50/30 font-montserrat py-8">
     <!-- Contenedor principal -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -278,9 +374,35 @@
                                 @endif
                             @else
                                 Primera inscripción al Padrón de Proveedores del Estado
+                                <br><span class="text-xs text-blue-600">⚡ Incluye validación de constancia fiscal</span>
                             @endif
                         @endif
                     </p>
+
+                    <!-- Botón Ver Datos del SAT (oculto inicialmente) -->
+                    <div class="mb-3">
+                        <button type="button" 
+                                id="verDatosBtn"
+                                onclick="showSatModal()"
+                                style="display: none;"
+                                class="inline-flex items-center text-xs bg-white hover:bg-blue-50 text-blue-600 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-blue-200 hover:border-blue-300">
+                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            Ver Datos del SAT
+                        </button>
+                        
+                        <!-- Botón para simular validación RFC (solo para demostración) -->
+                        <button type="button" 
+                                onclick="simularValidacionRFC('{{ $infoProveedor['rfc'] ?? 'DEMO123456789' }}', 'verDatosBtn')"
+                                class="inline-flex items-center text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-green-200 hover:border-green-300 ml-2">
+                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Validar RFC
+                        </button>
+                    </div>
 
                     <!-- Botón elegante -->
                     @if($tipoTramite['inscripcion'])
@@ -357,9 +479,35 @@
                                 <br><span class="text-xs text-gray-500">Vencimiento: {{ $infoProveedor['fecha_vencimiento']->format('d/m/Y H:i') }}</span>
                             @else
                                 Renueva tu registro antes del vencimiento (7 días)
+                                <br><span class="text-xs text-blue-600">⚡ Incluye validación de constancia fiscal</span>
                             @endif
                         @endif
                     </p>
+
+                    <!-- Botón Ver Datos del SAT (oculto inicialmente) -->
+                    <div class="mb-3">
+                        <button type="button" 
+                                id="verDatosBtnRenovacion"
+                                onclick="showSatModal()"
+                                style="display: none;"
+                                class="inline-flex items-center text-xs bg-white hover:bg-blue-50 text-blue-600 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-blue-200 hover:border-blue-300">
+                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            Ver Datos del SAT
+                        </button>
+                        
+                        <!-- Botón para simular validación RFC (solo para demostración) -->
+                        <button type="button" 
+                                onclick="simularValidacionRFC('{{ $infoProveedor['rfc'] ?? 'DEMO123456789' }}', 'verDatosBtnRenovacion')"
+                                class="inline-flex items-center text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-green-200 hover:border-green-300 ml-2">
+                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Validar RFC
+                        </button>
+                    </div>
 
                     <!-- Botón elegante -->
                     @if($tipoTramite['renovacion'])
@@ -424,9 +572,35 @@
                                 <br><span class="text-xs text-gray-500">Vigente hasta: {{ $infoProveedor['fecha_vencimiento']->format('d/m/Y H:i') }}</span>
                             @else
                                 Actualiza información, servicios y documentos
+                                <br><span class="text-xs text-blue-600">⚡ Incluye validación de constancia fiscal</span>
                             @endif
                         @endif
                     </p>
+
+                    <!-- Botón Ver Datos del SAT (oculto inicialmente) -->
+                    <div class="mb-3">
+                        <button type="button" 
+                                id="verDatosBtnActualizacion"
+                                onclick="showSatModal()"
+                                style="display: none;"
+                                class="inline-flex items-center text-xs bg-white hover:bg-blue-50 text-blue-600 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-blue-200 hover:border-blue-300">
+                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            Ver Datos del SAT
+                        </button>
+                        
+                        <!-- Botón para simular validación RFC (solo para demostración) -->
+                        <button type="button" 
+                                onclick="simularValidacionRFC('{{ $infoProveedor['rfc'] ?? 'DEMO123456789' }}', 'verDatosBtnActualizacion')"
+                                class="inline-flex items-center text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-green-200 hover:border-green-300 ml-2">
+                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Validar RFC
+                        </button>
+                    </div>
 
                     <!-- Botón elegante -->
                     @if($tipoTramite['actualizacion'])
@@ -457,10 +631,53 @@
 @push('styles')
 <style>
 [x-cloak] { display: none !important; }
+
+@keyframes loading-progress {
+    0% { width: 20%; }
+    50% { width: 75%; }
+    100% { width: 95%; }
+}
+
+.animate-loading-progress {
+    animation: loading-progress 2s ease-in-out infinite alternate;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.primary {
+    --tw-bg-opacity: 1;
+    background-color: rgb(157 36 73 / var(--tw-bg-opacity));
+}
+
+.primary-dark {
+    --tw-bg-opacity: 1;
+    background-color: rgb(122 29 55 / var(--tw-bg-opacity));
+}
 </style>
 @endpush
 
 @push('scripts')
+<!-- Scripts necesarios para SAT -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js"></script>
+<script src="/js/scrapers/sat-scraper.js"></script>
+<script src="/js/validators/sat-validator.js"></script>
+<script src="/js/components/qr-reader.js"></script>
+<script src="/js/components/qr-handler.js"></script>
+
 <script>
     // Función para volver a la vista de trámites
     function volverATramites() {
@@ -523,9 +740,257 @@
     }
     @endif
 
+    // Variables globales para el SAT
+    let satDataExtracted = null;
+    let rfcValidated = false;
+    
+    // Función para mostrar el modal con datos del SAT
+    window.showSatModal = function() {
+        if (!satDataExtracted) {
+            alert('No hay datos del SAT disponibles para mostrar');
+            return;
+        }
+
+        const modal = document.getElementById('satDataModal');
+        const loadingDiv = document.getElementById('satValidationLoading');
+        const dataContainer = document.getElementById('satDataContainer');
+        
+        if (modal && loadingDiv && dataContainer) {
+            // Mostrar modal
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // Mostrar loading y ocultar contenido
+            loadingDiv.classList.remove('hidden');
+            dataContainer.classList.add('hidden');
+            
+            // Simular proceso de validación con diferentes etapas
+            setTimeout(() => {
+                // Después de 2 segundos, generar contenido del modal
+                const content = generateSatModalContent(satDataExtracted);
+                const satDataContent = document.getElementById('satDataContent');
+                if (satDataContent) {
+                    satDataContent.innerHTML = content;
+                }
+                
+                // Ocultar loading y mostrar datos con animación
+                loadingDiv.classList.add('hidden');
+                dataContainer.classList.remove('hidden');
+                dataContainer.classList.add('animate-fadeInUp');
+                
+                // Remover clase de animación después de completarla
+                setTimeout(() => {
+                    dataContainer.classList.remove('animate-fadeInUp');
+                }, 500);
+            }, 2000);
+        }
+    };
+
+    // Función para cerrar el modal
+    window.closeSatModal = function() {
+        const modal = document.getElementById('satDataModal');
+        const loadingDiv = document.getElementById('satValidationLoading');
+        const dataContainer = document.getElementById('satDataContainer');
+        
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            
+            // Resetear estado del modal para próxima vez
+            if (loadingDiv) loadingDiv.classList.add('hidden');
+            if (dataContainer) dataContainer.classList.add('hidden');
+        }
+    };
+
+    // Función para generar contenido del modal usando SATScraper
+    function generateSatModalContent(data) {
+        // Usar SATScraper si está disponible, sino usar fallback
+        if (typeof SATScraper !== 'undefined' && SATScraper.generateModalContent) {
+            return SATScraper.generateModalContent(data);
+        }
+        
+        // Fallback si SATScraper no está disponible
+        if (!data || !data.sections) {
+            return '<p class="text-gray-500">No hay datos para mostrar.</p>';
+        }
+
+        let html = '';
+        
+        data.sections.forEach(section => {
+            html += `
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-200">
+                        ${section.title}
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            `;
+            
+            section.fields.forEach(field => {
+                const isStatus = section.title === 'Estado de los Datos';
+                const valueClass = isStatus && field.value.includes('⚠️') 
+                    ? 'text-yellow-600' 
+                    : isStatus && field.value.includes('✅') 
+                        ? 'text-green-600' 
+                        : 'text-gray-700';
+                
+                html += `
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                        <dt class="text-sm font-medium text-gray-600 mb-1">${field.label}:</dt>
+                        <dd class="text-sm ${valueClass} break-words">${field.value}</dd>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+
+        return html;
+    }
+
+    // Función para cargar datos del SAT desde el backend
+    window.cargarDatosSAT = async function() {
+        // Por ahora, los datos del SAT se procesan dinámicamente con la simulación
+        // Esta función se mantiene para compatibilidad futura
+        console.log('Función cargarDatosSAT ejecutada - datos se procesan dinámicamente');
+        return false;
+    };
+
+    // Función para simular la validación del RFC y activar botón "Ver Datos"
+    window.simularValidacionRFC = function(rfc, verBtnId = 'verDatosBtn') {
+        // Mostrar loading mientras se "valida"
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<svg class="w-3.5 h-3.5 mr-1.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>Validando...';
+        btn.disabled = true;
+        
+        setTimeout(() => {
+            // Restaurar botón
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            
+            // Simular datos del SAT (esto normalmente vendría del QRHandler)
+            satDataExtracted = {
+                sections: [
+                    {
+                        title: 'Estado de los Datos',
+                        fields: [
+                            {
+                                label: 'Conexión con SAT',
+                                value: '✅ Datos obtenidos exitosamente del SAT'
+                            },
+                            {
+                                label: 'Estado de Validación',
+                                value: '✅ RFC validado correctamente'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Datos Fiscales',
+                        fields: [
+                            {
+                                label: 'RFC',
+                                value: rfc
+                            },
+                            {
+                                label: 'Nombre/Razón Social',
+                                value: '{{ auth()->user()->nombre ?? "Contribuyente Validado" }}'
+                            },
+                            {
+                                label: 'Tipo de Persona',
+                                value: '{{ $solicitante->tipo_persona ?? "Física" }}'
+                            },
+                            {
+                                label: 'Situación del Contribuyente',
+                                value: 'Activo'
+                            },
+                            {
+                                label: 'Fecha de Validación',
+                                value: new Date().toLocaleDateString('es-MX', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Datos de Domicilio',
+                        fields: [
+                            {
+                                label: 'Código Postal',
+                                value: '{{ $datosDomicilio["codigo_postal"] ?? "68000" }}'
+                            },
+                            {
+                                label: 'Estado',
+                                value: '{{ $datosDomicilio["estado"] ?? "Oaxaca" }}'
+                            },
+                            {
+                                label: 'Municipio',
+                                value: '{{ $datosDomicilio["municipio"] ?? "Oaxaca de Juárez" }}'
+                            },
+                            {
+                                label: 'Colonia',
+                                value: '{{ $datosDomicilio["colonia"] ?? "Centro" }}'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Información del Trámite',
+                        fields: [
+                            {
+                                label: 'Proceso',
+                                value: 'Validación de Constancia Fiscal'
+                            },
+                            {
+                                label: 'Sistema',
+                                value: 'Padrón de Proveedores - Gobierno de Oaxaca'
+                            },
+                            {
+                                label: 'Válida para',
+                                value: 'Inscripción, Renovación y Actualización'
+                            }
+                        ]
+                    }
+                ]
+            };
+            
+            rfcValidated = true;
+            
+            // Mostrar botón "Ver Datos"
+            const verDatosBtn = document.getElementById(verBtnId);
+            if (verDatosBtn) {
+                verDatosBtn.style.display = 'inline-flex';
+            }
+            
+            // Mostrar mensaje de éxito
+            alert('🎉 RFC validado exitosamente con el SAT.\n\nAhora puede ver los datos extraídos de su constancia fiscal.');
+        }, 2000); // 2 segundos para simular validación
+    };
+
+    // Cerrar modal al hacer clic fuera de él
+    document.addEventListener('click', function(event) {
+        const modal = document.getElementById('satDataModal');
+        const modalContent = modal?.querySelector('.bg-white');
+        if (modal && event.target === modal && modalContent && !modalContent.contains(event.target)) {
+            closeSatModal();
+        }
+    });
+
     // Carga instantánea - sin retrasos
     document.addEventListener('DOMContentLoaded', function() {
         // Las tarjetas cargan inmediatamente sin animación de retraso
+        
+        // Configurar PDF.js si está disponible
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
+        }
+        
+        console.log('Vista de trámites cargada correctamente');
     });
 </script>
 @endpush

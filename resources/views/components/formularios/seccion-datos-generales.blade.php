@@ -222,19 +222,39 @@ function datosGeneralesData() {
 
                 <!-- Actividad -->
                 <div class="form-group">
-                    <label for="actividad_id" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="actividad_search" class="block text-sm font-medium text-gray-700 mb-2">
                         Actividad
                     </label>
                     <div class="relative group">
-                        <select id="actividad_id" name="actividad_id"
-                                class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50 @error('actividad_id') border-red-500 @enderror"
-                                aria-label="Seleccionar actividad"
-                                disabled>
-                            <option value="">Primero seleccione un sector</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                            <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+                        <!-- Input de búsqueda -->
+                        <input type="text" 
+                               id="actividad_search" 
+                               placeholder="Escriba para buscar actividad..."
+                               class="block w-full px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50 @error('actividad_id') border-red-500 @enderror"
+                               aria-label="Buscar actividad"
+                               autocomplete="off"
+                               disabled>
+                        
+                        <!-- Icono de búsqueda -->
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i id="actividad-search-icon" class="fas fa-search text-gray-400 text-sm"></i>
+                            <i id="actividad-loading-icon" class="fas fa-spinner fa-spin text-gray-400 text-sm hidden"></i>
                         </div>
+                        
+                        <!-- Dropdown de resultados -->
+                        <div id="actividad-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto">
+                            <div id="actividad-resultados" class="py-1">
+                                <!-- Los resultados se cargarán aquí -->
+                            </div>
+                            <div id="actividad-no-resultados" class="px-3 py-2 text-sm text-gray-500 text-center hidden">
+                                No se encontraron actividades
+                            </div>
+                        </div>
+                        
+                        <!-- Select oculto para compatibilidad -->
+                        <select id="actividad_id" name="actividad_id" class="hidden" aria-label="Actividad seleccionada">
+                            <option value="">Seleccione una actividad</option>
+                        </select>
                     </div>
                     @error('actividad_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -1035,6 +1055,142 @@ button:hover {
         background-color: rgba(0, 0, 0, 0.5);
     }
 }
+
+/* Estilos para el dropdown de búsqueda de actividades */
+#actividad-dropdown {
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.1), 
+                0 10px 10px -5px rgba(79, 70, 229, 0.04);
+    backdrop-filter: blur(10px);
+    animation: dropdownSlideIn 0.2s ease-out;
+}
+
+#actividad-dropdown.show {
+    display: block;
+}
+
+@keyframes dropdownSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Estilo para cada resultado en el dropdown */
+.actividad-resultado-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.actividad-resultado-item:last-child {
+    border-bottom: none;
+}
+
+.actividad-resultado-item:hover {
+    background: linear-gradient(135deg, 
+        rgba(79, 70, 229, 0.08) 0%,
+        rgba(79, 70, 229, 0.12) 100%
+    );
+    color: #4F46E5;
+    transform: translateX(4px);
+}
+
+.actividad-resultado-item.selected {
+    background: linear-gradient(135deg, 
+        rgba(79, 70, 229, 0.12) 0%,
+        rgba(79, 70, 229, 0.18) 100%
+    );
+    color: #4F46E5;
+    font-weight: 500;
+}
+
+.actividad-resultado-nombre {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    line-height: 1.3;
+}
+
+.actividad-resultado-sector {
+    font-size: 0.75rem;
+    color: #6B7280;
+    font-style: italic;
+}
+
+.actividad-resultado-item:hover .actividad-resultado-nombre {
+    color: #4F46E5;
+}
+
+.actividad-resultado-item:hover .actividad-resultado-sector {
+    color: #6366F1;
+}
+
+/* Resaltar texto coincidente */
+.highlight {
+    background-color: rgba(79, 70, 229, 0.2);
+    font-weight: 600;
+    padding: 1px 2px;
+    border-radius: 2px;
+}
+
+/* Loading state para el input */
+#actividad_search:disabled {
+    background-color: #f9fafb;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Scrollbar personalizada para el dropdown */
+#actividad-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+#actividad-dropdown::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+#actividad-dropdown::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+#actividad-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Animación para el icono de loading */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.fa-spinner.fa-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Estado cuando no hay resultados */
+#actividad-no-resultados {
+    background: linear-gradient(135deg, 
+        rgba(107, 114, 128, 0.05) 0%,
+        rgba(107, 114, 128, 0.08) 100%
+    );
+    border-radius: 6px;
+    margin: 4px;
+}
 </style>
 
 <script>
@@ -1042,10 +1198,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Variables necesarias
     const sectorSelect = document.getElementById('sector_id');
     const actividadSelect = document.getElementById('actividad_id');
+    const actividadSearchInput = document.getElementById('actividad_search');
+    const actividadDropdown = document.getElementById('actividad-dropdown');
+    const actividadResultados = document.getElementById('actividad-resultados');
+    const actividadNoResultados = document.getElementById('actividad-no-resultados');
+    const actividadSearchIcon = document.getElementById('actividad-search-icon');
+    const actividadLoadingIcon = document.getElementById('actividad-loading-icon');
     const actividadesContainer = document.getElementById('actividades-seleccionadas');
     const actividadesInput = document.getElementById('actividades_seleccionadas_input');
     const noActividadesMessage = document.getElementById('no-actividades-message');
     let actividadesSeleccionadas = new Set();
+    let actividadesData = []; // Cache de todas las actividades
+    let searchTimeout;
+    let selectedIndex = -1; // Para navegación con teclado
 
     // Función para actualizar el mensaje de no actividades
     function actualizarMensajeNoActividades() {
@@ -1080,14 +1245,47 @@ document.addEventListener('DOMContentLoaded', function() {
             actualizarActividadesInput();
             tag.remove();
 
-            // Restaurar la opción en el select si corresponde al sector actual
-            if (sectorSelect.value) {
-                cargarActividades(sectorSelect.value);
+            // Remover del select oculto
+            if (actividadSelect) {
+                const option = actividadSelect.querySelector(`option[value="${id}"]`);
+                if (option) {
+                    option.remove();
+                }
+            }
+
+            // Si hay búsqueda activa, actualizar resultados
+            if (actividadSearchInput && actividadSearchInput.value.trim().length >= 2) {
+                buscarActividades(actividadSearchInput.value.trim());
             }
         });
 
         actividadesContainer.appendChild(tag);
         actualizarMensajeNoActividades();
+    }
+
+    // Función para cargar todas las actividades (para búsqueda)
+    async function cargarTodasLasActividades() {
+        try {
+            const response = await fetch('/api/actividades');
+            if (!response.ok) throw new Error('Error al cargar actividades');
+            
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message || 'Error al cargar actividades');
+            
+            actividadesData = data.data;
+            
+            // Habilitar el input de búsqueda
+            if (actividadSearchInput) {
+                actividadSearchInput.disabled = false;
+                actividadSearchInput.placeholder = 'Escriba para buscar actividad...';
+            }
+            
+        } catch (error) {
+            console.error('Error cargando actividades:', error);
+            if (actividadSearchInput) {
+                actividadSearchInput.placeholder = 'Error al cargar actividades';
+            }
+        }
     }
 
     // Función para cargar actividades existentes
@@ -1112,62 +1310,267 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Event Listeners
-    if (sectorSelect && actividadSelect) {
-        sectorSelect.addEventListener('change', async function() {
-            const sectorId = this.value;
-            actividadSelect.disabled = true;
-            actividadSelect.innerHTML = '<option value="">Cargando actividades...</option>';
+    // Función para resaltar texto coincidente
+    function resaltarTexto(texto, busqueda) {
+        if (!busqueda) return texto;
+        
+        const regex = new RegExp(`(${busqueda.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return texto.replace(regex, '<span class="highlight">$1</span>');
+    }
 
-            if (!sectorId) {
-                actividadSelect.innerHTML = '<option value="">Primero seleccione un sector</option>';
-                actividadSelect.disabled = true;
+    // Función para buscar actividades
+    function buscarActividades(query) {
+        if (!query || query.length < 2) {
+            ocultarDropdown();
+            return;
+        }
+
+        mostrarLoading();
+
+        // Filtrar actividades
+        const resultados = actividadesData.filter(actividad => {
+            // Buscar en nombre de actividad y sector
+            const nombreCoincide = actividad.nombre.toLowerCase().includes(query.toLowerCase());
+            const sectorCoincide = actividad.sector && actividad.sector.nombre.toLowerCase().includes(query.toLowerCase());
+            
+            // Excluir actividades ya seleccionadas
+            return (nombreCoincide || sectorCoincide) && !actividadesSeleccionadas.has(actividad.id.toString());
+        });
+
+        mostrarResultados(resultados, query);
+    }
+
+    // Función para mostrar loading
+    function mostrarLoading() {
+        if (actividadSearchIcon) actividadSearchIcon.classList.add('hidden');
+        if (actividadLoadingIcon) actividadLoadingIcon.classList.remove('hidden');
+    }
+
+    // Función para ocultar loading
+    function ocultarLoading() {
+        if (actividadSearchIcon) actividadSearchIcon.classList.remove('hidden');
+        if (actividadLoadingIcon) actividadLoadingIcon.classList.add('hidden');
+    }
+
+    // Función para mostrar resultados
+    function mostrarResultados(resultados, query) {
+        ocultarLoading();
+        selectedIndex = -1;
+
+        if (!actividadResultados) return;
+
+        actividadResultados.innerHTML = '';
+
+        if (resultados.length === 0) {
+            if (actividadNoResultados) actividadNoResultados.classList.remove('hidden');
+            mostrarDropdown();
+            return;
+        }
+
+        if (actividadNoResultados) actividadNoResultados.classList.add('hidden');
+
+        // Limitar resultados para mejor rendimiento
+        const resultadosLimitados = resultados.slice(0, 20);
+
+        resultadosLimitados.forEach((actividad, index) => {
+            const item = document.createElement('div');
+            item.className = 'actividad-resultado-item';
+            item.dataset.id = actividad.id;
+            item.dataset.nombre = actividad.nombre;
+            item.dataset.sector = actividad.sector ? actividad.sector.nombre : 'Sin sector';
+            item.dataset.index = index;
+
+            const nombreResaltado = resaltarTexto(actividad.nombre, query);
+            const sectorResaltado = actividad.sector ? resaltarTexto(actividad.sector.nombre, query) : 'Sin sector';
+
+            item.innerHTML = `
+                <div class="actividad-resultado-nombre">${nombreResaltado}</div>
+                <div class="actividad-resultado-sector">${sectorResaltado}</div>
+            `;
+
+            // Event listeners para selección
+            item.addEventListener('click', () => seleccionarActividad(actividad));
+            item.addEventListener('mouseenter', () => {
+                selectedIndex = index;
+                actualizarSeleccionVisual();
+            });
+
+            actividadResultados.appendChild(item);
+        });
+
+        mostrarDropdown();
+    }
+
+    // Función para mostrar dropdown
+    function mostrarDropdown() {
+        if (actividadDropdown) {
+            actividadDropdown.classList.remove('hidden');
+            actividadDropdown.classList.add('show');
+        }
+    }
+
+    // Función para ocultar dropdown
+    function ocultarDropdown() {
+        if (actividadDropdown) {
+            actividadDropdown.classList.add('hidden');
+            actividadDropdown.classList.remove('show');
+        }
+        selectedIndex = -1;
+        ocultarLoading();
+    }
+
+    // Función para seleccionar actividad
+    function seleccionarActividad(actividad) {
+        const actividadId = actividad.id.toString();
+        const actividadNombre = actividad.nombre;
+        const sectorNombre = actividad.sector ? actividad.sector.nombre : 'Sin sector';
+
+        if (!actividadesSeleccionadas.has(actividadId)) {
+            actividadesSeleccionadas.add(actividadId);
+            actualizarActividadesInput();
+            agregarTag(actividadId, actividadNombre, sectorNombre);
+
+            // Actualizar select oculto
+            if (actividadSelect) {
+                const option = document.createElement('option');
+                option.value = actividadId;
+                option.textContent = actividadNombre;
+                option.selected = true;
+                actividadSelect.appendChild(option);
+            }
+        }
+
+        // Limpiar búsqueda
+        if (actividadSearchInput) {
+            actividadSearchInput.value = '';
+        }
+        ocultarDropdown();
+    }
+
+    // Función para actualizar selección visual con teclado
+    function actualizarSeleccionVisual() {
+        const items = document.querySelectorAll('.actividad-resultado-item');
+        items.forEach((item, index) => {
+            if (index === selectedIndex) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+    }
+
+    // Función para navegar con teclado
+    function navegarConTeclado(direction) {
+        const items = document.querySelectorAll('.actividad-resultado-item');
+        if (items.length === 0) return;
+
+        if (direction === 'down') {
+            selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+        } else if (direction === 'up') {
+            selectedIndex = Math.max(selectedIndex - 1, -1);
+        }
+
+        actualizarSeleccionVisual();
+
+        // Scroll al elemento seleccionado
+        if (selectedIndex >= 0 && items[selectedIndex]) {
+            items[selectedIndex].scrollIntoView({
+                block: 'nearest',
+                behavior: 'smooth'
+            });
+        }
+    }
+
+    // Event Listeners para búsqueda de actividades
+    if (actividadSearchInput) {
+        // Búsqueda mientras escribe
+        actividadSearchInput.addEventListener('input', function(e) {
+            const query = e.target.value.trim();
+            
+            // Limpiar timeout anterior
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            
+            // Debounce de 300ms
+            searchTimeout = setTimeout(() => {
+                buscarActividades(query);
+            }, 300);
+        });
+
+        // Navegación con teclado
+        actividadSearchInput.addEventListener('keydown', function(e) {
+            const dropdown = document.getElementById('actividad-dropdown');
+            
+            if (!dropdown || dropdown.classList.contains('hidden')) {
                 return;
             }
 
-            try {
-                const response = await fetch(`/api/sectores/${sectorId}/actividades`);
-                if (!response.ok) throw new Error('Error al cargar actividades');
-
-                const data = await response.json();
-                if (!data.success) throw new Error(data.message || 'Error al cargar actividades');
-
-                actividadSelect.innerHTML = '<option value="">Seleccione una actividad</option>';
-                data.data.forEach(actividad => {
-                    if (!actividadesSeleccionadas.has(actividad.id.toString())) {
-                        const option = document.createElement('option');
-                        option.value = actividad.id;
-                        option.textContent = actividad.nombre;
-                        option.title = actividad.nombre;
-                        actividadSelect.appendChild(option);
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    navegarConTeclado('down');
+                    break;
+                    
+                case 'ArrowUp':
+                    e.preventDefault();
+                    navegarConTeclado('up');
+                    break;
+                    
+                case 'Enter':
+                    e.preventDefault();
+                    const items = document.querySelectorAll('.actividad-resultado-item');
+                    if (selectedIndex >= 0 && items[selectedIndex]) {
+                        const actividadId = items[selectedIndex].dataset.id;
+                        const actividad = actividadesData.find(act => act.id.toString() === actividadId);
+                        if (actividad) {
+                            seleccionarActividad(actividad);
+                        }
                     }
-                });
-
-                actividadSelect.disabled = false;
-
-            } catch (error) {
-                actividadSelect.innerHTML = '<option value="">Error al cargar actividades</option>';
-                actividadSelect.disabled = true;
+                    break;
+                    
+                case 'Escape':
+                    e.preventDefault();
+                    ocultarDropdown();
+                    this.blur();
+                    break;
             }
         });
 
-        actividadSelect.addEventListener('change', function() {
-            const actividadId = this.value;
-            if (!actividadId) return;
-
-            const actividadNombre = this.options[this.selectedIndex].text;
-            const sectorNombre = sectorSelect.options[sectorSelect.selectedIndex].getAttribute('data-nombre');
-
-            if (!actividadesSeleccionadas.has(actividadId)) {
-                actividadesSeleccionadas.add(actividadId);
-                actualizarActividadesInput();
-                agregarTag(actividadId, actividadNombre, sectorNombre);
+        // Mostrar dropdown al hacer focus si hay texto
+        actividadSearchInput.addEventListener('focus', function() {
+            const query = this.value.trim();
+            if (query.length >= 2) {
+                buscarActividades(query);
             }
+        });
 
-            // Resetear el select
-            this.value = '';
+        // Ocultar dropdown al perder focus (con delay para permitir clicks)
+        actividadSearchInput.addEventListener('blur', function() {
+            setTimeout(() => {
+                ocultarDropdown();
+            }, 200);
         });
     }
+
+    // Event Listeners originales (mantener compatibilidad)
+    if (sectorSelect && actividadSelect) {
+        sectorSelect.addEventListener('change', async function() {
+            const sectorId = this.value;
+            // El select original ahora está oculto, pero mantenemos la funcionalidad
+            // El input de búsqueda funciona independientemente del sector
+        });
+    }
+
+    // Cerrar dropdown al hacer click fuera
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#actividad_search') && !e.target.closest('#actividad-dropdown')) {
+            ocultarDropdown();
+        }
+    });
+
+    // Inicializar: cargar todas las actividades al cargar la página
+    cargarTodasLasActividades();
 
     // Inicializar actividades seleccionadas si existen
     const actividadesExistentes = actividadesInput?.value;
@@ -1189,6 +1592,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Inicializar el mensaje
     actualizarMensajeNoActividades();
+    
+    // Configurar placeholder inicial del input de búsqueda
+    if (actividadSearchInput) {
+        actividadSearchInput.placeholder = 'Cargando actividades...';
+        actividadSearchInput.disabled = true;
+    }
 });
 
 // Función para guardar datos y navegar al siguiente paso

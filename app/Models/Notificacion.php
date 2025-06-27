@@ -40,7 +40,8 @@ class Notificacion extends Model
     public static function paraUsuario($usuarioId, $limite = 10, $soloNoLeidas = false)
     {
         $query = static::whereHas('usuarios', function ($q) use ($usuarioId) {
-            $q->where('usuario_id', $usuarioId);
+            $q->where('usuario_id', $usuarioId)
+              ->where('notificacion_usuario.estado', '!=', 'Eliminado'); // Excluir eliminadas
         })
         ->with(['usuarios' => function ($q) use ($usuarioId) {
             $q->where('usuario_id', $usuarioId);

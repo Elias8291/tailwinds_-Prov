@@ -115,50 +115,58 @@
                             <div class="w-32 h-0.5 bg-gradient-to-r from-[#9d2449] to-[#8a203f] mt-2 rounded-full opacity-50"></div>
                         </div>
 
-                        <div class="w-full max-w-lg mx-auto space-y-6">
+                        <div class="w-full max-w-lg mx-auto space-y-5">
                             <!-- Nombre -->
-                            <div class="input-floating">
-                                <input type="text" 
-                                       id="name"
-                                       name="name"
-                                       value="{{ old('name', $user->nombre) }}"
-                                       autocomplete="off"
-                                       placeholder=" "
-                                       class="@error('name') error @enderror"
-                                       required>
-                                <label class="input-floating-label" for="name">
-                                    Nombre<span class="text-[#9d2449] ml-1">*</span>
+                            <div>
+                                <label for="name" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Nombre <span class="text-[#9d2449]">*</span>
                                 </label>
-                                <i class="fas fa-user input-icon"></i>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-user text-base"></i>
+                                    </span>
+                                    <input type="text"
+                                           id="name"
+                                           name="name"
+                                           value="{{ old('name', $user->nombre) }}"
+                                           autocomplete="off"
+                                           placeholder="Ej: Juan Pérez"
+                                           class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('name') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
+                                           required>
+                                </div>
                                 @error('name')
-                                <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
                                     <i class="fas fa-info-circle"></i>
                                     {{ $message }}
                                 </p>
                                 @enderror
                             </div>
-
                             <!-- Email -->
-                            <div class="input-floating">
-                                <input type="email" 
-                                       id="email"
-                                       name="email"
-                                       value="{{ old('email', $user->correo) }}"
-                                       autocomplete="off"
-                                       placeholder=" "
-                                       class="@error('email') error @enderror"
-                                       required>
-                                <label class="input-floating-label" for="email">
-                                    Correo Electrónico<span class="text-[#9d2449] ml-1">*</span>
+                            <div>
+                                <label for="email" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Correo Electrónico <span class="text-[#9d2449]">*</span>
                                 </label>
-                                <i class="fas fa-envelope input-icon"></i>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-envelope text-base"></i>
+                                    </span>
+                                    <input type="email"
+                                           id="email"
+                                           name="email"
+                                           value="{{ old('email', $user->correo) }}"
+                                           autocomplete="off"
+                                           placeholder="Ej: correo@ejemplo.com"
+                                           class="w-full h-11 pl-10 pr-3 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('email') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror"
+                                           required>
+                                </div>
                                 @error('email')
-                                <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
                                     <i class="fas fa-info-circle"></i>
                                     {{ $message }}
                                 </p>
                                 @enderror
                             </div>
+<<<<<<< HEAD
 
                             <!-- RFC -->
                             <div class="input-floating">
@@ -182,45 +190,54 @@
                                 @enderror
                             </div>
 
+=======
+>>>>>>> c0f914d6e5f49bac2ec8351bbd9cdd9675e19456
                             <!-- Contraseña -->
-                            <div class="input-floating">
-                                <input type="password" 
-                                       id="password"
-                                       name="password"
-                                       autocomplete="new-password"
-                                       placeholder=" "
-                                       class="@error('password') error @enderror"
-                                       style="padding-right: 4rem;">
-                                <label class="input-floating-label" for="password">
+                            <div>
+                                <label for="password" class="block text-xs font-medium text-gray-500 mb-1">
                                     Nueva Contraseña
                                 </label>
-                                <i class="fas fa-lock input-icon"></i>
-                                <i id="password-icon" class="fas fa-eye toggle-password" onclick="togglePassword('password')"></i>
-                                <div class="flex items-center mt-1.5 ml-1">
-                                    <i class="fas fa-info-circle text-gray-400 text-xs mr-1.5"></i>
-                                    <span class="text-xs text-gray-500">Dejar en blanco para mantener la actual</span>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-lock text-base"></i>
+                                    </span>
+                                    <input type="password"
+                                           id="password"
+                                           name="password"
+                                           autocomplete="new-password"
+                                           placeholder="Dejar en blanco para mantener la actual"
+                                           class="w-full h-11 pl-10 pr-10 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300 @error('password') border-red-300 focus:border-red-500 focus:ring-red-100 @enderror">
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-gray-400 hover:text-[#9d2449]" onclick="togglePassword('password')">
+                                        <i id="password-icon" class="fas fa-eye"></i>
+                                    </span>
                                 </div>
+                                <span class="text-xs text-gray-400">Dejar en blanco para mantener la actual</span>
                                 @error('password')
-                                <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
                                     <i class="fas fa-info-circle"></i>
                                     {{ $message }}
                                 </p>
                                 @enderror
                             </div>
-
                             <!-- Confirmar Contraseña -->
-                            <div class="input-floating">
-                                <input type="password" 
-                                       id="password_confirmation"
-                                       name="password_confirmation"
-                                       autocomplete="new-password"
-                                       placeholder=" "
-                                       style="padding-right: 4rem;">
-                                <label class="input-floating-label" for="password_confirmation">
-                                    Confirmar Nueva Contraseña
+                            <div>
+                                <label for="password_confirmation" class="block text-xs font-medium text-gray-500 mb-1">
+                                    Confirmar Contraseña
                                 </label>
-                                <i class="fas fa-lock input-icon"></i>
-                                <i id="password_confirmation-icon" class="fas fa-eye toggle-password" onclick="togglePassword('password_confirmation')"></i>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-300">
+                                        <i class="fas fa-lock text-base"></i>
+                                    </span>
+                                    <input type="password"
+                                           id="password_confirmation"
+                                           name="password_confirmation"
+                                           autocomplete="new-password"
+                                           placeholder="Vuelve a escribir la contraseña nueva"
+                                           class="w-full h-11 pl-10 pr-10 bg-white border border-gray-200 rounded-lg text-gray-800 shadow-sm focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/10 focus:outline-none transition-all duration-300">
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-gray-400 hover:text-[#9d2449]" onclick="togglePassword('password_confirmation')">
+                                        <i id="password_confirmation-icon" class="fas fa-eye"></i>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>

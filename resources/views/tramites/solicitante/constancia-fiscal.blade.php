@@ -1,5 +1,34 @@
 @extends('layouts.app')
 
+@push('styles')
+<style>
+    @keyframes loading-progress {
+        0% { width: 20%; }
+        50% { width: 75%; }
+        100% { width: 95%; }
+    }
+    
+    .animate-loading-progress {
+        animation: loading-progress 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-fadeInUp {
+        animation: fadeInUp 0.5s ease-out;
+    }
+</style>
+@endpush
+
 @section('content')
 <!-- Modal para mensajes de éxito/error -->
 <div id="messageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
@@ -21,19 +50,71 @@
                 </button>
             </div>
         </div>
-        <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px);">
-            <div id="satDataContent" class="space-y-6"></div>
+        
+        <!-- Contenido de carga durante validación -->
+        <div id="satValidationLoading" class="hidden p-6">
+            <div class="flex flex-col items-center justify-center space-y-6 py-12">
+                <!-- Spinner animado -->
+                <div class="relative">
+                    <div class="w-20 h-20 border-4 border-[#9d2449]/20 border-t-[#9d2449] rounded-full animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-[#9d2449] text-2xl animate-pulse"></i>
+                    </div>
+                </div>
+                
+                <!-- Texto de validación -->
+                <div class="text-center max-w-md">
+                    <h3 class="text-xl font-semibold text-[#9d2449] mb-3">Validando Constancia Fiscal</h3>
+                    <p class="text-gray-600 mb-6">
+                        Estamos verificando que el RFC coincida con su cuenta y validando los datos con el SAT...
+                    </p>
+                    
+                    <!-- Barra de progreso visual -->
+                    <div class="w-full max-w-sm mx-auto mb-6">
+                        <div class="bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] h-full rounded-full animate-loading-progress"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pasos del proceso -->
+                    <div class="space-y-3 text-sm text-gray-600">
+                        <div class="flex items-center justify-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <span>Escaneando código QR de la constancia...</span>
+                        </div>
+                        <div class="flex items-center justify-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+                            <span>Validando RFC con su cuenta ({{ $solicitante->rfc }})...</span>
+                        </div>
+                        <div class="flex items-center justify-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+                            <span>Extrayendo datos fiscales del SAT...</span>
+                        </div>
+                        <div class="flex items-center justify-center space-x-3">
+                            <div class="w-3 h-3 bg-purple-500 rounded-full animate-pulse" style="animation-delay: 1.5s;"></div>
+                            <span>Verificando información tributaria...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
-            <div class="flex justify-end space-x-3">
-                <button onclick="closeSatModal()" 
-                        class="px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 font-medium rounded-lg border border-gray-300 transition-colors">
-                    Cerrar
-                </button>
-                <button onclick="confirmarDatos()" 
-                        class="px-4 py-2 bg-gradient-to-r from-[#9d2449] to-[#7a1d37] text-white font-medium rounded-lg hover:shadow-lg transition-all">
-                    Confirmar y Continuar
-                </button>
+        
+        <!-- Contenido con datos del SAT (se muestra después de la validación) -->
+        <div id="satDataContainer" class="hidden">
+            <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px);">
+                <div id="satDataContent" class="space-y-6"></div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
+                <div class="flex justify-end space-x-3">
+                    <button onclick="closeSatModal()" 
+                            class="px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 font-medium rounded-lg border border-gray-300 transition-colors">
+                        Cerrar
+                    </button>
+                    <button onclick="confirmarDatos()" 
+                            class="px-4 py-2 bg-gradient-to-r from-[#9d2449] to-[#7a1d37] text-white font-medium rounded-lg hover:shadow-lg transition-all">
+                        Confirmar y Continuar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -129,12 +210,47 @@
 
             <!-- Loading -->
             <div id="loading-indicator" class="hidden mb-4">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="animate-spin w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full"></div>
-                        <div>
-                            <h4 class="font-medium text-blue-800">Procesando...</h4>
-                            <p class="text-xs text-blue-600">Validando RFC de la constancia</p>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex flex-col items-center space-y-4">
+                        <!-- Spinner principal -->
+                        <div class="relative">
+                            <div class="w-16 h-16 border-4 border-[#9d2449]/20 border-t-[#9d2449] rounded-full animate-spin"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-[#9d2449] text-xl animate-pulse"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Texto de estado -->
+                        <div class="text-center">
+                            <h4 class="font-semibold text-[#9d2449] text-lg mb-1">Procesando...</h4>
+                            <p class="text-sm text-gray-600 mb-4">Validando RFC de la constancia</p>
+                            
+                            <!-- Barra de progreso -->
+                            <div class="w-full max-w-xs mx-auto mb-4">
+                                <div class="bg-gray-200 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] h-full rounded-full animate-loading-progress"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Pasos de validación -->
+                            <div class="space-y-2 text-xs text-gray-500">
+                                <div id="step1" class="flex items-center justify-center space-x-2">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                    <span>Escaneando código QR...</span>
+                                </div>
+                                <div id="step2" class="flex items-center justify-center space-x-2 opacity-50">
+                                    <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                    <span>Validando RFC con cuenta ({{ $solicitante->rfc }})...</span>
+                                </div>
+                                <div id="step3" class="flex items-center justify-center space-x-2 opacity-50">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <span>Verificando con el SAT...</span>
+                                </div>
+                                <div id="step4" class="flex items-center justify-center space-x-2 opacity-50">
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                    <span>Finalizando validación...</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -208,49 +324,69 @@
             qrHandler.setOnDataScanned((data) => {
                 console.log('Datos escaneados de la constancia:', data);
                 
-                // Validar RFC
-                const rfcTramite = '{{ $solicitante->rfc }}';
-                const rfcConstancia = data.details?.rfc || '';
-                
-                if (!rfcConstancia) {
-                    showMessageModal('Error de validación', 'No se pudo extraer el RFC de la constancia', 'error');
-                    resetUpload();
-                    return;
-                }
-                
-                if (rfcConstancia.toUpperCase() !== rfcTramite.toUpperCase()) {
-                    showMessageModal('RFC no coincide', `El RFC de la constancia (${rfcConstancia}) no coincide con el RFC del trámite (${rfcTramite})`, 'error');
-                    resetUpload();
-                    return;
-                }
-                
-                // Guardar datos extraídos
-                satDataExtracted = data;
-                documentProcessed = true;
-                
-                // Llenar campos ocultos con datos del SAT
-                if (data.details) {
-                    document.getElementById('satRfc').value = data.details.rfc || '';
-                    document.getElementById('satNombre').value = data.details.razonSocial || data.details.nombreCompleto || '';
-                    document.getElementById('satTipoPersona').value = data.details.tipoPersona || '';
-                    document.getElementById('satCurp').value = data.details.curp || '';
-                }
-                
-                // Ocultar área de carga y loading
-                document.getElementById('upload-area').classList.add('hidden');
-                document.getElementById('loading-indicator').classList.add('hidden');
-                
-                // Mostrar área de archivo procesado
-                const processedArea = document.getElementById('file-processed');
-                processedArea.classList.remove('hidden');
-                
-                // Habilitar botón de continuar
-                const continueButton = document.getElementById('continue-button');
-                continueButton.disabled = false;
-                continueButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                
-                // Mostrar modal de éxito
-                showMessageModal('¡Constancia validada correctamente!', 'RFC verificado exitosamente', 'success');
+                // Activar paso 2: Validación RFC
+                setTimeout(() => {
+                    activateValidationStep(2);
+                    updateLoadingText('Validando RFC...', 'Verificando coincidencia con su cuenta');
+                    
+                    // Validar RFC
+                    const rfcTramite = '{{ $solicitante->rfc }}';
+                    const rfcConstancia = data.details?.rfc || '';
+                    
+                    if (!rfcConstancia) {
+                        showMessageModal('Error de validación', 'No se pudo extraer el RFC de la constancia', 'error');
+                        resetUpload();
+                        return;
+                    }
+                    
+                    if (rfcConstancia.toUpperCase() !== rfcTramite.toUpperCase()) {
+                        showMessageModal('RFC no coincide', `El RFC de la constancia (${rfcConstancia}) no coincide con el RFC del trámite (${rfcTramite})`, 'error');
+                        resetUpload();
+                        return;
+                    }
+                    
+                    // Activar paso 3: Validación SAT
+                    setTimeout(() => {
+                        activateValidationStep(3);
+                        updateLoadingText('Validando con SAT...', 'Verificando información tributaria');
+                        
+                        // Activar paso 4: Finalización
+                        setTimeout(() => {
+                            activateValidationStep(4);
+                            updateLoadingText('Finalizando...', 'Guardando información validada');
+                            
+                            setTimeout(() => {
+                                // Guardar datos extraídos
+                                satDataExtracted = data;
+                                documentProcessed = true;
+                                
+                                // Llenar campos ocultos con datos del SAT
+                                if (data.details) {
+                                    document.getElementById('satRfc').value = data.details.rfc || '';
+                                    document.getElementById('satNombre').value = data.details.razonSocial || data.details.nombreCompleto || '';
+                                    document.getElementById('satTipoPersona').value = data.details.tipoPersona || '';
+                                    document.getElementById('satCurp').value = data.details.curp || '';
+                                }
+                                
+                                // Ocultar área de carga y loading
+                                document.getElementById('upload-area').classList.add('hidden');
+                                document.getElementById('loading-indicator').classList.add('hidden');
+                                
+                                // Mostrar área de archivo procesado
+                                const processedArea = document.getElementById('file-processed');
+                                processedArea.classList.remove('hidden');
+                                
+                                // Habilitar botón de continuar
+                                const continueButton = document.getElementById('continue-button');
+                                continueButton.disabled = false;
+                                continueButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                                
+                                // Mostrar modal de éxito
+                                showMessageModal('¡Constancia validada correctamente!', `RFC (${rfcConstancia}) verificado exitosamente con el SAT`, 'success');
+                            }, 800); // Finalización
+                        }, 1200); // Validación SAT
+                    }, 1000); // Validación RFC
+                }, 800); // Activar paso 2
             });
 
             qrHandler.setOnError((error) => {
@@ -323,25 +459,53 @@
         }
 
         const modal = document.getElementById('satDataModal');
-        if (modal) {
+        const loadingDiv = document.getElementById('satValidationLoading');
+        const dataContainer = document.getElementById('satDataContainer');
+        
+        if (modal && loadingDiv && dataContainer) {
+            // Mostrar modal
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             
-            // Generar contenido del modal usando SATScraper
-            const content = SATScraper.generateModalContent(satDataExtracted);
-            const satDataContent = document.getElementById('satDataContent');
-            if (satDataContent) {
-                satDataContent.innerHTML = content;
-            }
+            // Mostrar loading y ocultar contenido
+            loadingDiv.classList.remove('hidden');
+            dataContainer.classList.add('hidden');
+            
+            // Simular proceso de validación con diferentes etapas
+            setTimeout(() => {
+                // Después de 2 segundos, generar contenido del modal usando SATScraper
+                const content = SATScraper.generateModalContent(satDataExtracted);
+                const satDataContent = document.getElementById('satDataContent');
+                if (satDataContent) {
+                    satDataContent.innerHTML = content;
+                }
+                
+                // Ocultar loading y mostrar datos con animación
+                loadingDiv.classList.add('hidden');
+                dataContainer.classList.remove('hidden');
+                dataContainer.classList.add('animate-fadeInUp');
+                
+                // Remover clase de animación después de completarla
+                setTimeout(() => {
+                    dataContainer.classList.remove('animate-fadeInUp');
+                }, 500);
+            }, 2000);
         }
     };
 
     // Función para cerrar el modal
     window.closeSatModal = function() {
         const modal = document.getElementById('satDataModal');
+        const loadingDiv = document.getElementById('satValidationLoading');
+        const dataContainer = document.getElementById('satDataContainer');
+        
         if (modal) {
             modal.style.display = 'none';
             document.body.style.overflow = '';
+            
+            // Resetear estado del modal para próxima vez
+            if (loadingDiv) loadingDiv.classList.add('hidden');
+            if (dataContainer) dataContainer.classList.add('hidden');
         }
     };
 
@@ -447,6 +611,10 @@
         document.getElementById('file-processed').classList.add('hidden');
         document.getElementById('loading-indicator').classList.add('hidden');
         
+        // Resetear pasos de validación
+        resetValidationSteps();
+        updateLoadingText('Procesando...', 'Validando RFC de la constancia');
+        
         // Deshabilitar botón
         const continueButton = document.getElementById('continue-button');
         continueButton.disabled = true;
@@ -462,6 +630,67 @@
             qrHandler.reset();
         }
     };
+
+    // Funciones auxiliares para el proceso de validación
+    function activateValidationStep(stepNumber) {
+        // Desactivar el paso anterior
+        if (stepNumber > 1) {
+            const prevStep = document.getElementById(`step${stepNumber - 1}`);
+            if (prevStep) {
+                prevStep.classList.remove('opacity-50');
+                const dot = prevStep.querySelector('.w-2');
+                if (dot) {
+                    dot.classList.remove('animate-pulse');
+                    dot.classList.add('bg-green-500');
+                }
+            }
+        }
+        
+        // Activar el paso actual
+        const currentStep = document.getElementById(`step${stepNumber}`);
+        if (currentStep) {
+            currentStep.classList.remove('opacity-50');
+            const dot = currentStep.querySelector('.w-2');
+            if (dot) {
+                dot.classList.add('animate-pulse');
+            }
+        }
+    }
+    
+    function updateLoadingText(title, subtitle) {
+        const loadingIndicator = document.getElementById('loading-indicator');
+        if (loadingIndicator) {
+            const titleElement = loadingIndicator.querySelector('h4');
+            const subtitleElement = loadingIndicator.querySelector('p');
+            if (titleElement) titleElement.textContent = title;
+            if (subtitleElement) subtitleElement.textContent = subtitle;
+        }
+    }
+    
+    function resetValidationSteps() {
+        for (let i = 1; i <= 4; i++) {
+            const step = document.getElementById(`step${i}`);
+            if (step) {
+                if (i === 1) {
+                    step.classList.remove('opacity-50');
+                    const dot = step.querySelector('.w-2');
+                    if (dot) {
+                        dot.classList.add('animate-pulse', 'bg-green-500');
+                        dot.classList.remove('bg-yellow-500', 'bg-blue-500', 'bg-purple-500');
+                    }
+                } else {
+                    step.classList.add('opacity-50');
+                    const dot = step.querySelector('.w-2');
+                    if (dot) {
+                        dot.classList.remove('animate-pulse', 'bg-green-500');
+                        if (i === 2) dot.classList.add('bg-yellow-500');
+                        if (i === 3) dot.classList.add('bg-blue-500');
+                        if (i === 4) dot.classList.add('bg-purple-500');
+                    }
+                }
+            }
+        }
+    }
 
     // Cerrar modal al hacer clic fuera de él
     document.addEventListener('click', function(event) {

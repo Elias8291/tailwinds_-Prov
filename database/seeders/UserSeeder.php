@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
         // Super Administrador
         $superAdmin = User::firstOrCreate(['correo' => '20161273@itoaxaca.edu.mx'], [
             'nombre' => 'Super Administrador',
-            'rfc' => 'MIDJ020222G49',
+            'rfc' => 'RAJE020226G97',
             'estado' => 'activo',
             'password' => Hash::make('gSSKAtlVP'),
         ]);

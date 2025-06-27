@@ -83,6 +83,7 @@ class SolicitanteController extends Controller
             'sat_rfc' => ['required', 'string', 'max:13'],
             'sat_nombre' => ['required', 'string', 'max:255'],
             'sat_tipo_persona' => ['required', 'in:Física,Moral'],
+            'sat_curp' => ['nullable', 'string', 'regex:/^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z][0-9]$/'],
             'sat_cp' => ['required', 'string', 'max:5'],
             'sat_nombre_vialidad' => ['nullable', 'string', 'max:255'],
         ], [
@@ -91,6 +92,7 @@ class SolicitanteController extends Controller
             'sat_nombre.required' => 'El nombre/razón social del SAT es obligatorio.',
             'sat_tipo_persona.required' => 'El tipo de persona es obligatorio.',
             'sat_tipo_persona.in' => 'El tipo de persona debe ser Física o Moral.',
+            'sat_curp.regex' => 'El formato del CURP no es válido.',
             'sat_cp.required' => 'El código postal es obligatorio.',
             'sat_cp.max' => 'El código postal no debe exceder 5 caracteres.',
         ])->validate();

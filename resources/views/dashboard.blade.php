@@ -22,20 +22,7 @@
                         </h2>
                         <p class="text-gray-600 text-sm">Bienvenido al Padrón de Proveedores del Estado De Oaxaca</p>
                     </div>
-                    <div class="flex flex-col items-end gap-3">
-                        <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium inline-flex items-center border border-green-200">
-                            <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                            Sesión Activa
-                        </span>
-                        @can('dashboard.iniciar-tramite')
-                        <a href="{{ route('tramites.solicitante.index') }}" class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2.5 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20 text-base">
-                            <span class="font-semibold">Iniciar trámite</span>
-                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                            </svg>
-                        </a>
-                        @endcan
-                    </div>
+                   
                 </div>
             </div>
 
@@ -200,18 +187,7 @@
                                     </div>
                                 </a>
 
-                                <!-- Notificaciones -->
-                                <a href="{{ route('notificaciones.index') }}" class="group p-4 hover:bg-gray-50 cursor-pointer transition-colors duration-300 block">
-                                    <div class="flex items-center space-x-4">
-                                        <div class="flex-shrink-0">
-                                            <i class="fa-solid fa-bell text-xl text-[#9d2449]"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="text-sm font-semibold text-gray-800 group-hover:text-[#9d2449] transition-colors">Notificaciones</h4>
-                                            <p class="text-xs text-gray-500">Revisa tus notificaciones y actualizaciones</p>
-                                        </div>
-                                    </div>
-                                </a>
+
                             </div>
                         </div>
                     </div>

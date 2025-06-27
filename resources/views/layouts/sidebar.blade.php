@@ -151,20 +151,47 @@
                     </a>
                     @endcan
 
+
+
                     <!-- Notificaciones -->
                     <a href="{{ route('notificaciones.index') }}" class="group/item flex items-center min-w-[250px] px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
-                        {{ request()->routeIs('notificaciones.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
+                        {{ request()->routeIs('notificaciones.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}"
+                        x-data="{ 
+                            contador: 0,
+                            async cargarContador() {
+                                try {
+                                    const response = await fetch('{{ route('notificaciones.contador') }}', {
+                                        headers: {
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').getAttribute('content')
+                                        }
+                                    });
+                                    if (response.ok) {
+                                        const data = await response.json();
+                                        this.contador = data.contador;
+                                    }
+                                } catch (error) {
+                                    console.error('Error al cargar contador:', error);
+                                }
+                            }
+                        }"
+                        x-init="
+                            cargarContador();
+                            setInterval(() => cargarContador(), 30000);
+                        ">
                         <div class="relative">
                             <svg class="{{ request()->routeIs('notificaciones.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            <span id="desktop-notification-count" class="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-500 text-white text-xs rounded-full" style="display: none;">0</span>
+                            <span x-show="contador > 0" 
+                                  x-text="contador" 
+                                  class="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center bg-red-500 text-white text-xs font-medium rounded-full animate-pulse"></span>
                         </div>
                         <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Notificaciones</span>
                     </a>
 
                     <!-- Separador: Personal - Solo si hay elementos en la sección -->
-                    @if(auth()->user()->can('perfil.ver') || auth()->user()->can('configuracion.ver'))
+                    @if(auth()->user()->can('perfil.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                     </div>
@@ -181,15 +208,7 @@
                     </a>
                     @endcan
 
-                    <!-- Configuración -->
-                    @can('configuracion.ver')
-                    <a href="#" class="group/item flex items-center min-w-[250px] px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 text-gray-700 hover:bg-white hover:shadow-md hover:text-primary">
-                        <svg class="text-gray-400 flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:text-primary group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                        </svg>
-                        <span class="ml-3 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">Configuración</span>
-                    </a>
-                    @endcan
+
                 </nav>
             </div>
         </div>
@@ -393,20 +412,47 @@
                     </a>
                     @endcan
 
+
+
                     <!-- Notificaciones en móvil -->
                     <a href="{{ route('notificaciones.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
-                        {{ request()->routeIs('notificaciones.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}">
-                        <div class="relative">
-                            <svg class="{{ request()->routeIs('notificaciones.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} mr-4 flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        {{ request()->routeIs('notificaciones.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}"
+                        x-data="{ 
+                            contador: 0,
+                            async cargarContador() {
+                                try {
+                                    const response = await fetch('{{ route('notificaciones.contador') }}', {
+                                        headers: {
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').getAttribute('content')
+                                        }
+                                    });
+                                    if (response.ok) {
+                                        const data = await response.json();
+                                        this.contador = data.contador;
+                                    }
+                                } catch (error) {
+                                    console.error('Error al cargar contador:', error);
+                                }
+                            }
+                        }"
+                        x-init="
+                            cargarContador();
+                            setInterval(() => cargarContador(), 30000);
+                        ">
+                        <div class="relative mr-4">
+                            <svg class="{{ request()->routeIs('notificaciones.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            <span id="mobile-notification-count" class="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-500 text-white text-xs rounded-full" style="display: none;">0</span>
+                            <span x-show="contador > 0" 
+                                  x-text="contador" 
+                                  class="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center bg-red-500 text-white text-xs font-medium rounded-full animate-pulse"></span>
                         </div>
                         Notificaciones
                     </a>
 
                     <!-- Separador: Personal - Solo si hay elementos en la sección -->
-                    @if(auth()->user()->can('perfil.ver') || auth()->user()->can('configuracion.ver'))
+                    @if(auth()->user()->can('perfil.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                         <p class="mt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Personal</p>

@@ -286,6 +286,10 @@ class TramiteSolicitanteController extends Controller
     public function iniciarInscripcion(Request $request)
     {
         $user = Auth::user();
+        
+        // Asegurar que el usuario tenga un solicitante
+        $this->asegurarSolicitante($user);
+        
         $tramiteEnProgreso = $this->verificarTramiteEnProgreso($user);
         
         Log::info('Iniciando inscripción:', [
@@ -308,6 +312,10 @@ class TramiteSolicitanteController extends Controller
     public function iniciarRenovacion(Request $request)
     {
         $user = Auth::user();
+        
+        // Asegurar que el usuario tenga un solicitante
+        $this->asegurarSolicitante($user);
+        
         $tramiteEnProgreso = $this->verificarTramiteEnProgreso($user);
         
         Log::info('Iniciando renovación:', [
@@ -330,6 +338,10 @@ class TramiteSolicitanteController extends Controller
     public function iniciarActualizacion(Request $request)
     {
         $user = Auth::user();
+        
+        // Asegurar que el usuario tenga un solicitante
+        $this->asegurarSolicitante($user);
+        
         $tramiteEnProgreso = $this->verificarTramiteEnProgreso($user);
         
         Log::info('Iniciando actualización:', [
@@ -367,7 +379,21 @@ class TramiteSolicitanteController extends Controller
             ])->with('warning', 'Hay secciones que necesitan corrección. Por favor, revise las observaciones.');
         }
 
-        // Siempre redirigir a la vista create unificada
+        // Si el trámite no tiene constancia fiscal, redirigir primero a cargarla
+        if (!$this->tieneConstanciaFiscal($tramite)) {
+            Log::info('Trámite existente sin constancia fiscal, redirigiendo:', [
+                'tramite_id' => $tramite->id,
+                'tipo_tramite' => $tramite->tipo_tramite,
+                'progreso' => $tramite->progreso_tramite
+            ]);
+            
+            return redirect()->route('tramites.solicitante.constancia-fiscal', [
+                'tipo_tramite' => strtolower($tramite->tipo_tramite),
+                'tramite' => $tramite->id
+            ])->with('info', 'Para continuar con su trámite, necesitamos validar su constancia de situación fiscal.');
+        }
+
+        // Si ya tiene constancia fiscal, ir directamente al formulario
         return redirect()->route('tramites.create.tipo', [
             'tipo_tramite' => strtolower($tramite->tipo_tramite),
             'tramite' => $tramite->id
@@ -376,12 +402,8 @@ class TramiteSolicitanteController extends Controller
 
     private function crearNuevoTramite($tipoTramite, $user)
     {
-        // Buscar el solicitante asociado al usuario
+        // Buscar el solicitante asociado al usuario (ya garantizado que existe)
         $solicitante = Solicitante::where('usuario_id', $user->id)->first();
-        
-        if (!$solicitante) {
-            return back()->with('error', 'No se encontró información del solicitante');
-        }
 
         // Verificar OTRA VEZ si ya existe un trámite del mismo tipo en progreso
         $tramiteExistente = Tramite::where('solicitante_id', $solicitante->id)
@@ -417,7 +439,20 @@ class TramiteSolicitanteController extends Controller
         // Log del sistema para auditoría
         SystemLogService::tramiteCreated($tramite->id, ucfirst($tipoTramite), $solicitante->razon_social ?? $solicitante->nombre_completo ?? 'Solicitante');
         
-        // Redirigir directamente a la vista create unificada
+        // Para nuevos trámites, verificar si necesita constancia fiscal
+        if ($this->necesitaConstanciaFiscal($tramite)) {
+            Log::info('Nuevo trámite requiere constancia fiscal, redirigiendo:', [
+                'tramite_id' => $tramite->id,
+                'tipo_tramite' => $tipoTramite
+            ]);
+            
+            return redirect()->route('tramites.solicitante.constancia-fiscal', [
+                'tipo_tramite' => strtolower($tipoTramite),
+                'tramite' => $tramite->id
+            ])->with('info', 'Para continuar, necesitamos validar su constancia de situación fiscal.');
+        }
+        
+        // Si no necesita constancia fiscal, ir directamente al formulario
         return redirect()->route('tramites.create.tipo', [
             'tipo_tramite' => strtolower($tipoTramite),
             'tramite' => $tramite->id
@@ -432,6 +467,51 @@ class TramiteSolicitanteController extends Controller
         // Por ahora solo verificamos si el trámite tiene progreso > 0
         // Más adelante se puede implementar la verificación de documentos
         return $tramite->progreso_tramite > 0;
+    }
+
+    /**
+     * Determina si un nuevo trámite necesita constancia fiscal
+     */
+    private function necesitaConstanciaFiscal($tramite)
+    {
+        // Un nuevo trámite necesita constancia fiscal si:
+        // 1. No tiene progreso (recién creado)
+        // 2. No tiene constancia fiscal ya procesada
+        return $tramite->progreso_tramite == 0 && !$this->tieneConstanciaFiscal($tramite);
+    }
+
+    /**
+     * Asegura que el usuario tenga un registro de solicitante
+     */
+    private function asegurarSolicitante($user)
+    {
+        $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+        
+        if (!$solicitante) {
+            Log::info('Creando solicitante automáticamente para usuario:', [
+                'user_id' => $user->id,
+                'user_rfc' => $user->rfc ?? 'N/A',
+                'user_nombre' => $user->nombre ?? 'N/A'
+            ]);
+            
+            $solicitante = Solicitante::create([
+                'usuario_id' => $user->id,
+                'rfc' => $user->rfc ?? '',
+                'nombre_completo' => $user->nombre ?? '',
+                'razon_social' => '',
+                'tipo_persona' => 'Física', // Por defecto
+                'curp' => '',
+                'giro' => '',
+                'estado' => 'Activo'
+            ]);
+            
+            Log::info('Solicitante creado automáticamente:', [
+                'solicitante_id' => $solicitante->id,
+                'usuario_id' => $user->id
+            ]);
+        }
+        
+        return $solicitante;
     }
 
     /**

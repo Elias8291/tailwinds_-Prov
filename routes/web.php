@@ -47,7 +47,7 @@ use App\Http\Controllers\DocumentoMembretadoController;
 use App\Http\Controllers\MembreteController;
 
 // Controladores de IA
-use App\Http\Controllers\AI\DocumentTrainingController;
+// use App\Http\Controllers\AI\DocumentTrainingController;
 
 // Controladores de Estado
 use App\Http\Controllers\MiEstadoProveedorController;
@@ -492,50 +492,50 @@ Route::middleware('auth')->group(function () {
 // MÓDULO DE ENTRENAMIENTO DE IA
 // ============================================================================
 
-Route::middleware(['auth'])->prefix('ai/training')->name('ai.training.')->group(function () {
-    
-    // Dashboard principal del módulo de entrenamiento
-    Route::get('/', [DocumentTrainingController::class, 'index'])->name('index');
-    
-    // Subida de documentos para entrenamiento
-    Route::get('/upload', [DocumentTrainingController::class, 'uploadForm'])->name('upload');
-    Route::post('/upload', [DocumentTrainingController::class, 'upload'])->name('upload.store');
-    
-    // Revisión y aprobación de documentos
-    Route::get('/review', [DocumentTrainingController::class, 'review'])->name('review');
-    Route::post('/approve/{trainingData}', [DocumentTrainingController::class, 'approve'])->name('approve');
-    Route::post('/reject/{trainingData}', [DocumentTrainingController::class, 'reject'])->name('reject');
-    
-    // Entrenamiento de modelos
-    Route::post('/train', [DocumentTrainingController::class, 'trainModel'])->name('train');
-    
-    // Ver detalles de documento de entrenamiento
-    Route::get('/document/{trainingData}', [DocumentTrainingController::class, 'showDocument'])->name('document.show');
-    
-    // Servir archivos de entrenamiento
-    Route::get('/file/{trainingData}', [DocumentTrainingController::class, 'serveTrainingFile'])->name('file.serve');
-    
-    // Eliminar datos de entrenamiento
-    Route::delete('/training-data/{trainingData}', [DocumentTrainingController::class, 'deleteTrainingData'])->name('training-data.delete');
-});
+// Route::middleware(['auth'])->prefix('ai/training')->name('ai.training.')->group(function () {
+//     
+//     // Dashboard principal del módulo de entrenamiento
+//     Route::get('/', [DocumentTrainingController::class, 'index'])->name('index');
+//     
+//     // Subida de documentos para entrenamiento
+//     Route::get('/upload', [DocumentTrainingController::class, 'uploadForm'])->name('upload');
+//     Route::post('/upload', [DocumentTrainingController::class, 'upload'])->name('upload.store');
+//     
+//     // Revisión y aprobación de documentos
+//     Route::get('/review', [DocumentTrainingController::class, 'review'])->name('review');
+//     Route::post('/approve/{trainingData}', [DocumentTrainingController::class, 'approve'])->name('approve');
+//     Route::post('/reject/{trainingData}', [DocumentTrainingController::class, 'reject'])->name('reject');
+//     
+//     // Entrenamiento de modelos
+//     Route::post('/train', [DocumentTrainingController::class, 'trainModel'])->name('train');
+//     
+//     // Ver detalles de documento de entrenamiento
+//     Route::get('/document/{trainingData}', [DocumentTrainingController::class, 'showDocument'])->name('document.show');
+//     
+//     // Servir archivos de entrenamiento
+//     Route::get('/file/{trainingData}', [DocumentTrainingController::class, 'serveTrainingFile'])->name('file.serve');
+//     
+//     // Eliminar datos de entrenamiento
+//     Route::delete('/training-data/{trainingData}', [DocumentTrainingController::class, 'deleteTrainingData'])->name('training-data.delete');
+// });
 
 // ============================================================================
 // MÓDULO DE DASHBOARD DE IA
 // ============================================================================
 
-Route::middleware(['auth', 'can:ai.ver'])->prefix('ai')->name('ai.')->group(function () {
-    
-    // Dashboard principal de IA
-    Route::get('/dashboard', [\App\Http\Controllers\AI\AiDashboardController::class, 'index'])->name('dashboard.index');
-    
-    // Métricas y estadísticas
-    Route::get('/metrics', [\App\Http\Controllers\AI\AiDashboardController::class, 'getMetrics'])->name('metrics');
-    Route::get('/system-health', [\App\Http\Controllers\AI\AiDashboardController::class, 'getSystemHealth'])->name('system-health');
-    Route::get('/training-status', [\App\Http\Controllers\AI\AiDashboardController::class, 'getTrainingStatus'])->name('training-status');
-    
-    // Acciones rápidas
-    Route::post('/quick-action', [\App\Http\Controllers\AI\AiDashboardController::class, 'quickAction'])->name('quick-action');
-});
+// Route::middleware(['auth', 'can:ai.ver'])->prefix('ai')->name('ai.')->group(function () {
+//     
+//     // Dashboard principal de IA
+//     Route::get('/dashboard', [\App\Http\Controllers\AI\AiDashboardController::class, 'index'])->name('dashboard.index');
+//     
+//     // Métricas y estadísticas
+//     Route::get('/metrics', [\App\Http\Controllers\AI\AiDashboardController::class, 'getMetrics'])->name('metrics');
+//     Route::get('/system-health', [\App\Http\Controllers\AI\AiDashboardController::class, 'getSystemHealth'])->name('system-health');
+//     Route::get('/training-status', [\App\Http\Controllers\AI\AiDashboardController::class, 'getTrainingStatus'])->name('training-status');
+//     
+//     // Acciones rápidas
+//     Route::post('/quick-action', [\App\Http\Controllers\AI\AiDashboardController::class, 'quickAction'])->name('quick-action');
+// });
 
 if (config('app.debug')) {
     
@@ -570,16 +570,19 @@ if (config('app.debug')) {
 }
 
 // ============================================================================
-// MÓDULO DE NOTIFICACIONES
+// MÓDULO DE NOTIFICACIONES (SOLO API - SIN INTERFAZ)
 // ============================================================================
 
 Route::middleware(['auth'])->prefix('notificaciones')->name('notificaciones.')->group(function () {
     
-    // Ver todas las notificaciones
+    // Módulo principal de notificaciones (página completa)
     Route::get('/', [\App\Http\Controllers\NotificacionController::class, 'index'])->name('index');
     
     // API para el header (AJAX)
     Route::get('/header', [\App\Http\Controllers\NotificacionController::class, 'obtenerParaHeader'])->name('header');
+    
+    // API para el módulo de notificaciones (AJAX) - todas las notificaciones
+    Route::get('/todas', [\App\Http\Controllers\NotificacionController::class, 'obtenerTodas'])->name('todas');
     
     // Contador de no leídas
     Route::get('/contador', [\App\Http\Controllers\NotificacionController::class, 'contadorNoLeidas'])->name('contador');

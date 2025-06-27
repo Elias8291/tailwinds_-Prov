@@ -16,3 +16,12 @@ Schedule::command('proveedores:actualizar-estados')
     ->description('Actualiza automáticamente el estado de proveedores vencidos')
     ->withoutOverlapping()
     ->onOneServer();
+
+// Programar la eliminación automática de trámites vencidos (48 horas)
+Schedule::command('tramites:eliminar-vencidos --force')
+    ->hourly() // Se ejecuta cada hora para verificar trámites vencidos
+    ->name('eliminar-tramites-vencidos')
+    ->description('Elimina automáticamente trámites que han pasado 48 horas sin completarse')
+    ->withoutOverlapping()
+    ->onOneServer()
+    ->runInBackground();

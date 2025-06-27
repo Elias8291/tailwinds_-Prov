@@ -210,7 +210,7 @@
                     </div>
 
                     <!-- Botones de acción compactos -->
-                    <div class="flex items-center justify-center gap-3 pt-4 border-t border-gray-100">
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
                         <a href="{{ route('revision.index') }}" 
                            class="inline-flex items-center px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400/20 transition-all duration-200">
                             <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

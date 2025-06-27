@@ -81,10 +81,7 @@ class Tramite extends Model
             ->withTimestamps();
     }
 
-    public function citas()
-    {
-        return $this->hasMany(Cita::class);
-    }
+
 
     public function seccionesRevision()
     {
