@@ -124,6 +124,7 @@ class LoginController extends Controller
         $remember = $request->filled('remember');
 
         if (Auth::attempt($credentials, $remember)) {
+            // Regenerar la sesión para prevenir session fixation
             $request->session()->regenerate();
             
             Log::info('Login exitoso, procesando redirección', [

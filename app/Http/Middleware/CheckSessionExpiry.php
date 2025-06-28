@@ -17,8 +17,8 @@ class CheckSessionExpiry
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Solo verificar si el usuario está autenticado
-        if (Auth::check()) {
+        // Solo verificar si el usuario está autenticado y la sesión ya está iniciada
+        if (Auth::check() && $request->session()->isStarted()) {
             $sessionLifetime = config('session.lifetime', 30); // minutos
             $lastActivity = Session::get('last_activity');
             
@@ -36,7 +36,7 @@ class CheckSessionExpiry
                 }
             }
             
-            // Actualizar la hora de última actividad
+            // Actualizar la hora de última actividad solo para usuarios autenticados
             Session::put('last_activity', now());
         }
 

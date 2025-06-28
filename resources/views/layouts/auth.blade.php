@@ -287,72 +287,228 @@
         <div class="w-full max-w-[1000px] mx-auto">
             <div class="grid lg:grid-cols-2 min-h-[500px]">
                 <!-- Sección del Carousel -->
-                <div class="hidden lg:block relative overflow-hidden rounded-l-2xl">
+                <div class="hidden lg:block relative overflow-hidden rounded-l-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
                     <!-- Carousel Container -->
-                    <div id="carousel" class="relative w-full h-full">
+                    <div id="carousel" class="relative w-full h-full group">
                         <!-- Slide 1 -->
-                        <div class="carousel-slide absolute inset-0 transition-all duration-700 opacity-100" data-slide="0">
-                            <img src="{{ asset('images/carrousel_1.webp') }}" 
-                                 alt="Imagen de carrusel 1"
-                                 class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-6">
-                                <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                                    <h3 class="text-white text-lg font-bold mb-2">Padrón de Proveedores</h3>
-                                    <p class="text-white/90 text-sm leading-relaxed">Sistema integral para la gestión de proveedores del Gobierno de Oaxaca.</p>
+                        <div class="carousel-slide absolute inset-0 transition-all duration-[1200ms] ease-out opacity-100" data-slide="0">
+                            <div class="relative w-full h-full">
+                                <img src="{{ asset('images/carrousel_1.webp') }}" 
+                                     alt="Padrón de Proveedores"
+                                     class="w-full h-full object-cover opacity-70 transition-all duration-[3000ms] scale-105 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-800/50 to-slate-900/70"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+                            </div>
+                            
+                            <!-- Contenido Principal -->
+                            <div class="absolute inset-0 flex items-center justify-center p-12">
+                                <div class="text-center max-w-md mx-auto space-y-8">
+                                    <!-- Icono Principal -->
+                                    <div class="mx-auto w-20 h-20 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30 shadow-2xl">
+                                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                        </svg>
+                                    </div>
+                                    
+                                    <!-- Título Principal -->
+                                    <div class="space-y-3">
+                                        <h2 class="text-3xl font-light text-white tracking-wider">
+                                            Registro de Proveedores
+                                        </h2>
+                                        <h3 class="text-lg font-medium text-white/90 leading-relaxed">
+                                            del Gobierno de Oaxaca
+                                        </h3>
+                                        <div class="w-16 h-0.5 bg-gradient-to-r from-white/60 to-white/20 mx-auto"></div>
+                                    </div>
+                                    
+                                    <!-- Descripción -->
+                                    <p class="text-sm text-white/90 leading-relaxed font-light">
+                                        Plataforma oficial para empresas y personas físicas que desean ser proveedores del Gobierno del Estado de Oaxaca. 
+                                        Proceso completamente digital y transparente.
+                                    </p>
+                                    
+                                    <!-- Badge Oficial -->
+                                    <div class="inline-flex items-center space-x-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-full border border-white/30">
+                                        <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                                        <span class="text-xs text-white/90 font-medium tracking-wide">GOBIERNO DE OAXACA</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Slide 2 -->
-                        <div class="carousel-slide absolute inset-0 transition-all duration-700 opacity-0" data-slide="1">
-                            <img src="{{ asset('images/carrousel2.webp') }}" 
-                                 alt="Imagen de carrusel 2"
-                                 class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-6">
-                                <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                                    <h3 class="text-white text-lg font-bold mb-2">Registro Simplificado</h3>
-                                    <p class="text-white/90 text-sm leading-relaxed">Proceso de registro digital optimizado para proveedores de Oaxaca.</p>
+                        <div class="carousel-slide absolute inset-0 transition-all duration-[1200ms] ease-out opacity-0" data-slide="1">
+                            <div class="relative w-full h-full">
+                                <img src="{{ asset('images/carrousel2.webp') }}" 
+                                     alt="Registro con QR del SAT"
+                                     class="w-full h-full object-cover opacity-70 transition-all duration-[3000ms] scale-105 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-gradient-to-br from-blue-900/70 via-slate-800/50 to-slate-900/70"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+                            </div>
+                            
+                            <div class="absolute inset-0 flex items-center justify-center p-12">
+                                <div class="text-center max-w-md mx-auto space-y-8">
+                                    <div class="mx-auto w-20 h-20 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30 shadow-2xl">
+                                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h4M4 8h4m0 0V4m0 4h4m0 0v4M4 16h4m0 0v4"/>
+                                        </svg>
+                                    </div>
+                                    
+                                    <div class="space-y-3">
+                                        <h2 class="text-3xl font-light text-white tracking-wider">
+                                            Validación con QR
+                                        </h2>
+                                        <h3 class="text-lg font-medium text-white/90 leading-relaxed">
+                                            Constancia Fiscal del SAT
+                                        </h3>
+                                        <div class="w-16 h-0.5 bg-gradient-to-r from-white/60 to-white/20 mx-auto"></div>
+                                    </div>
+                                    
+                                    <p class="text-sm text-white/90 leading-relaxed font-light">
+                                        Suba su Constancia de Situación Fiscal con código QR y nuestro sistema validará automáticamente 
+                                        su información directamente con el SAT. Sin papeles, sin filas.
+                                    </p>
+                                    
+                                    <div class="inline-flex items-center space-x-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-full border border-white/30">
+                                        <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                                        <span class="text-xs text-white/90 font-medium tracking-wide">VALIDACIÓN AUTOMÁTICA</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Slide 3 -->
-                        <div class="carousel-slide absolute inset-0 transition-all duration-700 opacity-0" data-slide="2">
-                            <img src="{{ asset('images/carrousel3.webp') }}" 
-                                 alt="Imagen de carrusel 3"
-                                 class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-6">
-                                <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                                    <h3 class="text-white text-lg font-bold mb-2">Gestión Eficiente</h3>
-                                    <p class="text-white/90 text-sm leading-relaxed">Administra tus documentos y trámites de manera eficiente y segura.</p>
+                        <div class="carousel-slide absolute inset-0 transition-all duration-[1200ms] ease-out opacity-0" data-slide="2">
+                            <div class="relative w-full h-full">
+                                <img src="{{ asset('images/carrousel3.webp') }}" 
+                                     alt="Gestión de Trámites"
+                                     class="w-full h-full object-cover opacity-70 transition-all duration-[3000ms] scale-105 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-gradient-to-br from-emerald-900/70 via-slate-800/50 to-slate-900/70"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+                            </div>
+                            
+                            <div class="absolute inset-0 flex items-center justify-center p-12">
+                                <div class="text-center max-w-md mx-auto space-y-8">
+                                    <div class="mx-auto w-20 h-20 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30 shadow-2xl">
+                                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                    </div>
+                                    
+                                    <div class="space-y-3">
+                                        <h2 class="text-3xl font-light text-white tracking-wider">
+                                            Gestión de Trámites
+                                        </h2>
+                                        <h3 class="text-lg font-medium text-white/90 leading-relaxed">
+                                            Inscripción y Renovación
+                                        </h3>
+                                        <div class="w-16 h-0.5 bg-gradient-to-r from-white/60 to-white/20 mx-auto"></div>
+                                    </div>
+                                    
+                                    <p class="text-sm text-white/90 leading-relaxed font-light">
+                                        Gestione la inscripción inicial, renovaciones anuales y actualizaciones de datos. 
+                                        Seguimiento en tiempo real del estatus de todos sus trámites gubernamentales.
+                                    </p>
+                                    
+                                    <div class="inline-flex items-center space-x-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-full border border-white/30">
+                                        <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                                        <span class="text-xs text-white/90 font-medium tracking-wide">SEGUIMIENTO EN LÍNEA</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Slide 4 -->
-                        <div class="carousel-slide absolute inset-0 transition-all duration-700 opacity-0" data-slide="3">
-                            <img src="{{ asset('images/carrousel4.webp') }}" 
-                                 alt="Imagen de carrusel 4"
-                                 class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-6">
-                                <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                                    <h3 class="text-white text-lg font-bold mb-2">Soporte Continuo</h3>
-                                    <p class="text-white/90 text-sm leading-relaxed">Asistencia y seguimiento en cada etapa de tu proceso.</p>
+                        <div class="carousel-slide absolute inset-0 transition-all duration-[1200ms] ease-out opacity-0" data-slide="3">
+                            <div class="relative w-full h-full">
+                                <img src="{{ asset('images/carrousel4.webp') }}" 
+                                     alt="Portal de Proveedores"
+                                     class="w-full h-full object-cover opacity-70 transition-all duration-[3000ms] scale-105 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-gradient-to-br from-purple-900/70 via-slate-800/50 to-slate-900/70"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+                            </div>
+                            
+                            <div class="absolute inset-0 flex items-center justify-center p-12">
+                                <div class="text-center max-w-md mx-auto space-y-8">
+                                    <div class="mx-auto w-20 h-20 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30 shadow-2xl">
+                                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                        </svg>
+                                    </div>
+                                    
+                                    <div class="space-y-3">
+                                        <h2 class="text-3xl font-light text-white tracking-wider">
+                                            Portal del Proveedor
+                                        </h2>
+                                        <h3 class="text-lg font-medium text-white/90 leading-relaxed">
+                                            Dashboard Personalizado
+                                        </h3>
+                                        <div class="w-16 h-0.5 bg-gradient-to-r from-white/60 to-white/20 mx-auto"></div>
+                                    </div>
+                                    
+                                    <p class="text-sm text-white/90 leading-relaxed font-light">
+                                        Acceda a su portal personalizado con historial de trámites, documentos digitales, 
+                                        notificaciones importantes y oportunidades de licitación del gobierno estatal.
+                                    </p>
+                                    
+                                    <div class="inline-flex items-center space-x-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-full border border-white/30">
+                                        <div class="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                                        <span class="text-xs text-white/90 font-medium tracking-wide">ACCESO PERMANENTE</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Carousel Navigation -->
-                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                            <button class="carousel-dot w-2 h-2 rounded-full bg-white/50 transition-all duration-300" data-slide="0"></button>
-                            <button class="carousel-dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300" data-slide="1"></button>
-                            <button class="carousel-dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300" data-slide="2"></button>
-                            <button class="carousel-dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300" data-slide="3"></button>
+                        <!-- Controles de navegación elegantes y compactos -->
+                        <div class="absolute top-1/2 left-6 transform -translate-y-1/2 z-20">
+                            <button onclick="window.previousSlide()" class="group w-10 h-10 bg-gradient-to-br from-white/15 to-white/5 hover:from-white/25 hover:to-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:border-white/40 flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl">
+                                <svg class="w-4 h-4 text-white group-hover:text-white transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                <div class="absolute inset-0 bg-white/0 group-hover:bg-white/10 rounded-full transition-all duration-300"></div>
+                            </button>
                         </div>
+                        
+                        <div class="absolute top-1/2 right-6 transform -translate-y-1/2 z-20">
+                            <button onclick="window.nextSlideManual()" class="group w-10 h-10 bg-gradient-to-br from-white/15 to-white/5 hover:from-white/25 hover:to-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:border-white/40 flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl">
+                                <svg class="w-4 h-4 text-white group-hover:text-white transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                </svg>
+                                <div class="absolute inset-0 bg-white/0 group-hover:bg-white/10 rounded-full transition-all duration-300"></div>
+                            </button>
+                        </div>
+
+                        <!-- Indicadores elegantes -->
+                        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4">
+                            <button class="carousel-dot group/dot relative transition-all duration-300" data-slide="0">
+                                <div class="w-12 h-1 bg-white/40 rounded-full overflow-hidden">
+                                    <div class="dot-progress h-full bg-white rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </button>
+                            <button class="carousel-dot group/dot relative transition-all duration-300" data-slide="1">
+                                <div class="w-12 h-1 bg-white/40 rounded-full overflow-hidden">
+                                    <div class="dot-progress h-full bg-white rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </button>
+                            <button class="carousel-dot group/dot relative transition-all duration-300" data-slide="2">
+                                <div class="w-12 h-1 bg-white/40 rounded-full overflow-hidden">
+                                    <div class="dot-progress h-full bg-white rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </button>
+                            <button class="carousel-dot group/dot relative transition-all duration-300" data-slide="3">
+                                <div class="w-12 h-1 bg-white/40 rounded-full overflow-hidden">
+                                    <div class="dot-progress h-full bg-white rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </button>
+                        </div>
+
+                        <!-- Barra de progreso superior minimalista -->
+                        <div class="absolute top-0 left-0 right-0 h-0.5 bg-white/10">
+                            <div id="progressBar" class="h-full bg-gradient-to-r from-white to-white/80 transition-all duration-100 ease-linear" style="width: 0%"></div>
+                        </div>
+
+                        <!-- Elemento decorativo inferior -->
+                        <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
                     </div>
                 </div>
 
@@ -400,53 +556,143 @@
 
     <!-- Scripts -->
     <script>
-        // Carousel functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            let currentSlide = 0;
+        // ===== CARRUSEL SIMPLE Y FUNCIONAL =====
+        
+        // Estado del carrusel
+        let currentSlideIndex = 0;
+        const totalSlides = 4;
+        let autoSlideTimer = null;
+
+        // FUNCIÓN ANTERIOR - SIEMPRE DISPONIBLE
+        window.previousSlide = function() {
+            console.log('👈 BOTÓN ANTERIOR - FUNCIONANDO!');
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlideIndex);
+            restartAutoSlide();
+        };
+
+        // FUNCIÓN SIGUIENTE - SIEMPRE DISPONIBLE  
+        window.nextSlideManual = function() {
+            console.log('👉 BOTÓN SIGUIENTE - FUNCIONANDO!');
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            showSlide(currentSlideIndex);
+            restartAutoSlide();
+        };
+
+        // FUNCIÓN IR A SLIDE ESPECÍFICO
+        window.goToSlide = function(index) {
+            console.log('🎯 IR A SLIDE:', index);
+            currentSlideIndex = index;
+            showSlide(currentSlideIndex);
+            restartAutoSlide();
+        };
+
+        // Mostrar slide específico
+        function showSlide(index) {
+            console.log('📺 Mostrando slide:', index);
+            
+            // Obtener todos los slides
             const slides = document.querySelectorAll('.carousel-slide');
             const dots = document.querySelectorAll('.carousel-dot');
-            const totalSlides = slides.length;
-            let slideInterval;
+            
+            if (slides.length === 0) {
+                console.log('⚠️ No se encontraron slides');
+                return;
+            }
 
-            function updateSlide(index) {
-                slides.forEach(slide => {
+            // Actualizar slides
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    // Slide activo
+                    slide.style.opacity = '1';
+                    slide.style.zIndex = '10';
+                    slide.style.visibility = 'visible';
+                } else {
+                    // Slides inactivos
                     slide.style.opacity = '0';
-                    slide.style.zIndex = '0';
-                });
-                dots.forEach(dot => {
-                    dot.classList.remove('bg-white/50');
-                    dot.classList.add('bg-white/30');
-                });
+                    slide.style.zIndex = '1';
+                    slide.style.visibility = 'hidden';
+                }
+            });
 
-                slides[index].style.opacity = '1';
-                slides[index].style.zIndex = '1';
-                dots[index].classList.remove('bg-white/30');
-                dots[index].classList.add('bg-white/50');
-            }
+            // Actualizar dots
+            dots.forEach((dot, i) => {
+                const progress = dot.querySelector('.dot-progress');
+                if (progress) {
+                    if (i === index) {
+                        progress.style.width = '100%';
+                        progress.style.backgroundColor = '#ffffff';
+                        dot.style.opacity = '1';
+                    } else {
+                        progress.style.width = '0%';
+                        progress.style.backgroundColor = 'rgba(255,255,255,0.4)';
+                        dot.style.opacity = '0.7';
+                    }
+                }
+            });
 
-            function nextSlide() {
-                currentSlide = (currentSlide + 1) % totalSlides;
-                updateSlide(currentSlide);
-            }
+            console.log('✅ Slide actualizado correctamente');
+        }
 
-            // Event listeners for dots
+        // Auto-avance
+        function startAutoSlide() {
+            autoSlideTimer = setInterval(() => {
+                currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+                showSlide(currentSlideIndex);
+            }, 7000);
+        }
+
+        function restartAutoSlide() {
+            clearInterval(autoSlideTimer);
+            startAutoSlide();
+        }
+
+        // Configurar dots cuando el DOM esté listo
+        function setupCarousel() {
+            console.log('🚀 Configurando carrusel...');
+            
+            const dots = document.querySelectorAll('.carousel-dot');
+            
+            // Event listeners para dots
             dots.forEach((dot, index) => {
                 dot.addEventListener('click', () => {
-                    currentSlide = index;
-                    updateSlide(currentSlide);
-                    resetInterval();
+                    console.log('🔘 Click en dot:', index);
+                    window.goToSlide(index);
                 });
             });
 
-            function resetInterval() {
-                clearInterval(slideInterval);
-                slideInterval = setInterval(nextSlide, 5000);
+            // Pausar en hover
+            const carousel = document.getElementById('carousel');
+            if (carousel) {
+                carousel.addEventListener('mouseenter', () => {
+                    clearInterval(autoSlideTimer);
+                });
+                
+                carousel.addEventListener('mouseleave', () => {
+                    startAutoSlide();
+                });
             }
 
-            // Initialize carousel
-            updateSlide(currentSlide);
-            slideInterval = setInterval(nextSlide, 5000);
-        });
+            // Mostrar primer slide
+            showSlide(0);
+            startAutoSlide();
+            
+            console.log('✅ Carrusel configurado correctamente');
+        }
+
+        // Inicializar cuando DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupCarousel);
+        } else {
+            setupCarousel();
+        }
+
+        // Test directo de funciones
+        console.log('🎮 CARRUSEL LISTO:');
+        console.log('- window.previousSlide =', typeof window.previousSlide);
+        console.log('- window.nextSlideManual =', typeof window.nextSlideManual);
+        console.log('- window.goToSlide =', typeof window.goToSlide);
+        console.log('👆 ¡HAZ CLIC EN LOS BOTONES GRANDES DEL CARRUSEL!');
     </script>
 </body>
 </html> 
