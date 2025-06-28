@@ -331,95 +331,94 @@
             </div>
 
         <!-- Tarjetas compactas y elegantes -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             
             <!-- Tarjeta de Inscripción -->
-            <div class="relative bg-gradient-to-br from-[#9d2449]/10 to-[#9d2449]/5 rounded-2xl shadow-lg border border-[#9d2449]/20 overflow-hidden transition-all duration-200 hover:shadow-xl hover:scale-102 {{ $tipoTramite['inscripcion'] ? '' : 'opacity-50 pointer-events-none' }}">
-                <!-- Gradiente decorativo -->
-                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#9d2449] to-[#b8396b]"></div>
+            <div class="group relative bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:-translate-y-2 {{ $tipoTramite['inscripcion'] ? '' : 'opacity-50 pointer-events-none' }}">
+                <!-- Gradiente decorativo superior -->
+                <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#9d2449] via-[#b8396b] to-[#9d2449]"></div>
                 
-                <!-- Contenido compacto -->
-                <div class="p-5">
-                    <!-- Header con icono -->
-                    <div class="flex items-center justify-between mb-3">
+                <!-- Efecto de brillo en hover -->
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                
+                <!-- Contenido -->
+                <div class="relative p-6">
+                    <!-- Header con icono mejorado -->
+                    <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center">
-                            <div class="w-10 h-10 bg-gradient-to-r from-[#9d2449] to-[#b8396b] rounded-xl flex items-center justify-center shadow-lg">
-                                <i class="fas fa-user-plus text-white text-sm"></i>
+                            <div class="relative">
+                                <div class="w-14 h-14 bg-gradient-to-br from-[#9d2449] to-[#b8396b] rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                                    <i class="fas fa-user-plus text-white text-lg"></i>
+                                </div>
+                                <!-- Anillo decorativo -->
+                                <div class="absolute -inset-1 bg-gradient-to-r from-[#9d2449] to-[#b8396b] rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                             </div>
-                            <div class="ml-3">
-                                <h3 class="text-lg font-bold text-[#9d2449]">Inscripción</h3>
-                                <p class="text-xs text-gray-600">Nuevo registro</p>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-[#9d2449] group-hover:text-[#b8396b] transition-colors duration-300">Inscripción</h3>
+                                <p class="text-sm text-gray-500 font-medium">Primera vez en el padrón</p>
                             </div>
                         </div>
                         @if($tipoTramite['inscripcion'])
-                            <div class="w-3 h-3 bg-[#9d2449] rounded-full shadow-lg"></div>
+                            <div class="w-4 h-4 bg-[#9d2449] rounded-full shadow-md group-hover:scale-125 transition-transform duration-300"></div>
                         @else
-                            <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+                            <div class="w-4 h-4 bg-gray-300 rounded-full"></div>
                         @endif
                     </div>
 
-                    <!-- Descripción compacta -->
-                    <p class="text-gray-700 text-sm mb-4">
-                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion')
-                            <span class="text-[#9d2449] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
-                            @if(!empty($datosDomicilio['codigo_postal']))
-                                <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
-                            @endif
-                        @else
-                            @if($infoProveedor)
-                                @if($infoProveedor['ya_vencido'])
-                                    <span class="text-red-600 font-medium">Proveedor vencido</span> - Nueva inscripción requerida
-                                @else
-                                    Ya es proveedor activo ({{ $infoProveedor['pv'] }})
+                    <!-- Descripción mejorada -->
+                    <div class="mb-6">
+                        <p class="text-gray-700 text-sm leading-relaxed">
+                            @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion')
+                                <span class="inline-flex items-center px-2 py-1 bg-[#9d2449]/10 text-[#9d2449] text-xs font-semibold rounded-full mb-2">
+                                    <div class="w-2 h-2 bg-[#9d2449] rounded-full mr-2 animate-pulse"></div>
+                                    En progreso
+                                </span>
+                                <br>Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
+                                @if(!empty($datosDomicilio['codigo_postal']))
+                                    <br><span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded mt-1 inline-block">📍 CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
                                 @endif
                             @else
-                                Primera inscripción al Padrón de Proveedores del Estado
-                                <br><span class="text-xs text-blue-600">⚡ Incluye validación de constancia fiscal</span>
+                                @if($infoProveedor)
+                                    @if($infoProveedor['ya_vencido'])
+                                        <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full mb-2">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                            Proveedor vencido
+                                        </span>
+                                        <br>Se requiere nueva inscripción al padrón
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full mb-2">
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Ya es proveedor
+                                        </span>
+                                        <br>Proveedor activo: <strong>{{ $infoProveedor['pv'] }}</strong>
+                                    @endif
+                                @else
+                                    Regístrese por primera vez en el <strong>Padrón de Proveedores del Estado de Oaxaca</strong> y obtenga su número de proveedor oficial.
+                                @endif
                             @endif
-                        @endif
-                    </p>
-
-                    <!-- Botón Ver Datos del SAT (oculto inicialmente) -->
-                    <div class="mb-3">
-                        <button type="button" 
-                                id="verDatosBtn"
-                                onclick="showSatModal()"
-                                style="display: none;"
-                                class="inline-flex items-center text-xs bg-white hover:bg-blue-50 text-blue-600 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-blue-200 hover:border-blue-300">
-                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                            </svg>
-                            Ver Datos del SAT
-                        </button>
-                        
-                        <!-- Botón para simular validación RFC (solo para demostración) -->
-                        <button type="button" 
-                                onclick="simularValidacionRFC('{{ $infoProveedor['rfc'] ?? 'DEMO123456789' }}', 'verDatosBtn')"
-                                class="inline-flex items-center text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-green-200 hover:border-green-300 ml-2">
-                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Validar RFC
-                        </button>
+                        </p>
                     </div>
 
-                    <!-- Botón elegante -->
+                    <!-- Botón elegante mejorado -->
                     @if($tipoTramite['inscripcion'])
                         <form action="{{ route('tramites.solicitante.iniciar-inscripcion') }}" method="POST">
                             @csrf
-                            <button type="submit" class="w-full bg-gradient-to-r from-[#9d2449] to-[#b8396b] text-white py-2.5 rounded-xl font-medium text-sm shadow-lg hover:shadow-xl transition-all duration-200">
-                                @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion')
-                                    Continuar
-                                    <i class="fas fa-play ml-2"></i>
-                                @else
-                                    Comenzar
-                                    <i class="fas fa-arrow-right ml-2"></i>
-                                @endif
+                            <button type="submit" class="w-full bg-gradient-to-r from-[#9d2449] to-[#b8396b] hover:from-[#7a1c38] hover:to-[#9d2449] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div class="relative flex items-center justify-center">
+                                    @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion')
+                                        <i class="fas fa-play mr-2"></i>
+                                        Continuar Trámite
+                                    @else
+                                        <i class="fas fa-plus-circle mr-2"></i>
+                                        Iniciar Inscripción
+                                    @endif
+                                </div>
                             </button>
                         </form>
                     @else
-                        <div class="w-full bg-gray-200 text-gray-500 py-2.5 rounded-xl font-medium text-sm text-center">
+                        <div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-semibold text-sm text-center border border-gray-200">
+                            <i class="fas fa-lock mr-2"></i>
                             No disponible
                         </div>
                     @endif
@@ -427,104 +426,98 @@
             </div>
 
             <!-- Tarjeta de Renovación -->
-            <div class="relative bg-gradient-to-br from-[#9d2449]/15 to-[#9d2449]/8 rounded-2xl shadow-lg border border-[#9d2449]/25 overflow-hidden transition-all duration-200 hover:shadow-xl hover:scale-102 {{ $tipoTramite['renovacion'] ? '' : 'opacity-50 pointer-events-none' }}">
-                <!-- Gradiente decorativo -->
-                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#c1437a] to-[#9d2449]"></div>
+            <div class="group relative bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:-translate-y-2 {{ $tipoTramite['renovacion'] ? '' : 'opacity-50 pointer-events-none' }}">
+                <!-- Gradiente decorativo superior -->
+                <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#c1437a] via-[#e55a8f] to-[#c1437a]"></div>
                 
-                <!-- Contenido compacto -->
-                <div class="p-5">
-                    <!-- Header con icono -->
-                    <div class="flex items-center justify-between mb-3">
+                <!-- Efecto de brillo en hover -->
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                
+                <!-- Contenido -->
+                <div class="relative p-6">
+                    <!-- Header con icono mejorado -->
+                    <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center">
-                            <div class="w-10 h-10 bg-gradient-to-r from-[#c1437a] to-[#9d2449] rounded-xl flex items-center justify-center shadow-lg">
-                                <i class="fas fa-sync-alt text-white text-sm"></i>
+                            <div class="relative">
+                                <div class="w-14 h-14 bg-gradient-to-br from-[#c1437a] to-[#e55a8f] rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                                    <i class="fas fa-sync-alt text-white text-lg"></i>
+                                </div>
+                                <!-- Anillo decorativo -->
+                                <div class="absolute -inset-1 bg-gradient-to-r from-[#c1437a] to-[#e55a8f] rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                             </div>
-                            <div class="ml-3">
-                                <h3 class="text-lg font-bold text-[#9d2449]">Renovación</h3>
-                                <p class="text-xs text-gray-600">
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-[#c1437a] group-hover:text-[#e55a8f] transition-colors duration-300">Renovación</h3>
+                                <p class="text-sm text-gray-500 font-medium">
                                     @if($infoProveedor && $infoProveedor['proximo_a_vencer'])
                                         @if($infoProveedor['tiempo_restante']['urgente'])
-                                            <span class="{{ $infoProveedor['tiempo_restante']['clase_css'] }} font-medium">¡URGENTE!</span>
+                                            <span class="{{ $infoProveedor['tiempo_restante']['clase_css'] }} font-bold">¡URGENTE!</span>
                                         @else
                                             Próximo a vencer
                                         @endif
                                     @else
-                                        Próximo a vencer
+                                        Renovar registro
                                     @endif
                                 </p>
                             </div>
                         </div>
                         @if($tipoTramite['renovacion'])
-                            <div class="w-3 h-3 bg-[#c1437a] rounded-full shadow-lg"></div>
+                            <div class="w-4 h-4 bg-[#c1437a] rounded-full shadow-md group-hover:scale-125 transition-transform duration-300"></div>
                         @else
-                            <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+                            <div class="w-4 h-4 bg-gray-300 rounded-full"></div>
                         @endif
                     </div>
 
-                    <!-- Descripción compacta -->
-                    <p class="text-gray-700 text-sm mb-4">
-                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion')
-                            <span class="text-[#c1437a] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
-                            @if(!empty($datosDomicilio['codigo_postal']))
-                                <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
-                            @endif
-                        @else
-                            @if($infoProveedor && $infoProveedor['proximo_a_vencer'])
-                                <span class="font-medium {{ $infoProveedor['tiempo_restante']['clase_css'] }}">{{ $infoProveedor['pv'] }}</span> 
-                                @if($infoProveedor['ya_vencido'])
-                                    <span class="{{ $infoProveedor['tiempo_restante']['clase_css'] }}">{{ $infoProveedor['tiempo_restante']['texto'] }}</span>
-                                @else
-                                    vence en <span class="{{ $infoProveedor['tiempo_restante']['clase_css'] }}">{{ $infoProveedor['tiempo_restante']['texto'] }}</span>
+                    <!-- Descripción mejorada -->
+                    <div class="mb-6">
+                        <p class="text-gray-700 text-sm leading-relaxed">
+                            @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion')
+                                <span class="inline-flex items-center px-2 py-1 bg-[#c1437a]/10 text-[#c1437a] text-xs font-semibold rounded-full mb-2">
+                                    <div class="w-2 h-2 bg-[#c1437a] rounded-full mr-2 animate-pulse"></div>
+                                    En progreso
+                                </span>
+                                <br>Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
+                                @if(!empty($datosDomicilio['codigo_postal']))
+                                    <br><span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded mt-1 inline-block">📍 CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
                                 @endif
-                                <br><span class="text-xs text-gray-500">Vencimiento: {{ $infoProveedor['fecha_vencimiento']->format('d/m/Y H:i') }}</span>
                             @else
-                                Renueva tu registro antes del vencimiento (7 días)
-                                <br><span class="text-xs text-blue-600">⚡ Incluye validación de constancia fiscal</span>
+                                @if($infoProveedor && $infoProveedor['proximo_a_vencer'])
+                                    <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-id-card mr-1"></i>
+                                        {{ $infoProveedor['pv'] }}
+                                    </span>
+                                    @if($infoProveedor['ya_vencido'])
+                                        <br><span class="{{ $infoProveedor['tiempo_restante']['clase_css'] }} font-semibold">{{ $infoProveedor['tiempo_restante']['texto'] }}</span>
+                                    @else
+                                        <br>Vence en <span class="{{ $infoProveedor['tiempo_restante']['clase_css'] }} font-semibold">{{ $infoProveedor['tiempo_restante']['texto'] }}</span>
+                                    @endif
+                                    <br><span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded mt-1 inline-block">📅 Vencimiento: {{ $infoProveedor['fecha_vencimiento']->format('d/m/Y H:i') }}</span>
+                                @else
+                                    Renueve su registro en el padrón <strong>antes del vencimiento</strong> para mantener su estatus de proveedor activo.
+                                @endif
                             @endif
-                        @endif
-                    </p>
-
-                    <!-- Botón Ver Datos del SAT (oculto inicialmente) -->
-                    <div class="mb-3">
-                        <button type="button" 
-                                id="verDatosBtnRenovacion"
-                                onclick="showSatModal()"
-                                style="display: none;"
-                                class="inline-flex items-center text-xs bg-white hover:bg-blue-50 text-blue-600 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-blue-200 hover:border-blue-300">
-                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                            </svg>
-                            Ver Datos del SAT
-                        </button>
-                        
-                        <!-- Botón para simular validación RFC (solo para demostración) -->
-                        <button type="button" 
-                                onclick="simularValidacionRFC('{{ $infoProveedor['rfc'] ?? 'DEMO123456789' }}', 'verDatosBtnRenovacion')"
-                                class="inline-flex items-center text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-green-200 hover:border-green-300 ml-2">
-                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Validar RFC
-                        </button>
+                        </p>
                     </div>
 
-                    <!-- Botón elegante -->
+                    <!-- Botón elegante mejorado -->
                     @if($tipoTramite['renovacion'])
                         <form action="{{ route('tramites.solicitante.iniciar-renovacion') }}" method="POST">
                             @csrf
-                            <button type="submit" class="w-full bg-gradient-to-r from-[#c1437a] to-[#9d2449] text-white py-2.5 rounded-xl font-medium text-sm shadow-lg hover:shadow-xl transition-all duration-200">
-                                @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion')
-                                    Continuar
-                                    <i class="fas fa-play ml-2"></i>
-                                @else
-                                    Renovar
-                                    <i class="fas fa-arrow-right ml-2"></i>
-                                @endif
+                            <button type="submit" class="w-full bg-gradient-to-r from-[#c1437a] to-[#e55a8f] hover:from-[#9d2449] hover:to-[#c1437a] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div class="relative flex items-center justify-center">
+                                    @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion')
+                                        <i class="fas fa-play mr-2"></i>
+                                        Continuar Renovación
+                                    @else
+                                        <i class="fas fa-redo-alt mr-2"></i>
+                                        Iniciar Renovación
+                                    @endif
+                                </div>
                             </button>
                         </form>
                     @else
-                        <div class="w-full bg-gray-200 text-gray-500 py-2.5 rounded-xl font-medium text-sm text-center">
+                        <div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-semibold text-sm text-center border border-gray-200">
+                            <i class="fas fa-lock mr-2"></i>
                             No disponible
                         </div>
                     @endif
@@ -532,92 +525,86 @@
             </div>
 
             <!-- Tarjeta de Actualización -->
-            <div class="relative bg-gradient-to-br from-[#9d2449]/12 to-[#9d2449]/6 rounded-2xl shadow-lg border border-[#9d2449]/30 overflow-hidden transition-all duration-200 hover:shadow-xl hover:scale-102 {{ $tipoTramite['actualizacion'] ? '' : 'opacity-50 pointer-events-none' }}">
-                <!-- Gradiente decorativo -->
-                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#7a1d37] to-[#9d2449]"></div>
+            <div class="group relative bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:-translate-y-2 {{ $tipoTramite['actualizacion'] ? '' : 'opacity-50 pointer-events-none' }}">
+                <!-- Gradiente decorativo superior -->
+                <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#7a1d37] via-[#9d2449] to-[#7a1d37]"></div>
                 
-                <!-- Contenido compacto -->
-                <div class="p-5">
-                    <!-- Header con icono -->
-                    <div class="flex items-center justify-between mb-3">
+                <!-- Efecto de brillo en hover -->
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                
+                <!-- Contenido -->
+                <div class="relative p-6">
+                    <!-- Header con icono mejorado -->
+                    <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center">
-                            <div class="w-10 h-10 bg-gradient-to-r from-[#7a1d37] to-[#9d2449] rounded-xl flex items-center justify-center shadow-lg">
-                                <i class="fas fa-edit text-white text-sm"></i>
+                            <div class="relative">
+                                <div class="w-14 h-14 bg-gradient-to-br from-[#7a1d37] to-[#9d2449] rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                                    <i class="fas fa-edit text-white text-lg"></i>
+                                </div>
+                                <!-- Anillo decorativo -->
+                                <div class="absolute -inset-1 bg-gradient-to-r from-[#7a1d37] to-[#9d2449] rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                             </div>
-                            <div class="ml-3">
-                                <h3 class="text-lg font-bold text-[#9d2449]">Actualización</h3>
-                                <p class="text-xs text-gray-600">Modificar datos</p>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-[#7a1d37] group-hover:text-[#9d2449] transition-colors duration-300">Actualización</h3>
+                                <p class="text-sm text-gray-500 font-medium">Modificar información</p>
                             </div>
                         </div>
                         @if($tipoTramite['actualizacion'])
-                            <div class="w-3 h-3 bg-[#7a1d37] rounded-full shadow-lg"></div>
+                            <div class="w-4 h-4 bg-[#7a1d37] rounded-full shadow-md group-hover:scale-125 transition-transform duration-300"></div>
                         @else
-                            <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+                            <div class="w-4 h-4 bg-gray-300 rounded-full"></div>
                         @endif
                     </div>
 
-                    <!-- Descripción compacta -->
-                    <p class="text-gray-700 text-sm mb-4">
-                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion')
-                            <span class="text-[#7a1d37] font-medium">En progreso:</span> Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
-                            @if(!empty($datosDomicilio['codigo_postal']))
-                                <br><span class="text-xs text-gray-500">CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
-                            @endif
-                        @else
-                            @if($infoProveedor)
-                                <span class="text-green-600 font-medium">{{ $infoProveedor['pv'] }}</span> - Proveedor activo
-                                <br><span class="text-xs {{ $infoProveedor['tiempo_restante']['clase_css'] }}">
-                                    Vence en {{ $infoProveedor['tiempo_restante']['texto'] }}
+                    <!-- Descripción mejorada -->
+                    <div class="mb-6">
+                        <p class="text-gray-700 text-sm leading-relaxed">
+                            @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion')
+                                <span class="inline-flex items-center px-2 py-1 bg-[#7a1d37]/10 text-[#7a1d37] text-xs font-semibold rounded-full mb-2">
+                                    <div class="w-2 h-2 bg-[#7a1d37] rounded-full mr-2 animate-pulse"></div>
+                                    En progreso
                                 </span>
-                                <br><span class="text-xs text-gray-500">Vigente hasta: {{ $infoProveedor['fecha_vencimiento']->format('d/m/Y H:i') }}</span>
+                                <br>Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
+                                @if(!empty($datosDomicilio['codigo_postal']))
+                                    <br><span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded mt-1 inline-block">📍 CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
+                                @endif
                             @else
-                                Actualiza información, servicios y documentos
-                                <br><span class="text-xs text-blue-600">⚡ Incluye validación de constancia fiscal</span>
+                                @if($infoProveedor)
+                                    <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        {{ $infoProveedor['pv'] }} - Activo
+                                    </span>
+                                    <br><span class="text-xs {{ $infoProveedor['tiempo_restante']['clase_css'] }} font-medium">
+                                        Vence en {{ $infoProveedor['tiempo_restante']['texto'] }}
+                                    </span>
+                                    <br><span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded mt-1 inline-block">📅 Vigente hasta: {{ $infoProveedor['fecha_vencimiento']->format('d/m/Y H:i') }}</span>
+                                @else
+                                    Actualice su información, servicios y documentos para mantener sus datos al día en el padrón de proveedores.
+                                @endif
                             @endif
-                        @endif
-                    </p>
-
-                    <!-- Botón Ver Datos del SAT (oculto inicialmente) -->
-                    <div class="mb-3">
-                        <button type="button" 
-                                id="verDatosBtnActualizacion"
-                                onclick="showSatModal()"
-                                style="display: none;"
-                                class="inline-flex items-center text-xs bg-white hover:bg-blue-50 text-blue-600 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-blue-200 hover:border-blue-300">
-                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                            </svg>
-                            Ver Datos del SAT
-                        </button>
-                        
-                        <!-- Botón para simular validación RFC (solo para demostración) -->
-                        <button type="button" 
-                                onclick="simularValidacionRFC('{{ $infoProveedor['rfc'] ?? 'DEMO123456789' }}', 'verDatosBtnActualizacion')"
-                                class="inline-flex items-center text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-green-200 hover:border-green-300 ml-2">
-                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Validar RFC
-                        </button>
+                        </p>
                     </div>
 
-                    <!-- Botón elegante -->
+                    <!-- Botón elegante mejorado -->
                     @if($tipoTramite['actualizacion'])
                         <form action="{{ route('tramites.solicitante.iniciar-actualizacion') }}" method="POST">
                             @csrf
-                            <button type="submit" class="w-full bg-gradient-to-r from-[#7a1d37] to-[#9d2449] text-white py-2.5 rounded-xl font-medium text-sm shadow-lg hover:shadow-xl transition-all duration-200">
-                                @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion')
-                                    Continuar
-                                    <i class="fas fa-play ml-2"></i>
-                                @else
-                                    Actualizar
-                                    <i class="fas fa-arrow-right ml-2"></i>
-                                @endif
+                            <button type="submit" class="w-full bg-gradient-to-r from-[#7a1d37] to-[#9d2449] hover:from-[#5a1529] hover:to-[#7a1d37] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div class="relative flex items-center justify-center">
+                                    @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion')
+                                        <i class="fas fa-play mr-2"></i>
+                                        Continuar Actualización
+                                    @else
+                                        <i class="fas fa-pen-alt mr-2"></i>
+                                        Iniciar Actualización
+                                    @endif
+                                </div>
                             </button>
                         </form>
                     @else
-                        <div class="w-full bg-gray-200 text-gray-500 py-2.5 rounded-xl font-medium text-sm text-center">
+                        <div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-semibold text-sm text-center border border-gray-200">
+                            <i class="fas fa-lock mr-2"></i>
                             No disponible
                         </div>
                     @endif

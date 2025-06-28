@@ -293,7 +293,7 @@
                         <!-- Slide 1 -->
                         <div class="carousel-slide absolute inset-0 transition-all duration-[1200ms] ease-out opacity-100" data-slide="0">
                             <div class="relative w-full h-full">
-                                <img src="{{ asset('images/carrousel_1.webp') }}" 
+                            <img src="{{ asset('images/carrousel_1.webp') }}" 
                                      alt="Padrón de Proveedores"
                                      class="w-full h-full object-cover opacity-70 transition-all duration-[3000ms] scale-105 group-hover:scale-110">
                                 <div class="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-800/50 to-slate-900/70"></div>
@@ -339,7 +339,7 @@
                         <!-- Slide 2 -->
                         <div class="carousel-slide absolute inset-0 transition-all duration-[1200ms] ease-out opacity-0" data-slide="1">
                             <div class="relative w-full h-full">
-                                <img src="{{ asset('images/carrousel2.webp') }}" 
+                            <img src="{{ asset('images/carrousel2.webp') }}" 
                                      alt="Registro con QR del SAT"
                                      class="w-full h-full object-cover opacity-70 transition-all duration-[3000ms] scale-105 group-hover:scale-110">
                                 <div class="absolute inset-0 bg-gradient-to-br from-blue-900/70 via-slate-800/50 to-slate-900/70"></div>
@@ -380,7 +380,7 @@
                         <!-- Slide 3 -->
                         <div class="carousel-slide absolute inset-0 transition-all duration-[1200ms] ease-out opacity-0" data-slide="2">
                             <div class="relative w-full h-full">
-                                <img src="{{ asset('images/carrousel3.webp') }}" 
+                            <img src="{{ asset('images/carrousel3.webp') }}" 
                                      alt="Gestión de Trámites"
                                      class="w-full h-full object-cover opacity-70 transition-all duration-[3000ms] scale-105 group-hover:scale-110">
                                 <div class="absolute inset-0 bg-gradient-to-br from-emerald-900/70 via-slate-800/50 to-slate-900/70"></div>
@@ -421,7 +421,7 @@
                         <!-- Slide 4 -->
                         <div class="carousel-slide absolute inset-0 transition-all duration-[1200ms] ease-out opacity-0" data-slide="3">
                             <div class="relative w-full h-full">
-                                <img src="{{ asset('images/carrousel4.webp') }}" 
+                            <img src="{{ asset('images/carrousel4.webp') }}" 
                                      alt="Portal de Proveedores"
                                      class="w-full h-full object-cover opacity-70 transition-all duration-[3000ms] scale-105 group-hover:scale-110">
                                 <div class="absolute inset-0 bg-gradient-to-br from-purple-900/70 via-slate-800/50 to-slate-900/70"></div>

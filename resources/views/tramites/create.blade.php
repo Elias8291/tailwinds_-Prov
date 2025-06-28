@@ -26,26 +26,52 @@
     <div class="max-w-4xl mx-auto mt-4 sm:mt-8 md:mt-16 bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-8 relative z-10"
          x-data="{ 
             currentStep: 1,
-            totalSteps: 0,
-            tipoPersona: '',
-            isPersonaFisica: false,
+            totalSteps: 3,
+            tipoPersona: 'Física',
+            isPersonaFisica: true,
             rfc: '',
             curp: '',
             tramiteId: null,
-            steps: [],
+            steps: [
+                {number: '01', label: 'Datos Generales'},
+                {number: '02', label: 'Domicilio'},
+                {number: '03', label: 'Documentos'}
+            ],
+            isLoading: true,
+            loadingError: false,
+            loadingMessage: 'Cargando información del trámite...',
+            
             async init() {
+                console.log('🚀 Iniciando carga de datos del trámite...');
+                
+                // NO mostrar la página hasta que todo esté cargado
+                // this.$el.classList.remove('invisible'); // Lo haremos al final
+                
                 // Obtener datos del trámite desde el controlador
                 try {
+                    this.loadingMessage = 'Cargando datos del trámite...';
                     const response = await fetch('/tramites-solicitante/datos-tramite');
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
                     const data = await response.json();
+                    console.log('✅ Datos recibidos:', data);
+                    
+                    this.loadingMessage = 'Procesando información...';
+                    
+                    // Actualizar datos con validación completa
+                    await new Promise(resolve => setTimeout(resolve, 300));
                     
                     this.currentStep = data.paso_inicial || data.progreso_tramite || 1;
-                    this.tipoPersona = data.tipo_persona;
-                    this.isPersonaFisica = data.tipo_persona === 'Física';
+                    this.tipoPersona = data.tipo_persona || 'Física';
+                    this.isPersonaFisica = this.tipoPersona === 'Física';
                     this.totalSteps = this.isPersonaFisica ? 3 : 6;
-                    this.rfc = data.rfc;
-                    this.curp = data.curp;
-                    this.tramiteId = data.tramite_id;
+                    this.rfc = data.rfc || '';
+                    this.curp = data.curp || '';
+                    this.tramiteId = data.tramite_id || null;
+                    
                     this.steps = this.isPersonaFisica ? 
                         [
                             {number: '01', label: 'Datos Generales'},
@@ -60,17 +86,77 @@
                             {number: '05', label: 'Apoderado Legal'},
                             {number: '06', label: 'Documentos'}
                         ];
+                    
+                    console.log('✅ Configuración completada');
+                    this.loadingMessage = 'Casi listo...';
+                    
+                    // Pequeño delay para mostrar el mensaje final
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
                 } catch (error) {
-    
+                    console.error('❌ Error al cargar datos:', error);
+                    this.loadingError = true;
+                    this.loadingMessage = 'Cargando configuración básica...';
+                    
+                    // Fallback: usar datos por defecto
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                 }
                 
-                this.$nextTick(() => {
-                    this.$el.classList.remove('invisible');
-                });
+                // Finalizar loading
+                this.isLoading = false;
+                console.log('🎉 Carga completada');
             }
          }"
          class="invisible">
          
+        <!-- Loading Overlay Elegante -->
+        <div x-show="isLoading" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="absolute inset-0 bg-white/95 backdrop-blur-sm z-50 flex items-center justify-center rounded-xl">
+            
+            <div class="text-center max-w-sm mx-auto p-8">
+                <!-- Spinner elegante con Tailwind -->
+                <div class="relative mb-6">
+                    <div class="w-20 h-20 mx-auto relative">
+                        <!-- Anillo externo -->
+                        <div class="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+                        <!-- Anillo animado -->
+                        <div class="absolute inset-0 border-4 border-transparent border-t-[#9d2449] rounded-full animate-spin"></div>
+                        <!-- Punto central -->
+                        <div class="absolute inset-4 bg-gradient-to-br from-[#9d2449] to-[#7a1d37] rounded-full flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mensaje de carga -->
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Preparando Formulario</h3>
+                <p class="text-sm text-gray-600 mb-4" x-text="loadingMessage">Cargando datos del trámite...</p>
+                
+                <!-- Barra de progreso con Tailwind -->
+                <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden mb-4">
+                    <div class="h-full bg-gradient-to-r from-[#9d2449] to-[#7a1d37] rounded-full animate-pulse w-full"></div>
+                </div>
+                
+                <!-- Mensaje de error si ocurre -->
+                <div x-show="loadingError" class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 text-amber-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                        <span class="text-xs text-amber-700">Continuando con datos básicos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Contador de Tiempo Límite - Dentro del contenedor -->
         @if(isset($tiempoLimite))
         <div class="mb-6"
@@ -280,84 +366,157 @@
         </div>
 
         <!-- Form Sections Container -->
-        <div class="min-h-[400px] sm:min-h-[500px]">
+        <div class="min-h-[400px] sm:min-h-[500px] relative">
+            <!-- Sección Loading Indicator para cambio de pasos -->
+            <div x-data="{ showTransition: false }"
+                 x-init="
+                    $watch('currentStep', () => {
+                        showTransition = true;
+                        setTimeout(() => { showTransition = false; }, 300);
+                    })
+                 "
+                 x-show="showTransition"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="absolute inset-0 bg-white/80 backdrop-blur-sm z-40 flex items-center justify-center rounded-lg">
+                
+                <div class="text-center">
+                    <div class="w-8 h-8 border-2 border-[#9d2449] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p class="text-sm text-gray-600">Cargando sección...</p>
+                </div>
+            </div>
+            
             <!-- Form Sections -->
             <div class="max-w-3xl mx-auto">
                 <!-- Datos Generales -->
-                <div x-show="currentStep === 1" x-cloak>
-                    @include('components.formularios.seccion-datos-generales', [
-                        'datosTramite' => isset($datosTramite) ? $datosTramite : [],
-                        'datosSolicitante' => isset($solicitante) ? [
-                            'rfc' => $solicitante->rfc ?? $datosTramite['rfc'] ?? '',
-                            'curp' => $solicitante->curp ?? $datosTramite['curp'] ?? '',
-                            'tipo_persona' => $solicitante->tipo_persona ?? $datosTramite['tipo_persona'] ?? 'Física',
-                            'nombre_completo' => $solicitante->nombre_completo ?? $datosTramite['nombre_completo'] ?? '',
-                            'razon_social' => $solicitante->razon_social ?? $datosTramite['razon_social'] ?? '',
-                            'giro' => $solicitante->giro ?? $datosTramite['giro'] ?? ''
-                        ] : [
-                            'rfc' => $datosTramite['rfc'] ?? '',
-                            'curp' => $datosTramite['curp'] ?? '',
-                            'tipo_persona' => $datosTramite['tipo_persona'] ?? 'Física',
-                            'nombre_completo' => $datosTramite['nombre_completo'] ?? '',
-                            'razon_social' => $datosTramite['razon_social'] ?? '',
-                            'giro' => $datosTramite['giro'] ?? ''
-                        ]
-                    ])
+                <div x-show="currentStep === 1" 
+                     x-cloak
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 translate-x-4"
+                     x-transition:enter-end="opacity-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 -translate-x-4">
+                    
+                                         <!-- Contenido siempre listo (no hay skeleton individual) -->
+                     @include('components.formularios.seccion-datos-generales', [
+                         'datosTramite' => isset($datosTramite) ? $datosTramite : [],
+                            'datosSolicitante' => isset($solicitante) ? [
+                                'rfc' => $solicitante->rfc ?? $datosTramite['rfc'] ?? '',
+                                'curp' => $solicitante->curp ?? $datosTramite['curp'] ?? '',
+                                'tipo_persona' => $solicitante->tipo_persona ?? $datosTramite['tipo_persona'] ?? 'Física',
+                                'nombre_completo' => $solicitante->nombre_completo ?? $datosTramite['nombre_completo'] ?? '',
+                                'razon_social' => $solicitante->razon_social ?? $datosTramite['razon_social'] ?? '',
+                                'giro' => $solicitante->giro ?? $datosTramite['giro'] ?? ''
+                            ] : [
+                                'rfc' => $datosTramite['rfc'] ?? '',
+                                'curp' => $datosTramite['curp'] ?? '',
+                                'tipo_persona' => $datosTramite['tipo_persona'] ?? 'Física',
+                                'nombre_completo' => $datosTramite['nombre_completo'] ?? '',
+                                'razon_social' => $datosTramite['razon_social'] ?? '',
+                                'giro' => $datosTramite['giro'] ?? ''
+                            ]
+                        ])
+                    </div>
                 </div>
 
                 <!-- Domicilio -->
-                <div x-show="currentStep === 2" x-cloak @next-step="currentStep++">
-                    @include('components.formularios.seccion-domicilio', [
-                        'tramite' => $tramite,
-                        'datosDomicilio' => isset($datosDomicilio) ? $datosDomicilio : [],
-                        'datosSAT' => isset($datosSAT) ? $datosSAT : null,
-                        'datosSolicitante' => [
-                            'rfc' => $datosTramite['rfc'] ?? '',
-                            'curp' => $datosTramite['curp'] ?? '',
-                            'tipo_persona' => $datosTramite['tipo_persona'] ?? 'Física'
-                        ]
-                    ])
-                </div>
-
-                <!-- Constitución - Solo para Persona Moral -->
-                <div x-show="currentStep === 3 && isPersonaFisica === false" x-cloak>
-                    @include('components.formularios.seccion-constitucion')
-                </div>
-
-                <!-- Documentos - Para Persona Física en paso 3, para Moral en paso 6 -->
-                <div x-show="(isPersonaFisica === true && currentStep === 3) || (isPersonaFisica === false && currentStep === 6)" x-cloak @previous-step="currentStep--">
-                    @include('components.formularios.seccion-documentos', [
-                        'tramite' => $tramite
-                    ])
-                </div>
-
-                <!-- Accionistas - Solo para Persona Moral -->
-                <div x-show="isPersonaFisica === false && currentStep === 4" x-cloak @next-step="currentStep++" @previous-step="currentStep--">
-                    @include('components.formularios.seccion-accionistas', [
-                        'tramite' => $tramite,
-                        'datosAccionistas' => isset($datosAccionistas) ? $datosAccionistas : []
-                    ])
-                </div>
-
-                <!-- Apoderado Legal - Solo para Persona Moral -->
-                <div x-show="isPersonaFisica === false && currentStep === 5" x-cloak @next-step="currentStep++" @previous-step="currentStep--">
-                    @include('components.formularios.seccion-apoderado', [
-                        'tramite' => $tramite,
-                        'datosApoderado' => isset($datosApoderado) ? $datosApoderado : []
-                    ])
-                </div>
-
-                <!-- Navigation Buttons -->
-                <div class="flex flex-col sm:flex-row justify-between gap-3 mt-6">
+                <div x-show="currentStep === 2" 
+                     x-cloak 
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 translate-x-4"
+                     x-transition:enter-end="opacity-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 -translate-x-4"
+                     @next-step="currentStep++">
                     
-                    <button type="button" 
-                            x-show="currentStep === totalSteps"
-                            x-cloak
-                            @click="finalizarTramite()"
-                            class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-red-800 text-white text-sm sm:text-base rounded-lg hover:bg-red-900 transition-all duration-300 transform-gpu hover:-translate-y-0.5">
-                        Finalizar <i class="fas fa-check ml-1"></i>
-                    </button>
+                    <!-- Contenido siempre listo (no hay skeleton individual) -->
+                    @include('components.formularios.seccion-domicilio', [
+                        'datosTramite' => isset($datosTramite) ? $datosTramite : [],
+                        'direccion' => isset($direccion) ? $direccion : null
+                    ])
                 </div>
+
+                <!-- Constitución (Personas Morales) -->
+                <div x-show="currentStep === 3 && !isPersonaFisica" 
+                     x-cloak 
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 translate-x-4"
+                     x-transition:enter-end="opacity-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 -translate-x-4"
+                     @next-step="currentStep++">
+                    
+                    <!-- Contenido siempre listo (no hay skeleton individual) -->
+                    @include('components.formularios.seccion-constitucion', [
+                        'datosTramite' => isset($datosTramite) ? $datosTramite : [],
+                        'datosConstitutivo' => isset($datosConstitutivo) ? $datosConstitutivo : null,
+                        'modificacionEstatuto' => isset($modificacionEstatuto) ? $modificacionEstatuto : null,
+                        'instrumentoNotarial' => isset($instrumentoNotarial) ? $instrumentoNotarial : null
+                    ])
+                </div>
+
+                <!-- Accionistas (Personas Morales) -->
+                <div x-show="currentStep === 4 && !isPersonaFisica" 
+                     x-cloak 
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 translate-x-4"
+                     x-transition:enter-end="opacity-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 -translate-x-4"
+                     @next-step="currentStep++">
+                    
+                    <!-- Contenido siempre listo (no hay skeleton individual) -->
+                    @include('components.formularios.seccion-accionistas', [
+                        'datosTramite' => isset($datosTramite) ? $datosTramite : [],
+                        'accionistas' => isset($accionistas) ? $accionistas : []
+                    ])
+                </div>
+
+                <!-- Apoderado Legal (Personas Morales) -->
+                <div x-show="currentStep === 5 && !isPersonaFisica" 
+                     x-cloak 
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 translate-x-4"
+                     x-transition:enter-end="opacity-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 -translate-x-4"
+                     @next-step="currentStep++">
+                    
+                    <!-- Contenido siempre listo (no hay skeleton individual) -->
+                    @include('components.formularios.seccion-apoderado', [
+                        'datosTramite' => isset($datosTramite) ? $datosTramite : [],
+                        'representanteLegal' => isset($representanteLegal) ? $representanteLegal : null
+                    ])
+                </div>
+
+                <!-- Documentos -->
+                <div x-show="(currentStep === 3 && isPersonaFisica) || (currentStep === 6 && !isPersonaFisica)" 
+                     x-cloak 
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 translate-x-4"
+                     x-transition:enter-end="opacity-100 translate-x-0"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 translate-x-0"
+                     x-transition:leave-end="opacity-0 -translate-x-4">
+                    
+                    <!-- Contenido siempre listo (no hay skeleton individual) -->
+                    @include('components.formularios.seccion-documentos', [
+                        'datosTramite' => isset($datosTramite) ? $datosTramite : [],
+                        'documentos' => isset($documentos) ? $documentos : [],
+                        'documentosRequeridos' => isset($documentosRequeridos) ? $documentosRequeridos : []
+                    ])
+                </div>
+
+
             </div>
         </div>
     </div>
@@ -874,6 +1033,18 @@
 
     .tiempo-limite-container-mini .bg-gray-100:hover {
         background: rgba(229, 231, 235, 0.9) !important;
+    }
+
+    /* ⚡ Mejoras de accesibilidad para usuarios con preferencias de movimiento reducido */
+    @media (prefers-reduced-motion: reduce) {
+        .animate-pulse,
+        .animate-spin {
+            animation: none !important;
+        }
+        
+        [x-transition] {
+            transition: none !important;
+        }
     }
 </style>
 @endpush

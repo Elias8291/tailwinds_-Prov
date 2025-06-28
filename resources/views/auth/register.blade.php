@@ -78,20 +78,22 @@
     @csrf
     <!-- Header con Logo -->
     <div class="text-center mb-3">
-        <div class="flex flex-col items-center justify-center mb-1">
-            <div class="w-14 h-14 flex items-center justify-center mb-1">
-                <img src="{{ asset('images/logoprin.jpg') }}" alt="Logo" class="w-full h-full object-contain">
+        <div class="flex flex-col items-center justify-center mb-2">
+            <div class="w-14 h-14 flex items-center justify-center mb-2 bg-gradient-to-br from-primary/10 to-primary-dark/10 rounded-full p-2">
+                <img src="{{ asset('images/logoprin.jpg') }}" alt="Logo Estado de Oaxaca" class="w-full h-full object-contain rounded-full">
             </div>
-            <div class="text-center">
-                <span class="text-primary font-bold text-base block leading-tight">ADMINISTRACIÓN</span>
-                <span class="text-gray-600 text-xs font-medium -mt-0.5">Gobierno de Oaxaca</span>
+            <div class="text-center space-y-1">
+                <span class="text-primary font-bold text-sm block tracking-wide">ADMINISTRACIÓN</span>
+                <span class="text-gray-500 text-xs font-medium uppercase tracking-wider">Gobierno del Estado de Oaxaca</span>
             </div>
         </div>
         
-        <h1 class="text-lg font-bold text-gray-800 mb-0.5">Registro de Proveedor</h1>
-        <p class="text-gray-600 text-xs leading-tight max-w-xs mx-auto">
-            Suba su Constancia de Situación Fiscal con QR
-        </p>
+        <div class="space-y-1 mb-2">
+            <h1 class="text-lg font-bold text-gray-800 leading-tight">Registro de Proveedor</h1>
+            <p class="text-gray-600 text-xs leading-tight max-w-xs mx-auto">
+                Suba su Constancia de Situación Fiscal con QR
+            </p>
+        </div>
     </div>
 
     <!-- Mensajes de error del servidor -->
@@ -107,25 +109,25 @@
 
     <!-- Área de subida de PDF -->
     <div id="uploadArea" class="transition-all duration-300 ease-in-out">
-        <div class="mt-2">
-            <label for="document" class="block text-sm font-medium text-gray-700 mb-1">
+        <div class="mt-1">
+            <label for="document" class="block text-xs font-medium text-gray-700 mb-0.5">
                 <span class="block md:inline">Constancia de Situación Fiscal</span>
                 <span class="text-xs text-gray-500 block md:inline md:ml-1">(PDF o Imagen)</span>
             </label>
             <div class="relative">
                 <input type="file" id="document" name="document" accept=".pdf,.png,.jpg,.jpeg" required
                        class="hidden">
-                <label for="document" class="group flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-primary/20 hover:border-primary rounded-lg transition-all duration-300 cursor-pointer bg-primary-50/30 hover:bg-primary-50">
-                    <div class="flex flex-col md:flex-row items-center space-y-1 md:space-y-0 md:space-x-2 px-3">
+                <label for="document" class="group flex flex-col items-center justify-center w-full h-16 border-2 border-dashed border-primary/20 hover:border-primary rounded-lg transition-all duration-300 cursor-pointer bg-primary-50/30 hover:bg-primary-50">
+                    <div class="flex flex-col md:flex-row items-center space-y-0.5 md:space-y-0 md:space-x-2 px-3">
                         <!-- Icono -->
                         <div class="transform group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-5 h-5 text-primary/70 group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-primary/70 group-hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
                         <!-- Texto -->
                         <div class="text-center md:text-left">
-                            <p class="text-primary/70 group-hover:text-primary font-medium text-xs mb-0.5">
+                            <p class="text-primary/70 group-hover:text-primary font-medium text-xs mb-0">
                                 Haga clic para seleccionar archivo
                             </p>
                             <p class="text-xs text-gray-500" id="fileName">
@@ -139,13 +141,13 @@
 
         <!-- Indicador de Carga -->
         <div id="loading-indicator" class="hidden">
-            <div class="mt-4 p-6 bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg border border-primary/20">
-                <div class="flex flex-col items-center justify-center space-y-4">
+            <div class="mt-3 p-4 bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg border border-primary/20">
+                <div class="flex flex-col items-center justify-center space-y-3">
                     <!-- Spinner animado -->
                     <div class="relative">
-                        <div class="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                        <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                         <div class="absolute inset-0 flex items-center justify-center">
-                            <svg class="w-8 h-8 text-primary animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 text-primary animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
@@ -153,30 +155,30 @@
                     
                     <!-- Texto de carga -->
                     <div class="text-center">
-                        <h3 class="text-lg font-semibold text-primary mb-2">Procesando Constancia Fiscal</h3>
-                        <p class="text-sm text-gray-600 mb-3">
+                        <h3 class="text-base font-semibold text-primary mb-1">Procesando Constancia Fiscal</h3>
+                        <p class="text-xs text-gray-600 mb-2">
                             Estamos leyendo y validando su documento...
                         </p>
                         
                         <!-- Barra de progreso visual -->
-                        <div class="w-full max-w-sm mx-auto">
-                            <div class="bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div class="w-full max-w-xs mx-auto">
+                            <div class="bg-gray-200 rounded-full h-1.5 overflow-hidden">
                                 <div class="bg-gradient-to-r from-primary to-blue-500 h-full rounded-full animate-loading-progress"></div>
                             </div>
                         </div>
                         
                         <!-- Pasos del proceso -->
-                        <div class="mt-4 text-xs text-gray-500 space-y-1">
-                            <div class="flex items-center justify-center space-x-2">
-                                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <div class="mt-3 text-xs text-gray-500 space-y-0.5">
+                            <div class="flex items-center justify-center space-x-1">
+                                <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
                                 <span>Escaneando código QR...</span>
                             </div>
-                            <div class="flex items-center justify-center space-x-2">
-                                <div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+                            <div class="flex items-center justify-center space-x-1">
+                                <div class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
                                 <span>Validando con el SAT...</span>
                             </div>
-                            <div class="flex items-center justify-center space-x-2">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+                            <div class="flex items-center justify-center space-x-1">
+                                <div class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
                                 <span>Extrayendo datos...</span>
                             </div>
                         </div>
@@ -195,7 +197,7 @@
     </div>
 
     <!-- Formulario de registro (inicialmente oculto) -->
-    <div id="registrationForm" class="hidden space-y-2 transition-all duration-300 ease-in-out">
+    <div id="registrationForm" class="hidden space-y-1.5 transition-all duration-300 ease-in-out">
         <input type="hidden" id="qrUrl" name="qr_url">
         
         <!-- Campos ocultos para datos del SAT -->
@@ -214,7 +216,7 @@
                 id="verDatosBtn"
                 onclick="showSatModal()"
                 class="hidden inline-flex items-center text-xs bg-white hover:bg-primary-50 text-primary font-medium py-1 px-2 rounded-lg transition-all duration-300 shadow-sm hover:shadow border border-primary/20 hover:border-primary/40">
-            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
             </svg>
@@ -268,20 +270,22 @@
 
     <!-- Botones de acción -->
     <div class="space-y-1.5 pt-2">
-        <button type="button" id="actionButton" onclick="handleActionButton()" class="group w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 relative overflow-hidden text-sm">
+        <button type="button" id="actionButton" onclick="handleActionButton()" class="group w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 relative overflow-hidden text-sm">
             <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative flex items-center justify-center space-x-2">
-                <svg id="actionIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg id="actionIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
                 <span id="actionText">Siguiente</span>
+                <div class="absolute -right-2 w-2 h-2 bg-white/30 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping"></div>
             </div>
         </button>
 
-        <a href="{{ route('login') }}" class="group w-full bg-white text-primary font-medium py-1.5 px-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 border border-primary/30 hover:border-primary/50 relative overflow-hidden inline-flex items-center justify-center text-sm">
-            <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <a href="{{ route('login') }}" class="group w-full bg-white hover:bg-gray-50 text-primary hover:text-primary-dark font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 border-2 border-primary/20 hover:border-primary/40 relative overflow-hidden inline-flex items-center justify-center text-sm">
+            <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary-dark/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative flex items-center justify-center space-x-2">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
                 <span>Volver al Login</span>
@@ -290,12 +294,12 @@
     </div>
 
     <!-- Enlace de recuperación de contraseña -->
-    <div class="text-center mt-4">
+    <div class="text-center mt-3 relative z-10">
         <a 
             href="{{ route('password.request') }}" 
-            class="text-gray-600 hover:text-primary text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-1"
+            class="text-gray-500 hover:text-primary text-xs font-medium transition-all duration-200 flex items-center justify-center space-x-2 hover:bg-gray-50 py-1.5 px-3 rounded-lg"
         >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 0121 9z"/>
             </svg>
             <span>¿Olvidaste tu contraseña?</span>
@@ -313,7 +317,7 @@
 
 <script>
     // Configurar PDF.js
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js';
     
     // Variables globales
     let documentProcessed = false;

@@ -14,7 +14,9 @@ class Actividad extends Model
     protected $fillable = [
         'sector_id',
         'nombre',
+        'codigo_scian',
         'descripcion',
+        'fuente'
     ];
 
     public function sector()

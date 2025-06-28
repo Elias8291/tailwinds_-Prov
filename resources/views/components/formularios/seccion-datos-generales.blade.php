@@ -870,9 +870,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('✅ Formulario encontrado:', form);
         console.log('📋 Action del formulario:', form.action);
-        console.log('🔗 URL completa construida:', form.action);
+        
+        // Verificar que form.action sea válido antes de usar replace
+        const formActionStr = form.action ? String(form.action) : '';
+        console.log('🔗 URL completa construida:', formActionStr);
         console.log('🌐 Base URL:', window.location.origin);
-        console.log('📍 Ruta relativa:', form.action.replace(window.location.origin, ''));
+        
+        // Solo usar replace si formActionStr es válido
+        const rutaRelativa = formActionStr ? formActionStr.replace(window.location.origin, '') : '/formularios/datos-generales/guardar';
+        console.log('📍 Ruta relativa:', rutaRelativa);
         
         const btnGuardar = document.getElementById('btn-guardar-datos-generales') || document.getElementById('btn-guardar-datos-generales-alt');
         const btnText = document.getElementById('btn-text-datos-generales') || document.getElementById('btn-text-datos-generales-alt');
@@ -913,12 +919,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Construir URL absoluta para debug
         const baseUrl = window.location.origin;
-        const formAction = form.action;
         // Forzar la URL correcta del servidor
         const absoluteUrl = baseUrl + '/formularios/datos-generales/guardar';
         
         console.log('🔗 URL base:', baseUrl);
-        console.log('📋 Action original:', formAction);
+        console.log('📋 Action original:', formActionStr);
         console.log('🎯 URL absoluta construida:', absoluteUrl);
 
         fetch(absoluteUrl, {

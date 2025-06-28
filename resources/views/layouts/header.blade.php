@@ -153,51 +153,99 @@
 
                 <div class="relative" x-data="{ open: false }">
                     <div>
-                        <button @click="open = !open" class="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" id="user-menu-button">
+                        <button @click="open = !open" class="group flex items-center max-w-xs text-sm rounded-full hover:ring-2 hover:ring-primary/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" id="user-menu-button">
                             <span class="sr-only">Abrir menú de usuario</span>
-                            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-primary-100 text-primary">
-                                <span class="text-sm font-medium leading-none">
-                                    @if(auth()->check())
-                                        {{ strtoupper(substr(auth()->user()->nombre ?? auth()->user()->name ?? '', 0, 1)) }}{{ strtoupper(substr(explode(' ', auth()->user()->nombre ?? auth()->user()->name ?? '')[1] ?? '', 0, 1)) }}
-                                    @else
-                                        U
-                                    @endif
+                            <div class="relative">
+                                <span class="inline-flex items-center justify-center h-9 w-9 rounded-full bg-gradient-to-br from-primary to-primary-dark text-white shadow-md group-hover:shadow-lg transition-all duration-200 group-hover:scale-105">
+                                    <span class="text-sm font-semibold leading-none">
+                                        @if(auth()->check())
+                                            {{ strtoupper(substr(auth()->user()->nombre ?? auth()->user()->name ?? '', 0, 1)) }}{{ strtoupper(substr(explode(' ', auth()->user()->nombre ?? auth()->user()->name ?? '')[1] ?? '', 0, 1)) }}
+                                        @else
+                                            U
+                                        @endif
+                                    </span>
                                 </span>
-                            </span>
+                                <div class="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-400 border-2 border-white rounded-full"></div>
+                            </div>
                         </button>
                     </div>
                     <div x-show="open" 
                          @click.away="open = false"
-                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="transform opacity-0 scale-95"
                          x-transition:enter-end="transform opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="transform opacity-100 scale-100"
                          x-transition:leave-end="transform opacity-0 scale-95"
-                         class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none z-50">
-                        <div class="py-1">
-                            <a href="#" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-primary-50">
-                                <svg class="mr- crook 3 h-5 w-5 text-gray-400 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                         class="origin-top-right absolute right-0 mt-3 w-64 rounded-xl shadow-xl bg-white ring-1 ring-gray-200 divide-y divide-gray-100 focus:outline-none z-50 overflow-hidden">
+                        
+                        <!-- Header del usuario -->
+                        <div class="px-4 py-4 bg-gradient-to-r from-primary/10 to-primary-dark/10">
+                            <div class="flex items-center space-x-3">
+                                <span class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary-dark text-white shadow-md">
+                                    <span class="text-lg font-semibold leading-none">
+                                        @if(auth()->check())
+                                            {{ strtoupper(substr(auth()->user()->nombre ?? auth()->user()->name ?? '', 0, 1)) }}{{ strtoupper(substr(explode(' ', auth()->user()->nombre ?? auth()->user()->name ?? '')[1] ?? '', 0, 1)) }}
+                                        @else
+                                            U
+                                        @endif
+                                    </span>
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-gray-900 truncate">
+                                        @if(auth()->check())
+                                            {{ auth()->user()->nombre ?? auth()->user()->name ?? 'Usuario' }}
+                                        @else
+                                            Usuario
+                                        @endif
+                                    </p>
+                                    <p class="text-xs text-gray-500 truncate">
+                                        @if(auth()->check())
+                                            {{ auth()->user()->email ?? 'email@example.com' }}
+                                        @else
+                                            email@example.com
+                                        @endif
+                                    </p>
+                                    <div class="flex items-center mt-1">
+                                        <div class="h-2 w-2 bg-green-400 rounded-full mr-1"></div>
+                                        <span class="text-xs text-green-600 font-medium">En línea</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Opciones principales -->
+                        <div class="py-2">
+                            <a href="{{ route('profile.index') }}" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-all duration-200">
+                                <div class="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mr-3 group-hover:bg-primary/20 transition-colors duration-200">
+                                    <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium">Mi Perfil</div>
+                                    <div class="text-xs text-gray-500">Configurar cuenta</div>
+                                </div>
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
-                                Mi Perfil
-                            </a>
-                            <a href="#" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-primary-50">
-                                <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                Configuración
                             </a>
                         </div>
-                        <div class="py-1">
+
+                        <!-- Cerrar sesión -->
+                        <div class="py-2">
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="group flex w-full items-center px-4 py-2 text-sm text-red-700 hover:bg-red-50">
-                                    <svg class="mr-3 h-5 w-5 text-red-400 group-hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                    Cerrar Sesión
+                                <button type="submit" class="group flex w-full items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center mr-3 group-hover:bg-red-100 transition-colors duration-200">
+                                        <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1 text-left">
+                                        <div class="font-medium">Cerrar Sesión</div>
+                                        <div class="text-xs text-red-400">Salir del sistema</div>
+                                    </div>
                                 </button>
                             </form>
                         </div>

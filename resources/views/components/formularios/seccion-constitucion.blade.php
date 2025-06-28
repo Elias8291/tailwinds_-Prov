@@ -598,12 +598,4 @@ input:focus, select:focus, textarea:focus {
 .form-group:hover textarea {
     @apply border-[#4F46E5]/40;
 }
-</style> 
-.form-group:hover textarea {
-    @apply border-[#4F46E5]/40;
-}
-</style> 
-.form-group:hover textarea {
-    @apply border-[#4F46E5]/40;
-}
-</style> 
+</style>

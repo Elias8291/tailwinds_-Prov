@@ -755,11 +755,3 @@ input:focus, select:focus {
                 0 2px 4px -1px rgba(157, 36, 73, 0.06);
 }
 </style>
-
-                0 2px 4px -1px rgba(157, 36, 73, 0.06);
-}
-</style>
-
-                0 2px 4px -1px rgba(157, 36, 73, 0.06);
-}
-</style>
