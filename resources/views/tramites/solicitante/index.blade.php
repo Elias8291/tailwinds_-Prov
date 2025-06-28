@@ -369,13 +369,30 @@
                     <div class="mb-6">
                         <p class="text-gray-700 text-sm leading-relaxed">
                             @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion')
-                                <span class="inline-flex items-center px-2 py-1 bg-[#9d2449]/10 text-[#9d2449] text-xs font-semibold rounded-full mb-2">
-                                    <div class="w-2 h-2 bg-[#9d2449] rounded-full mr-2 animate-pulse"></div>
-                                    En progreso
-                                </span>
-                                <br>Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
-                                @if(!empty($datosDomicilio['codigo_postal']))
-                                    <br><span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded mt-1 inline-block">📍 CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
+                                @if($tramiteEnProgreso->estado === 'En Revision')
+                                    <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        En Revisión
+                                    </span>
+                                    <br>Trámite enviado y en proceso de evaluación
+                                @elseif($tramiteEnProgreso->estado === 'Aprobado')
+                                    <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Trámite Completado
+                                    </span>
+                                    <br>¡Su inscripción ha sido aprobada exitosamente!
+                                @elseif($tramiteEnProgreso->estado === 'Rechazado')
+                                    <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-times-circle mr-1"></i>
+                                        Requiere Correcciones
+                                    </span>
+                                    <br>Revise las observaciones y corrija la información
+                                @else
+                                    <span class="inline-flex items-center px-2 py-1 bg-[#9d2449]/10 text-[#9d2449] text-xs font-semibold rounded-full mb-2">
+                                        <div class="w-2 h-2 bg-[#9d2449] rounded-full mr-2 animate-pulse"></div>
+                                        En Progreso
+                                    </span>
+                                    <br>Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
                                 @endif
                             @else
                                 @if($infoProveedor)
@@ -401,21 +418,32 @@
 
                     <!-- Botón elegante mejorado -->
                     @if($tipoTramite['inscripcion'])
-                        <form action="{{ route('tramites.solicitante.iniciar-inscripcion') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="w-full bg-gradient-to-r from-[#9d2449] to-[#b8396b] hover:from-[#7a1c38] hover:to-[#9d2449] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group">
+                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion' && in_array($tramiteEnProgreso->estado, ['En Revision', 'Aprobado', 'Rechazado']))
+                            <!-- Trámite enviado - Mostrar enlace al estado -->
+                            <a href="{{ route('tramites.solicitante.estado', $tramiteEnProgreso) }}" class="w-full bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#7a1d37] hover:to-[#9d2449] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group block">
                                 <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <div class="relative flex items-center justify-center">
-                                    @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion')
-                                        <i class="fas fa-play mr-2"></i>
-                                        Continuar Trámite
-                                    @else
-                                        <i class="fas fa-plus-circle mr-2"></i>
-                                        Iniciar Inscripción
-                                    @endif
+                                    <i class="fas fa-chart-line mr-2"></i>
+                                    Ver Estado del Trámite
                                 </div>
-                            </button>
-                        </form>
+                            </a>
+                        @else
+                            <form action="{{ route('tramites.solicitante.iniciar-inscripcion') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full bg-gradient-to-r from-[#9d2449] to-[#b8396b] hover:from-[#7a1c38] hover:to-[#9d2449] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group">
+                                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div class="relative flex items-center justify-center">
+                                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion')
+                                            <i class="fas fa-play mr-2"></i>
+                                            Continuar Trámite
+                                        @else
+                                            <i class="fas fa-plus-circle mr-2"></i>
+                                            Iniciar Inscripción
+                                        @endif
+                                    </div>
+                                </button>
+                            </form>
+                        @endif
                     @else
                         <div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-semibold text-sm text-center border border-gray-200">
                             <i class="fas fa-lock mr-2"></i>
@@ -471,13 +499,30 @@
                     <div class="mb-6">
                         <p class="text-gray-700 text-sm leading-relaxed">
                             @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion')
-                                <span class="inline-flex items-center px-2 py-1 bg-[#c1437a]/10 text-[#c1437a] text-xs font-semibold rounded-full mb-2">
-                                    <div class="w-2 h-2 bg-[#c1437a] rounded-full mr-2 animate-pulse"></div>
-                                    En progreso
-                                </span>
-                                <br>Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
-                                @if(!empty($datosDomicilio['codigo_postal']))
-                                    <br><span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded mt-1 inline-block">📍 CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
+                                @if($tramiteEnProgreso->estado === 'En Revision')
+                                    <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        En Revisión
+                                    </span>
+                                    <br>Renovación enviada y en proceso de evaluación
+                                @elseif($tramiteEnProgreso->estado === 'Aprobado')
+                                    <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Renovación Completada
+                                    </span>
+                                    <br>¡Su renovación ha sido aprobada exitosamente!
+                                @elseif($tramiteEnProgreso->estado === 'Rechazado')
+                                    <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-times-circle mr-1"></i>
+                                        Requiere Correcciones
+                                    </span>
+                                    <br>Revise las observaciones y corrija la información
+                                @else
+                                    <span class="inline-flex items-center px-2 py-1 bg-[#c1437a]/10 text-[#c1437a] text-xs font-semibold rounded-full mb-2">
+                                        <div class="w-2 h-2 bg-[#c1437a] rounded-full mr-2 animate-pulse"></div>
+                                        En Progreso
+                                    </span>
+                                    <br>Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
                                 @endif
                             @else
                                 @if($infoProveedor && $infoProveedor['proximo_a_vencer'])
@@ -500,21 +545,32 @@
 
                     <!-- Botón elegante mejorado -->
                     @if($tipoTramite['renovacion'])
-                        <form action="{{ route('tramites.solicitante.iniciar-renovacion') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="w-full bg-gradient-to-r from-[#c1437a] to-[#e55a8f] hover:from-[#9d2449] hover:to-[#c1437a] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group">
+                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion' && in_array($tramiteEnProgreso->estado, ['En Revision', 'Aprobado', 'Rechazado']))
+                            <!-- Trámite enviado - Mostrar enlace al estado -->
+                            <a href="{{ route('tramites.solicitante.estado', $tramiteEnProgreso) }}" class="w-full bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#7a1d37] hover:to-[#9d2449] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group block">
                                 <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <div class="relative flex items-center justify-center">
-                                    @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion')
-                                        <i class="fas fa-play mr-2"></i>
-                                        Continuar Renovación
-                                    @else
-                                        <i class="fas fa-redo-alt mr-2"></i>
-                                        Iniciar Renovación
-                                    @endif
+                                    <i class="fas fa-chart-line mr-2"></i>
+                                    Ver Estado del Trámite
                                 </div>
-                            </button>
-                        </form>
+                            </a>
+                        @else
+                            <form action="{{ route('tramites.solicitante.iniciar-renovacion') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full bg-gradient-to-r from-[#c1437a] to-[#e55a8f] hover:from-[#9d2449] hover:to-[#c1437a] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group">
+                                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div class="relative flex items-center justify-center">
+                                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion')
+                                            <i class="fas fa-play mr-2"></i>
+                                            Continuar Renovación
+                                        @else
+                                            <i class="fas fa-redo-alt mr-2"></i>
+                                            Iniciar Renovación
+                                        @endif
+                                    </div>
+                                </button>
+                            </form>
+                        @endif
                     @else
                         <div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-semibold text-sm text-center border border-gray-200">
                             <i class="fas fa-lock mr-2"></i>
@@ -560,13 +616,30 @@
                     <div class="mb-6">
                         <p class="text-gray-700 text-sm leading-relaxed">
                             @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion')
-                                <span class="inline-flex items-center px-2 py-1 bg-[#7a1d37]/10 text-[#7a1d37] text-xs font-semibold rounded-full mb-2">
-                                    <div class="w-2 h-2 bg-[#7a1d37] rounded-full mr-2 animate-pulse"></div>
-                                    En progreso
-                                </span>
-                                <br>Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
-                                @if(!empty($datosDomicilio['codigo_postal']))
-                                    <br><span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded mt-1 inline-block">📍 CP: {{ $datosDomicilio['codigo_postal'] }} {{ $datosDomicilio['estado'] ?? '' }}</span>
+                                @if($tramiteEnProgreso->estado === 'En Revision')
+                                    <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        En Revisión
+                                    </span>
+                                    <br>Actualización enviada y en proceso de evaluación
+                                @elseif($tramiteEnProgreso->estado === 'Aprobado')
+                                    <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Actualización Completada
+                                    </span>
+                                    <br>¡Su actualización ha sido aprobada exitosamente!
+                                @elseif($tramiteEnProgreso->estado === 'Rechazado')
+                                    <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-times-circle mr-1"></i>
+                                        Requiere Correcciones
+                                    </span>
+                                    <br>Revise las observaciones y corrija la información
+                                @else
+                                    <span class="inline-flex items-center px-2 py-1 bg-[#7a1d37]/10 text-[#7a1d37] text-xs font-semibold rounded-full mb-2">
+                                        <div class="w-2 h-2 bg-[#7a1d37] rounded-full mr-2 animate-pulse"></div>
+                                        En Progreso
+                                    </span>
+                                    <br>Paso {{ $tramiteEnProgreso->progreso_tramite ?? 1 }} de {{ $tramiteEnProgreso->solicitante->tipo_persona === 'Física' ? 3 : 6 }}
                                 @endif
                             @else
                                 @if($infoProveedor)
@@ -587,21 +660,32 @@
 
                     <!-- Botón elegante mejorado -->
                     @if($tipoTramite['actualizacion'])
-                        <form action="{{ route('tramites.solicitante.iniciar-actualizacion') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="w-full bg-gradient-to-r from-[#7a1d37] to-[#9d2449] hover:from-[#5a1529] hover:to-[#7a1d37] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group">
+                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion' && in_array($tramiteEnProgreso->estado, ['En Revision', 'Aprobado', 'Rechazado']))
+                            <!-- Trámite enviado - Mostrar enlace al estado -->
+                            <a href="{{ route('tramites.solicitante.estado', $tramiteEnProgreso) }}" class="w-full bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#7a1d37] hover:to-[#9d2449] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group block">
                                 <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <div class="relative flex items-center justify-center">
-                                    @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion')
-                                        <i class="fas fa-play mr-2"></i>
-                                        Continuar Actualización
-                                    @else
-                                        <i class="fas fa-pen-alt mr-2"></i>
-                                        Iniciar Actualización
-                                    @endif
+                                    <i class="fas fa-chart-line mr-2"></i>
+                                    Ver Estado del Trámite
                                 </div>
-                            </button>
-                        </form>
+                            </a>
+                        @else
+                            <form action="{{ route('tramites.solicitante.iniciar-actualizacion') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full bg-gradient-to-r from-[#7a1d37] to-[#9d2449] hover:from-[#5a1529] hover:to-[#7a1d37] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group">
+                                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div class="relative flex items-center justify-center">
+                                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion')
+                                            <i class="fas fa-play mr-2"></i>
+                                            Continuar Actualización
+                                        @else
+                                            <i class="fas fa-pen-alt mr-2"></i>
+                                            Iniciar Actualización
+                                        @endif
+                                    </div>
+                                </button>
+                            </form>
+                        @endif
                     @else
                         <div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-semibold text-sm text-center border border-gray-200">
                             <i class="fas fa-lock mr-2"></i>

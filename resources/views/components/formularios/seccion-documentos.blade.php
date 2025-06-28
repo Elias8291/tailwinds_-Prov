@@ -163,22 +163,8 @@
             </div>
         </div>
 
-        <!-- Loading State -->
-        <div x-show="loading" x-cloak class="text-center py-12">
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-8 border border-blue-200">
-                <div class="flex justify-center mb-4">
-                    <div class="relative">
-                        <div class="w-12 h-12 border-4 border-blue-200 rounded-full animate-spin border-t-blue-500"></div>
-                        <div class="absolute inset-0 w-12 h-12 border-4 border-transparent rounded-full animate-ping border-t-blue-300"></div>
-                    </div>
-                </div>
-                <h3 class="text-lg font-semibold text-blue-800 mb-2">Cargando documentos</h3>
-                <p class="text-blue-600">Preparando la lista de documentos requeridos...</p>
-            </div>
-        </div>
-
         <!-- Lista de Documentos -->
-        <div x-show="!loading" x-cloak class="space-y-4">
+        <div class="space-y-4">
             <template x-for="documento in documentos" :key="documento.id">
                 <div class="bg-white border rounded-xl p-6 transition-all duration-300 group shadow-sm hover:shadow-lg"
                      :class="{
@@ -238,21 +224,10 @@
                             <label :for="`documento_${documento.id}`" 
                                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg text-sm font-medium hover:from-[#8a203f] hover:to-[#6d1a32] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] cursor-pointer transition-all duration-300 shadow-md hover:shadow-lg">
                                 
-                                <!-- Estado normal -->
-                                <template x-if="!documento.uploading">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-cloud-upload-alt mr-2"></i>
-                                        <span x-text="documento.estado === 'Rechazado' ? 'Subir Nuevo' : 'Seleccionar archivo'"></span>
-                                    </div>
-                                </template>
-                                
-                                <!-- Estado subiendo -->
-                                <template x-if="documento.uploading">
-                                    <div class="flex items-center">
-                                        <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                                        <span>Subiendo...</span>
-                                    </div>
-                                </template>
+                                <div class="flex items-center">
+                                    <i class="fas fa-cloud-upload-alt mr-2"></i>
+                                    <span x-text="documento.estado === 'Rechazado' ? 'Subir Nuevo' : 'Seleccionar archivo'"></span>
+                                </div>
                                 
                             </label>
                         </div>
@@ -466,7 +441,7 @@
             </template>
 
             <!-- Mensaje cuando no hay documentos -->
-            <div x-show="documentos.length === 0 && !loading" x-cloak class="text-center py-8">
+            <div x-show="documentos.length === 0" x-cloak class="text-center py-8">
                 <div class="bg-gray-50 rounded-lg p-6">
                     <i class="fas fa-exclamation-circle text-gray-400 text-3xl mb-3"></i>
                     <p class="text-gray-500">No hay documentos configurados para este tipo de persona.</p>
@@ -475,9 +450,9 @@
         </div>
 
         <!-- Botones de navegación -->
-        <div x-show="mostrarNavegacion && !loading" x-cloak class="flex justify-between pt-6 border-t border-gray-200 mt-8">
+        <div x-show="mostrarNavegacion" x-cloak class="flex justify-between pt-6 border-t border-gray-200 mt-8">
             <button type="button" 
-                    @click="$dispatch('previous-step')"
+                    onclick="navegarAnteriorDocumentos()"
                     class="flex items-center px-6 py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-200">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Anterior
@@ -510,7 +485,6 @@ function documentosData() {
         tramiteId: null,
         tipoPersona: 'Física',
         documentos: [],
-        loading: true,
         showError: false,
         errorMessage: '',
         showSuccess: false,
@@ -551,7 +525,6 @@ function documentosData() {
 
         async cargarDocumentos() {
             try {
-                this.loading = true;
                 console.log('🔍 Cargando documentos para trámite:', this.tramiteId);
                 
                 const response = await fetch('/tramites-solicitante/documentos');
@@ -561,7 +534,6 @@ function documentosData() {
                     this.documentos = data.documentos.map(doc => ({
                         ...doc,
                         estado: doc.estado || 'Pendiente',
-                        uploading: false,
                         archivo_seleccionado: false,
                         nombre_archivo: '',
                         observaciones: doc.observaciones || null
@@ -575,8 +547,6 @@ function documentosData() {
             } catch (error) {
                 console.error('❌ Error al cargar documentos:', error);
                 this.mostrarError('Error al cargar los documentos');
-            } finally {
-                this.loading = false;
             }
         },
 
@@ -600,7 +570,6 @@ function documentosData() {
             // Actualizar estado del documento
             documento.archivo_seleccionado = true;
             documento.nombre_archivo = file.name;
-            documento.uploading = true;
                     
             // Subir archivo
             await this.subirDocumento(documento, file);
@@ -618,7 +587,7 @@ function documentosData() {
                     formData.append('_token', csrfToken.getAttribute('content'));
                 }
 
-                console.log('📤 Subiendo documento:', documento.nombre);
+                console.log('🖼 Subiendo documento:', documento.nombre);
 
                 const response = await fetch('/tramites-solicitante/upload-documento', {
                     method: 'POST',
@@ -639,11 +608,6 @@ function documentosData() {
                     documento.observaciones = null;
                     
                     this.mostrarExito(data.mensaje || 'Documento subido correctamente');
-                    
-                    // Recargar documentos para obtener información de validación IA
-                    setTimeout(async () => {
-                        await this.cargarDocumentos();
-                    }, 1000);
                 } else {
                     this.mostrarError(data.mensaje || 'Error al subir el documento');
                     documento.archivo_seleccionado = false;
@@ -654,8 +618,6 @@ function documentosData() {
                 this.mostrarError('Error de conexión al subir el documento');
                 documento.archivo_seleccionado = false;
                 documento.nombre_archivo = '';
-            } finally {
-                documento.uploading = false;
             }
         },
 
@@ -940,6 +902,82 @@ function documentosData() {
             return schemes[colorScheme] || '⚫ Estándar';
         }
     }
+}
+</script>
+
+<script>
+// Función para navegar al paso anterior desde documentos
+function navegarAnteriorDocumentos() {
+    console.log('📍 Navegando al paso anterior desde documentos');
+    
+    // Método 1: Función global navegarAnterior
+    if (typeof window.navegarAnterior === 'function') {
+        console.log('✅ Usando función global navegarAnterior');
+        window.navegarAnterior();
+        return;
+    }
+    
+    // Método 2: Buscar contenedor Alpine.js y retroceder
+    const alpineContainer = document.querySelector('[x-data*="currentStep"]');
+    if (alpineContainer && typeof Alpine !== 'undefined') {
+        try {
+            const alpineData = Alpine.$data(alpineContainer);
+            if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                if (alpineData.currentStep > 1) {
+                    console.log('✅ Retrocediendo paso con Alpine.js:', alpineData.currentStep, '->', alpineData.currentStep - 1);
+                    alpineData.currentStep--;
+                    return;
+                } else {
+                    console.log('⚠️ Ya estás en el primer paso');
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error al acceder a Alpine.js:', error);
+        }
+    }
+    
+    // Método 3: Disparar evento personalizado en el contenedor
+    if (alpineContainer) {
+        console.log('✅ Disparando evento previous-step');
+        alpineContainer.dispatchEvent(new CustomEvent('previous-step'));
+        return;
+    }
+    
+    // Método 4: Buscar directamente botones de navegación en el documento
+    const prevButtons = document.querySelectorAll('button[onclick*="currentStep--"], button[x-text*="Anterior"]');
+    if (prevButtons.length > 0) {
+        console.log('✅ Simulando click en botón anterior encontrado');
+        prevButtons[0].click();
+        return;
+    }
+    
+    // Fallback: intentar manipular directamente
+    console.log('⚠️ Usando fallback - intentando retroceder manualmente');
+    const stepContainers = document.querySelectorAll('[x-show*="currentStep"]');
+    if (stepContainers.length > 0) {
+        // Buscar el contenedor activo
+        for (let container of stepContainers) {
+            if (container.style.display !== 'none' && !container.hasAttribute('hidden')) {
+                // Intentar acceder al contexto Alpine
+                try {
+                    const parentWithData = container.closest('[x-data]');
+                    if (parentWithData && Alpine && Alpine.$data) {
+                        const data = Alpine.$data(parentWithData);
+                        if (data && data.currentStep && data.currentStep > 1) {
+                            data.currentStep--;
+                            console.log('✅ Navegación fallback exitosa');
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error en fallback:', error);
+                }
+            }
+        }
+    }
+    
+    console.error('❌ No se pudo navegar al paso anterior');
 }
 </script>
 

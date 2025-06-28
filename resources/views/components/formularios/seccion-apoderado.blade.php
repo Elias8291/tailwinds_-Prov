@@ -373,7 +373,7 @@
         <!-- Botones de navegación -->
         <div class="flex justify-between pt-6 border-t border-gray-200">
             <button type="button" 
-                    @click="$dispatch('previous-step')"
+                    onclick="navegarAnteriorApoderado()"
                     class="flex items-center px-6 py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-200">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Anterior
@@ -629,6 +629,82 @@ function apoderadoData() {
             }
         }
     }
+}
+</script>
+
+<script>
+// Función para navegar al paso anterior desde apoderado legal
+function navegarAnteriorApoderado() {
+    console.log('📍 Navegando al paso anterior desde apoderado legal');
+    
+    // Método 1: Función global navegarAnterior
+    if (typeof window.navegarAnterior === 'function') {
+        console.log('✅ Usando función global navegarAnterior');
+        window.navegarAnterior();
+        return;
+    }
+    
+    // Método 2: Buscar contenedor Alpine.js y retroceder
+    const alpineContainer = document.querySelector('[x-data*="currentStep"]');
+    if (alpineContainer && typeof Alpine !== 'undefined') {
+        try {
+            const alpineData = Alpine.$data(alpineContainer);
+            if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                if (alpineData.currentStep > 1) {
+                    console.log('✅ Retrocediendo paso con Alpine.js:', alpineData.currentStep, '->', alpineData.currentStep - 1);
+                    alpineData.currentStep--;
+                    return;
+                } else {
+                    console.log('⚠️ Ya estás en el primer paso');
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error al acceder a Alpine.js:', error);
+        }
+    }
+    
+    // Método 3: Disparar evento personalizado en el contenedor
+    if (alpineContainer) {
+        console.log('✅ Disparando evento previous-step');
+        alpineContainer.dispatchEvent(new CustomEvent('previous-step'));
+        return;
+    }
+    
+    // Método 4: Buscar directamente botones de navegación en el documento
+    const prevButtons = document.querySelectorAll('button[onclick*="currentStep--"], button[x-text*="Anterior"]');
+    if (prevButtons.length > 0) {
+        console.log('✅ Simulando click en botón anterior encontrado');
+        prevButtons[0].click();
+        return;
+    }
+    
+    // Fallback: intentar manipular directamente
+    console.log('⚠️ Usando fallback - intentando retroceder manualmente');
+    const stepContainers = document.querySelectorAll('[x-show*="currentStep"]');
+    if (stepContainers.length > 0) {
+        // Buscar el contenedor activo
+        for (let container of stepContainers) {
+            if (container.style.display !== 'none' && !container.hasAttribute('hidden')) {
+                // Intentar acceder al contexto Alpine
+                try {
+                    const parentWithData = container.closest('[x-data]');
+                    if (parentWithData && Alpine && Alpine.$data) {
+                        const data = Alpine.$data(parentWithData);
+                        if (data && data.currentStep && data.currentStep > 1) {
+                            data.currentStep--;
+                            console.log('✅ Navegación fallback exitosa');
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error en fallback:', error);
+                }
+            }
+        }
+    }
+    
+    console.error('❌ No se pudo navegar al paso anterior');
 }
 </script>
 

@@ -174,7 +174,8 @@
                 
                     <div class="p-8">
                         @include('components.formularios.seccion-datos-generales', [
-                        'datosGenerales' => $datosGenerales ?? null,
+                            'datosTramite' => $datosTramite ?? [],
+                            'datosSolicitante' => $datosSolicitante ?? [],
                             'readonly' => true
                         ])
                         
@@ -257,7 +258,8 @@
                 
                 <div id="contenido-domicilio" class="p-8">
                         @include('components.formularios.seccion-domicilio', [
-                        'datosDomicilio' => $domicilio ?? null,
+                            'datosDomicilio' => $datosDomicilio ?? [],
+                            'datosSAT' => $datosSAT ?? [],
                             'readonly' => true
                         ])
                         
@@ -335,7 +337,7 @@
                 
                 <div class="p-8">
                         @include('components.formularios.seccion-constitucion', [
-                        'datosConstitutivos' => $datosConstitutivos ?? null,
+                            'datosConstitucion' => $datosConstitucion ?? [],
                             'readonly' => true
                         ])
                         
@@ -413,7 +415,8 @@
                 
                 <div class="p-8">
                         @include('components.formularios.seccion-accionistas', [
-                        'accionistas' => $accionistas ?? null,
+                            'datosAccionistas' => $datosAccionistas ?? [],
+                            'accionistas' => $accionistas ?? [],
                             'readonly' => true
                         ])
                         
@@ -491,7 +494,7 @@
                 
                 <div class="p-8">
                         @include('components.formularios.seccion-apoderado', [
-                        'datosApoderado' => $apoderado ?? null,
+                            'datosApoderado' => $datosApoderado ?? [],
                             'readonly' => true
                         ])
                         
@@ -570,7 +573,7 @@
                 
                 <div class="p-8">
                         @include('components.formularios.seccion-documentos', [
-                        'documentos' => $documentos ?? null,
+                            'documentos' => $documentos ?? [],
                             'readonly' => true
                         ])
                         

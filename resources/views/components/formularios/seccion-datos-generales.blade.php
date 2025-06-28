@@ -247,11 +247,36 @@ function datosGeneralesData() {
                 </div>
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800">Actividades Económicas</h3>
-                    <p class="text-sm text-gray-500">Selecciona las actividades económicas que realizas</p>
+                    <p class="text-sm text-gray-500">{{ $readonly ? 'Actividades económicas registradas' : 'Selecciona las actividades económicas que realizas' }}</p>
                 </div>
             </div>
         <div class="space-y-6">
-            <!-- Actividad -->
+            @if($readonly)
+                <!-- Mostrar actividades en modo solo lectura -->
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Actividades Seleccionadas
+                    </label>
+                    <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
+                        @php
+                            $actividades_ids = json_decode($datosTramite['actividades_seleccionadas'] ?? '[]', true);
+                        @endphp
+                        @if(empty($actividades_ids))
+                            <p class="text-gray-500 italic">No hay actividades seleccionadas</p>
+                        @else
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($actividades_ids as $actividad_id)
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Actividad ID: {{ $actividad_id }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @else
+                <!-- Actividad en modo editable -->
                 <div class="form-group">
                 <label for="actividad_search" class="block text-sm font-medium text-gray-700 mb-2">
                     Buscar Actividades *
@@ -341,6 +366,7 @@ function datosGeneralesData() {
 
                 <!-- Input oculto para almacenar las actividades seleccionadas -->
     <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
+            @endif
         </div>
         </div>
 
@@ -363,15 +389,18 @@ function datosGeneralesData() {
                 </label>
                 <div class="relative group">
                     <input type="url" id="pagina_web" name="pagina_web"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50 @error('pagina_web') border-red-500 @enderror"
-                           placeholder="https://www.ejemplo.com"
+                           class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50' }} border rounded-lg @error('pagina_web') border-red-500 @enderror"
+                           placeholder="{{ $readonly ? '' : 'https://www.ejemplo.com' }}"
                            data-validation="url"
                            aria-label="Página web"
-                           value="{{ old('pagina_web', $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? '') }}">
+                           value="{{ old('pagina_web', $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? '') }}"
+                           {{ $readonly ? 'readonly' : '' }}>
                 </div>
-                @error('pagina_web')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                @if(!$readonly)
+                    @error('pagina_web')
+                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('pagina_web') }}</p>
+                    @enderror
+                @endif
             </div>
         </div>
 
@@ -397,17 +426,20 @@ function datosGeneralesData() {
                     </label>
                     <div class="relative group">
                         <input type="text" id="contacto_nombre" name="contacto_nombre"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50 @error('contacto_nombre') border-red-500 @enderror"
-                               placeholder="Nombre completo del contacto"
+                               class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50' }} border rounded-lg @error('contacto_nombre') border-red-500 @enderror"
+                               placeholder="{{ $readonly ? '' : 'Nombre completo del contacto' }}"
                                maxlength="100"
                                minlength="2"
                                data-validation="required|minLength:2|maxLength:100|text"
                                aria-label="Nombre del contacto"
-                               value="{{ old('contacto_nombre', $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? '') }}" required>
+                               value="{{ old('contacto_nombre', $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? '') }}" 
+                               {{ $readonly ? 'readonly' : 'required' }}>
                     </div>
-                    @error('contacto_nombre')
-                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_nombre') }}</p>
-                    @enderror
+                    @if(!$readonly)
+                        @error('contacto_nombre')
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_nombre') }}</p>
+                        @enderror
+                    @endif
                 </div>
 
                 <!-- Cargo -->
@@ -418,17 +450,20 @@ function datosGeneralesData() {
                     </label>
                     <div class="relative group">
                         <input type="text" id="contacto_cargo" name="contacto_cargo"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50 @error('contacto_cargo') border-red-500 @enderror"
-                               placeholder="Cargo en la empresa"
+                               class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50' }} border rounded-lg @error('contacto_cargo') border-red-500 @enderror"
+                               placeholder="{{ $readonly ? '' : 'Cargo en la empresa' }}"
                                maxlength="50"
                                minlength="2"
                                data-validation="required|minLength:2|maxLength:50|text"
                                aria-label="Cargo del contacto"
-                               value="{{ old('contacto_cargo', $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? '') }}" required>
+                               value="{{ old('contacto_cargo', $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? '') }}" 
+                               {{ $readonly ? 'readonly' : 'required' }}>
                     </div>
-                    @error('contacto_cargo')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    @if(!$readonly)
+                        @error('contacto_cargo')
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_cargo') }}</p>
+                        @enderror
+                    @endif
                 </div>
 
                 <!-- Email -->
@@ -439,15 +474,18 @@ function datosGeneralesData() {
                     </label>
                     <div class="relative group">
                         <input type="email" id="contacto_correo" name="contacto_correo"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50 @error('contacto_correo') border-red-500 @enderror"
-                               placeholder="correo@ejemplo.com"
+                               class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50' }} border rounded-lg @error('contacto_correo') border-red-500 @enderror"
+                               placeholder="{{ $readonly ? '' : 'correo@ejemplo.com' }}"
                                data-validation="required|email"
                                aria-label="Correo del contacto"
-                               value="{{ old('contacto_correo', $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? '') }}" required>
+                               value="{{ old('contacto_correo', $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? '') }}" 
+                               {{ $readonly ? 'readonly' : 'required' }}>
                     </div>
-                    @error('contacto_correo')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    @if(!$readonly)
+                        @error('contacto_correo')
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_correo') }}</p>
+                        @enderror
+                    @endif
                 </div>
 
                 <!-- Teléfono -->
@@ -458,19 +496,22 @@ function datosGeneralesData() {
                     </label>
                     <div class="relative group">
                         <input type="tel" id="contacto_telefono" name="contacto_telefono"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50 @error('contacto_telefono') border-red-500 @enderror"
-                               placeholder="10 dígitos"
+                               class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50' }} border rounded-lg @error('contacto_telefono') border-red-500 @enderror"
+                               placeholder="{{ $readonly ? '' : '10 dígitos' }}"
                                pattern="[0-9]{10}"
                                maxlength="10"
                                minlength="10"
                                inputmode="numeric"
                                data-validation="required|phone|minLength:10|maxLength:10"
                                aria-label="Teléfono del contacto"
-                               value="{{ old('contacto_telefono', $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? '') }}" required>
+                               value="{{ old('contacto_telefono', $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? '') }}" 
+                               {{ $readonly ? 'readonly' : 'required' }}>
                     </div>
-                    @error('contacto_telefono')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    @if(!$readonly)
+                        @error('contacto_telefono')
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_telefono') }}</p>
+                        @enderror
+                    @endif
             </div>
         </div>
         </div>
@@ -515,12 +556,25 @@ function datosGeneralesData() {
                 </button>
             </div>
             @endif
+        @else
+            <!-- Mensaje informativo en modo solo lectura -->
+            <div class="mt-8 pt-6 border-t border-gray-100">
+                <div class="text-center text-gray-500">
+                    <i class="fas fa-eye mr-2"></i>
+                    Modo solo lectura - Los datos no pueden ser modificados
+                </div>
+            </div>
         @endif
     </form>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Solo ejecutar en modo editable
+    @if($readonly)
+        return; // No ejecutar JavaScript en modo solo lectura
+    @endif
+
     // Variables
     const searchInput = document.getElementById('actividad_search');
     const dropdown = document.getElementById('actividad-dropdown');

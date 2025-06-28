@@ -9,6 +9,7 @@ use App\Models\Tramite;
 use App\Models\Solicitante;
 use App\Models\SeccionRevision;
 use App\Models\DocumentoSolicitante;
+use App\Models\Documento;
 use App\Http\Controllers\Formularios\DatosGeneralesController;
 use App\Http\Controllers\Formularios\DomicilioController;
 use App\Http\Controllers\Formularios\ConstitucionController;
@@ -99,35 +100,49 @@ class RevisionController extends Controller
             // Cargar relaciones necesarias
             $tramite->load(['solicitante', 'revisor', 'detalleTramite', 'seccionesRevision.seccion']);
             
-            // 1. Obtener datos generales
-            $datosTramite = $this->obtenerDatosGenerales($tramite);
+            // 1. Obtener datos generales usando el controlador
+            $datosGenerales = $this->obtenerDatosGenerales($tramite);
             
-            // 2. Obtener datos de domicilio
+            // Separar datos generales en las variables que esperan los componentes
+            $datosTramite = $datosGenerales;
+            $datosSolicitante = [
+                'tipo_persona' => $tramite->solicitante->tipo_persona ?? '',
+                'rfc' => $tramite->solicitante->rfc ?? '',
+                'curp' => $tramite->solicitante->curp ?? '',
+                'nombre_completo' => $tramite->solicitante->nombre_completo ?? '',
+                'razon_social' => $tramite->solicitante->razon_social ?? ''
+            ];
+            
+            // 2. Obtener datos de domicilio usando el controlador
             $datosDomicilio = $this->obtenerDatosDomicilio($tramite);
             
             // 3. Obtener datos SAT (si existen)
             $datosSAT = $this->obtenerDatosSAT($tramite);
             
-            // 4. Obtener documentos
+            // 4. Obtener documentos usando el controlador
             $documentos = $this->obtenerDocumentos($tramite);
             
             // 4.1. Obtener documentos agrupados por sección
             $documentosPorSeccion = $this->obtenerDocumentosPorSeccion($tramite);
             
-            // 5. Para persona moral: obtener datos adicionales
-            $constitucion = null;
+            // 5. Para persona moral: obtener datos adicionales usando los controladores
+            $datosConstitucion = null;
+            $datosAccionistas = [];
             $accionistas = [];
-            $apoderado = null;
+            $datosApoderado = null;
             
             if ($tramite->solicitante && strtolower($tramite->solicitante->tipo_persona) === 'moral') {
-                $constitucion = $this->obtenerDatosConstitucion($tramite);
-                $accionistas = $this->obtenerDatosAccionistas($tramite);
-                $apoderado = $this->obtenerDatosApoderado($tramite);
+                $datosConstitucion = $this->obtenerDatosConstitucion($tramite);
+                $accionistasData = $this->obtenerDatosAccionistas($tramite);
+                $datosAccionistas = $accionistasData;
+                $accionistas = $accionistasData;
+                $datosApoderado = $this->obtenerDatosApoderado($tramite);
             }
 
             Log::info('✅ Datos cargados exitosamente para revisión', [
                 'tramite_id' => $tramite->id,
                 'tiene_datos_generales' => !empty($datosTramite),
+                'tiene_datos_solicitante' => !empty($datosSolicitante),
                 'tiene_domicilio' => !empty($datosDomicilio),
                 'tiene_documentos' => count($documentos),
                 'es_persona_moral' => $tramite->solicitante && $tramite->solicitante->tipo_persona === 'Moral',
@@ -150,13 +165,15 @@ class RevisionController extends Controller
             return view('revision.show', compact(
                 'tramite',
                 'datosTramite',
+                'datosSolicitante',
                 'datosDomicilio', 
                 'datosSAT',
                 'documentos',
                 'documentosPorSeccion',
                 'accionistas',
-                'apoderado',
-                'constitucion',
+                'datosAccionistas',
+                'datosApoderado',
+                'datosConstitucion',
                 'revisionesExistentes',
                 'comentariosGenerales'
             ));
@@ -172,13 +189,15 @@ class RevisionController extends Controller
             return view('revision.show', [
                 'tramite' => $tramite,
                 'datosTramite' => [],
+                'datosSolicitante' => [],
                 'datosDomicilio' => [],
                 'datosSAT' => [],
                 'documentos' => [],
                 'documentosPorSeccion' => [],
                 'accionistas' => [],
-                'apoderado' => null,
-                'constitucion' => null,
+                'datosAccionistas' => [],
+                'datosApoderado' => null,
+                'datosConstitucion' => null,
                 'revisionesExistentes' => [],
                 'comentariosGenerales' => [],
                 'error' => 'Error al cargar los datos del trámite'
@@ -192,12 +211,27 @@ class RevisionController extends Controller
     private function obtenerDatosGenerales(Tramite $tramite)
     {
         try {
+            Log::info('Obteniendo datos generales para el trámite:', [
+                'tramite_id' => $tramite->id,
+                'tipo_tramite' => $tramite->tipo_tramite,
+                'solicitante_id' => $tramite->solicitante_id
+            ]);
+            
             $controller = new DatosGeneralesController();
-            return $controller->obtenerDatos($tramite);
+            $datos = $controller->obtenerDatos($tramite);
+            
+            Log::info('Datos generales obtenidos:', [
+                'tramite_id' => $tramite->id,
+                'datos_count' => count($datos),
+                'datos_keys' => array_keys($datos)
+            ]);
+            
+            return $datos;
         } catch (\Exception $e) {
             Log::error('Error al obtener datos generales:', [
                 'tramite_id' => $tramite->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
             return [];
         }
@@ -209,12 +243,25 @@ class RevisionController extends Controller
     private function obtenerDatosDomicilio(Tramite $tramite)
     {
         try {
+            Log::info('Obteniendo datos de domicilio para el trámite:', [
+                'tramite_id' => $tramite->id
+            ]);
+            
             $controller = new DomicilioController();
-            return $controller->obtenerDatos($tramite);
+            $datos = $controller->obtenerDatos($tramite);
+            
+            Log::info('Datos de domicilio obtenidos:', [
+                'tramite_id' => $tramite->id,
+                'datos_count' => count($datos),
+                'tiene_codigo_postal' => !empty($datos['codigo_postal'])
+            ]);
+            
+            return $datos;
         } catch (\Exception $e) {
             Log::error('Error al obtener datos de domicilio:', [
                 'tramite_id' => $tramite->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
             return [];
         }
@@ -247,15 +294,42 @@ class RevisionController extends Controller
     private function obtenerDocumentos(Tramite $tramite)
     {
         try {
-            // Simular request para obtener documentos
-            $request = new Request();
-            $controller = new DocumentosController();
+            // Obtener documentos directamente de la base de datos
+            $documentos = DocumentoSolicitante::where('tramite_id', $tramite->id)
+                ->with('documento')
+                ->get()
+                ->map(function($doc) {
+                    try {
+                        // Intentar desencriptar la ruta del archivo
+                        $rutaDesencriptada = \Illuminate\Support\Facades\Crypt::decryptString($doc->ruta_archivo);
+                        $rutaArchivo = asset('storage/' . $rutaDesencriptada);
+                    } catch (\Exception $e) {
+                        // Si no se puede desencriptar, usar la ruta directamente
+                        $rutaArchivo = asset('storage/' . $doc->ruta_archivo);
+                    }
+                    
+                    return [
+                        'id' => $doc->id,
+                        'documento_id' => $doc->documento_id,
+                        'nombre' => $doc->documento->nombre ?? 'Documento',
+                        'tipo' => $doc->documento->tipo ?? 'No especificado',
+                        'fecha_entrega' => $doc->fecha_entrega 
+                            ? \Carbon\Carbon::parse($doc->fecha_entrega)->toIso8601String() 
+                            : null,
+                        'estado' => $doc->estado ?? 'Pendiente',
+                        'version_documento' => $doc->version_documento ?? 1,
+                        'ruta_archivo' => $rutaArchivo,
+                        'observaciones' => $doc->observaciones
+                    ];
+                })
+                ->toArray();
+                
+            Log::info('Documentos obtenidos exitosamente:', [
+                'tramite_id' => $tramite->id,
+                'total_documentos' => count($documentos)
+            ]);
             
-            // Obtener documentos usando el método get del controlador
-            $response = $controller->get($request, $tramite->id);
-            $responseData = $response->getData(true);
-            
-            return $responseData['success'] ? $responseData['documentos'] : [];
+            return $documentos;
         } catch (\Exception $e) {
             Log::error('Error al obtener documentos:', [
                 'tramite_id' => $tramite->id,
