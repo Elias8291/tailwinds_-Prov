@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class Proveedor extends Model
 {
@@ -66,16 +67,103 @@ class Proveedor extends Model
      */
     public static function crearDesdeTramiite($tramite)
     {
-        $nuevoPV = self::generarSiguientePV();
-        
-        return self::create([
-            'pv' => $nuevoPV,
-            'solicitante_id' => $tramite->solicitante_id,
-            'fecha_registro' => now(),
-            'fecha_vencimiento' => now()->addYear(), // Válido por 1 año
-            'estado' => 'Activo',
-            'observaciones' => 'Proveedor creado automáticamente desde trámite ID: ' . $tramite->id
-        ]);
+        try {
+            // Verificar si ya existe un proveedor para este solicitante
+            $proveedorExistente = self::where('solicitante_id', $tramite->solicitante_id)
+                                       ->where('estado', 'Activo')
+                                       ->first();
+            
+            if ($proveedorExistente) {
+                Log::warning('Ya existe un proveedor activo para este solicitante:', [
+                    'solicitante_id' => $tramite->solicitante_id,
+                    'pv_existente' => $proveedorExistente->pv,
+                    'tramite_id' => $tramite->id
+                ]);
+                
+                // Actualizar observaciones del proveedor existente
+                $proveedorExistente->update([
+                    'observaciones' => $proveedorExistente->observaciones . 
+                                     ' | Trámite adicional procesado: ' . $tramite->id . ' el ' . now()->format('d/m/Y')
+                ]);
+                
+                return $proveedorExistente;
+            }
+            
+            $nuevoPV = self::generarSiguientePV();
+            
+            $proveedor = self::create([
+                'pv' => $nuevoPV,
+                'solicitante_id' => $tramite->solicitante_id,
+                'fecha_registro' => now(),
+                'fecha_vencimiento' => now()->addYear(), // Válido por 1 año
+                'estado' => 'Activo',
+                'observaciones' => 'Proveedor creado automáticamente desde trámite ID: ' . $tramite->id . 
+                                 ' el ' . now()->format('d/m/Y H:i:s')
+            ]);
+
+            // Log del evento
+            Log::info('Proveedor creado automáticamente:', [
+                'pv' => $proveedor->pv,
+                'solicitante_id' => $tramite->solicitante_id,
+                'tramite_id' => $tramite->id,
+                'tipo_tramite' => $tramite->tipo_tramite,
+                'fecha_creacion' => now(),
+                'fecha_vencimiento' => $proveedor->fecha_vencimiento
+            ]);
+
+            // Crear notificación para el solicitante
+            self::crearNotificacionProveedor($proveedor, $tramite);
+
+            return $proveedor;
+            
+        } catch (\Exception $e) {
+            Log::error('Error al crear proveedor desde trámite:', [
+                'tramite_id' => $tramite->id,
+                'solicitante_id' => $tramite->solicitante_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            throw new \Exception('Error al crear el proveedor: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Crear notificación para el solicitante sobre su nuevo proveedor
+     */
+    private static function crearNotificacionProveedor($proveedor, $tramite)
+    {
+        try {
+            // Buscar al usuario asociado al solicitante
+            $usuario = User::where('email', $tramite->solicitante->email)->first();
+            
+            if ($usuario) {
+                \App\Models\Notificacion::create([
+                    'usuario_id' => $usuario->id,
+                    'titulo' => '🎉 ¡Felicidades! Su proveedor ha sido creado',
+                    'mensaje' => "Su trámite de {$tramite->tipo_tramite} ha sido aprobado exitosamente. " .
+                               "Su código de proveedor es: {$proveedor->pv}. " .
+                               "Válido hasta: {$proveedor->fecha_vencimiento->format('d/m/Y')}",
+                    'tipo' => 'proveedor_creado',
+                    'leida' => false,
+                    'datos_adicionales' => json_encode([
+                        'pv' => $proveedor->pv,
+                        'tramite_id' => $tramite->id,
+                        'fecha_vencimiento' => $proveedor->fecha_vencimiento->format('Y-m-d')
+                    ])
+                ]);
+                
+                Log::info('Notificación de proveedor creada:', [
+                    'usuario_id' => $usuario->id,
+                    'pv' => $proveedor->pv
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::warning('No se pudo crear notificación de proveedor:', [
+                'pv' => $proveedor->pv,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**

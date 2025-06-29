@@ -1,7 +1,10 @@
 /**
- * Validador para el formulario de Documentos
- * Valida la subida de archivos PDF y feedback visual
+ * Validador para la sección de Documentos
+ * Maneja la validación de documentos subidos
  */
+
+// Variables globales
+let documentosValidados = false;
 
 // Configuración de validación para documentos
 const documentosValidationConfig = {
@@ -23,23 +26,15 @@ const documentosErrorMessages = {
 let documentosStates = {};
 
 // Función principal de inicialización
-function initDocumentosValidation() {
-    console.log('Inicializando validación de documentos...');
+function inicializarValidacionDocumentos() {
+    const formulario = document.getElementById('form-documentos');
     
-    // Verificar que el formulario existe
-    const form = document.querySelector('form[x-ref="documentosForm"]');
-    if (!form) {
-        console.log('Formulario de documentos no encontrado');
+    if (!formulario) {
         return;
     }
 
-    // Configurar eventos de validación
-    setupDocumentosValidationEvents();
-    
-    // Configurar intercepción del submit
-    setupDocumentosSubmitInterception();
-    
-    console.log('Validación de documentos inicializada correctamente');
+    // Inicializar validaciones y eventos
+    configurarEventosDocumentos(formulario);
 }
 
 // Configurar eventos de validación en tiempo real
@@ -134,8 +129,6 @@ function validarArchivoDocumento(input, file) {
 
 // Validar formulario completo de documentos
 function validarFormularioDocumentosCompleto() {
-    console.log('Validando formulario de documentos completo...');
-    
     let isValid = true;
     let camposConError = [];
     let documentosSubidos = 0;
@@ -183,7 +176,6 @@ function validarFormularioDocumentosCompleto() {
         return false;
     }
 
-    console.log('Formulario de documentos válido');
     return true;
 }
 
@@ -253,19 +245,18 @@ function mostrarInfoArchivo(container, file) {
 // Mostrar modal de errores
 function mostrarModalErroresDocumentos(camposConError) {
     // Implementación del modal de errores
-    console.log('Errores en documentos:', camposConError);
 }
 
 // Integración con Alpine.js
 document.addEventListener('DOMContentLoaded', function() {
-    initDocumentosValidation();
+    inicializarValidacionDocumentos();
 });
 
 // También inicializar si Alpine.js ya está cargado
 if (window.Alpine) {
     Alpine.data('documentosValidation', () => ({
         init() {
-            initDocumentosValidation();
+            inicializarValidacionDocumentos();
         }
     }));
 } 

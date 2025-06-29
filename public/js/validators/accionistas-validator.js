@@ -1,7 +1,10 @@
 /**
- * Validador para el formulario de Accionistas
- * Valida campos específicos con patrones regex y feedback visual
+ * Validador para la sección de Accionistas
+ * Maneja la validación de datos de accionistas para personas morales
  */
+
+// Variables globales
+let accionistasValidados = false;
 
 // Patrones de validación para accionistas
 const accionistasValidationPatterns = {
@@ -25,23 +28,15 @@ const accionistasErrorMessages = {
 let accionistasFieldStates = {};
 
 // Función principal de inicialización
-function initAccionistasValidation() {
-    console.log('Inicializando validación de accionistas...');
+function inicializarValidacionAccionistas() {
+    const formulario = document.getElementById('form-accionistas');
     
-    // Verificar que el formulario existe
-    const form = document.querySelector('form[x-ref="accionistasForm"]');
-    if (!form) {
-        console.log('Formulario de accionistas no encontrado');
+    if (!formulario) {
         return;
     }
 
-    // Configurar eventos de validación
-    setupAccionistasValidationEvents();
-    
-    // Configurar intercepción del submit
-    setupAccionistasSubmitInterception();
-    
-    console.log('Validación de accionistas inicializada correctamente');
+    // Inicializar validaciones y eventos
+    configurarEventosAccionistas(formulario);
 }
 
 // Configurar eventos de validación en tiempo real
@@ -167,8 +162,6 @@ function validarCampoAccionista(input, fieldType) {
 
 // Validar formulario completo de accionistas
 function validarFormularioAccionistasCompleto() {
-    console.log('Validando formulario de accionistas completo...');
-    
     let isValid = true;
     let camposConError = [];
 
@@ -220,7 +213,6 @@ function validarFormularioAccionistasCompleto() {
         return false;
     }
 
-    console.log('Formulario de accionistas válido');
     return true;
 }
 
@@ -261,22 +253,20 @@ function limpiarErrorAccionista(input) {
 // Mostrar modal de errores
 function mostrarModalErroresAccionistas(camposConError) {
     // Implementación del modal de errores
-    console.log('Errores en accionistas:', camposConError);
 }
 
 // Integración con Alpine.js
 document.addEventListener('DOMContentLoaded', function() {
-    initAccionistasValidation();
+    inicializarValidacionAccionistas();
 });
 
 // También inicializar si Alpine.js ya está cargado
 if (window.Alpine) {
     Alpine.data('accionistasValidation', () => ({
         init() {
-            initAccionistasValidation();
+            inicializarValidacionAccionistas();
         }
     }));
 } 
 
-// Validador para accionistas
-console.log('Accionistas validator loaded'); 
+// Validador para accionistas 

@@ -107,6 +107,16 @@
                 console.log('🎉 Carga completada');
             }
          }"
+         @next-step="
+            if (currentStep < totalSteps) {
+                currentStep++;
+            }
+         "
+         @prev-step="
+            if (currentStep > 1) {
+                currentStep--;
+            }
+         "
          class="invisible">
          
         <!-- Loading Overlay Elegante -->
@@ -1051,6 +1061,78 @@
 
 @push('scripts')
 <script>
+    // ✅ FUNCIÓN GLOBAL DE NAVEGACIÓN PARA FORMULARIOS
+    window.navegarSiguiente = function() {
+        // Ejecutando window.navegarSiguiente() en create.blade.php
+        
+        // Buscar el contenedor principal de Alpine.js
+        const alpineContainer = document.querySelector('[x-data*="currentStep"]');
+        
+        if (alpineContainer) {
+            try {
+                // Intentar acceder al componente Alpine y aumentar currentStep
+                if (typeof Alpine !== 'undefined') {
+                    const alpineData = Alpine.$data(alpineContainer);
+                    
+                    if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                        if (alpineData.currentStep < alpineData.totalSteps) {
+                            alpineData.currentStep++;
+                            return;
+                        } else {
+                            return;
+                        }
+                    }
+                }
+                
+                // Fallback: usar event dispatch para comunicarse con Alpine
+                alpineContainer.dispatchEvent(new CustomEvent('next-step'));
+                return;
+                
+            } catch (error) {
+                // Error en navegarSiguiente
+            }
+        }
+        
+        // Último fallback: buscar cualquier elemento con x-data
+        const anyAlpineEl = document.querySelector('[x-data]');
+        if (anyAlpineEl) {
+            anyAlpineEl.dispatchEvent(new CustomEvent('next-step'));
+        }
+    };
+
+    // ✅ FUNCIÓN GLOBAL DE NAVEGACIÓN ANTERIOR
+    window.navegarAnterior = function() {
+        const alpineContainer = document.querySelector('[x-data*="currentStep"]');
+        
+        if (alpineContainer) {
+            try {
+                if (typeof Alpine !== 'undefined') {
+                    const alpineData = Alpine.$data(alpineContainer);
+                    if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                        if (alpineData.currentStep > 1) {
+                            alpineData.currentStep--;
+                        }
+                        return;
+                    }
+                }
+                
+                // Fallback con evento
+                alpineContainer.dispatchEvent(new CustomEvent('prev-step'));
+                
+            } catch (error) {
+                // Error en navegarAnterior
+            }
+        }
+    };
+
+    // Función de prueba de navegación (desarrollo)
+    window.testNavegacion = function() {
+        // Probar navegación
+        if (typeof window.navegarSiguiente === 'function') {
+            window.navegarSiguiente();
+        }
+    };
+
     function finalizarTramite() {
         // Crear modal de confirmación personalizado
         mostrarModalConfirmacion();

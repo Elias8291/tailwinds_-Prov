@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Proveedor;
 use App\Models\Tramite;
 use App\Models\Solicitante;
@@ -19,7 +20,7 @@ class MiEstadoProveedorController extends Controller
 
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         
         // Verificar si el usuario tiene el permiso manualmente
         if (!$user->can('mi-estado-proveedor.ver')) {
@@ -41,8 +42,8 @@ class MiEstadoProveedorController extends Controller
             ]);
         }
 
-        // Obtener trámites activos del proveedor
-        $tramitesActivos = Tramite::where('proveedor_id', $proveedor->id)
+        // Obtener trámites activos del proveedor (a través del solicitante)
+        $tramitesActivos = Tramite::where('solicitante_id', $proveedor->solicitante_id)
             ->whereIn('estado', ['en_proceso', 'en_revision', 'pendiente'])
             ->with(['solicitante', 'detalleTramite'])
             ->orderBy('created_at', 'desc')
@@ -90,7 +91,7 @@ class MiEstadoProveedorController extends Controller
         $documentosPendientes = 0;
         if ($solicitante) {
             $documentosPendientes = $solicitante->documentosSolicitante()
-                ->where('estado', 'pendiente')
+                ->where('documento_solicitante.estado', 'pendiente')
                 ->count();
         }
         

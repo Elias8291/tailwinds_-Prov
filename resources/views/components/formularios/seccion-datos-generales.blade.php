@@ -1,12 +1,9 @@
 @props(['title' => 'Datos Generales', 'datosTramite' => [], 'datosSolicitante' => [], 'readonly' => false])
-
 <!-- Asegúrate de incluir Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 <!-- Incluir dependencias para validación y carga -->
 <script src="{{ asset('js/components/loading-states.js') }}" defer></script>
 <script src="{{ asset('js/validators/datos-generales-validator.js') }}" defer></script>
-
 <script>
 function datosGeneralesData() {
     return {
@@ -15,15 +12,12 @@ function datosGeneralesData() {
         curp: @json($datosSolicitante['curp'] ?? $datosTramite['curp'] ?? ''),
         nombreCompleto: @json($datosSolicitante['nombre_completo'] ?? $datosTramite['nombre_completo'] ?? ''),
         razonSocial: @json($datosSolicitante['razon_social'] ?? $datosTramite['razon_social'] ?? ''),
-        giro: @json($datosTramite['giro'] ?? ''),
+        giro: @json(old('giro', $datosTramite['giro'] ?? '')),
         esEdicion: @json(isset($datosTramite['tramite_id']) && $datosTramite['tramite_id'] ? true : false),
-        
         async init() {
                 // Los datos ya están cargados desde el servidor
-
             // Test de conectividad con el controlador
             await this.testConectividad();
-                
             // Inicializar validaciones después de que el DOM esté listo
                     this.$nextTick(() => {
                 if (typeof initDatosGeneralesValidation === 'function') {
@@ -31,11 +25,9 @@ function datosGeneralesData() {
                 }
             });
         },
-
         async testConectividad() {
             try {
-                console.log('🧪 Probando conectividad con el controlador...');
-                
+                // Test de conectividad
                 // Test 1: Ruta de controller con auth
                 try {
                     const response1 = await fetch('/formularios/datos-generales/test', {
@@ -45,13 +37,11 @@ function datosGeneralesData() {
                             'Accept': 'application/json'
                         }
                     });
-                    
                     const data1 = await response1.json();
-                    console.log('✅ Test de controlador con auth exitoso:', data1);
+                    // Test exitoso
                 } catch (error1) {
-                    console.error('❌ Error en test de controlador con auth:', error1);
+                    // Error en test de controlador
                 }
-
                 // Test 2: Ruta de debug simple sin auth
                 try {
                     const response2 = await fetch('/debug/datos-generales', {
@@ -67,37 +57,35 @@ function datosGeneralesData() {
                             timestamp: new Date().toISOString()
                         })
                     });
-                    
                     const data2 = await response2.json();
-                    console.log('✅ Test de ruta debug exitoso:', data2);
+                    // Test de ruta debug exitoso
                 } catch (error2) {
-                    console.error('❌ Error en test de ruta debug:', error2);
+                    // Error en test de ruta debug
                 }
-
             } catch (error) {
-                console.error('❌ Error general en test de conectividad:', error);
+                // Error general en test de conectividad
             }
         }
     }
 }
 </script>
-
 <div x-data="datosGeneralesData()">
-
-
     <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-6" data-validate="true">
         @csrf
-        <input type="hidden" name="action" value="next">
+        <input type="hidden" name="form_action" value="next">
         <input type="hidden" name="seccion" value="1">
-        
         @if(isset($datosTramite['tramite_id']))
             <input type="hidden" name="tramite_id" value="{{ $datosTramite['tramite_id'] }}">
+        @else
+            <!-- Buscar tramite_id en la URL o contexto -->
+            <input type="hidden" name="tramite_id" value="{{ request()->route('tramite') ?? session('tramite_id') ?? '' }}">
         @endif
-        
         @if(isset($datosTramite['tipo_tramite']))
             <input type="hidden" name="tipo_tramite" value="{{ $datosTramite['tipo_tramite'] }}">
+        @else
+            <!-- Buscar tipo_tramite en la URL o contexto -->
+            <input type="hidden" name="tipo_tramite" value="{{ request()->route('tipo_tramite') ?? 'inscripcion' }}">
         @endif
-
         <!-- Datos del Proveedor -->
         <div class="space-y-6 pt-2">
             <!-- Título de sección con icono -->
@@ -110,7 +98,6 @@ function datosGeneralesData() {
                     <p class="text-sm text-gray-500">Información general del solicitante</p>
                 </div>
             </div>
-
         <!-- Información Principal -->
         <div class="space-y-4">
             <!-- Tipo de Proveedor y RFC -->
@@ -131,7 +118,6 @@ function datosGeneralesData() {
                                readonly>
                         </div>
                 </div>
-
                 <!-- RFC (Solo lectura) -->
                 <div class="form-group">
                     <label for="rfc" class="block text-sm font-medium text-gray-700 mb-2">
@@ -149,7 +135,6 @@ function datosGeneralesData() {
                     </div>
                 </div>
             </div>
-
             <!-- CURP - Solo visible para persona física (Solo lectura) -->
             @if(($datosSolicitante['tipo_persona'] ?? '') === 'Física')
             <div class="form-group">
@@ -168,7 +153,6 @@ function datosGeneralesData() {
                 </div>
                 </div>
             @endif
-
             <!-- Nombre Completo (Solo para persona física) -->
             @if(($datosSolicitante['tipo_persona'] ?? '') === 'Física')
             <div class="form-group">
@@ -187,7 +171,6 @@ function datosGeneralesData() {
                 </div>
             </div>
             @endif
-
             <!-- Razón Social (Solo para persona moral) -->
             @if(($datosSolicitante['tipo_persona'] ?? '') === 'Moral')
             <div class="form-group">
@@ -206,7 +189,6 @@ function datosGeneralesData() {
                 </div>
             </div>
             @endif
-
             <!-- Giro -->
             <div class="form-group">
                 <label for="giro" class="block text-sm font-medium text-gray-700 mb-2">
@@ -237,7 +219,6 @@ function datosGeneralesData() {
             </div>
             </div>
         </div>
-
         <!-- Actividades Económicas -->
         <div class="space-y-6 pt-6 border-t border-gray-100">
             <!-- Título de sección con icono -->
@@ -257,23 +238,38 @@ function datosGeneralesData() {
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Actividades Seleccionadas
                     </label>
-                    <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
-                        @php
-                            $actividades_ids = json_decode($datosTramite['actividades_seleccionadas'] ?? '[]', true);
-                        @endphp
-                        @if(empty($actividades_ids))
-                            <p class="text-gray-500 italic">No hay actividades seleccionadas</p>
-                        @else
-                            <div class="flex flex-wrap gap-2">
-                                @foreach($actividades_ids as $actividad_id)
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20">
-                                        <i class="fas fa-check-circle mr-1"></i>
-                                        Actividad ID: {{ $actividad_id }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
+                                    <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
+                    @php
+                        $actividades_ids = json_decode($datosTramite['actividades_seleccionadas'] ?? '[]', true);
+                        $actividades_nombres = [];
+                        if (!empty($actividades_ids)) {
+                            // Obtener los nombres de las actividades desde la base de datos
+                            $actividades_nombres = \App\Models\Actividad::whereIn('id', $actividades_ids)
+                                ->select('id', 'nombre', 'sector_id')
+                                ->get()
+                                ->keyBy('id');
+                        }
+                    @endphp
+                    @if(empty($actividades_ids))
+                        <p class="text-gray-500 italic">No hay actividades seleccionadas</p>
+                    @else
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($actividades_ids as $actividad_id)
+                                @php
+                                    $actividad = $actividades_nombres->get($actividad_id);
+                                @endphp
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    @if($actividad)
+                                        {{ $actividad->nombre }}
+                                    @else
+                                        Actividad no encontrada (ID: {{ $actividad_id }})
+                                    @endif
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
                 </div>
             @else
                 <!-- Actividad en modo editable -->
@@ -281,7 +277,6 @@ function datosGeneralesData() {
                 <label for="actividad_search" class="block text-sm font-medium text-gray-700 mb-2">
                     Buscar Actividades *
                     </label>
-                
                 <!-- Nota informativa -->
                 <div class="mb-4 p-3 bg-gradient-to-r from-[#9d2449]/5 to-[#9d2449]/10 border border-[#9d2449]/20 rounded-lg">
                     <div class="flex items-start space-x-3">
@@ -297,7 +292,6 @@ function datosGeneralesData() {
                     </div>
                     </div>
                 </div>
-
                     <div class="relative group">
                     <!-- Input de búsqueda -->
                     <input type="text" 
@@ -306,12 +300,10 @@ function datosGeneralesData() {
                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50 @error('actividades_seleccionadas') border-red-500 @enderror"
                            aria-label="Buscar actividad"
                            autocomplete="off">
-                    
                     <!-- Icono de búsqueda -->
                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                         <i id="actividad-search-icon" class="fas fa-search text-gray-400 text-sm"></i>
                         </div>
-                    
                     <!-- Dropdown de resultados -->
                     <div id="actividad-dropdown" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl hidden max-h-64 overflow-hidden backdrop-blur-sm">
                         <!-- Header del dropdown -->
@@ -321,14 +313,12 @@ function datosGeneralesData() {
                                 <span>Resultados de búsqueda</span>
                     </div>
                         </div>
-                        
                         <!-- Contenedor de resultados con scroll -->
                         <div class="max-h-48 overflow-y-auto">
                             <div id="actividad-resultados">
                                 <!-- Los resultados se cargarán aquí -->
                             </div>
                         </div>
-                        
                         <!-- Mensaje sin resultados -->
                         <div id="actividad-no-resultados" class="px-6 py-8 text-center hidden">
                             <div class="flex flex-col items-center">
@@ -337,7 +327,6 @@ function datosGeneralesData() {
                                 </div>
                                 <p class="text-gray-500 text-sm font-medium mb-2">No se encontraron actividades</p>
                                 <p class="text-gray-400 text-xs mb-4">Intenta con otros términos de búsqueda</p>
-                                
                                 <!-- Botón para agregar actividad manualmente -->
                                 <button type="button" 
                                         id="btn-agregar-manual"
@@ -354,7 +343,6 @@ function datosGeneralesData() {
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
             </div>
-
             <!-- Tags de Actividades Seleccionadas -->
             <div id="actividades-seleccionadas" class="flex flex-wrap gap-3 p-4 bg-gradient-to-br from-[#9d2449]/5 to-white rounded-xl border border-[#9d2449]/20 shadow-sm min-h-[60px] transition-all duration-300 hover:shadow-md hover:border-[#9d2449]/30">
                 <!-- Los tags se agregarán aquí dinámicamente -->
@@ -363,13 +351,11 @@ function datosGeneralesData() {
                     No hay actividades seleccionadas
                 </div>
             </div>
-
                 <!-- Input oculto para almacenar las actividades seleccionadas -->
     <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
             @endif
         </div>
         </div>
-
         <!-- Información Adicional -->
         <div class="space-y-6 pt-6 border-t border-gray-100">
             <!-- Título de sección con icono -->
@@ -382,7 +368,6 @@ function datosGeneralesData() {
                     <p class="text-sm text-gray-500">Datos opcionales del solicitante</p>
                 </div>
             </div>
-
             <div class="form-group">
                 <label for="pagina_web" class="block text-sm font-medium text-gray-700 mb-2">
                     Página Web
@@ -403,7 +388,6 @@ function datosGeneralesData() {
                 @endif
             </div>
         </div>
-
         <!-- Datos de Contacto -->
         <div class="space-y-6 pt-6 border-t border-gray-100">
             <!-- Título de sección con icono mejorado -->
@@ -416,7 +400,6 @@ function datosGeneralesData() {
                     <p class="text-sm text-gray-500">Persona de referencia para comunicaciones</p>
                 </div>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Nombre -->
                 <div class="form-group">
@@ -441,7 +424,6 @@ function datosGeneralesData() {
                         @enderror
                     @endif
                 </div>
-
                 <!-- Cargo -->
                 <div class="form-group">
                     <label for="contacto_cargo" class="block text-sm font-medium text-gray-700 mb-2">
@@ -465,7 +447,6 @@ function datosGeneralesData() {
                         @enderror
                     @endif
                 </div>
-
                 <!-- Email -->
                 <div class="form-group">
                     <label for="contacto_correo" class="block text-sm font-medium text-gray-700 mb-2">
@@ -487,7 +468,6 @@ function datosGeneralesData() {
                         @enderror
                     @endif
                 </div>
-
                 <!-- Teléfono -->
                 <div class="form-group">
                     <label for="contacto_telefono" class="block text-sm font-medium text-gray-700 mb-2">
@@ -515,7 +495,6 @@ function datosGeneralesData() {
             </div>
         </div>
         </div>
-
         @if(!$readonly)
             @if(!isset($mostrar_navegacion) || $mostrar_navegacion !== false)
             <!-- Botones de navegación -->
@@ -556,25 +535,16 @@ function datosGeneralesData() {
                 </button>
             </div>
             @endif
-        @else
-            <!-- Mensaje informativo en modo solo lectura -->
-            <div class="mt-8 pt-6 border-t border-gray-100">
-                <div class="text-center text-gray-500">
-                    <i class="fas fa-eye mr-2"></i>
-                    Modo solo lectura - Los datos no pueden ser modificados
-                </div>
-            </div>
+
         @endif
     </form>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Solo ejecutar en modo editable
     @if($readonly)
         return; // No ejecutar JavaScript en modo solo lectura
     @endif
-
     // Variables
     const searchInput = document.getElementById('actividad_search');
     const dropdown = document.getElementById('actividad-dropdown');
@@ -584,39 +554,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const tagsContainer = document.getElementById('actividades-seleccionadas');
     const noActivitiesMessage = document.getElementById('no-actividades-message');
     const hiddenInput = document.getElementById('actividades_seleccionadas_input');
-    
     let searchTimeout;
     let selectedIndex = -1;
     let actividadesSeleccionadas = [];
-
     // Función para mostrar loading
     function mostrarLoading() {
         searchIcon.className = 'fas fa-spinner fa-spin text-[#9d2449] text-sm';
     }
-
     // Función para ocultar loading
     function ocultarLoading() {
         searchIcon.className = 'fas fa-search text-gray-400 text-sm';
     }
-
     // Función para buscar actividades
     async function buscarActividades(query) {
         if (!query || query.length < 2) {
             ocultarDropdown();
             return;
         }
-
         mostrarLoading();
-
         try {
             const response = await fetch(`/api/actividades/buscar?q=${encodeURIComponent(query)}&limit=20`);
-            
             if (!response.ok) {
                 throw new Error('Error en la búsqueda');
             }
-
             const result = await response.json();
-            
             if (result.success && result.data) {
                 // Filtrar actividades ya seleccionadas
                 const actividadesFiltradas = result.data.filter(actividad => 
@@ -627,33 +588,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 mostrarSinResultados();
             }
         } catch (error) {
-            console.error('Error buscando actividades:', error);
+                // Error buscando actividades
             mostrarSinResultados();
         } finally {
             ocultarLoading();
         }
     }
-
     // Función para mostrar resultados
     function mostrarResultados(actividades, query) {
         resultados.innerHTML = '';
         noResultados.classList.add('hidden');
         selectedIndex = -1;
-
         if (actividades.length === 0) {
             mostrarSinResultados();
             return;
         }
-
         actividades.forEach((actividad, index) => {
             const item = document.createElement('div');
             item.className = 'px-4 py-3 cursor-pointer transition-all duration-200 border-b border-gray-100/50 last:border-b-0 hover:bg-gradient-to-r hover:from-[#9d2449]/5 hover:to-[#9d2449]/10 hover:text-[#9d2449] group';
             item.dataset.id = actividad.id;
             item.dataset.index = index;
-            
             const nombre = resaltarTexto(actividad.nombre, query);
             const sector = typeof actividad.sector === 'string' ? actividad.sector : 'Sin sector';
-            
             item.innerHTML = `
                 <div class="flex items-start justify-between">
                     <div class="flex-1 min-w-0">
@@ -670,77 +626,61 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
             `;
-
             item.addEventListener('click', () => agregarActividad(actividad));
             item.addEventListener('mouseenter', () => {
                 selectedIndex = index;
                 actualizarSeleccionVisual();
             });
-
             resultados.appendChild(item);
         });
-
         mostrarDropdown();
     }
-
     // Función para mostrar sin resultados
     function mostrarSinResultados() {
         resultados.innerHTML = '';
         noResultados.classList.remove('hidden');
-        
         // Asegurar que el botón esté disponible
         const btnAgregar = document.getElementById('btn-agregar-manual');
         if (btnAgregar) {
             btnAgregar.style.display = 'inline-flex';
         }
-        
         mostrarDropdown();
     }
-
     // Función para mostrar dropdown
     function mostrarDropdown() {
         dropdown.classList.remove('hidden');
     }
-
     // Función para ocultar dropdown
     function ocultarDropdown() {
         dropdown.classList.add('hidden');
         selectedIndex = -1;
     }
-
     // Función para agregar actividad (selección múltiple)
     function agregarActividad(actividad) {
         // Verificar si ya está seleccionada
         if (actividadesSeleccionadas.some(sel => sel.id === actividad.id)) {
             return;
         }
-
         // Agregar a la lista
         actividadesSeleccionadas.push(actividad);
-        
         // Limpiar búsqueda
         searchInput.value = '';
-        
         // Actualizar interfaz
         actualizarTags();
         actualizarInputHidden();
-        
         // Cerrar dropdown
         ocultarDropdown();
     }
-
     // Función para remover actividad
     function removerActividad(actividadId) {
         actividadesSeleccionadas = actividadesSeleccionadas.filter(act => act.id !== actividadId);
         actualizarTags();
         actualizarInputHidden();
     }
-
     // Función para actualizar tags visuales
     function actualizarTags() {
         // Limpiar contenedor
         tagsContainer.innerHTML = '';
-        
         if (actividadesSeleccionadas.length === 0) {
             // Mostrar mensaje vacío
             const emptyMessage = document.createElement('div');
@@ -752,21 +692,17 @@ document.addEventListener('DOMContentLoaded', function() {
             // Mostrar tags
             actividadesSeleccionadas.forEach(actividad => {
                 const tag = document.createElement('div');
-                
                 // Estilo diferente para actividades personalizadas
                 const isCustom = actividad.custom || false;
                 const baseClass = 'inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200 hover:shadow-sm animate-pulse-once';
-                
                 if (isCustom) {
                     tag.className = baseClass + ' bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-blue-200 hover:from-blue-100 hover:to-blue-150';
                 } else {
                     tag.className = baseClass + ' bg-gradient-to-r from-[#9d2449]/10 to-[#9d2449]/15 text-[#9d2449] border-[#9d2449]/20 hover:from-[#9d2449]/15 hover:to-[#9d2449]/20';
                 }
-                
                 const sector = (typeof actividad.sector === 'string' && actividad.sector) ? ` - ${actividad.sector}` : '';
                 const icon = isCustom ? 'fas fa-edit' : 'fas fa-check-circle';
                 const iconColor = isCustom ? 'text-blue-600' : 'text-[#9d2449]';
-                
                 tag.innerHTML = `
                     <span class="flex items-center gap-1">
                         <i class="${icon} ${iconColor}"></i>
@@ -777,25 +713,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="fas fa-times text-xs"></i>
                     </button>
                 `;
-                
                 tagsContainer.appendChild(tag);
             });
         }
     }
-
     // Función para actualizar input hidden
     function actualizarInputHidden() {
         const actividadesIds = actividadesSeleccionadas.map(act => act.id);
         hiddenInput.value = JSON.stringify(actividadesIds);
     }
-
     // Función para resaltar texto
     function resaltarTexto(texto, busqueda) {
         if (!busqueda) return texto;
         const regex = new RegExp(`(${busqueda.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
         return texto.replace(regex, '<mark class="bg-yellow-200 px-1 rounded">$1</mark>');
     }
-
     // Función para actualizar selección visual
     function actualizarSeleccionVisual() {
         const items = resultados.querySelectorAll('[data-index]');
@@ -809,37 +741,30 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
     // Event listeners
     searchInput.addEventListener('input', function(e) {
         const query = e.target.value.trim();
-        
         if (searchTimeout) {
             clearTimeout(searchTimeout);
         }
-        
         searchTimeout = setTimeout(() => {
             buscarActividades(query);
         }, 300);
     });
-
     // Navegación con teclado
     searchInput.addEventListener('keydown', function(e) {
         const items = resultados.querySelectorAll('[data-index]');
-        
         switch (e.key) {
             case 'ArrowDown':
                 e.preventDefault();
                 selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
                 actualizarSeleccionVisual();
                 break;
-                
             case 'ArrowUp':
                 e.preventDefault();
                 selectedIndex = Math.max(selectedIndex - 1, -1);
                 actualizarSeleccionVisual();
                 break;
-                
             case 'Enter':
                 e.preventDefault();
                 if (selectedIndex >= 0 && items[selectedIndex]) {
@@ -852,34 +777,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     agregarActividad(actividad);
                 }
                 break;
-                
             case 'Escape':
                 e.preventDefault();
                 ocultarDropdown();
                 break;
         }
     });
-
     // Cerrar dropdown al hacer click fuera
     document.addEventListener('click', function(e) {
         if (!e.target.closest('#actividad_search') && !e.target.closest('#actividad-dropdown')) {
             ocultarDropdown();
         }
     });
-
     // Función global para remover actividades (llamada desde HTML)
     window.removerActividad = removerActividad;
-
     // Función global para agregar actividad manual
     window.agregarActividadManual = function() {
         const query = searchInput.value.trim();
-        
         if (!query || query.length < 2) {
             alert('Por favor escriba el nombre de la actividad que desea agregar (mínimo 2 caracteres).');
             searchInput.focus();
                 return;
             }
-
         // Crear actividad personalizada
         const actividadPersonalizada = {
             id: Date.now(), // ID único temporal
@@ -887,148 +806,260 @@ document.addEventListener('DOMContentLoaded', function() {
             sector: 'Actividad personalizada',
             custom: true // Marcador para identificar actividades personalizadas
         };
-
         // Verificar si ya existe
         const yaExiste = actividadesSeleccionadas.some(act => 
             act.nombre.toLowerCase() === query.toLowerCase()
         );
-
         if (yaExiste) {
             alert('Esta actividad ya ha sido agregada.');
             return;
         }
-
         // Agregar la actividad
         agregarActividad(actividadPersonalizada);
-        
         // Limpiar búsqueda y cerrar dropdown
         searchInput.value = '';
         ocultarDropdown();
-        
         // Mostrar mensaje de confirmación
         setTimeout(() => {
             alert('Actividad personalizada agregada correctamente.');
         }, 100);
     };
-
     // Manejo del formulario con validaciones
-    window.guardarYSiguiente = function() {
-        console.log('🔧 Iniciando guardarYSiguiente');
+
+    window.guardarYSiguiente = async function() {
+        console.log('🚀 Iniciando guardarYSiguiente()');
         
-        const form = document.getElementById('datos-generales-form');
-        if (!form) {
-            console.error('❌ Formulario datos-generales-form no encontrado');
-            alert('Error: Formulario no encontrado');
-            return;
-        }
-        
-        console.log('✅ Formulario encontrado:', form);
-        console.log('📋 Action del formulario:', form.action);
-        
-        // Verificar que form.action sea válido antes de usar replace
-        const formActionStr = form.action ? String(form.action) : '';
-        console.log('🔗 URL completa construida:', formActionStr);
-        console.log('🌐 Base URL:', window.location.origin);
-        
-        // Solo usar replace si formActionStr es válido
-        const rutaRelativa = formActionStr ? formActionStr.replace(window.location.origin, '') : '/formularios/datos-generales/guardar';
-        console.log('📍 Ruta relativa:', rutaRelativa);
-        
-        const btnGuardar = document.getElementById('btn-guardar-datos-generales') || document.getElementById('btn-guardar-datos-generales-alt');
+        // Buscar el botón para activar loading
+        const btn = document.getElementById('btn-guardar-datos-generales') || document.getElementById('btn-guardar-datos-generales-alt');
         const btnText = document.getElementById('btn-text-datos-generales') || document.getElementById('btn-text-datos-generales-alt');
         const btnLoading = document.getElementById('btn-loading-datos-generales') || document.getElementById('btn-loading-datos-generales-alt');
 
-        // Validar formulario completo usando el validador
-        if (typeof validarFormularioDatosGeneralesCompleto === 'function') {
-            console.log('🔍 Ejecutando validaciones del cliente');
-            if (!validarFormularioDatosGeneralesCompleto()) {
-                console.log('❌ Validación del cliente falló');
-                return; // El validador ya muestra los errores
-            }
-            console.log('✅ Validación del cliente exitosa');
-        } else {
-            console.log('⚠️ Validador no disponible, usando fallback');
-            // Fallback: validar que haya al menos una actividad seleccionada
-            if (actividadesSeleccionadas.length === 0) {
-                alert('Debe seleccionar al menos una actividad económica.');
+        // Activar loading en el botón
+        if (btn && btnText && btnLoading) {
+            btn.disabled = true;
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+        }
+        
+        try {
+            // Buscar el formulario
+            const form = document.getElementById('datos-generales-form');
+            if (!form) {
+                mostrarError('Error: No se encontró el formulario.');
                 return;
             }
-        }
+            
+            console.log('📝 Formulario encontrado:', form);
 
-        // Mostrar loading
-        if (btnGuardar) btnGuardar.disabled = true;
-        if (btnText) btnText.classList.add('hidden');
-        if (btnLoading) btnLoading.classList.remove('hidden');
-
-        console.log('📤 Preparando envío del formulario');
-        
-        // Enviar formulario
-        const formData = new FormData(form);
-        
-        // Debug: mostrar datos del formulario
-        console.log('📋 Datos del formulario:');
-        for (let [key, value] of formData.entries()) {
-            console.log(`  ${key}:`, value);
-        }
-
-        // Construir URL absoluta para debug
-        const baseUrl = window.location.origin;
-        // Forzar la URL correcta del servidor
-        const absoluteUrl = baseUrl + '/formularios/datos-generales/guardar';
-        
-        console.log('🔗 URL base:', baseUrl);
-        console.log('📋 Action original:', formActionStr);
-        console.log('🎯 URL absoluta construida:', absoluteUrl);
-
-        fetch(absoluteUrl, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
+            // Validación simple de campos obligatorios
+            const tramiteId = form.querySelector('input[name="tramite_id"]');
+            const giroInput = document.getElementById('giro');
+            const contactoNombre = document.getElementById('contacto_nombre');
+            const contactoCargo = document.getElementById('contacto_cargo');
+            const contactoCorreo = document.getElementById('contacto_correo');
+            const contactoTelefono = document.getElementById('contacto_telefono');
+            
+            console.log('🔍 Validando campos obligatorios...');
+            
+            // Verificar tramite_id
+            if (!tramiteId || !tramiteId.value) {
+                mostrarError('Error: No se encontró el ID del trámite. Recargue la página.');
+                return;
             }
-        })
-        .then(response => {
-            console.log('📥 Respuesta recibida:', response.status, response.statusText);
-        if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            
+            // Verificar giro
+            if (!giroInput || !giroInput.value || giroInput.value.trim().length < 10) {
+                mostrarError('El giro debe tener al menos 10 caracteres.');
+                giroInput?.focus();
+                return;
             }
-            return response.json();
-        })
-        .then(result => {
-            console.log('✅ Resultado procesado:', result);
-        if (result.success) {
-                console.log('🎉 Guardado exitoso, navegando al siguiente paso');
-                // Navegar al siguiente paso
-    if (typeof window.navegarSiguiente === 'function') {
-                    console.log('🔄 Llamando a window.navegarSiguiente()');
-        window.navegarSiguiente();
+            
+            // Verificar contacto nombre
+            if (!contactoNombre || !contactoNombre.value || contactoNombre.value.trim().length < 2) {
+                mostrarError('El nombre del contacto es obligatorio (mínimo 2 caracteres).');
+                contactoNombre?.focus();
+                return;
+            }
+            
+            // Verificar contacto cargo
+            if (!contactoCargo || !contactoCargo.value || contactoCargo.value.trim().length < 2) {
+                mostrarError('El cargo del contacto es obligatorio (mínimo 2 caracteres).');
+                contactoCargo?.focus();
+                return;
+            }
+            
+            // Verificar contacto correo
+            if (!contactoCorreo || !contactoCorreo.value || !contactoCorreo.value.includes('@')) {
+                mostrarError('El correo electrónico del contacto es obligatorio y debe ser válido.');
+                contactoCorreo?.focus();
+                return;
+            }
+            
+            // Verificar contacto teléfono
+            if (!contactoTelefono || !contactoTelefono.value || contactoTelefono.value.replace(/\D/g, '').length !== 10) {
+                mostrarError('El teléfono del contacto es obligatorio y debe tener 10 dígitos.');
+                contactoTelefono?.focus();
+                return;
+            }
+
+            console.log('✅ Validaciones pasaron correctamente');
+
+            // Preparar datos del formulario
+            const formData = new FormData(form);
+            
+            // Obtener token CSRF
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (csrfToken) {
+                formData.set('_token', csrfToken);
+            }
+            
+            // Mostrar cantidad de datos a enviar para verificación
+            const dataCount = Array.from(formData.entries()).length;
+            console.log(`📦 Enviando ${dataCount} campos de datos`);
+
+            // Obtener URL del action del formulario (método simplificado)
+            const actionUrl = form.getAttribute('action');
+            if (!actionUrl) {
+                mostrarError('Error: No se encontró la URL de destino del formulario.');
+                return;
+            }
+
+            console.log('🌐 Enviando a URL:', actionUrl);
+
+            // Hacer la petición
+            const response = await fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            console.log('📡 Respuesta recibida:', response.status, response.statusText);
+
+            if (!response.ok) {
+                // Intentar obtener el mensaje de error del servidor
+                let errorText = 'Error del servidor';
+                try {
+                    const errorData = await response.json();
+                    errorText = errorData.message || errorText;
+                } catch (e) {
+                    errorText = await response.text() || errorText;
+                }
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+
+            const result = await response.json();
+            console.log('✅ Resultado:', result);
+
+            if (result.success) {
+                console.log('🎉 Guardado exitoso');
+                // Guardado exitoso, navegando al siguiente paso
+                if (typeof window.navegarSiguiente === 'function') {
+                    console.log('🔄 Llamando a navegarSiguiente()');
+                    window.navegarSiguiente();
                 } else {
-                    console.log('⚠️ window.navegarSiguiente no disponible, recargando página');
-                    location.reload();
+                    console.log('🔄 Recargando página');
+                    window.location.reload();
                 }
             } else {
-                console.error('❌ Error del servidor:', result.message || result.errors);
-                const errorMsg = result.message || (result.errors ? Object.values(result.errors).flat().join(', ') : 'Error al guardar');
-                alert('Error: ' + errorMsg);
+                console.error('❌ Error del servidor:', result);
+                let errorMessage = 'Error al guardar los datos.';
+                
+                if (result.message) {
+                    errorMessage = result.message;
+                } else if (result.errors) {
+                    const errorList = Object.values(result.errors).flat();
+                    errorMessage = errorList.join(' ');
+                }
+                
+                mostrarError(errorMessage);
             }
-        })
-        .catch(error => {
-            console.error('💥 Error en fetch:', error);
-            alert('Error de conexión: ' + error.message);
-        })
-        .finally(() => {
-            console.log('🔄 Limpiando estado de loading');
-            // Ocultar loading
-            if (btnGuardar) btnGuardar.disabled = false;
-            if (btnText) btnText.classList.remove('hidden');
-            if (btnLoading) btnLoading.classList.add('hidden');
-        });
-    };
 
+        } catch (error) {
+            console.error('💥 Error en guardarYSiguiente:', error);
+            
+            let errorMessage = 'Error de conexión. Inténtelo de nuevo.';
+            
+            // Diagnóstico específico
+            if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+                errorMessage = 'Error de red. Verifique su conexión a internet.';
+            } else if (error.message.includes('404')) {
+                errorMessage = 'Ruta no encontrada. Contacte al administrador.';
+            } else if (error.message.includes('500')) {
+                errorMessage = 'Error del servidor. Inténtelo más tarde.';
+            } else if (error.message.includes('419')) {
+                errorMessage = 'Sesión expirada. Recargue la página.';
+            } else if (error.message.includes('403')) {
+                errorMessage = 'No tiene permisos para esta acción.';
+            } else if (error.message.includes('422')) {
+                errorMessage = 'Datos de validación incorrectos. Revise los campos.';
+            } else {
+                errorMessage = error.message || errorMessage;
+            }
+            
+            mostrarError(errorMessage);
+        } finally {
+            // Limpiar estado de loading
+            if (btn && btnText && btnLoading) {
+                btn.disabled = false;
+                btnText.classList.remove('hidden');
+                btnLoading.classList.add('hidden');
+            }
+        }
+    };
+    
+    // Función auxiliar para mostrar errores
+    function mostrarError(mensaje) {
+        console.error('🚨 Error:', mensaje);
+        
+        // Remover error anterior si existe
+        const errorAnterior = document.getElementById('datos-generales-error');
+        if (errorAnterior) {
+            errorAnterior.remove();
+        }
+        
+        // Crear contenedor de error
+        const errorContainer = document.createElement('div');
+        errorContainer.id = 'datos-generales-error';
+        errorContainer.className = 'fixed top-4 right-4 z-50 max-w-md p-4 bg-red-50 border border-red-200 rounded-lg shadow-lg';
+        errorContainer.style.animation = 'slideInError 0.3s ease-out';
+        
+        errorContainer.innerHTML = `
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                    <h3 class="text-sm font-medium text-red-800">Error</h3>
+                    <p class="mt-1 text-sm text-red-700">${mensaje}</p>
+                </div>
+                <div class="ml-4 flex-shrink-0">
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Insertar en el body
+        document.body.appendChild(errorContainer);
+        
+        // Auto-hide después de 8 segundos
+        setTimeout(() => {
+            if (errorContainer && errorContainer.parentNode) {
+                errorContainer.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => errorContainer.remove(), 300);
+            }
+        }, 8000);
+    }
 });
 </script>
-
 <style>
 /* Animación para los nuevos tags */
 @keyframes pulse-once {
@@ -1036,38 +1067,31 @@ document.addEventListener('DOMContentLoaded', function() {
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
-
 .animate-pulse-once {
     animation: pulse-once 0.3s ease-out;
 }
-
 /* Scrollbar personalizada para dropdown */
 #actividad-dropdown .max-h-48::-webkit-scrollbar {
     width: 8px;
 }
-
 #actividad-dropdown .max-h-48::-webkit-scrollbar-track {
     background: linear-gradient(to bottom, rgba(157, 36, 73, 0.05), rgba(157, 36, 73, 0.1));
     border-radius: 4px;
     margin: 4px 0;
 }
-
 #actividad-dropdown .max-h-48::-webkit-scrollbar-thumb {
     background: linear-gradient(to bottom, rgba(157, 36, 73, 0.3), rgba(157, 36, 73, 0.5));
     border-radius: 4px;
     border: 1px solid rgba(157, 36, 73, 0.1);
 }
-
 #actividad-dropdown .max-h-48::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(to bottom, rgba(157, 36, 73, 0.5), rgba(157, 36, 73, 0.7));
 }
-
 /* Animación para el dropdown */
 #actividad-dropdown {
     animation: dropdownSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     transform-origin: top;
 }
-
 @keyframes dropdownSlideIn {
     0% {
         opacity: 0;
@@ -1078,45 +1102,36 @@ document.addEventListener('DOMContentLoaded', function() {
         transform: translateY(0) scale(1);
     }
 }
-
 /* Efectos hover suaves */
 .form-group:hover input,
 .form-group:hover select,
 .form-group:hover textarea {
     border-color: rgb(157 36 73 / 0.5);
 }
-
 /* Transiciones suaves */
 input, select, textarea, button {
     transition: all 0.2s ease-in-out;
 }
-
 /* Estilos de validación */
 .border-green-300 {
     border-color: rgb(134 239 172) !important;
 }
-
 .focus\:border-green-500:focus {
     border-color: rgb(34 197 94) !important;
 }
-
 .focus\:ring-green-200:focus {
     --tw-ring-color: rgb(187 247 208) !important;
 }
-
 .border-red-500 {
     border-color: rgb(239 68 68) !important;
 }
-
 .focus\:border-red-500:focus {
     border-color: rgb(239 68 68) !important;
 }
-
 .focus\:ring-red-200:focus {
     --tw-ring-color: rgb(254 202 202) !important;
 }
-
-/* Animación para mensajes de error */
+/* Animaciones para mensajes de error */
 .error-message {
     animation: slideInError 0.3s ease-out;
 }
@@ -1124,11 +1139,24 @@ input, select, textarea, button {
 @keyframes slideInError {
     0% {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateX(100%) scale(0.8);
     }
     100% {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0) scale(1);
     }
 }
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+
 </style>

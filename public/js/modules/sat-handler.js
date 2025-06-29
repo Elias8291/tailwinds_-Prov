@@ -3,10 +3,14 @@ import QRReader from '../components/qr-reader.js';
 import SATValidator from '../validators/sat-validator.js';
 import SATScraper from '../scrapers/sat-scraper.js';
 
+/**
+ * SATHandler - Manejo de datos del SAT
+ * Versión sin console.log para mejor performance
+ */
 export class SATHandler {
     constructor(config = {}) {
         this.qrHandler = null;
-        this.isProcessing = false;
+        this.processingFile = false;
         this.lastScannedData = null;
         this.config = {
             fileNameElement: 'qr-file-name',
@@ -15,51 +19,30 @@ export class SATHandler {
             verDatosBtnElement: 'verDatosBtn',
             ...config
         };
+        this.init();
     }
 
-    async initialize() {
+    async init() {
         try {
-            console.log('Inicializando SATHandler...');
-            
-            // Crear e inicializar QRHandler con configuración
-            this.qrHandler = new QRHandler(this.config);
-            const initialized = await this.qrHandler.initialize(QRReader, SATValidator, SATScraper);
-            
-            if (!initialized) {
-                throw new Error('Error al inicializar QRHandler');
+            // Inicializar QRHandler
+            if (typeof QRHandler !== 'undefined') {
+                this.qrHandler = new QRHandler(this.config);
+                
+                // Configurar callback para datos escaneados
+                this.qrHandler.onDataScanned = (data) => {
+                    this.handleScannedData(data);
+                };
             }
-
-            // Configurar callbacks
-            this.qrHandler.setOnDataScanned((data) => {
-                console.log('Datos escaneados:', data);
-                this.lastScannedData = data;
-                this.isProcessing = false;
-                this.hideLoading();
-                this.showModal();
-            });
-
-            this.qrHandler.setOnError((error) => {
-                console.error('Error en QRHandler:', error);
-                this.isProcessing = false;
-                this.hideLoading();
-                this.showError(error);
-                this.resetUpload();
-            });
-
-            console.log('SATHandler inicializado correctamente');
-            return true;
         } catch (error) {
-            console.error('Error durante la inicialización:', error);
-            this.showError('Error al inicializar: ' + error.message);
-            return false;
+            // Error durante la inicialización
         }
     }
 
     async handleFile(file) {
-        if (!file || this.isProcessing) return;
+        if (!file || this.processingFile) return;
 
         try {
-            this.isProcessing = true;
+            this.processingFile = true;
             this.showLoading();
 
             // Validar el tipo de archivo
@@ -76,15 +59,15 @@ export class SATHandler {
                 throw new Error('El archivo no debe exceder los 5MB.');
             }
 
-            console.log('Iniciando procesamiento del archivo:', file.name);
+            
             await this.qrHandler.handleFile(file);
 
         } catch (error) {
-            console.error('Error al procesar archivo:', error);
+            
             this.showError(error.message || 'Error al procesar el documento');
             this.resetUpload();
         } finally {
-            this.isProcessing = false;
+            this.processingFile = false;
             this.hideLoading();
         }
     }

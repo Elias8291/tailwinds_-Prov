@@ -1,3 +1,8 @@
+/**
+ * HistorialHandler - Manejo del historial de proveedores
+ * Versión sin console.log para mejor performance
+ */
+
 export class HistorialHandler {
     constructor() {
         this.lastRFC = null;
@@ -9,26 +14,24 @@ export class HistorialHandler {
         try {
             this.mostrarCargando();
             
-            const response = await fetch(`/api/proveedor/historial?rfc=${encodeURIComponent(rfc)}`, {
+            const response = await fetch(`/api/historial-proveedor/${rfc}`, {
                 method: 'GET',
                 headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
                 }
             });
 
             const data = await response.json();
             
-            if (data.success) {
+            if (response.ok) {
                 this.lastRFC = rfc;
+                return data.historial || [];
+            } else {
+                throw new Error(data.error || 'Error al buscar historial');
             }
-
-            this.actualizarContenidoModal(data.html);
-            this.mostrarModal();
-
         } catch (error) {
-            console.error('Error al buscar historial:', error);
-            this.actualizarContenidoModal(this.generarHTMLError());
+            throw error;
         }
     }
 

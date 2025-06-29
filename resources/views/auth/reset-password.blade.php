@@ -17,7 +17,7 @@
     
     <h1 class="text-2xl font-bold text-gray-800 mb-2">Restablecer Contraseña</h1>
     <p class="text-gray-600 text-sm leading-relaxed max-w-xs mx-auto">
-        Ingresa tu nueva contraseña para acceder a tu cuenta.
+        Ingresa tu nueva contraseña para acceder a tu cuenta fd.
     </p>
 </div>
 

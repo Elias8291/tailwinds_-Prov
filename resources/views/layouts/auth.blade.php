@@ -460,7 +460,7 @@
                         </div>
 
                         <!-- Controles de navegación elegantes y compactos -->
-                        <div class="absolute top-1/2 left-6 transform -translate-y-1/2 z-20">
+                        <div class="absolute top-1/2 left-6 transform -translate-y-1/2 z-10">
                             <button onclick="window.previousSlide()" class="group w-10 h-10 bg-gradient-to-br from-white/15 to-white/5 hover:from-white/25 hover:to-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:border-white/40 flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl">
                                 <svg class="w-4 h-4 text-white group-hover:text-white transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
@@ -469,7 +469,7 @@
                             </button>
                         </div>
                         
-                        <div class="absolute top-1/2 right-6 transform -translate-y-1/2 z-20">
+                        <div class="absolute top-1/2 right-6 transform -translate-y-1/2 z-10">
                             <button onclick="window.nextSlideManual()" class="group w-10 h-10 bg-gradient-to-br from-white/15 to-white/5 hover:from-white/25 hover:to-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:border-white/40 flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl">
                                 <svg class="w-4 h-4 text-white group-hover:text-white transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>

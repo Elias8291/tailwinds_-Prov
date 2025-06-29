@@ -28,6 +28,10 @@
     .animate-fadeInUp {
         animation: fadeInUp 0.5s ease-out;
     }
+    
+    .border-3 {
+        border-width: 3px;
+    }
 </style>
 @endpush
 
@@ -108,7 +112,7 @@
     @endif
 
     <!-- Área de subida de PDF -->
-    <div id="uploadArea" class="transition-all duration-300 ease-in-out">
+    <div id="uploadArea" class="transition-all duration-300 ease-in-out min-h-[80px]">
         <div class="mt-1">
             <label for="document" class="block text-xs font-medium text-gray-700 mb-0.5">
                 <span class="block md:inline">Constancia de Situación Fiscal</span>
@@ -141,45 +145,37 @@
 
         <!-- Indicador de Carga -->
         <div id="loading-indicator" class="hidden">
-            <div class="mt-3 p-4 bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg border border-primary/20">
-                <div class="flex flex-col items-center justify-center space-y-3">
-                    <!-- Spinner animado -->
-                    <div class="relative">
-                        <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <div class="mt-2 p-3 bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg border border-primary/20">
+                <div class="flex items-center space-x-3">
+                    <!-- Spinner animado más pequeño -->
+                    <div class="relative flex-shrink-0">
+                        <div class="w-8 h-8 border-3 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                         <div class="absolute inset-0 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-primary animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-primary animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
                     </div>
                     
-                    <!-- Texto de carga -->
-                    <div class="text-center">
-                        <h3 class="text-base font-semibold text-primary mb-1">Procesando Constancia Fiscal</h3>
-                        <p class="text-xs text-gray-600 mb-2">
-                            Estamos leyendo y validando su documento...
-                        </p>
-                        
-                        <!-- Barra de progreso visual -->
-                        <div class="w-full max-w-xs mx-auto">
-                            <div class="bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                                <div class="bg-gradient-to-r from-primary to-blue-500 h-full rounded-full animate-loading-progress"></div>
+                    <!-- Texto de carga compacto -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <h3 class="text-sm font-semibold text-primary">Procesando Constancia</h3>
+                            <div class="flex space-x-1">
+                                <div class="w-1 h-1 bg-primary rounded-full animate-pulse"></div>
+                                <div class="w-1 h-1 bg-primary rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                                <div class="w-1 h-1 bg-primary rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
                             </div>
                         </div>
                         
-                        <!-- Pasos del proceso -->
-                        <div class="mt-3 text-xs text-gray-500 space-y-0.5">
-                            <div class="flex items-center justify-center space-x-1">
-                                <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                                <span>Escaneando código QR...</span>
-                            </div>
-                            <div class="flex items-center justify-center space-x-1">
-                                <div class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
-                                <span>Validando con el SAT...</span>
-                            </div>
-                            <div class="flex items-center justify-center space-x-1">
-                                <div class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
-                                <span>Extrayendo datos...</span>
+                        <p class="text-xs text-gray-600 mb-2">
+                            Validando documento con el SAT...
+                        </p>
+                        
+                        <!-- Barra de progreso compacta -->
+                        <div class="w-full">
+                            <div class="bg-gray-200 rounded-full h-1 overflow-hidden">
+                                <div class="bg-gradient-to-r from-primary to-blue-500 h-full rounded-full animate-loading-progress"></div>
                             </div>
                         </div>
                     </div>
@@ -282,13 +278,13 @@
             </div>
         </button>
 
-        <a href="{{ route('login') }}" class="group w-full bg-white hover:bg-gray-50 text-primary hover:text-primary-dark font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 border-2 border-primary/20 hover:border-primary/40 relative overflow-hidden inline-flex items-center justify-center text-sm">
+        <a href="{{ url('/') }}" class="group w-full bg-white hover:bg-gray-50 text-primary hover:text-primary-dark font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 border-2 border-primary/20 hover:border-primary/40 relative overflow-hidden inline-flex items-center justify-center text-sm">
             <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary-dark/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative flex items-center justify-center space-x-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                 </svg>
-                <span>Volver al Login</span>
+                <span>Volver al Inicio</span>
             </div>
         </a>
     </div>
@@ -598,22 +594,41 @@
         
         if (loadingIndicator) {
             if (show) {
+                // Mostrar el indicador de carga de forma suave
+                loadingIndicator.style.opacity = '0';
+                loadingIndicator.style.transform = 'translateY(-10px)';
                 loadingIndicator.classList.remove('hidden');
-                loadingIndicator.classList.add('animate-fadeInUp');
+                
+                // Transición suave
+                setTimeout(() => {
+                    loadingIndicator.style.transition = 'all 0.3s ease-out';
+                    loadingIndicator.style.opacity = '1';
+                    loadingIndicator.style.transform = 'translateY(0)';
+                }, 10);
             } else {
-                loadingIndicator.classList.add('hidden');
-                loadingIndicator.classList.remove('animate-fadeInUp');
+                // Ocultar de forma suave
+                loadingIndicator.style.transition = 'all 0.3s ease-out';
+                loadingIndicator.style.opacity = '0';
+                loadingIndicator.style.transform = 'translateY(-10px)';
+                
+                setTimeout(() => {
+                    loadingIndicator.classList.add('hidden');
+                    loadingIndicator.style.transition = '';
+                    loadingIndicator.style.transform = '';
+                }, 300);
             }
         }
         
         // Ocultar/mostrar el área de subida cuando se está cargando
         if (uploadArea) {
             if (show) {
-                uploadArea.style.opacity = '0.5';
+                uploadArea.style.opacity = '0.7';
                 uploadArea.style.pointerEvents = 'none';
+                uploadArea.style.filter = 'blur(1px)';
             } else {
                 uploadArea.style.opacity = '1';
                 uploadArea.style.pointerEvents = 'auto';
+                uploadArea.style.filter = 'none';
             }
         }
     }

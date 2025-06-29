@@ -1,13 +1,9 @@
 @props(['title' => 'Detalles del Trámite'])
-
 <div class="space-y-8">
     <input type="hidden" name="action" value="next">
-
-
     <!-- Dirección -->
     <div class="space-y-6">
         <h3 class="text-lg font-medium text-gray-900">Dirección</h3>
-        
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <!-- Código Postal -->
             <div class="w-full">
@@ -32,7 +28,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Estado -->
             <div class="w-full">
                 <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">
@@ -55,7 +50,6 @@
                 </div>
             </div>
         </div>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <!-- Municipio -->
             <div class="w-full">
@@ -78,7 +72,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Colonia -->
             <div class="w-full">
                 <label for="colonia" class="block text-sm font-medium text-gray-700 mb-2">
@@ -100,7 +93,6 @@
                 </div>
             </div>
         </div>
-
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <!-- Calle -->
             <div class="w-full">
@@ -123,7 +115,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Número Exterior -->
             <div class="w-full">
                 <label for="numero_exterior" class="block text-sm font-medium text-gray-700 mb-2">
@@ -146,7 +137,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Número Interior -->
             <div class="w-full">
                 <label for="numero_interior" class="block text-sm font-medium text-gray-700 mb-2">
@@ -169,7 +159,6 @@
                 </div>
             </div>
         </div>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <!-- Entre Calle 1 -->
             <div class="w-full">
@@ -193,7 +182,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Entre Calle 2 -->
             <div class="w-full">
                 <label for="entre_calle_2" class="block text-sm font-medium text-gray-700 mb-2">

@@ -1,5 +1,4 @@
 @props(['title' => 'Accionistas', 'tramite' => null, 'datosAccionistas' => [], 'accionistas' => [], 'readonly' => false])
-
 <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" 
      @if(!$readonly) x-data="accionistasData()" x-init="init()" @endif>
     <!-- Encabezado con icono -->
@@ -12,7 +11,6 @@
             <p class="text-sm text-gray-700 mt-1">Información sobre los accionistas de la empresa</p>
         </div>
     </div>
-
     @if($readonly)
         <!-- Vista de solo lectura para revisión -->
         <div class="space-y-6">
@@ -20,12 +18,10 @@
                 @php
                     $totalPorcentaje = 0;
                 @endphp
-                
                 @foreach($accionistas as $index => $accionista)
                     @php
                         $totalPorcentaje += floatval($accionista['porcentaje_participacion'] ?? $accionista['porcentaje'] ?? 0);
                     @endphp
-                    
                     <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
                         <div class="flex items-center justify-between mb-4">
                             <h4 class="text-lg font-medium text-gray-900">
@@ -35,7 +31,6 @@
                                 {{ number_format(floatval($accionista['porcentaje_participacion'] ?? $accionista['porcentaje'] ?? 0), 2) }}%
                             </span>
                         </div>
-                        
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
@@ -43,14 +38,12 @@
                                     {{ $accionista['accionista']['nombre'] ?? $accionista['nombre'] ?? 'No especificado' }}
                                 </div>
                             </div>
-                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Apellido Paterno</label>
                                 <div class="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-700">
                                     {{ $accionista['accionista']['apellido_paterno'] ?? $accionista['apellido_paterno'] ?? 'No especificado' }}
                                 </div>
                             </div>
-                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Apellido Materno</label>
                                 <div class="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-700">
@@ -60,7 +53,6 @@
                         </div>
                     </div>
                 @endforeach
-                
                 <!-- Resumen de porcentajes -->
                 <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
                     <div class="flex justify-between items-center">
@@ -95,7 +87,6 @@
                 <p class="text-red-700 text-sm" x-text="errorMessage"></p>
             </div>
         </div>
-
         <!-- Alert de Éxito -->
         <div x-show="showSuccess" x-cloak class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <div class="flex items-center">
@@ -103,12 +94,10 @@
                 <p class="text-green-700 text-sm" x-text="successMessage"></p>
             </div>
         </div>
-
         <form class="space-y-8" @submit.prevent="guardarAccionistas" x-ref="accionistasForm">
             <input type="hidden" name="action" value="next">
             <input type="hidden" name="seccion" value="4">
             <input type="hidden" name="tramite_id" :value="tramiteId">
-
             <div class="space-y-6">
                 <!-- Header simple -->
                 <div class="text-center">
@@ -119,7 +108,6 @@
                         <span x-text="totalPorcentaje.toFixed(1) + '%'"></span> asignado
                     </div>
                 </div>
-
                 <!-- Nota informativa -->
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div class="flex items-center">
@@ -133,7 +121,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Grid de cartas simples -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Mensaje cuando no hay accionistas -->
@@ -146,14 +133,12 @@
                             </div>
                         </div>
                     </template>
-
                     <!-- Cards de accionistas existentes -->
                     <template x-for="(accionista, index) in accionistas" :key="index">
                         <!-- Carta simple -->
                         <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer"
                              @click="toggleAccionista(index)"
                              :class="accionista.expanded ? 'ring-2 ring-[#9d2449] border-[#9d2449]' : ''">
-                            
                             <!-- Número y porcentaje -->
                             <div class="flex justify-between items-center mb-3">
                                 <span class="w-8 h-8 bg-[#9d2449] text-white rounded-full flex items-center justify-center text-sm font-bold"
@@ -161,7 +146,6 @@
                                 <span class="text-lg font-bold text-[#9d2449]" 
                                       x-text="(parseFloat(accionista.porcentaje) || 0).toFixed(1) + '%'"></span>
                                 </div>
-                                
                             <!-- Nombre -->
                             <div class="mb-3">
                                 <h4 class="font-semibold text-gray-900" 
@@ -169,13 +153,11 @@
                                 <p class="text-sm text-gray-700" 
                                    x-text="(accionista.apellido_paterno || '') + ' ' + (accionista.apellido_materno || '')"></p>
                                     </div>
-                                    
                             <!-- Barra de progreso -->
                             <div class="w-full bg-gray-100 rounded-full h-2">
                                 <div class="h-2 bg-[#9d2449] rounded-full transition-all duration-300"
                                      :style="`width: ${Math.min((parseFloat(accionista.porcentaje) || 0), 100)}%`"></div>
                             </div>
-
                             <!-- Estado -->
                             <div class="mt-3 text-center">
                                 <span class="text-xs font-medium"
@@ -184,7 +166,6 @@
                                     <span x-text="(accionista.nombre && accionista.apellido_paterno && (parseFloat(accionista.porcentaje) || 0) > 0) ? 'Completo' : 'Pendiente'"></span>
                                 </span>
                                         </div>
-                                        
                                         <!-- Botón eliminar -->
                                         <button type="button" 
                                                 @click.stop="eliminarAccionista(index)"
@@ -193,7 +174,6 @@
                                         </button>
                         </div>
                     </template>
-                    
                     <!-- Carta para agregar (siempre visible) -->
                     <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-[#9d2449] hover:bg-[#9d2449]/5 transition-all cursor-pointer flex items-center justify-center min-h-[140px]"
                          @click="agregarAccionista()">
@@ -205,17 +185,14 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Modal simple -->
                 <div x-show="accionistas.some(a => a.expanded) || nuevoAccionista" 
                      x-cloak
                      class="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4"
                      @click.self="accionistas.forEach(a => a.expanded = false); nuevoAccionista = null">
-                    
                     <!-- Modal para accionistas existentes -->
                     <template x-for="(accionista, index) in accionistas.filter(a => a.expanded)" :key="index">
                         <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6" @click.stop>
-                            
                             <!-- Header modal -->
                             <div class="flex justify-between items-center mb-6">
                                 <h3 class="text-lg font-bold text-gray-900">
@@ -226,7 +203,6 @@
                                     <i class="fas fa-times"></i>
                                         </button>
                                 </div>
-
                             <!-- Formulario simple -->
                             <div class="space-y-4">
                                     <!-- Nombre -->
@@ -240,7 +216,6 @@
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#9d2449] focus:border-[#9d2449]"
                                            placeholder="Juan Carlos">
                                     </div>
-
                                 <!-- Apellidos -->
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
@@ -264,7 +239,6 @@
                                                placeholder="González">
                                     </div>
                                     </div>
-
                                 <!-- Porcentaje -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -282,7 +256,6 @@
                                         <span class="absolute right-3 top-2 text-gray-500">%</span>
                                             </div>
                                         </div>
-                                
                                 <!-- Botones -->
                                 <div class="flex gap-3 pt-4">
                                     <button @click="accionista.expanded = false"
@@ -297,11 +270,9 @@
                                             </div>
                                         </div>
                     </template>
-
                     <!-- Modal para nuevo accionista -->
                     <template x-if="nuevoAccionista">
                         <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6" @click.stop>
-                            
                             <!-- Header modal -->
                             <div class="flex justify-between items-center mb-6">
                                 <h3 class="text-lg font-bold text-gray-900">
@@ -312,7 +283,6 @@
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                            
                             <!-- Formulario simple -->
                             <div class="space-y-4">
                                 <!-- Nombre -->
@@ -325,7 +295,6 @@
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#9d2449] focus:border-[#9d2449]"
                                            placeholder="Juan Carlos">
                                 </div>
-                                
                                 <!-- Apellidos -->
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
@@ -347,7 +316,6 @@
                                                placeholder="González">
                                     </div>
                                         </div>
-                                
                                 <!-- Porcentaje -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -364,7 +332,6 @@
                                         <span class="absolute right-3 top-2 text-gray-500">%</span>
                                     </div>
                                 </div>
-                                
                                 <!-- Botones -->
                                 <div class="flex gap-3 pt-4">
                                     <button @click="guardarNuevoAccionista()"
@@ -380,11 +347,8 @@
                         </div>
                     </template>
                 </div>
-
                 <!-- Resumen total -->
-               
             </div>
-
             <!-- Botones de navegación -->
             <div class="flex justify-between pt-6 border-t border-gray-200">
                 <button type="button" 
@@ -393,7 +357,6 @@
                     <i class="fas fa-arrow-left mr-2"></i>
                     Anterior
                 </button>
-
                 <button type="submit" 
                         :disabled="loading || totalPorcentaje !== 100"
                         :class="loading || totalPorcentaje !== 100 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#8a203f] hover:to-[#6d1a32]'"
@@ -414,7 +377,6 @@
         </form>
     @endif
 </div>
-
 <script>
 function accionistasData() {
     return {
@@ -426,12 +388,10 @@ function accionistasData() {
         errorMessage: '',
         showSuccess: false,
         successMessage: '',
-        
         async init() {
             // Obtener tramite_id
             const datosAccionistas = @json($datosAccionistas ?? []);
             const tramite = @json($tramite ?? null);
-            
             if (datosAccionistas && datosAccionistas.tramite_id) {
                 this.tramiteId = datosAccionistas.tramite_id;
                 await this.cargarDatosDesdeObjeto(datosAccionistas);
@@ -440,7 +400,6 @@ function accionistasData() {
                 await this.cargarDatosDesdeTramite(tramite.id);
             }
         },
-
         async cargarDatosDesdeObjeto(datosAccionistas) {
             try {
                 if (datosAccionistas.accionistas && Array.isArray(datosAccionistas.accionistas) && datosAccionistas.accionistas.length > 0) {
@@ -456,15 +415,11 @@ function accionistasData() {
                     this.accionistas = [];
                 }
             } catch (error) {
-                console.error('Error al cargar datos desde objeto:', error);
                 this.accionistas = [];
             }
         },
-
         async cargarDatosDesdeTramite(tramiteId) {
             try {
-                console.log('🔍 Cargando datos de accionistas para trámite:', tramiteId);
-                
                 const response = await fetch(`/api/tramite/${tramiteId}/accionistas`, {
                     method: 'GET',
                     headers: {
@@ -472,11 +427,8 @@ function accionistasData() {
                         'Accept': 'application/json'
                     }
                 });
-                
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('📋 Datos de accionistas recibidos:', data);
-                    
                     if (data.success && data.accionistas && Array.isArray(data.accionistas) && data.accionistas.length > 0) {
                         this.accionistas = data.accionistas.map(accionista => ({
                             nombre: accionista.nombre || '',
@@ -493,12 +445,10 @@ function accionistasData() {
                 }
                 return false;
             } catch (error) {
-                console.error('❌ Error al cargar datos de accionistas:', error);
                 this.accionistas = [];
                 return false;
             }
         },
-
         agregarAccionista() {
             // Crear accionista temporal para el modal
             this.nuevoAccionista = {
@@ -509,7 +459,6 @@ function accionistasData() {
                 esNuevo: true
             };
         },
-
         guardarNuevoAccionista() {
             // Validar que los campos obligatorios estén llenos
             if (!this.nuevoAccionista.nombre.trim()) {
@@ -524,7 +473,6 @@ function accionistasData() {
                 this.mostrarError('El porcentaje debe ser mayor a 0');
                 return;
             }
-
             // Agregar al array de accionistas
             this.accionistas.push({
                 nombre: this.nuevoAccionista.nombre.trim(),
@@ -533,25 +481,20 @@ function accionistasData() {
                 porcentaje: parseFloat(this.nuevoAccionista.porcentaje),
                 expanded: false
             });
-
             // Cerrar modal y limpiar temporal
             this.nuevoAccionista = null;
             this.mostrarExito('Accionista agregado correctamente');
         },
-
         cancelarNuevoAccionista() {
             this.nuevoAccionista = null;
         },
-
         toggleAccionista(index) {
             this.accionistas[index].expanded = !this.accionistas[index].expanded;
         },
-
         updateAccionista(index) {
             // Forzar actualización de la reactividad
             this.$nextTick();
         },
-
         eliminarAccionista(index) {
             if (this.accionistas.length > 0) {
                 this.accionistas.splice(index, 1);
@@ -559,13 +502,11 @@ function accionistasData() {
                 this.mostrarExito('Accionista eliminado correctamente');
             }
         },
-
         get totalPorcentaje() {
             return this.accionistas.reduce((total, accionista) => {
                 return total + (parseFloat(accionista.porcentaje) || 0);
             }, 0);
         },
-
         mostrarError(mensaje) {
             this.errorMessage = mensaje;
             this.showError = true;
@@ -574,7 +515,6 @@ function accionistasData() {
                 this.showError = false;
             }, 5000);
         },
-
         mostrarExito(mensaje) {
             this.successMessage = mensaje;
             this.showSuccess = true;
@@ -583,21 +523,17 @@ function accionistasData() {
                 this.showSuccess = false;
             }, 3000);
         },
-
         async guardarAccionistas() {
             if (this.loading) return;
-
             // Validaciones
             if (!this.tramiteId) {
                 this.mostrarError('No se pudo identificar el trámite');
                 return;
             }
-
             if (this.accionistas.length === 0) {
                 this.mostrarError('Debe agregar al menos un accionista');
                 return;
             }
-
             // Validar que todos los campos estén llenos
             for (let i = 0; i < this.accionistas.length; i++) {
                 const accionista = this.accionistas[i];
@@ -614,18 +550,14 @@ function accionistasData() {
                     return;
                 }
             }
-
             if (Math.abs(this.totalPorcentaje - 100) > 0.01) {
                 this.mostrarError('El total de participación debe sumar exactamente 100%');
                 return;
             }
-
             this.loading = true;
-            
             try {
                 const formData = new FormData();
                 formData.append('tramite_id', this.tramiteId);
-                
                 // Agregar accionistas
                 this.accionistas.forEach((accionista, index) => {
                     formData.append(`accionistas[${index}][nombre]`, accionista.nombre.trim());
@@ -633,15 +565,11 @@ function accionistasData() {
                     formData.append(`accionistas[${index}][apellido_materno]`, accionista.apellido_materno.trim());
                     formData.append(`accionistas[${index}][porcentaje]`, accionista.porcentaje);
                 });
-
                 // Agregar CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]');
                 if (csrfToken) {
                     formData.append('_token', csrfToken.getAttribute('content'));
                 }
-
-                console.log('📤 Enviando datos de accionistas:', this.accionistas);
-
                 const response = await fetch('/tramites/guardar-accionistas-formulario', {
                     method: 'POST',
                     body: formData,
@@ -650,13 +578,9 @@ function accionistasData() {
                         'Accept': 'application/json'
                     }
                 });
-
                 const data = await response.json();
-                console.log('📥 Respuesta del servidor:', data);
-
                 if (data.success) {
                     this.mostrarExito('Accionistas guardados correctamente');
-                    
                     // Disparar evento para navegar al siguiente paso
                     setTimeout(() => {
                         this.$dispatch('next-step');
@@ -664,11 +588,9 @@ function accionistasData() {
                 } else {
                     this.mostrarError(data.message || 'Error al guardar los accionistas');
                     if (data.errors) {
-                        console.error('Errores de validación:', data.errors);
                     }
                 }
             } catch (error) {
-                console.error('❌ Error al guardar accionistas:', error);
                 this.mostrarError('Error de conexión. Por favor, intente nuevamente.');
             } finally {
                 this.loading = false;
@@ -677,19 +599,14 @@ function accionistasData() {
     }
 }
 </script>
-
 <script>
 // Función para navegar al paso anterior desde accionistas
 function navegarAnteriorAccionistas() {
-    console.log('📍 Navegando al paso anterior desde accionistas');
-    
     // Método 1: Función global navegarAnterior
     if (typeof window.navegarAnterior === 'function') {
-        console.log('✅ Usando función global navegarAnterior');
         window.navegarAnterior();
         return;
     }
-    
     // Método 2: Buscar contenedor Alpine.js y retroceder
     const alpineContainer = document.querySelector('[x-data*="currentStep"]');
     if (alpineContainer && typeof Alpine !== 'undefined') {
@@ -697,36 +614,27 @@ function navegarAnteriorAccionistas() {
             const alpineData = Alpine.$data(alpineContainer);
             if (alpineData && typeof alpineData.currentStep !== 'undefined') {
                 if (alpineData.currentStep > 1) {
-                    console.log('✅ Retrocediendo paso con Alpine.js:', alpineData.currentStep, '->', alpineData.currentStep - 1);
                     alpineData.currentStep--;
                     return;
                 } else {
-                    console.log('⚠️ Ya estás en el primer paso');
                     return;
                 }
             }
         } catch (error) {
-            console.error('❌ Error al acceder a Alpine.js:', error);
         }
     }
-    
     // Método 3: Disparar evento personalizado en el contenedor
     if (alpineContainer) {
-        console.log('✅ Disparando evento previous-step');
         alpineContainer.dispatchEvent(new CustomEvent('previous-step'));
         return;
     }
-    
     // Método 4: Buscar directamente botones de navegación en el documento
     const prevButtons = document.querySelectorAll('button[onclick*="currentStep--"], button[x-text*="Anterior"]');
     if (prevButtons.length > 0) {
-        console.log('✅ Simulando click en botón anterior encontrado');
         prevButtons[0].click();
         return;
     }
-    
     // Fallback: intentar manipular directamente
-    console.log('⚠️ Usando fallback - intentando retroceder manualmente');
     const stepContainers = document.querySelectorAll('[x-show*="currentStep"]');
     if (stepContainers.length > 0) {
         // Buscar el contenedor activo
@@ -739,47 +647,38 @@ function navegarAnteriorAccionistas() {
                         const data = Alpine.$data(parentWithData);
                         if (data && data.currentStep && data.currentStep > 1) {
                             data.currentStep--;
-                            console.log('✅ Navegación fallback exitosa');
                             return;
                         }
                     }
                 } catch (error) {
-                    console.error('❌ Error en fallback:', error);
                 }
             }
         }
     }
-    
-    console.error('❌ No se pudo navegar al paso anterior');
 }
 </script>
-
 @push('styles')
 <style>
 /* Estilos básicos y limpios */
 .transition-all {
     transition: all 0.3s ease;
 }
-
 /* Hover effects simples */
 .hover\:shadow-md:hover {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
-
 /* Focus states con color primario */
 input:focus {
     outline: none;
     border-color: #9d2449;
     box-shadow: 0 0 0 3px rgba(157, 36, 73, 0.1);
 }
-
 /* Responsive simple */
 @media (max-width: 640px) {
     .grid {
         grid-template-columns: 1fr;
     }
 }
-
 /* Ocultar elementos en mobile si es necesario */
 @media (prefers-reduced-motion: reduce) {
     * {
@@ -789,7 +688,6 @@ input:focus {
 }
 </style>
 @endpush
-
 @push('scripts')
 <script src="{{ asset('js/validators/accionistas-validator.js') }}"></script>
 @endpush

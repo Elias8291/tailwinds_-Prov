@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\Tramite;
 use App\Models\Solicitante;
 use App\Models\SeccionRevision;
+use App\Models\Proveedor;
 use App\Models\DocumentoSolicitante;
 use App\Models\Documento;
+use App\Models\Notificacion;
 use App\Http\Controllers\Formularios\DatosGeneralesController;
 use App\Http\Controllers\Formularios\DomicilioController;
 use App\Http\Controllers\Formularios\ConstitucionController;
@@ -668,15 +671,26 @@ class RevisionController extends Controller
     }
 
     /**
-     * Aprobar todo el trámite
+     * Aprobar todo el trámite y crear proveedor automáticamente
      */
     public function aprobarTodo(Request $request, Tramite $tramite)
     {
         try {
-            // Aprobar todas las secciones
-            $secciones = [1, 2, 3, 4, 5, 6];
+            DB::beginTransaction();
+
+            // Determinar qué secciones aprobar según el tipo de persona
+            $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
+            $seccionesAAprobar = $tipoPersona === 'Moral' ? [1, 2, 3, 4, 5, 6] : [1, 2, 3]; // 3 es documentos para persona física
             
-            foreach ($secciones as $seccionId) {
+            Log::info('Iniciando aprobación completa de trámite:', [
+                'tramite_id' => $tramite->id,
+                'tipo_persona' => $tipoPersona,
+                'secciones_a_aprobar' => $seccionesAAprobar,
+                'revisor' => Auth::id()
+            ]);
+
+            // Aprobar las secciones correspondientes
+            foreach ($seccionesAAprobar as $seccionId) {
                 SeccionRevision::updateOrCreate(
                     [
                         'tramite_id' => $tramite->id,
@@ -698,14 +712,83 @@ class RevisionController extends Controller
                 'revisado_por' => Auth::id()
             ]);
 
-            return redirect()->route('revision.index')->with('success', 'Trámite aprobado completamente');
-        } catch (\Exception $e) {
-            Log::error('Error al aprobar todo el trámite:', [
+            // ✅ CREAR AUTOMÁTICAMENTE EL PROVEEDOR
+            $proveedor = Proveedor::crearDesdeTramiite($tramite);
+
+            // 🔄 CAMBIAR ROL DE SOLICITANTE A PROVEEDOR
+            if ($tramite->solicitante && $tramite->solicitante->usuario_id) {
+                try {
+                    $usuario = \App\Models\User::find($tramite->solicitante->usuario_id);
+                    if ($usuario) {
+                        // Remover el rol de Solicitante y asignar el rol de Proveedor
+                        $usuario->removeRole('Solicitante');
+                        $usuario->assignRole('Proveedor');
+                        
+                        Log::info('Usuario cambió de rol automáticamente:', [
+                            'usuario_id' => $usuario->id,
+                            'tramite_id' => $tramite->id,
+                            'rol_anterior' => 'Solicitante',
+                            'rol_nuevo' => 'Proveedor',
+                            'proveedor_pv' => $proveedor->pv
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error al cambiar rol de usuario:', [
+                        'tramite_id' => $tramite->id,
+                        'usuario_id' => $tramite->solicitante->usuario_id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            // 🔔 CREAR NOTIFICACIÓN PARA EL USUARIO
+            if ($tramite->solicitante && $tramite->solicitante->usuario_id) {
+                try {
+                    Notificacion::crearParaUsuario(
+                        '¡Felicitaciones! Ya eres Proveedor Oficial',
+                        "Su trámite #" . str_pad($tramite->id, 6, '0', STR_PAD_LEFT) . " ha sido aprobado completamente. " .
+                        "¡Bienvenido al Padrón de Proveedores! Su código oficial es: " . $proveedor->pv . ". " .
+                        "Ahora puede participar en licitaciones del Gobierno del Estado de Oaxaca y gestionar renovaciones desde su panel.",
+                        'Informativo',
+                        $tramite->solicitante->usuario_id
+                    );
+                    
+                    Log::info('Notificación de aprobación enviada:', [
+                        'tramite_id' => $tramite->id,
+                        'usuario_id' => $tramite->solicitante->usuario_id,
+                        'proveedor_pv' => $proveedor->pv
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Error al crear notificación de aprobación:', [
+                        'tramite_id' => $tramite->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            Log::info('Trámite aprobado completamente y proveedor creado:', [
                 'tramite_id' => $tramite->id,
-                'error' => $e->getMessage()
+                'revisor' => Auth::id(),
+                'tipo_persona' => $tipoPersona,
+                'proveedor_pv' => $proveedor->pv,
+                'proveedor_estado' => $proveedor->estado
             ]);
 
-            return redirect()->back()->with('error', 'Error al aprobar el trámite');
+            return redirect()->route('revision.index')->with('success', 
+                'Trámite aprobado completamente. Proveedor creado con código: ' . $proveedor->pv);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('Error al aprobar todo el trámite:', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()->with('error', 'Error al aprobar el trámite: ' . $e->getMessage());
         }
     }
 
@@ -715,16 +798,28 @@ class RevisionController extends Controller
     public function rechazarTodo(Request $request, Tramite $tramite)
     {
         $request->validate([
-            'comentario_general' => 'required|string|max:1000'
+            'comentario' => 'required|string|max:1000'
         ], [
-            'comentario_general.required' => 'Debe proporcionar un comentario para rechazar el trámite'
+            'comentario.required' => 'Debe proporcionar un comentario para rechazar el trámite'
         ]);
 
         try {
-            // Rechazar todas las secciones
-            $secciones = [1, 2, 3, 4, 5, 6];
+            DB::beginTransaction();
+
+            // Determinar qué secciones rechazar según el tipo de persona
+            $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
+            $seccionesARechazar = $tipoPersona === 'Moral' ? [1, 2, 3, 4, 5, 6] : [1, 2, 3]; // 3 es documentos para persona física
             
-            foreach ($secciones as $seccionId) {
+            Log::info('Iniciando rechazo completo de trámite:', [
+                'tramite_id' => $tramite->id,
+                'tipo_persona' => $tipoPersona,
+                'secciones_a_rechazar' => $seccionesARechazar,
+                'revisor' => Auth::id(),
+                'comentario' => $request->comentario
+            ]);
+
+            // Rechazar las secciones correspondientes
+            foreach ($seccionesARechazar as $seccionId) {
                 SeccionRevision::updateOrCreate(
                     [
                         'tramite_id' => $tramite->id,
@@ -732,7 +827,7 @@ class RevisionController extends Controller
                     ],
                     [
                         'estado' => 'rechazado',
-                        'comentario' => $request->comentario_general,
+                        'comentario' => $request->comentario,
                         'revisor_id' => Auth::id(),
                         'fecha_revision' => now()
                     ]
@@ -744,17 +839,53 @@ class RevisionController extends Controller
                 'estado' => 'Rechazado',
                 'fecha_revision' => now(),
                 'revisado_por' => Auth::id(),
-                'observaciones' => $request->comentario_general
+                'observaciones' => $request->comentario
+            ]);
+
+            // 🔔 CREAR NOTIFICACIÓN PARA EL USUARIO
+            if ($tramite->solicitante && $tramite->solicitante->usuario_id) {
+                try {
+                    Notificacion::crearParaUsuario(
+                        'Trámite Rechazado',
+                        "Su trámite #" . str_pad($tramite->id, 6, '0', STR_PAD_LEFT) . " ha sido rechazado. " .
+                        "Motivo del rechazo: " . $request->comentario . ". " .
+                        "Por favor, corrija los puntos observados y vuelva a enviar su solicitud.",
+                        'Advertencia',
+                        $tramite->solicitante->usuario_id
+                    );
+                    
+                    Log::info('Notificación de rechazo enviada:', [
+                        'tramite_id' => $tramite->id,
+                        'usuario_id' => $tramite->solicitante->usuario_id,
+                        'comentario' => $request->comentario
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Error al crear notificación de rechazo:', [
+                        'tramite_id' => $tramite->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            Log::info('Trámite rechazado completamente:', [
+                'tramite_id' => $tramite->id,
+                'revisor' => Auth::id(),
+                'tipo_persona' => $tipoPersona
             ]);
 
             return redirect()->route('revision.index')->with('success', 'Trámite rechazado completamente');
         } catch (\Exception $e) {
+            DB::rollBack();
+            
             Log::error('Error al rechazar todo el trámite:', [
                 'tramite_id' => $tramite->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
-            return redirect()->back()->with('error', 'Error al rechazar el trámite');
+            return redirect()->back()->with('error', 'Error al rechazar el trámite: ' . $e->getMessage());
         }
     }
 
@@ -779,4 +910,6 @@ class RevisionController extends Controller
             return redirect()->back()->with('error', 'Error al pausar la revisión');
         }
     }
+
+
 } 

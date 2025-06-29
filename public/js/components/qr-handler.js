@@ -1,3 +1,7 @@
+/**
+ * QRHandler - Manejador de códigos QR del SAT
+ * Versión sin console.log para mejor performance
+ */
 class QRHandler {
     constructor(config = {}) {
         this.lastScannedData = null;
@@ -9,12 +13,20 @@ class QRHandler {
         this.scannedData = null;
         this.isProcessing = false;
         this.config = config;
+        this.init();
+    }
+
+    init() {
+        // QRHandler inicializado
+        try {
+            this.setupEventListeners();
+        } catch (error) {
+            // Error durante la inicialización
+        }
     }
 
     async initialize(QRReader, SATValidator, SATScraper) {
         try {
-            console.log('Inicializando QRHandler...');
-            
             // Verificar elementos necesarios
             const requiredElements = ['qrResult', 'pdfCanvas'];
             const missingElements = requiredElements.filter(id => !document.getElementById(id));
@@ -30,10 +42,8 @@ class QRHandler {
             // Sobrescribir métodos del QRReader
             this._overrideMethods();
             
-            console.log('QRHandler inicializado correctamente');
             return true;
         } catch (error) {
-            console.error('Error al inicializar QRHandler:', error);
             if (this.onError) {
                 this.onError(error.message);
             }
@@ -47,18 +57,14 @@ class QRHandler {
 
         this.qrReader.handleFile = async function(file) {
             try {
-                console.log('Procesando archivo:', file.name);
                 const result = await originalHandleFile.call(this, file);
-                console.log('Resultado inicial de handleFile:', result);
 
                 if (result && result.success) {
                     try {
                         const scrapedData = await self.qrReader.getLastScrapedData();
-                        console.log('Datos obtenidos del scraper:', scrapedData);
 
                         if (scrapedData && scrapedData.details) {
                             self.lastScannedData = scrapedData;
-                            console.log('Datos almacenados correctamente:', self.lastScannedData);
 
                             // Notificar a los listeners
                             if (self.onDataScanned) {
@@ -68,7 +74,6 @@ class QRHandler {
                             return { success: true, data: self.lastScannedData };
                         }
                     } catch (error) {
-                        console.error('Error al obtener datos del scraper:', error);
                         if (self.onError) {
                             self.onError(error.message);
                         }
@@ -82,7 +87,6 @@ class QRHandler {
                 }
                 return { success: false, error: errorMsg };
             } catch (error) {
-                console.error('Error en handleFile:', error);
                 if (self.onError) {
                     self.onError(error.message);
                 }
@@ -97,23 +101,19 @@ class QRHandler {
         this.qrReader.showSatData = function() {
             try {
                 if (!self.lastScannedData) {
-                    console.error('No hay datos disponibles');
                     return false;
                 }
 
-                console.log('Generando contenido con datos:', self.lastScannedData);
                 const content = self.scraper.generateModalContent(self.lastScannedData);
 
                 return { success: true, content: content };
             } catch (error) {
-                console.error('Error en showSatData:', error);
                 return { success: false, error: error.message };
             }
         };
 
         this.qrReader.onValidQRFound = async function(url) {
             try {
-                console.log('QR válido encontrado:', url);
                 const scrapedData = await self.scraper.scrapeData(url);
                 
                 if (scrapedData && scrapedData.success && scrapedData.data) {
@@ -123,7 +123,6 @@ class QRHandler {
                 
                 return { success: false, error: scrapedData.error || 'Error al obtener datos del SAT' };
             } catch (error) {
-                console.error('Error en onValidQRFound:', error);
                 return { success: false, error: error.message };
             }
         };
@@ -139,7 +138,6 @@ class QRHandler {
 
     async handleFile(file) {
         if (this.isProcessing) {
-            console.log('Ya hay un archivo en proceso');
             return;
         }
 
@@ -152,7 +150,7 @@ class QRHandler {
             const result = await this.qrReader.handleFile(file);
             return result;
         } catch (error) {
-            console.error('Error en handleFile:', error);
+            
             if (this.onError) {
                 this.onError(error.message);
             }
@@ -165,11 +163,11 @@ class QRHandler {
     showSatData() {
         try {
             if (!this.lastScannedData) {
-                console.error('No hay datos disponibles');
+                
                 return { success: false, error: 'No hay datos disponibles' };
             }
 
-            console.log('Generando contenido con datos:', this.lastScannedData);
+            
             const content = this.scraper.generateModalContent(this.lastScannedData);
             
             // Actualizar contenido del modal
@@ -180,7 +178,7 @@ class QRHandler {
 
             return { success: true, content: content };
         } catch (error) {
-            console.error('Error en showSatData:', error);
+            
             return { success: false, error: error.message };
         }
     }

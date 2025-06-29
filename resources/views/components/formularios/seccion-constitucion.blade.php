@@ -1,5 +1,4 @@
 @props(['title' => 'Constitución', 'tramite' => null, 'datosConstitucion' => [], 'readonly' => false])
-
 <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" 
     @if(!$readonly) x-data="constitucionData()" @endif>
     <!-- Encabezado con icono -->
@@ -14,7 +13,6 @@
             </div>
         </div>
     </div>
-
     @if($readonly)
         <!-- Vista de solo lectura para revisión -->
         <div class="space-y-6">
@@ -26,7 +24,6 @@
                     'is_array' => is_array($datosConstitucion)
                 ]);
             @endphp
-            
             @if(!empty($datosConstitucion) && is_array($datosConstitucion))
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-group">
@@ -35,21 +32,18 @@
                             {{ $datosConstitucion['numero_escritura'] ?? 'No especificado' }}
                         </div>
                     </div>
-                    
                     <div class="form-group">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Constitución</label>
                         <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
                             {{ $datosConstitucion['fecha_constitucion_formatted'] ?? ($datosConstitucion['fecha_constitucion'] ? \Carbon\Carbon::parse($datosConstitucion['fecha_constitucion'])->format('d/m/Y') : 'No especificado') }}
                         </div>
                     </div>
-                    
                     <div class="form-group md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Notario</label>
                         <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
                             {{ $datosConstitucion['nombre_notario'] ?? 'No especificado' }}
                         </div>
                     </div>
-                    
                     <div class="form-group">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Entidad Federativa</label>
                         <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
@@ -70,21 +64,18 @@
                             {{ $datosConstitucion['entidad_federativa_nombre'] ?? ($datosConstitucion['entidad_federativa'] ? $estados[$datosConstitucion['entidad_federativa']] : 'No especificado') }}
                         </div>
                     </div>
-                    
                     <div class="form-group">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Número de Notario</label>
                         <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
                             {{ $datosConstitucion['numero_notario'] ?? 'No especificado' }}
                         </div>
                     </div>
-                    
                     <div class="form-group">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Número de Registro</label>
                         <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
                             {{ $datosConstitucion['numero_registro'] ?? 'No especificado' }}
                         </div>
                     </div>
-                    
                     <div class="form-group">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Inscripción</label>
                         <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
@@ -118,7 +109,6 @@
                         </div>
     @endif
 </div>
-
 @push('scripts')
 <script src="{{ asset('js/validators/constitucion-validator.js') }}"></script>
 @endpush
@@ -128,7 +118,6 @@
             <input type="hidden" name="action" value="next">
             <input type="hidden" name="seccion" value="3">
             <input type="hidden" name="tramite_id" value="{{ $datosConstitucion['tramite_id'] ?? ($tramite->id ?? '') }}">
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Número de Escritura -->
                 <div class="form-group">
@@ -146,7 +135,6 @@
                                required>
                     </div>
                 </div>
-
                 <!-- Fecha de Constitución -->
                 <div class="form-group">
                     <label for="fecha_constitucion" class="block text-sm font-medium text-gray-700 mb-2">
@@ -161,7 +149,6 @@
                                required>
                     </div>
                 </div>
-
                 <!-- Nombre del Notario -->
                 <div class="form-group md:col-span-2">
                     <label for="nombre_notario" class="block text-sm font-medium text-gray-700 mb-2">
@@ -178,7 +165,6 @@
                                required>
                     </div>
                 </div>
-
                 <!-- Entidad Federativa -->
                 <div class="form-group">
                     <label for="entidad_federativa" class="block text-sm font-medium text-gray-700 mb-2">
@@ -215,7 +201,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Número de Notario -->
                 <div class="form-group">
                     <label for="numero_notario" class="block text-sm font-medium text-gray-700 mb-2">
@@ -232,7 +217,6 @@
                                required>
                     </div>
                 </div>
-
                 <!-- Número de Registro -->
                 <div class="form-group">
                     <label for="numero_registro" class="block text-sm font-medium text-gray-700 mb-2">
@@ -249,7 +233,6 @@
                                required>
                     </div>
                 </div>
-
                 <!-- Fecha de Inscripción -->
                 <div class="form-group">
                     <label for="fecha_inscripcion" class="block text-sm font-medium text-gray-700 mb-2">
@@ -265,7 +248,6 @@
                     </div>
                 </div>
             </div>
-            
             <!-- Botones de navegación -->
             <div class="flex justify-between pt-6 border-t border-gray-100">
                 <button type="button" 
@@ -274,7 +256,6 @@
                     <i class="fas fa-arrow-left mr-2"></i>
                     Anterior
                 </button>
-                
                 <button type="button" 
                         id="btn-guardar-constitucion"
                         onclick="guardarConstitucionYSiguiente()"
@@ -295,7 +276,6 @@
         </form>
     @endif
 </div>
-
 @if(!$readonly)
 <script>
 function constitucionData() {
@@ -307,19 +287,16 @@ function constitucionData() {
         numeroNotario: '',
         numeroRegistro: '',
         fechaInscripcion: '',
-        
         async init() {
             // Cargar datos existentes si los hay
             const datosConstitucion = @json($datosConstitucion ?? []);
             const tramite = @json($tramite ?? null);
-            
             if (datosConstitucion && Object.keys(datosConstitucion).length > 0) {
                 await this.cargarDatosDesdeObjeto(datosConstitucion);
             } else if (tramite && tramite.id) {
                 await this.cargarDatosDesdeTramite(tramite.id);
             }
         },
-
         // Cargar datos desde un objeto
         async cargarDatosDesdeObjeto(datosConstitucion) {
             try {
@@ -331,10 +308,8 @@ function constitucionData() {
                 this.numeroRegistro = datosConstitucion.numero_registro || '';
                 this.fechaInscripcion = datosConstitucion.fecha_inscripcion || '';
             } catch (error) {
-                console.error('Error al cargar datos desde objeto:', error);
             }
         },
-
         // Cargar datos desde el trámite
         async cargarDatosDesdeTramite(tramiteId) {
             try {
@@ -346,29 +321,24 @@ function constitucionData() {
                     }
                 }
             } catch (error) {
-                console.error('Error al cargar datos desde trámite:', error);
             }
         },
-
         // Guardar constitución
         async guardarConstitucion() {
             try {
                 // Obtener tramite_id de los datos pasados al componente
                 const tramite = @json($tramite ?? null);
                 const datosConstitucion = @json($datosConstitucion ?? []);
-                
                 let tramiteId = null;
                 if (tramite && tramite.id) {
                     tramiteId = tramite.id;
                 } else if (datosConstitucion && datosConstitucion.tramite_id) {
                     tramiteId = datosConstitucion.tramite_id;
                 }
-                
                 if (!tramiteId) {
                     alert('Error: No se pudo obtener el ID del trámite');
                     return false;
                 }
-                
                 const formData = new FormData();
                 formData.append('tramite_id', tramiteId);
                 formData.append('numero_escritura', this.numeroEscritura);
@@ -379,7 +349,6 @@ function constitucionData() {
                 formData.append('numero_registro', this.numeroRegistro);
                 formData.append('fecha_inscripcion', this.fechaInscripcion);
                 formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-
                 const response = await fetch('{{ route('tramites.guardar-constitucion-formulario') }}', {
                     method: 'POST',
                     body: formData,
@@ -388,10 +357,8 @@ function constitucionData() {
                         'Accept': 'application/json'
                     }
                 });
-
                 const responseText = await response.text();
                 const result = JSON.parse(responseText);
-                
                 if (result.success) {
                     return true;
                 } else {
@@ -406,7 +373,6 @@ function constitucionData() {
         }
     }
 }
-
 // Función para navegar al paso anterior desde constitución
 function navegarAnteriorConstitucion() {
     // Método 1: Función global navegarAnterior
@@ -414,7 +380,6 @@ function navegarAnteriorConstitucion() {
         window.navegarAnterior();
         return;
     }
-    
     // Método 2: Buscar contenedor Alpine.js y retroceder
     const alpineContainer = document.querySelector('[x-data*="currentStep"]');
     if (alpineContainer && typeof Alpine !== 'undefined') {
@@ -430,28 +395,23 @@ function navegarAnteriorConstitucion() {
             // Error silencioso
         }
     }
-    
     // Método 3: Disparar evento personalizado
     if (alpineContainer) {
         alpineContainer.dispatchEvent(new CustomEvent('prev-step'));
         return;
     }
 }
-
 // Función para guardar constitución y navegar al siguiente paso
 async function guardarConstitucionYSiguiente() {
     // Mostrar estado de carga
     mostrarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
-    
     try {
         // 1. Buscar el componente Alpine.js de constitución
         const constitucionContainer = document.querySelector('[x-data*="constitucionData"]');
         if (constitucionContainer && typeof Alpine !== 'undefined') {
             const alpineData = Alpine.$data(constitucionContainer);
-            
             if (alpineData && typeof alpineData.guardarConstitucion === 'function') {
                 const guardado = await alpineData.guardarConstitucion();
-                
                 if (guardado) {
                     navegarSiguienteDesdeConstitucion();
                 } else {
@@ -460,16 +420,13 @@ async function guardarConstitucionYSiguiente() {
                 return;
             }
         }
-        
         // Fallback: intentar navegar sin guardar
         navegarSiguienteDesdeConstitucion();
-        
     } catch (error) {
         ocultarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
         navegarSiguienteDesdeConstitucion();
     }
 }
-
 // Función para navegar al siguiente paso desde constitución
 function navegarSiguienteDesdeConstitucion() {
     // Método 1: Función global navegarSiguiente
@@ -477,7 +434,6 @@ function navegarSiguienteDesdeConstitucion() {
         window.navegarSiguiente();
         return;
     }
-    
     // Método 2: Buscar contenedor Alpine.js y avanzar
     const alpineContainer = document.querySelector('[x-data*="currentStep"]');
     if (alpineContainer && typeof Alpine !== 'undefined') {
@@ -493,25 +449,20 @@ function navegarSiguienteDesdeConstitucion() {
             // Error silencioso
         }
     }
-    
     // Método 3: Disparar evento personalizado
     if (alpineContainer) {
         alpineContainer.dispatchEvent(new CustomEvent('next-step'));
         return;
     }
 }
-
-
 </script>
 @endif
-
 <style>
 .h-12 {
     @apply bg-gradient-to-br from-[#9d2449] to-[#8a203f];
     position: relative;
     overflow: hidden;
 }
-
 .h-12::after {
     content: '';
     position: absolute;
@@ -528,7 +479,6 @@ function navegarSiguienteDesdeConstitucion() {
     transform: rotate(45deg);
     animation: shine 3s infinite;
 }
-
 @keyframes shine {
     0% {
         transform: translateX(-100%) rotate(45deg);
@@ -537,43 +487,35 @@ function navegarSiguienteDesdeConstitucion() {
         transform: translateX(100%) rotate(45deg);
     }
 }
-
 .form-group:hover input:not([readonly]),
 .form-group:hover select {
     @apply border-[#9d2449]/30;
 }
-
 input:focus:not([readonly]), 
 select:focus {
     @apply ring-2 ring-[#9d2449]/20 border-[#9d2449];
     box-shadow: 0 0 0 1px rgba(157, 36, 73, 0.1), 
                 0 2px 4px rgba(157, 36, 73, 0.05);
 }
-
 input[readonly] {
     @apply bg-gray-50;
 }
-
 .btn-primary {
     @apply bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white;
 }
-
 .btn-primary:hover {
     @apply from-[#8a203f] to-[#7a1c38];
     transform: translateY(-1px);
     box-shadow: 0 4px 6px -1px rgba(157, 36, 73, 0.1),
                 0 2px 4px -1px rgba(157, 36, 73, 0.06);
 }
-
 /* Animación suave para los inputs */
 input, select, textarea {
     @apply transition-all duration-300 bg-white shadow-sm;
 }
-
 input:focus, select:focus, textarea:focus {
     @apply transform -translate-y-px shadow-md bg-white;
 }
-
 /* Animaciones para los iconos de sección */
 .h-12 {
     position: relative;
@@ -581,18 +523,15 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 4px 6px -1px rgba(157, 36, 73, 0.1), 
                 0 2px 4px -1px rgba(157, 36, 73, 0.06);
 }
-
 /* Nuevos estilos para mejorar la apariencia de los inputs */
 .form-group {
     @apply relative;
 }
-
 .form-group input,
 .form-group select,
 .form-group textarea {
     @apply border-[#4F46E5]/20;
 }
-
 .form-group:hover input,
 .form-group:hover select,
 .form-group:hover textarea {

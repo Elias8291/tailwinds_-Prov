@@ -123,6 +123,24 @@ class RoleSeeder extends Seeder
 
         $this->asignarPermisosSeguro($solicitante, $permisosSolicitante);
 
+        // === PROVEEDOR ===
+        $proveedor = Role::firstOrCreate([
+            'name' => 'Proveedor',
+            'guard_name' => 'web'
+        ]);
+        
+        $permisosProveedor = [
+            'dashboard.iniciar-tramite',
+            'tramites-solicitante.ver', 'tramites-solicitante.crear', 'tramites-solicitante.editar',
+            'tramites-solicitante.renovacion', 'tramites-solicitante.actualizacion',
+            'tramites-solicitante.subir-documentos', 'tramites-solicitante.finalizar',
+            'mi-estado-proveedor.ver',
+            'citas.ver', 'citas.crear', 'citas.editar', 'citas.agendar', 'citas.cancelar',
+            'perfil.ver', 'perfil.editar', 'perfil.cambiar-password',
+        ];
+
+        $this->asignarPermisosSeguro($proveedor, $permisosProveedor);
+
         // === OPERADOR ===
         $operador = Role::firstOrCreate([
             'name' => 'Operador',

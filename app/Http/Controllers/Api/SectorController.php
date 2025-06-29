@@ -7,6 +7,7 @@ use App\Models\Sector;
 use App\Models\Actividad;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class SectorController extends Controller
 {
@@ -103,7 +104,7 @@ class SectorController extends Controller
                 'fuentes' => $actividades->groupBy('fuente')->map->count()
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error en getAllActividades: ' . $e->getMessage());
+            Log::error('Error en getAllActividades: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
@@ -168,7 +169,7 @@ class SectorController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error en buscarActividades: ' . $e->getMessage());
+            Log::error('Error en buscarActividades: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,

@@ -197,7 +197,7 @@
                                         @else bg-green-100 text-green-800 @endif">
                                         {{ ucfirst(str_replace('_', ' ', $tramite->estado)) }}
                                     </span>
-                                    <a href="{{ route('tramites.solicitante.show', $tramite) }}" class="text-primary hover:text-primary-dark text-sm font-medium">
+                                    <a href="{{ route('tramites.solicitante.estado', $tramite) }}" class="text-primary hover:text-primary-dark text-sm font-medium">
                                         Ver detalles
                                     </a>
                                 </div>

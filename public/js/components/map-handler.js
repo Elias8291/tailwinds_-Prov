@@ -16,12 +16,9 @@ class MapHandler {
      */
     checkGoogleMapsAPI() {
         if (typeof google !== 'undefined' && google.maps) {
-            this.isGoogleMapsLoaded = true;
-            console.log('✅ Google Maps API está disponible');
+            return true;
         } else {
-            console.warn('⚠️ Google Maps API no está cargada');
-            // Intentar cargar dinámicamente si no está disponible
-            this.loadGoogleMapsAPI();
+            return false;
         }
     }
 
@@ -29,20 +26,27 @@ class MapHandler {
      * Carga dinámicamente la API de Google Maps si no está disponible
      */
     loadGoogleMapsAPI() {
-        if (this.isGoogleMapsLoaded) return;
+        return new Promise((resolve, reject) => {
+            if (typeof google !== 'undefined' && google.maps) {
+                resolve();
+                return;
+            }
 
-        const script = document.createElement('script');
-        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCUqfgNQ2Q4AVy8OTNMfogJceDbA0FHZKs&libraries=places';
-        script.async = true;
-        script.defer = true;
-        script.onload = () => {
-            this.isGoogleMapsLoaded = true;
-            console.log('✅ Google Maps API cargada dinámicamente');
-        };
-        script.onerror = () => {
-            console.error('❌ Error al cargar Google Maps API');
-        };
-        document.head.appendChild(script);
+            const script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCUqfgNQ2Q4AVy8OTNMfogJceDbA0FHZKs&libraries=places';
+            script.async = true;
+            script.defer = true;
+            
+            script.onload = () => {
+                resolve();
+            };
+            
+            script.onerror = () => {
+                reject('Error al cargar Google Maps API');
+            };
+            
+            document.head.appendChild(script);
+        });
     }
 
     /**
@@ -51,15 +55,15 @@ class MapHandler {
      * @param {string} direccion - Dirección a mostrar en el mapa
      */
     initializeMap(seccion, direccion) {
-        if (!this.isGoogleMapsLoaded) {
-            console.error('❌ Google Maps API no está disponible');
+        if (!this.checkGoogleMapsAPI()) {
+            
             this.showMapError(seccion, 'Google Maps no está disponible');
             return;
         }
 
         const mapContainer = document.getElementById('mapa-' + seccion);
         if (!mapContainer) {
-            console.error('❌ Contenedor de mapa no encontrado:', 'mapa-' + seccion);
+            
             return;
         }
 
@@ -130,7 +134,7 @@ class MapHandler {
         if (direccion && direccion !== 'Dirección no disponible') {
             this.geocodeAndMarkLocation(direccion, seccion);
         } else {
-            console.warn('⚠️ No hay dirección válida para geocodificar');
+            
         }
     }
 
@@ -219,7 +223,7 @@ class MapHandler {
      */
     geocodeAndMarkLocation(direccion, seccion) {
         if (!this.currentMap) {
-            console.error('❌ No hay mapa inicializado');
+            
             return;
         }
 
@@ -301,9 +305,9 @@ class MapHandler {
                 // Detectar calles cercanas
                 this.detectNearbyStreets(location, seccion);
 
-                console.log('✅ Ubicación geocodificada correctamente:', direccion);
+                
             } else {
-                console.warn('⚠️ No se pudo geocodificar la dirección:', direccion, 'Status:', status);
+                
                 this.showGeocodeError(direccion);
                 this.updateStreetsError(seccion);
             }
@@ -713,7 +717,7 @@ class MapHandler {
 
             return direccion || 'Dirección no disponible';
         } catch (error) {
-            console.error('Error al obtener dirección:', error);
+            
             return 'Dirección no disponible';
         }
     }
@@ -732,4 +736,13 @@ window.obtenerDireccionCompleta = function() {
     return MapHandler.getDireccionFromForm();
 };
 
-console.log('🗺️ MapHandler inicializado correctamente'); 
+window.addEventListener('error', function(e) {
+    if (e.message && e.message.includes('google')) {
+        // Silenciar errores de Google Maps para evitar interferir con otros scripts
+        e.preventDefault();
+        return false;
+    }
+});
+
+ 
+

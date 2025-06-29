@@ -1,5 +1,4 @@
 @props(['title' => 'Documentos Requeridos', 'tramite' => null, 'mostrar_navegacion' => true, 'documentos' => [], 'readonly' => false])
-
 <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" 
      @if(!$readonly) x-data="documentosData()" x-init="init()" @endif>
     <!-- Encabezado con icono -->
@@ -18,7 +17,6 @@
             </p>
         </div>
     </div>
-
     @if($readonly)
         <!-- Vista de solo lectura para revisión -->
         <div class="space-y-6">
@@ -29,7 +27,6 @@
                     @elseif($documento['estado'] === 'Pendiente' && !empty($documento['ruta_archivo'])) border-blue-300 bg-blue-50
                     @elseif($documento['estado'] === 'Rechazado') border-red-300 bg-red-50
                     @else border-gray-300 @endif">
-                    
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center">
                             <div class="relative">
@@ -38,12 +35,10 @@
                                     @elseif($documento['estado'] === 'Pendiente' && !empty($documento['ruta_archivo'])) text-blue-600
                                     @elseif($documento['estado'] === 'Rechazado') text-red-600
                                     @else text-[#9d2449] @endif"></i>
-
                             </div>
                             <div>
                                 <h4 class="text-sm font-medium text-gray-900">{{ $documento['nombre'] }}</h4>
                                 <p class="text-xs text-gray-500">{{ $documento['descripcion'] ?? 'Documento requerido' }}</p>
-                                
                                 <!-- Estado del documento -->
                                 @if($documento['estado'] !== 'Pendiente' || !empty($documento['ruta_archivo']))
                                 <div class="flex items-center mt-1">
@@ -65,7 +60,6 @@
                                     </span>
                                 </div>
                                 @endif
-                                
                                 <!-- Observaciones para documentos rechazados -->
                                 @if($documento['estado'] === 'Rechazado' && !empty($documento['observaciones']))
                                 <div class="mt-1">
@@ -74,7 +68,6 @@
                                 @endif
                             </div>
                         </div>
-                        
                         <!-- Botones de acción para revisión -->
                         <div class="flex items-center space-x-2">
                             @if(!empty($documento['ruta_archivo']))
@@ -85,7 +78,6 @@
                                     Ver
                                 </a>
                             @endif
-                            
                             @if($documento['estado'] === 'Pendiente')
                                 <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                                     <i class="fas fa-clock mr-1"></i>
@@ -104,7 +96,6 @@
                             @endif
                         </div>
                     </div>
-                    
                     <!-- Información adicional del archivo -->
                     @if(!empty($documento['ruta_archivo']))
                     <div class="mt-4 p-3 bg-gray-50 rounded-lg">
@@ -131,8 +122,58 @@
                         </div>
                     </div>
                     @endif
-                    
-
+                    <!-- Panel de Revisión Individual por Documento -->
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <h5 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <i class="fas fa-clipboard-check text-[#9d2449] mr-2"></i>
+                            Revisión de Documento
+                        </h5>
+                        <!-- Opción de Cotejo Presencial -->
+                        <div class="mb-4">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" 
+                                       name="cotejo_presencial[{{ $documento['id'] }}]" 
+                                       id="cotejo_{{ $documento['id'] }}"
+                                       class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                       {{ (isset($documento['cotejo_presencial']) && $documento['cotejo_presencial']) ? 'checked' : '' }}>
+                                <div class="flex items-center">
+                                    <i class="fas fa-user-check text-blue-600 mr-2"></i>
+                                    <span class="text-sm font-medium text-gray-700">Requiere cotejo presencial</span>
+                                </div>
+                            </label>
+                            <p class="text-xs text-gray-500 ml-7 mt-1">
+                                Marcar si este documento debe ser cotejado de manera presencial
+                            </p>
+                        </div>
+                        <!-- Campo de Comentario Individual -->
+                        <div class="mb-4">
+                            <label for="comentario_doc_{{ $documento['id'] }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Comentario específico para este documento
+                            </label>
+                            <div class="py-3 px-4 bg-white rounded-lg border border-gray-200 shadow-sm relative">
+                                <textarea id="comentario_doc_{{ $documento['id'] }}" 
+                                          name="comentario_documento[{{ $documento['id'] }}]"
+                                          rows="3"
+                                          class="px-0 w-full text-sm text-gray-700 border-0 focus:ring-0 focus:outline-none bg-white resize-none placeholder-gray-400"
+                                          placeholder="Comentarios específicos sobre este documento...">{{ $documento['comentario_revision'] ?? '' }}</textarea>
+                            </div>
+                        </div>
+                        <!-- Botones de Acción por Documento -->
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <button type="button" 
+                                    onclick="aprobarDocumento({{ $documento['id'] }})"
+                                    class="flex-1 inline-flex items-center justify-center py-2 px-3 text-xs font-medium text-white bg-gradient-to-r from-green-400 to-green-500 rounded-lg focus:ring-4 focus:ring-green-100 hover:from-green-500 hover:to-green-600 transition-colors duration-150">
+                                <i class="fas fa-check mr-1"></i>
+                                Aprobar Documento
+                            </button>
+                            <button type="button" 
+                                    onclick="rechazarDocumento({{ $documento['id'] }})"
+                                    class="flex-1 inline-flex items-center justify-center py-2 px-3 text-xs font-medium text-white bg-gradient-to-r from-rose-400 to-rose-500 rounded-lg focus:ring-4 focus:ring-rose-100 hover:from-rose-500 hover:to-rose-600 transition-colors duration-150">
+                                <i class="fas fa-times mr-1"></i>
+                                Rechazar Documento
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 @endforeach
             @else
@@ -154,7 +195,6 @@
                 <p class="text-red-700 text-sm" x-text="errorMessage"></p>
             </div>
         </div>
-
         <!-- Alert de Éxito -->
         <div x-show="showSuccess" x-cloak class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <div class="flex items-start">
@@ -162,7 +202,6 @@
                 <div class="text-green-700 text-sm" x-html="successMessage"></div>
             </div>
         </div>
-
         <!-- Lista de Documentos -->
         <div class="space-y-4">
             <template x-for="documento in documentos" :key="documento.id">
@@ -187,7 +226,6 @@
                             <div>
                                 <h4 class="text-sm font-medium text-gray-900" x-text="documento.nombre"></h4>
                                 <p class="text-xs text-gray-500" x-text="documento.descripcion || 'PDF, máximo 10MB'"></p>
-                                
                                 <!-- Estado del documento -->
                                 <div x-show="documento.estado !== 'Pendiente' || documento.ruta_archivo" class="flex items-center mt-1">
                                     <i :class="{
@@ -203,14 +241,12 @@
                                           }"
                                           x-text="documento.estado === 'Pendiente' && documento.ruta_archivo ? 'En Revisión' : documento.estado"></span>
                                 </div>
-                                
                                 <!-- Observaciones para documentos rechazados -->
                                 <div x-show="documento.estado === 'Rechazado' && documento.observaciones" class="mt-1">
                                     <p class="text-xs text-red-600" x-text="documento.observaciones"></p>
                                 </div>
                             </div>
                         </div>
-                        
                         <!-- Botón de selección para documentos pendientes sin archivo o rechazados -->
                         <div x-show="(documento.estado === 'Pendiente' && !documento.ruta_archivo) || documento.estado === 'Rechazado'">
                             <input type="file" 
@@ -223,15 +259,12 @@
                                    required>
                             <label :for="`documento_${documento.id}`" 
                                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg text-sm font-medium hover:from-[#8a203f] hover:to-[#6d1a32] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] cursor-pointer transition-all duration-300 shadow-md hover:shadow-lg">
-                                
                                 <div class="flex items-center">
                                     <i class="fas fa-cloud-upload-alt mr-2"></i>
                                     <span x-text="documento.estado === 'Rechazado' ? 'Subir Nuevo' : 'Seleccionar archivo'"></span>
                                 </div>
-                                
                             </label>
                         </div>
-                        
                         <!-- Estado para documentos en revisión -->
                         <div x-show="documento.estado === 'Pendiente' && documento.ruta_archivo" class="flex items-center space-x-2">
                             <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
@@ -263,7 +296,6 @@
                                 IA
                             </button>
                         </div>
-                        
                         <!-- Estado para documentos aprobados (NO se pueden reemplazar) -->
                         <div x-show="documento.estado === 'Aprobado'" class="flex items-center space-x-2">
                             <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
@@ -290,7 +322,6 @@
                                 IA
                             </button>
                         </div>
-                        
                         <!-- Estado para documentos rechazados -->
                         <div x-show="documento.estado === 'Rechazado'" class="flex items-center">
                             <span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
@@ -299,7 +330,6 @@
                             </span>
                         </div>
                     </div>
-                    
                     <!-- Preview del archivo seleccionado -->
                     <div x-show="documento.archivo_seleccionado && documento.estado !== 'Aprobado'" 
                          class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -315,7 +345,6 @@
                             </button>
                         </div>
                     </div>
-                    
                     <!-- Análisis IA Avanzado (Vista Editable) -->
                     <div x-show="documento.validacion_ia && (documento.estado === 'Pendiente' || documento.estado === 'Aprobado')" 
                          class="mt-4 border rounded-xl p-4 transition-all duration-300 hover:shadow-md"
@@ -327,7 +356,6 @@
                              'bg-orange-50 border-orange-200': documento.validacion_ia && documento.validacion_ia.es_correcto === false && documento.validacion_ia.confianza >= 0.70,
                              'bg-slate-50 border-slate-200': documento.validacion_ia && (documento.validacion_ia.es_correcto === null || documento.validacion_ia.confianza < 0.70)
                          }">
-                        
                         <!-- Encabezado del análisis -->
                         <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center space-x-2">
@@ -373,7 +401,6 @@
                                 }"></div>
                             </div>
                         </div>
-                        
                         <!-- Mensaje principal -->
                         <p class="text-sm mb-3 leading-relaxed"
                            :class="{
@@ -383,11 +410,9 @@
                            }"
                            x-text="getMensajeContextualIA(documento)">
                         </p>
-                        
                         <!-- Características detectadas (si están disponibles) -->
                         <div x-show="documento.validacion_ia?.caracteristicas_visuales" 
                              class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-                            
                             <!-- Tipo detectado -->
                             <div x-show="documento.validacion_ia?.prediccion" 
                                  class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
@@ -400,7 +425,6 @@
                                       }"
                                       x-text="documento.validacion_ia?.prediccion"></span>
                             </div>
-                            
                             <!-- Características visuales dinámicas -->
                             <template x-if="documento.validacion_ia?.caracteristicas_visuales?.color_scheme">
                                 <div class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
@@ -408,14 +432,12 @@
                                     <span class="font-medium" x-text="getColorSchemeDisplay(documento.validacion_ia.caracteristicas_visuales.color_scheme)"></span>
                                 </div>
                             </template>
-                            
                             <template x-if="documento.validacion_ia?.caracteristicas_visuales?.has_logos">
                                 <div class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
                                     <span class="text-gray-600">🏢 Logos oficiales:</span>
                                     <span class="text-green-600 font-medium">✓ Detectados</span>
                                 </div>
                             </template>
-                            
                             <template x-if="documento.validacion_ia?.caracteristicas_visuales?.has_qr_code">
                                 <div class="flex items-center justify-between p-2 bg-white rounded-lg text-xs">
                                     <span class="text-gray-600">📱 Código QR:</span>
@@ -423,7 +445,6 @@
                                 </div>
                             </template>
                         </div>
-                        
                         <!-- Información temporal -->
                         <div x-show="documento.validacion_ia?.procesado_en" 
                              class="text-xs opacity-75 border-t pt-2"
@@ -439,7 +460,6 @@
                     </div>
                 </div>
             </template>
-
             <!-- Mensaje cuando no hay documentos -->
             <div x-show="documentos.length === 0" x-cloak class="text-center py-8">
                 <div class="bg-gray-50 rounded-lg p-6">
@@ -448,7 +468,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Botones de navegación -->
         <div x-show="mostrarNavegacion" x-cloak class="flex justify-between pt-6 border-t border-gray-200 mt-8">
             <button type="button" 
@@ -457,7 +476,6 @@
                 <i class="fas fa-arrow-left mr-2"></i>
                 Anterior
             </button>
-
             <button type="button" 
                     @click="finalizarTramite()"
                     :disabled="!todosDocumentosEnviados"
@@ -478,7 +496,6 @@
         </div>
     @endif
 </div>
-
 <script>
 function documentosData() {
     return {
@@ -491,11 +508,9 @@ function documentosData() {
         successMessage: '',
         finalizando: false,
         mostrarNavegacion: @json($mostrar_navegacion ?? true),
-        
         async init() {
             // Obtener tramite_id
             const tramite = @json($tramite ?? null);
-            
             if (tramite && tramite.id) {
                 this.tramiteId = tramite.id;
                 this.tipoPersona = tramite.solicitante?.tipo_persona || 'Física';
@@ -504,12 +519,10 @@ function documentosData() {
                 await this.obtenerDatosTramite();
             }
         },
-
         async obtenerDatosTramite() {
             try {
                 const response = await fetch('/tramites-solicitante/datos-tramite');
                 const data = await response.json();
-                
                 if (data.success) {
                     this.tramiteId = data.tramite_id;
                     this.tipoPersona = data.tipo_persona;
@@ -518,18 +531,13 @@ function documentosData() {
                     this.mostrarError('No se pudo obtener información del trámite');
                 }
             } catch (error) {
-                console.error('Error al obtener datos del trámite:', error);
                 this.mostrarError('Error al cargar información del trámite');
             }
         },
-
         async cargarDocumentos() {
             try {
-                console.log('🔍 Cargando documentos para trámite:', this.tramiteId);
-                
                 const response = await fetch('/tramites-solicitante/documentos');
                 const data = await response.json();
-                
                 if (data.success && data.documentos) {
                     this.documentos = data.documentos.map(doc => ({
                         ...doc,
@@ -538,57 +546,43 @@ function documentosData() {
                         nombre_archivo: '',
                         observaciones: doc.observaciones || null
                     }));
-                    
-                    console.log('📋 Documentos cargados:', this.documentos);
                 } else {
                     this.documentos = [];
-                    console.log('❌ No se encontraron documentos');
                 }
             } catch (error) {
-                console.error('❌ Error al cargar documentos:', error);
                 this.mostrarError('Error al cargar los documentos');
             }
         },
-
         async handleFileSelect(event, documento) {
             const file = event.target.files[0];
             if (!file) return;
-
             // Validaciones
             if (file.size > 10 * 1024 * 1024) {
                 this.mostrarError('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
                 event.target.value = '';
                 return;
             }
-            
             if (!file.type.includes('pdf')) {
                 this.mostrarError('Solo se permiten archivos PDF.');
                 event.target.value = '';
                 return;
             }
-
             // Actualizar estado del documento
             documento.archivo_seleccionado = true;
             documento.nombre_archivo = file.name;
-                    
             // Subir archivo
             await this.subirDocumento(documento, file);
         },
-
         async subirDocumento(documento, file) {
             try {
                 const formData = new FormData();
                 formData.append('archivo', file);
                 formData.append('documento_id', documento.id);
-
                 // Agregar CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]');
                 if (csrfToken) {
                     formData.append('_token', csrfToken.getAttribute('content'));
                 }
-
-                console.log('🖼 Subiendo documento:', documento.nombre);
-
                 const response = await fetch('/tramites-solicitante/upload-documento', {
                     method: 'POST',
                     body: formData,
@@ -597,16 +591,12 @@ function documentosData() {
                         'Accept': 'application/json'
                     }
                 });
-        
                 const data = await response.json();
-                console.log('📥 Respuesta del servidor:', data);
-
                 if (data.success) {
                     documento.estado = 'Pendiente';
                     documento.ruta_archivo = data.ruta;
                     documento.docSolicitanteId = data.docSolicitanteId;
                     documento.observaciones = null;
-                    
                     this.mostrarExito(data.mensaje || 'Documento subido correctamente');
                 } else {
                     this.mostrarError(data.mensaje || 'Error al subir el documento');
@@ -614,20 +604,17 @@ function documentosData() {
                     documento.nombre_archivo = '';
                 }
             } catch (error) {
-                console.error('❌ Error al subir documento:', error);
                 this.mostrarError('Error de conexión al subir el documento');
                 documento.archivo_seleccionado = false;
                 documento.nombre_archivo = '';
             }
         },
-
         reemplazarDocumento(documento) {
             // Solo permitir reemplazar si NO está aprobado
             if (documento.estado === 'Aprobado') {
                 this.mostrarError('No se puede reemplazar un documento que ya ha sido aprobado');
                 return;
             }
-
             documento.estado = 'Pendiente';
             documento.archivo_seleccionado = false;
             documento.nombre_archivo = '';
@@ -637,7 +624,6 @@ function documentosData() {
             const input = document.getElementById(`documento_${documento.id}`);
             if (input) input.value = '';
         },
-
         removerArchivo(documento) {
             documento.archivo_seleccionado = false;
             documento.nombre_archivo = '';
@@ -645,17 +631,14 @@ function documentosData() {
             const input = document.getElementById(`documento_${documento.id}`);
             if (input) input.value = '';
         },
-
         get descripcionDocumentos() {
             return `Documentos necesarios para ${this.tipoPersona === 'Física' ? 'persona física' : 'persona moral'}`;
         },
-
         get todosDocumentosEnviados() {
             return this.documentos.length > 0 && this.documentos.every(doc => 
                 doc.estado === 'Aprobado' || (doc.estado === 'Pendiente' && doc.ruta_archivo)
             );
         },
-
         mostrarError(mensaje) {
             this.errorMessage = mensaje;
             this.showError = true;
@@ -664,7 +647,6 @@ function documentosData() {
                 this.showError = false;
             }, 5000);
         },
-
         mostrarExito(mensaje) {
             this.successMessage = mensaje;
             this.showSuccess = true;
@@ -673,34 +655,26 @@ function documentosData() {
                 this.showSuccess = false;
             }, 3000);
         },
-
         async finalizarTramite() {
             if (!this.todosDocumentosEnviados) {
                 this.mostrarError('Debe subir todos los documentos requeridos antes de finalizar el trámite');
                 return;
             }
-            
             // Verificar si hay documentos rechazados
             const documentosRechazados = this.documentos.filter(doc => doc.estado === 'Rechazado');
             if (documentosRechazados.length > 0) {
                 this.mostrarError('Hay documentos rechazados que deben ser corregidos antes de finalizar el trámite');
                 return;
             }
-
             this.finalizando = true;
-            
             try {
-                console.log('🏁 Finalizando trámite:', this.tramiteId);
-                
                 const formData = new FormData();
                 formData.append('tramite_id', this.tramiteId);
-                
                 // Agregar CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]');
                 if (csrfToken) {
                     formData.append('_token', csrfToken.getAttribute('content'));
                 }
-
                 const response = await fetch('/tramites-solicitante/finalizar-tramite', {
                     method: 'POST',
                     body: formData,
@@ -709,19 +683,13 @@ function documentosData() {
                         'Accept': 'application/json'
                     }
                 });
-
                 const data = await response.json();
-                console.log('📥 Respuesta finalización:', data);
-
                 if (data.success) {
                     // Mostrar mensaje de éxito y redirigir al estado del trámite
                     this.mostrarExito('¡Trámite enviado correctamente! Redirigiendo...');
-                    
                     // Esperar un momento para que se vea el mensaje y luego redirigir
                     setTimeout(() => {
-                        console.log('🔍 Redirigiendo con tramiteId:', this.tramiteId, typeof this.tramiteId);
                         if (typeof this.tramiteId !== 'number' && typeof this.tramiteId !== 'string') {
-                            console.error('❌ tramiteId no es un valor válido:', this.tramiteId);
                             this.mostrarError('Error: ID de trámite inválido');
                             return;
                         }
@@ -730,85 +698,63 @@ function documentosData() {
                 } else {
                     this.mostrarError(data.message || 'Error al finalizar el trámite');
                 }
-                
             } catch (error) {
-                console.error('❌ Error al finalizar trámite:', error);
                 this.mostrarError('Error de conexión al finalizar el trámite');
             } finally {
                 this.finalizando = false;
             }
         },
-
         verDocumento(documento) {
             if (!documento.ruta_archivo || !this.tramiteId) {
                 this.mostrarError('No se puede acceder al documento');
                 return;
             }
-
-            console.log('🔍 Accediendo documento con tramiteId:', this.tramiteId, typeof this.tramiteId);
-            console.log('🔍 Documento ID:', documento.id, typeof documento.id);
-            
             if (typeof this.tramiteId !== 'number' && typeof this.tramiteId !== 'string') {
-                console.error('❌ tramiteId no es un valor válido para verDocumento:', this.tramiteId);
                 this.mostrarError('Error: ID de trámite inválido');
                 return;
             }
-
             // Detectar si es móvil
             const esMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
             if (esMobile) {
                 // En móvil, forzar descarga
                 const url = `/tramites-solicitante/ver-documento/${this.tramiteId}/${documento.id}?download=1`;
-                console.log('📱 URL móvil:', url);
                 window.location.href = url;
             } else {
                 // En desktop, abrir en nueva pestaña
                 const url = `/tramites-solicitante/ver-documento/${this.tramiteId}/${documento.id}`;
-                console.log('🖥️ URL desktop:', url);
                 window.open(url, '_blank');
             }
         },
-
         verValidacionIA(documento) {
             if (!documento.validacion_ia) {
                 this.mostrarError('No hay información de validación IA disponible para este documento');
                 return;
             }
-
             const validacion = documento.validacion_ia;
             const esCorrectoTexto = validacion.es_correcto === true ? '✅ Correcto' : 
                                    validacion.es_correcto === false ? '❌ Incorrecto' : '❓ Incierto';
-            
             let mensaje = `🤖 <strong>Análisis de IA para "${documento.nombre}"</strong><br><br>`;
-            
             mensaje += `<div class="space-y-2">`;
             mensaje += `<div class="flex justify-between items-center">`;
             mensaje += `<strong>Tipo Detectado:</strong> <span class="text-blue-600">${validacion.prediccion}</span>`;
             mensaje += `</div>`;
-            
             mensaje += `<div class="flex justify-between items-center">`;
             mensaje += `<strong>Confianza:</strong> <span class="font-mono text-lg ${validacion.confianza >= 0.8 ? 'text-green-600' : validacion.confianza >= 0.6 ? 'text-yellow-600' : 'text-red-600'}">${validacion.confianza_porcentaje}</span>`;
             mensaje += `</div>`;
-            
             mensaje += `<div class="flex justify-between items-center">`;
             mensaje += `<strong>Resultado:</strong> <span class="${validacion.es_correcto ? 'text-green-600' : 'text-red-600'}">${esCorrectoTexto}</span>`;
             mensaje += `</div>`;
-            
             if (validacion.procesado_en) {
                 mensaje += `<div class="flex justify-between items-center">`;
                 mensaje += `<strong>Procesado:</strong> <span class="text-gray-600">${validacion.procesado_en}</span>`;
                 mensaje += `</div>`;
             }
-            
             if (validacion.tiempo_procesamiento) {
                 mensaje += `<div class="flex justify-between items-center">`;
                 mensaje += `<strong>Tiempo:</strong> <span class="text-gray-600">${validacion.tiempo_procesamiento}</span>`;
                 mensaje += `</div>`;
             }
-            
             mensaje += `</div>`;
-            
             // Mostrar interpretación del resultado
             if (validacion.es_correcto === true) {
                 mensaje += `<br><div class="p-3 bg-green-50 border border-green-200 rounded-lg">`;
@@ -823,19 +769,15 @@ function documentosData() {
                 mensaje += `<p class="text-yellow-800 text-sm">🤔 <strong>Revisión requerida:</strong> La IA no puede determinar con certeza el tipo de documento.</p>`;
                 mensaje += `</div>`;
             }
-            
             this.mostrarExito(mensaje);
         },
-
         getMensajeContextualIA(documento) {
             if (!documento.validacion_ia) {
                 return '';
             }
-
             const validacion = documento.validacion_ia;
             const confianza = validacion.confianza || 0;
             const esCorrectoBoolean = validacion.es_correcto;
-            
             // Mensaje mejorado basado en análisis visual
             if (esCorrectoBoolean === true) {
                 if (confianza >= 0.90) {
@@ -858,16 +800,13 @@ function documentosData() {
                 return "Se requiere revisión manual del documento";
             }
         },
-
         getEstadoAnalisis(documento) {
             if (!documento.validacion_ia) {
                 return 'Sin análisis';
             }
-
             const validacion = documento.validacion_ia;
             const confianza = validacion.confianza || 0;
             const esCorrectoBoolean = validacion.es_correcto;
-            
             if (esCorrectoBoolean === true) {
                 if (confianza >= 0.90) {
                     return "Documento Verificado";
@@ -888,7 +827,6 @@ function documentosData() {
                 return "Análisis Inconcluso";
             }
         },
-
         getColorSchemeDisplay(colorScheme) {
             const schemes = {
                 'institutional_blue': '🏛️ Institucional',
@@ -898,25 +836,19 @@ function documentosData() {
                 'standard_black': '⚫ Estándar',
                 'security_red': '🛡️ Seguridad'
             };
-            
             return schemes[colorScheme] || '⚫ Estándar';
         }
     }
 }
 </script>
-
 <script>
 // Función para navegar al paso anterior desde documentos
 function navegarAnteriorDocumentos() {
-    console.log('📍 Navegando al paso anterior desde documentos');
-    
     // Método 1: Función global navegarAnterior
     if (typeof window.navegarAnterior === 'function') {
-        console.log('✅ Usando función global navegarAnterior');
         window.navegarAnterior();
         return;
     }
-    
     // Método 2: Buscar contenedor Alpine.js y retroceder
     const alpineContainer = document.querySelector('[x-data*="currentStep"]');
     if (alpineContainer && typeof Alpine !== 'undefined') {
@@ -924,36 +856,27 @@ function navegarAnteriorDocumentos() {
             const alpineData = Alpine.$data(alpineContainer);
             if (alpineData && typeof alpineData.currentStep !== 'undefined') {
                 if (alpineData.currentStep > 1) {
-                    console.log('✅ Retrocediendo paso con Alpine.js:', alpineData.currentStep, '->', alpineData.currentStep - 1);
                     alpineData.currentStep--;
                     return;
                 } else {
-                    console.log('⚠️ Ya estás en el primer paso');
                     return;
                 }
             }
         } catch (error) {
-            console.error('❌ Error al acceder a Alpine.js:', error);
         }
     }
-    
     // Método 3: Disparar evento personalizado en el contenedor
     if (alpineContainer) {
-        console.log('✅ Disparando evento previous-step');
         alpineContainer.dispatchEvent(new CustomEvent('previous-step'));
         return;
     }
-    
     // Método 4: Buscar directamente botones de navegación en el documento
     const prevButtons = document.querySelectorAll('button[onclick*="currentStep--"], button[x-text*="Anterior"]');
     if (prevButtons.length > 0) {
-        console.log('✅ Simulando click en botón anterior encontrado');
         prevButtons[0].click();
         return;
     }
-    
     // Fallback: intentar manipular directamente
-    console.log('⚠️ Usando fallback - intentando retroceder manualmente');
     const stepContainers = document.querySelectorAll('[x-show*="currentStep"]');
     if (stepContainers.length > 0) {
         // Buscar el contenedor activo
@@ -966,21 +889,16 @@ function navegarAnteriorDocumentos() {
                         const data = Alpine.$data(parentWithData);
                         if (data && data.currentStep && data.currentStep > 1) {
                             data.currentStep--;
-                            console.log('✅ Navegación fallback exitosa');
                             return;
                         }
                     }
                 } catch (error) {
-                    console.error('❌ Error en fallback:', error);
                 }
             }
         }
     }
-    
-    console.error('❌ No se pudo navegar al paso anterior');
 }
 </script>
-
 @push('styles')
 <style>
 /* Mejora en la animación de bounce */
@@ -992,13 +910,11 @@ function navegarAnteriorDocumentos() {
         transform: translateY(-8px);
     }
 }
-
 .custom-bounce {
     animation: custom-bounce 1s ease-in-out infinite;
 }
 </style>
 @endpush
-
 @push('scripts')
 <script src="{{ asset('js/validators/documentos-validator.js') }}"></script>
 @endpush

@@ -269,6 +269,14 @@ Route::middleware(['auth', 'can:tramites-solicitante.ver'])->prefix('tramites-so
         return redirect()->route('tramites.solicitante.index');
     });
     
+    // ✅ RUTAS PARA ACTUALIZACIÓN DE PROVEEDORES ACTIVOS
+    Route::get('/actualizacion/selector', [TramiteSolicitanteController::class, 'mostrarSelectorActualizacion'])
+        ->middleware('can:tramites-solicitante.actualizacion')
+        ->name('tramites.actualizacion.selector');
+    Route::post('/actualizacion/seccion/{seccion}', [TramiteSolicitanteController::class, 'iniciarActualizacionSeccion'])
+        ->middleware('can:tramites-solicitante.actualizacion')
+        ->name('tramites.actualizacion.seccion');
+    
     // CONSTANCIA DE SITUACIÓN FISCAL
     Route::get('/constancia-fiscal/{tipo_tramite}/{tramite}', [TramiteSolicitanteController::class, 'mostrarConstanciaFiscal'])
         ->name('tramites.solicitante.constancia-fiscal');

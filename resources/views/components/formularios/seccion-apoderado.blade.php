@@ -1,5 +1,4 @@
 @props(['title' => 'Apoderado Legal', 'tramite' => null, 'datosApoderado' => [], 'readonly' => false])
-
 <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" 
      @if(!$readonly) x-data="apoderadoData()" x-init="init()" @endif>
     <!-- Encabezado con icono -->
@@ -12,7 +11,6 @@
             <p class="text-sm text-gray-500 mt-1">Información del apoderado legal y datos notariales</p>
         </div>
     </div>
-
     @if($readonly)
         <!-- Vista de solo lectura para revisión -->
         <div class="space-y-6">
@@ -23,7 +21,6 @@
                         <i class="fas fa-user-tie text-[#9d2449]"></i>
                         <h4 class="text-lg font-medium text-gray-700">Datos del Apoderado o Representante Legal</h4>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="form-group">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
@@ -31,28 +28,24 @@
                                 {{ $datosApoderado['nombre_apoderado'] ?? 'No especificado' }}
                             </div>
                         </div>
-                        
                         <div class="form-group">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Número de Escritura</label>
                             <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
                                 {{ $datosApoderado['numero_escritura'] ?? 'No especificado' }}
                             </div>
                         </div>
-                        
                         <div class="form-group">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Notario</label>
                             <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
                                 {{ $datosApoderado['nombre_notario'] ?? 'No especificado' }}
                             </div>
                         </div>
-                        
                         <div class="form-group">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Número del Notario</label>
                             <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
                                 {{ $datosApoderado['numero_notario'] ?? 'No especificado' }}
                             </div>
                         </div>
-                        
                         <div class="form-group">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Entidad Federativa</label>
                             <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
@@ -74,7 +67,6 @@
                                 {{ $estados[$entidadId] ?? 'No especificado' }}
                             </div>
                         </div>
-                        
                         <div class="form-group">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Escritura</label>
                             <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
@@ -95,14 +87,12 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Datos de Inscripción -->
                 <div class="mt-8">
                     <div class="flex items-center space-x-2 mb-6">
                         <i class="fas fa-book text-[#9d2449]"></i>
                         <h4 class="text-lg font-medium text-gray-700">Datos de Inscripción en el Registro Público</h4>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="form-group">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Número de Registro o Folio Mercantil</label>
@@ -110,7 +100,6 @@
                                 {{ $datosApoderado['numero_registro'] ?? 'No especificado' }}
                             </div>
                         </div>
-                        
                         <div class="form-group">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Inscripción</label>
                             <div class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
@@ -141,7 +130,6 @@
                         </div>
     @endif
 </div>
-
 @push('scripts')
 <script src="{{ asset('js/validators/apoderado-validator.js') }}"></script>
 @endpush
@@ -154,7 +142,6 @@
                 <p class="text-red-700 text-sm" x-text="errorMessage"></p>
             </div>
         </div>
-
         <!-- Alert de Éxito -->
         <div x-show="showSuccess" x-cloak class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <div class="flex items-center">
@@ -162,19 +149,16 @@
                 <p class="text-green-700 text-sm" x-text="successMessage"></p>
             </div>
         </div>
-
         <form class="space-y-8" @submit.prevent="guardarApoderado" x-ref="apoderadoForm">
             <input type="hidden" name="action" value="next">
             <input type="hidden" name="seccion" value="5">
             <input type="hidden" name="tramite_id" :value="tramiteId">
-
             <!-- Datos del Apoderado -->
             <div class="space-y-6">
             <div class="flex items-center space-x-2 mb-6">
                     <i class="fas fa-user-tie text-[#9d2449]"></i>
                     <h4 class="text-lg font-medium text-gray-700">Datos del Apoderado o Representante Legal</h4>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Nombre del Apoderado -->
                     <div class="form-group">
@@ -194,7 +178,6 @@
                                required>
                         </div>
                     </div>
-
                     <!-- Número de Escritura -->
                     <div class="form-group">
                     <label for="numero_escritura" class="block text-sm font-medium text-gray-700 mb-2">
@@ -213,7 +196,6 @@
                                required>
                         </div>
                     </div>
-
                     <!-- Nombre del Notario -->
                     <div class="form-group">
                     <label for="nombre_notario" class="block text-sm font-medium text-gray-700 mb-2">
@@ -232,7 +214,6 @@
                                required>
                         </div>
                     </div>
-
                     <!-- Número del Notario -->
                     <div class="form-group">
                     <label for="numero_notario" class="block text-sm font-medium text-gray-700 mb-2">
@@ -251,7 +232,6 @@
                                required>
                         </div>
                     </div>
-
                     <!-- Entidad Federativa -->
                     <div class="form-group">
                     <label for="entidad_federativa" class="block text-sm font-medium text-gray-700 mb-2">
@@ -304,7 +284,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Fecha de Escritura -->
                     <div class="form-group">
                     <label for="fecha_escritura" class="block text-sm font-medium text-gray-700 mb-2">
@@ -322,14 +301,12 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Datos de Inscripción -->
                 <div class="mt-8">
                 <div class="flex items-center space-x-2 mb-6">
                         <i class="fas fa-book text-[#9d2449]"></i>
                         <h4 class="text-lg font-medium text-gray-700">Datos de Inscripción en el Registro Público</h4>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Número de Registro -->
                         <div class="form-group">
@@ -349,7 +326,6 @@
                                    required>
                             </div>
                         </div>
-
                         <!-- Fecha de Inscripción -->
                         <div class="form-group">
                         <label for="fecha_inscripcion" class="block text-sm font-medium text-gray-700 mb-2">
@@ -369,7 +345,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Botones de navegación -->
         <div class="flex justify-between pt-6 border-t border-gray-200">
             <button type="button" 
@@ -378,7 +353,6 @@
                 <i class="fas fa-arrow-left mr-2"></i>
                 Anterior
             </button>
-
             <button type="submit" 
                     :disabled="loading"
                     :class="loading ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#8a203f] hover:to-[#6d1a32]'"
@@ -399,7 +373,6 @@
     </form>
     @endif
 </div>
-
 <script>
 function apoderadoData() {
     return {
@@ -417,35 +390,21 @@ function apoderadoData() {
         errorMessage: '',
         showSuccess: false,
         successMessage: '',
-        
         async init() {
-            console.log('🚀 Inicializando componente de apoderado legal');
-            
             // Obtener tramite_id
             const datosApoderado = @json($datosApoderado ?? []);
             const tramite = @json($tramite ?? null);
-            
-            console.log('📊 Datos recibidos:', { datosApoderado, tramite });
-            
             if (datosApoderado && Object.keys(datosApoderado).length > 0 && datosApoderado.tramite_id) {
-                console.log('📋 Cargando desde datosApoderado');
                 this.tramiteId = datosApoderado.tramite_id;
                 await this.cargarDatosDesdeObjeto(datosApoderado);
             } else if (tramite && tramite.id) {
-                console.log('🔍 Cargando desde tramite.id:', tramite.id);
                 this.tramiteId = tramite.id;
                 await this.cargarDatosDesdeTramite(tramite.id);
             } else {
-                console.log('⚠️ No se encontró tramite_id válido');
             }
-            
-            console.log('✅ Inicialización completada. tramiteId:', this.tramiteId);
         },
-
         async cargarDatosDesdeObjeto(datosApoderado) {
             try {
-                console.log('📝 Cargando datos desde objeto:', datosApoderado);
-                
                 this.nombreApoderado = datosApoderado.nombre_apoderado || '';
                 this.numeroEscritura = datosApoderado.numero_escritura || '';
                 this.nombreNotario = datosApoderado.nombre_notario || '';
@@ -455,25 +414,14 @@ function apoderadoData() {
                 this.numeroRegistro = datosApoderado.numero_registro || '';
                 this.fechaInscripcion = datosApoderado.fecha_inscripcion || '';
                 
-                console.log('✅ Datos cargados en el formulario:', {
-                    nombreApoderado: this.nombreApoderado,
-                    numeroEscritura: this.numeroEscritura,
-                    nombreNotario: this.nombreNotario,
-                    numeroNotario: this.numeroNotario,
-                    entidadFederativa: this.entidadFederativa,
-                    fechaEscritura: this.fechaEscritura,
-                    numeroRegistro: this.numeroRegistro,
-                    fechaInscripcion: this.fechaInscripcion
-                });
+                // Datos cargados correctamente
+                
             } catch (error) {
-                console.error('❌ Error al cargar datos desde objeto:', error);
+                // Error al cargar datos del apoderado
             }
         },
-
         async cargarDatosDesdeTramite(tramiteId) {
             try {
-                console.log('🔍 Cargando datos de apoderado para trámite:', tramiteId);
-                
                 const response = await fetch(`/api/tramite/${tramiteId}/apoderado`, {
                     method: 'GET',
                     headers: {
@@ -481,32 +429,24 @@ function apoderadoData() {
                         'Accept': 'application/json'
                     }
                 });
-                
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('📋 Datos de apoderado recibidos:', data);
-                    
                     // Cargar datos tanto si success es true como false (para datos vacíos)
                     if (data.apoderado) {
                         await this.cargarDatosDesdeObjeto(data.apoderado);
-                        
                         // Si hay datos reales (no solo estructura vacía), mostrar mensaje de éxito
                         if (data.success && data.apoderado.nombre_apoderado) {
-                            console.log('✅ Datos de apoderado cargados exitosamente');
                             return true;
                         } else {
-                            console.log('ℹ️ Estructura de apoderado inicializada (sin datos previos)');
                             return true;
                         }
                     }
                 }
                 return false;
             } catch (error) {
-                console.error('❌ Error al cargar datos de apoderado:', error);
                 return false;
             }
         },
-
         mostrarError(mensaje) {
             this.errorMessage = mensaje;
             this.showError = true;
@@ -515,7 +455,6 @@ function apoderadoData() {
                 this.showError = false;
             }, 5000);
         },
-
         mostrarExito(mensaje) {
             this.successMessage = mensaje;
             this.showSuccess = true;
@@ -524,58 +463,46 @@ function apoderadoData() {
                 this.showSuccess = false;
             }, 3000);
         },
-
         async guardarApoderado() {
             if (this.loading) return;
-
             // Validaciones
             if (!this.tramiteId) {
                 this.mostrarError('No se pudo identificar el trámite');
                 return;
             }
-
             if (!this.nombreApoderado.trim()) {
                 this.mostrarError('El nombre del apoderado es obligatorio');
                 return;
             }
-
             if (!this.numeroEscritura.trim()) {
                 this.mostrarError('El número de escritura es obligatorio');
                 return;
             }
-
             if (!this.nombreNotario.trim()) {
                 this.mostrarError('El nombre del notario es obligatorio');
                 return;
             }
-
             if (!this.numeroNotario.trim()) {
                 this.mostrarError('El número del notario es obligatorio');
                 return;
             }
-
             if (!this.entidadFederativa) {
                 this.mostrarError('La entidad federativa es obligatoria');
                 return;
             }
-
             if (!this.fechaEscritura) {
                 this.mostrarError('La fecha de escritura es obligatoria');
                 return;
             }
-
             if (!this.numeroRegistro.trim()) {
                 this.mostrarError('El número de registro es obligatorio');
                 return;
             }
-
             if (!this.fechaInscripcion) {
                 this.mostrarError('La fecha de inscripción es obligatoria');
                 return;
             }
-
             this.loading = true;
-            
             try {
                 const formData = new FormData();
                 formData.append('tramite_id', this.tramiteId);
@@ -587,15 +514,11 @@ function apoderadoData() {
                 formData.append('fecha_escritura', this.fechaEscritura);
                 formData.append('numero_registro', this.numeroRegistro.trim());
                 formData.append('fecha_inscripcion', this.fechaInscripcion);
-
                 // Agregar CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]');
                 if (csrfToken) {
                     formData.append('_token', csrfToken.getAttribute('content'));
                 }
-
-                console.log('📤 Enviando datos de apoderado legal');
-
                 const response = await fetch('/tramites/guardar-apoderado-formulario', {
                     method: 'POST',
                     body: formData,
@@ -604,13 +527,9 @@ function apoderadoData() {
                         'Accept': 'application/json'
                     }
                 });
-
                 const data = await response.json();
-                console.log('📥 Respuesta del servidor:', data);
-
                 if (data.success) {
                     this.mostrarExito('Datos del apoderado legal guardados correctamente');
-                    
                     // Disparar evento para navegar al siguiente paso
                     setTimeout(() => {
                         this.$dispatch('next-step');
@@ -618,11 +537,9 @@ function apoderadoData() {
                 } else {
                     this.mostrarError(data.message || 'Error al guardar los datos del apoderado legal');
                     if (data.errors) {
-                        console.error('Errores de validación:', data.errors);
                     }
                 }
             } catch (error) {
-                console.error('❌ Error al guardar apoderado legal:', error);
                 this.mostrarError('Error de conexión. Por favor, intente nuevamente.');
             } finally {
                 this.loading = false;
@@ -631,19 +548,14 @@ function apoderadoData() {
     }
 }
 </script>
-
 <script>
 // Función para navegar al paso anterior desde apoderado legal
 function navegarAnteriorApoderado() {
-    console.log('📍 Navegando al paso anterior desde apoderado legal');
-    
     // Método 1: Función global navegarAnterior
     if (typeof window.navegarAnterior === 'function') {
-        console.log('✅ Usando función global navegarAnterior');
         window.navegarAnterior();
         return;
     }
-    
     // Método 2: Buscar contenedor Alpine.js y retroceder
     const alpineContainer = document.querySelector('[x-data*="currentStep"]');
     if (alpineContainer && typeof Alpine !== 'undefined') {
@@ -651,36 +563,27 @@ function navegarAnteriorApoderado() {
             const alpineData = Alpine.$data(alpineContainer);
             if (alpineData && typeof alpineData.currentStep !== 'undefined') {
                 if (alpineData.currentStep > 1) {
-                    console.log('✅ Retrocediendo paso con Alpine.js:', alpineData.currentStep, '->', alpineData.currentStep - 1);
                     alpineData.currentStep--;
                     return;
                 } else {
-                    console.log('⚠️ Ya estás en el primer paso');
                     return;
                 }
             }
         } catch (error) {
-            console.error('❌ Error al acceder a Alpine.js:', error);
         }
     }
-    
     // Método 3: Disparar evento personalizado en el contenedor
     if (alpineContainer) {
-        console.log('✅ Disparando evento previous-step');
         alpineContainer.dispatchEvent(new CustomEvent('previous-step'));
         return;
     }
-    
     // Método 4: Buscar directamente botones de navegación en el documento
     const prevButtons = document.querySelectorAll('button[onclick*="currentStep--"], button[x-text*="Anterior"]');
     if (prevButtons.length > 0) {
-        console.log('✅ Simulando click en botón anterior encontrado');
         prevButtons[0].click();
         return;
     }
-    
     // Fallback: intentar manipular directamente
-    console.log('⚠️ Usando fallback - intentando retroceder manualmente');
     const stepContainers = document.querySelectorAll('[x-show*="currentStep"]');
     if (stepContainers.length > 0) {
         // Buscar el contenedor activo
@@ -693,46 +596,36 @@ function navegarAnteriorApoderado() {
                         const data = Alpine.$data(parentWithData);
                         if (data && data.currentStep && data.currentStep > 1) {
                             data.currentStep--;
-                            console.log('✅ Navegación fallback exitosa');
                             return;
                         }
                     }
                 } catch (error) {
-                    console.error('❌ Error en fallback:', error);
                 }
             }
         }
     }
-    
-    console.error('❌ No se pudo navegar al paso anterior');
 }
 </script>
-
 <style>
 /* Estilos base */
 .form-group {
     @apply relative mb-4;
 }
-
 /* Estilos para campos con error */
 .has-error input,
 .has-error select {
     @apply border-red-300 !important;
 }
-
 .has-error .text-gray-500 {
     @apply text-red-500;
 }
-
 /* Transiciones y efectos hover */
 input, select, button {
     @apply transition-all duration-300;
 }
-
 input:focus, select:focus {
     @apply outline-none ring-2 ring-[#4F46E5]/20 border-[#4F46E5];
 }
-
 /* Estilos para el select */
 select {
     @apply cursor-pointer;
@@ -740,29 +633,24 @@ select {
     -moz-appearance: none;
     appearance: none;
 }
-
 /* Estilos para los asteriscos de campos requeridos */
 .text-[#9d2449] {
     @apply inline-block ml-1;
 }
-
 /* Mejoras en la accesibilidad */
 input:focus-visible,
 select:focus-visible,
 button:focus-visible {
     @apply ring-2 ring-offset-2 ring-[#4F46E5]/20;
 }
-
 /* Estilos para las notificaciones */
 .notification {
     @apply fixed bottom-4 right-4 p-4 rounded-lg bg-white shadow-lg z-50 max-w-sm;
     animation: slideIn 0.3s ease-out;
 }
-
 .notification.error {
     @apply border-l-4 border-red-500;
 }
-
 @keyframes slideIn {
     from {
         transform: translateX(100%);
@@ -773,14 +661,12 @@ button:focus-visible {
         opacity: 1;
     }
 }
-
 /* Estilos para los iconos de sección */
 .h-12 {
     @apply bg-gradient-to-br from-[#9d2449] to-[#8a203f];
     position: relative;
     overflow: hidden;
 }
-
 .h-12::after {
     content: '';
     position: absolute;
@@ -797,7 +683,6 @@ button:focus-visible {
     transform: rotate(45deg);
     animation: shine 3s infinite;
 }
-
 @keyframes shine {
     0% {
         transform: translateX(-100%) rotate(45deg);
@@ -806,24 +691,20 @@ button:focus-visible {
         transform: translateX(100%) rotate(45deg);
     }
 }
-
 /* Mejoras en la accesibilidad y estados hover */
 .form-group:hover input,
 .form-group:hover select {
     @apply border-[#9d2449]/30;
 }
-
 input:focus, select:focus {
     @apply ring-2 ring-[#9d2449]/20 border-[#9d2449];
     box-shadow: 0 0 0 1px rgba(157, 36, 73, 0.1), 
                 0 2px 4px rgba(157, 36, 73, 0.05);
 }
-
 /* Estilos para los botones */
 .btn-primary {
     @apply bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white;
 }
-
 .btn-primary:hover {
     @apply from-[#8a203f] to-[#7a1c38];
     transform: translateY(-1px);

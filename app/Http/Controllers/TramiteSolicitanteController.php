@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Tramite;
@@ -11,6 +12,7 @@ use App\Models\Solicitante;
 use App\Models\Documento;
 use App\Models\Proveedor;
 use App\Models\DocumentoSolicitante;
+use App\Models\DetalleTramite;
 
 use Carbon\Carbon;
 use App\Http\Controllers\Formularios\DomicilioController;
@@ -340,11 +342,27 @@ class TramiteSolicitanteController extends Controller
         $user = Auth::user();
         
         // Asegurar que el usuario tenga un solicitante
-        $this->asegurarSolicitante($user);
+        $solicitante = $this->asegurarSolicitante($user);
+        
+        // ✅ VERIFICAR SI ES PROVEEDOR ACTIVO PRIMERO
+        $proveedor = Proveedor::where('solicitante_id', $solicitante->id)
+            ->where('estado', 'Activo')
+            ->first();
+        
+        if ($proveedor) {
+            Log::info('Usuario es proveedor activo, mostrando selector de secciones:', [
+                'user_id' => $user->id,
+                'proveedor_pv' => $proveedor->pv,
+                'solicitante_id' => $solicitante->id
+            ]);
+            
+            // 🎯 REDIRIGIR AL SELECTOR DE SECCIONES
+            return redirect()->route('tramites.actualizacion.selector');
+        }
         
         $tramiteEnProgreso = $this->verificarTramiteEnProgreso($user);
         
-        Log::info('Iniciando actualización:', [
+        Log::info('Iniciando actualización (no es proveedor activo):', [
             'user_id' => $user->id,
             'tramite_en_progreso' => $tramiteEnProgreso ? $tramiteEnProgreso->id : 'null',
             'tipo_tramite_progreso' => $tramiteEnProgreso ? $tramiteEnProgreso->tipo_tramite : 'null'
@@ -356,8 +374,8 @@ class TramiteSolicitanteController extends Controller
             return $this->continuarTramite($tramiteEnProgreso);
         }
         
-        Log::info('Creando nuevo trámite de actualización');
-        // Crear nuevo trámite de actualización
+        Log::info('Creando nuevo trámite de actualización completa');
+        // Crear nuevo trámite de actualización completa (para no proveedores)
         return $this->crearNuevoTramite('actualizacion', $user);
     }
 
@@ -460,13 +478,56 @@ class TramiteSolicitanteController extends Controller
     }
 
     /**
-     * Verifica si el trámite ya tiene constancia de situación fiscal
+     * Verifica si el usuario ya tiene constancia de situación fiscal procesada
      */
     private function tieneConstanciaFiscal($tramite)
     {
-        // Por ahora solo verificamos si el trámite tiene progreso > 0
-        // Más adelante se puede implementar la verificación de documentos
-        return $tramite->progreso_tramite > 0;
+        // Verificar si este trámite específico ya tiene progreso
+        if ($tramite->progreso_tramite > 0) {
+            return true;
+        }
+
+        // Verificar si el usuario ya tiene algún trámite con datos de domicilio
+        $solicitante = $tramite->solicitante;
+        if (!$solicitante) {
+            return false;
+        }
+
+        // Verificar si ya tiene algún detalle de trámite con dirección
+        $tieneDetalleTramiteConDireccion = \App\Models\DetalleTramite::whereHas('tramite', function($query) use ($solicitante) {
+                $query->where('solicitante_id', $solicitante->id);
+            })
+            ->whereNotNull('direccion_id')
+            ->exists();
+
+        if ($tieneDetalleTramiteConDireccion) {
+            Log::info('Usuario ya tiene trámite con domicilio, omitiendo constancia fiscal:', [
+                'solicitante_id' => $solicitante->id,
+                'tramite_actual_id' => $tramite->id
+            ]);
+            return true;
+        }
+
+        // Verificar si ya tiene documento de constancia fiscal en cualquier trámite
+        $tieneConstanciaFiscal = \App\Models\DocumentoSolicitante::whereHas('documento', function($query) {
+                $query->where('nombre', 'like', '%Constancia%Fiscal%')
+                      ->orWhere('nombre', 'like', '%Situación Fiscal%');
+            })
+            ->whereHas('tramite', function($query) use ($solicitante) {
+                $query->where('solicitante_id', $solicitante->id);
+            })
+            ->where('estado', 'Aprobado')
+            ->exists();
+
+        if ($tieneConstanciaFiscal) {
+            Log::info('Usuario ya tiene constancia fiscal aprobada en otro trámite:', [
+                'solicitante_id' => $solicitante->id,
+                'tramite_actual_id' => $tramite->id
+            ]);
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -474,10 +535,20 @@ class TramiteSolicitanteController extends Controller
      */
     private function necesitaConstanciaFiscal($tramite)
     {
-        // Un nuevo trámite necesita constancia fiscal si:
+        // Un nuevo trámite necesita constancia fiscal solo si:
         // 1. No tiene progreso (recién creado)
-        // 2. No tiene constancia fiscal ya procesada
-        return $tramite->progreso_tramite == 0 && !$this->tieneConstanciaFiscal($tramite);
+        // 2. El usuario no tiene constancia fiscal ya procesada en ningún trámite
+        // 3. El usuario no tiene datos de domicilio en ningún trámite
+        
+        $tieneConstancia = $this->tieneConstanciaFiscal($tramite);
+        
+        Log::info('Verificando necesidad de constancia fiscal:', [
+            'tramite_id' => $tramite->id,
+            'progreso_tramite' => $tramite->progreso_tramite,
+            'tiene_constancia' => $tieneConstancia
+        ]);
+
+        return $tramite->progreso_tramite == 0 && !$tieneConstancia;
     }
 
     /**
@@ -1645,5 +1716,241 @@ class TramiteSolicitanteController extends Controller
         
         // En casos de confianza media-baja, es incierto
         return null;
+    }
+
+    /**
+     * ✅ MOSTRAR SELECTOR DE SECCIONES PARA ACTUALIZACIÓN
+     */
+    public function mostrarSelectorActualizacion()
+    {
+        $user = Auth::user();
+        $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+        
+        if (!$solicitante) {
+            return redirect()->route('tramites.solicitante.index')
+                ->with('error', 'No se encontró información del solicitante');
+        }
+
+        // Verificar que sea proveedor activo
+        $proveedor = Proveedor::where('solicitante_id', $solicitante->id)
+            ->where('estado', 'Activo')
+            ->first();
+            
+        if (!$proveedor) {
+            return redirect()->route('tramites.solicitante.index')
+                ->with('error', 'No tiene un registro de proveedor activo');
+        }
+
+        // Buscar el trámite aprobado que lo hizo proveedor
+        $tramiteAprobado = Tramite::where('solicitante_id', $solicitante->id)
+            ->where('estado', 'Aprobado')
+            ->orderBy('fecha_revision', 'desc')
+            ->first();
+            
+        if (!$tramiteAprobado) {
+            return redirect()->route('tramites.solicitante.index')
+                ->with('error', 'No se encontró el trámite base para la actualización');
+        }
+
+        // Obtener datos actuales para mostrar en el selector
+        $datosActuales = $this->obtenerDatosActualesProveedor($tramiteAprobado);
+
+        Log::info('Mostrando selector de secciones para actualización:', [
+            'user_id' => $user->id,
+            'proveedor_pv' => $proveedor->pv,
+            'tramite_base_id' => $tramiteAprobado->id,
+            'tipo_persona' => $tramiteAprobado->solicitante->tipo_persona
+        ]);
+
+        return view('tramites.actualizacion.selector', compact(
+            'proveedor', 
+            'tramiteAprobado', 
+            'datosActuales'
+        ));
+    }
+
+    /**
+     * ✅ INICIAR ACTUALIZACIÓN DE SECCIÓN ESPECÍFICA
+     */
+    public function iniciarActualizacionSeccion(Request $request, $seccionId)
+    {
+        $request->validate([
+            'tramite_base_id' => 'required|exists:tramite,id'
+        ]);
+
+        $user = Auth::user();
+        $tramiteBase = Tramite::find($request->tramite_base_id);
+        
+        // Verificar permisos
+        if ($tramiteBase->solicitante->usuario_id !== $user->id) {
+            return redirect()->route('tramites.solicitante.index')
+                ->with('error', 'No tiene permisos para este trámite');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Crear nuevo trámite de actualización parcial
+            $tramiteActualizacion = Tramite::create([
+                'solicitante_id' => $tramiteBase->solicitante_id,
+                'tipo_tramite' => 'Actualizacion',
+                'estado' => 'Pendiente',
+                'progreso_tramite' => 0,
+                'fecha_inicio' => now(),
+                'observaciones' => "Actualización parcial - Sección {$seccionId} | Trámite base: {$tramiteBase->id}"
+            ]);
+
+            // ✅ Pre-cargar TODOS los datos del trámite aprobado
+            $this->precargarDatosProveedor($tramiteBase, $tramiteActualizacion);
+
+            DB::commit();
+
+            Log::info('Trámite de actualización parcial creado:', [
+                'tramite_nuevo_id' => $tramiteActualizacion->id,
+                'tramite_base_id' => $tramiteBase->id,
+                'seccion_actualizar' => $seccionId,
+                'solicitante_id' => $tramiteBase->solicitante_id
+            ]);
+
+            // Redirigir al formulario de la sección específica
+            return redirect()->route('tramites.create.tipo', [
+                'tipo_tramite' => 'actualizacion',
+                'tramite' => $tramiteActualizacion->id
+            ])->with([
+                'success' => '✅ Datos cargados desde su registro de proveedor. Modifique solo la información que necesita actualizar.',
+                'seccion_focus' => $seccionId,
+                'es_actualizacion_parcial' => true
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('Error al iniciar actualización parcial:', [
+                'tramite_base_id' => $request->tramite_base_id,
+                'seccion_id' => $seccionId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()->with('error', 'Error al iniciar la actualización: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * ✅ PRE-CARGAR DATOS DEL TRÁMITE APROBADO AL NUEVO TRÁMITE
+     */
+    private function precargarDatosProveedor($tramiteBase, $tramiteNuevo)
+    {
+        // Copiar DetalleTramite
+        if ($tramiteBase->detalleTramite) {
+            $detalleOriginal = $tramiteBase->detalleTramite->toArray();
+            unset($detalleOriginal['id'], $detalleOriginal['tramite_id'], $detalleOriginal['created_at'], $detalleOriginal['updated_at']);
+            $detalleOriginal['tramite_id'] = $tramiteNuevo->id;
+            
+            \App\Models\DetalleTramite::create($detalleOriginal);
+        }
+
+        // Copiar dirección
+        if ($tramiteBase->direccion) {
+            $direccionOriginal = $tramiteBase->direccion->toArray();
+            unset($direccionOriginal['id'], $direccionOriginal['tramite_id'], $direccionOriginal['created_at'], $direccionOriginal['updated_at']);
+            $direccionOriginal['tramite_id'] = $tramiteNuevo->id;
+            
+            \App\Models\Direccion::create($direccionOriginal);
+        }
+
+        // Copiar datos de constitución si existen
+        if ($tramiteBase->datosConstitutivo) {
+            $constitutionOriginal = $tramiteBase->datosConstitutivo->toArray();
+            unset($constitutionOriginal['id'], $constitutionOriginal['tramite_id'], $constitutionOriginal['created_at'], $constitutionOriginal['updated_at']);
+            $constitutionOriginal['tramite_id'] = $tramiteNuevo->id;
+            
+            \App\Models\DatosConstitutivo::create($constitutionOriginal);
+        }
+
+        // Copiar accionistas si existen
+        if ($tramiteBase->accionistasSolicitante) {
+            foreach ($tramiteBase->accionistasSolicitante as $accionista) {
+                $accionistaData = $accionista->toArray();
+                unset($accionistaData['id'], $accionistaData['tramite_id'], $accionistaData['created_at'], $accionistaData['updated_at']);
+                $accionistaData['tramite_id'] = $tramiteNuevo->id;
+                
+                \App\Models\AccionistaSolicitante::create($accionistaData);
+            }
+        }
+
+        // Copiar representante legal si existe
+        if ($tramiteBase->representanteLegal) {
+            $representanteData = $tramiteBase->representanteLegal->toArray();
+            unset($representanteData['id'], $representanteData['tramite_id'], $representanteData['created_at'], $representanteData['updated_at']);
+            $representanteData['tramite_id'] = $tramiteNuevo->id;
+            
+            \App\Models\RepresentanteLegal::create($representanteData);
+        }
+
+        // Copiar contacto
+        if ($tramiteBase->contactoSolicitante) {
+            $contactoData = $tramiteBase->contactoSolicitante->toArray();
+            unset($contactoData['id'], $contactoData['tramite_id'], $contactoData['created_at'], $contactoData['updated_at']);
+            $contactoData['tramite_id'] = $tramiteNuevo->id;
+            
+            \App\Models\ContactoSolicitante::create($contactoData);
+        }
+
+        Log::info('Datos pre-cargados en trámite de actualización:', [
+            'tramite_base_id' => $tramiteBase->id,
+            'tramite_nuevo_id' => $tramiteNuevo->id,
+            'datos_copiados' => 'detalle_tramite, direccion, constitucion, accionistas, representante, contacto'
+        ]);
+    }
+
+    /**
+     * ✅ OBTENER DATOS ACTUALES PARA MOSTRAR EN EL SELECTOR
+     */
+    private function obtenerDatosActualesProveedor($tramite)
+    {
+        $datos = [];
+
+        // Datos generales
+        if ($tramite->detalleTramite) {
+            $datos['datos_generales'] = [
+                'razon_social' => $tramite->solicitante->razon_social ?? 'N/A',
+                'giro' => $tramite->detalleTramite->giro ?? 'N/A',
+                'actividad_preponderante' => $tramite->detalleTramite->actividad_preponderante ?? 'N/A'
+            ];
+        }
+
+        // Domicilio
+        if ($tramite->direccion) {
+            $datos['domicilio'] = [
+                'estado_nombre' => $tramite->direccion->estado->nombre ?? 'N/A',
+                'municipio_nombre' => $tramite->direccion->municipio->nombre ?? 'N/A',
+                'direccion_completa' => ($tramite->direccion->calle ?? '') . ' ' . ($tramite->direccion->numero_exterior ?? '')
+            ];
+        }
+
+        // Constitución (solo para persona moral)
+        if ($tramite->datosConstitutivo) {
+            $datos['constitucion'] = [
+                'numero_notario' => $tramite->datosConstitutivo->numero_notario ?? 'N/A',
+                'fecha_constitucion' => $tramite->datosConstitutivo->fecha_constitucion ?? 'N/A'
+            ];
+        }
+
+        // Accionistas
+        $datos['accionistas'] = $tramite->accionistasSolicitante ? $tramite->accionistasSolicitante->toArray() : [];
+
+        // Apoderado
+        if ($tramite->representanteLegal) {
+            $datos['apoderado'] = [
+                'nombre' => $tramite->representanteLegal->nombre ?? 'N/A',
+                'cargo' => $tramite->representanteLegal->cargo ?? 'N/A'
+            ];
+        }
+
+        // Documentos
+        $datos['documentos'] = $tramite->documentosSolicitante ? $tramite->documentosSolicitante->toArray() : [];
+
+        return $datos;
     }
 }
