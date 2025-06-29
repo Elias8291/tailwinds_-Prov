@@ -87,67 +87,128 @@ class DatosGeneralesController extends Controller
         }
 
         try {
-            // Validaciones personalizadas según las reglas del JavaScript
-            $request->validate([
+            // Validaciones simplificadas para evitar errores innecesarios
+            $rules = [
                 'tramite_id' => 'required|exists:tramite,id',
                 'giro' => [
                     'required',
                     'string',
-                    'min:10',
-                    'max:500',
-                    'regex:/^[a-zA-ZÀ-ÿ0-9\s\.\,\-\(\)]+$/'
+                    'min:3',
+                    'max:500'
                 ],
-                'sector_id' => 'nullable|exists:sector,id',
-                'actividades_seleccionadas' => 'nullable|string',
+                'actividades_seleccionadas' => 'required|string|min:1',
                 'contacto_nombre' => [
                     'required',
                     'string',
                     'min:2',
-                    'max:100',
-                    'regex:/^[a-zA-ZÀ-ÿ\s]+$/'
+                    'max:40'
                 ],
                 'contacto_cargo' => [
                     'required',
                     'string',
                     'min:2',
-                    'max:50',
-                    'regex:/^[a-zA-ZÀ-ÿ\s]+$/'
+                    'max:50'
                 ],
                 'contacto_correo' => [
                     'required',
                     'email',
-                    'regex:/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/'
+                    'max:255'
                 ],
                 'contacto_telefono' => [
                     'required',
                     'string',
-                    'regex:/^\d{10}$/'
+                    'min:10',
+                    'max:10'
                 ],
                 'pagina_web' => [
                     'nullable',
-                    'regex:/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/'
+                    'string',
+                    'max:255'
                 ],
-            ], [
-                // Mensajes personalizados que coinciden con el JavaScript
-                'giro.required' => 'El giro es obligatorio.',
-                'giro.min' => 'El giro debe tener entre 10 y 500 caracteres. Solo se permiten letras, números y signos básicos.',
-                'giro.max' => 'El giro debe tener entre 10 y 500 caracteres. Solo se permiten letras, números y signos básicos.',
-                'giro.regex' => 'El giro debe tener entre 10 y 500 caracteres. Solo se permiten letras, números y signos básicos.',
-                'contacto_nombre.required' => 'El nombre es obligatorio.',
-                'contacto_nombre.min' => 'El nombre debe tener entre 2 y 100 caracteres. Solo se permiten letras y espacios.',
-                'contacto_nombre.max' => 'El nombre debe tener entre 2 y 100 caracteres. Solo se permiten letras y espacios.',
-                'contacto_nombre.regex' => 'El nombre debe tener entre 2 y 100 caracteres. Solo se permiten letras y espacios.',
-                'contacto_cargo.required' => 'El cargo es obligatorio.',
-                'contacto_cargo.min' => 'El cargo debe tener entre 2 y 50 caracteres. Solo se permiten letras y espacios.',
-                'contacto_cargo.max' => 'El cargo debe tener entre 2 y 50 caracteres. Solo se permiten letras y espacios.',
-                'contacto_cargo.regex' => 'El cargo debe tener entre 2 y 50 caracteres. Solo se permiten letras y espacios.',
-                'contacto_correo.required' => 'El correo electrónico es obligatorio.',
-                'contacto_correo.email' => 'Ingrese un correo electrónico válido.',
-                'contacto_correo.regex' => 'Ingrese un correo electrónico válido.',
-                'contacto_telefono.required' => 'El teléfono es obligatorio.',
+            ];
+
+            // Validar nombres específicos según tipo de persona
+            $user = Auth::user();
+            $solicitante = $user->solicitante ?? null;
+            $tipoPersona = $solicitante?->tipo_persona ?? 'Física';
+
+            if ($tipoPersona === 'Física') {
+                $rules['nombre_completo'] = [
+                    'sometimes',
+                    'string',
+                    'min:5',
+                    'max:255',
+                    'regex:/^[a-zA-ZÀ-ÿ\s]+$/'
+                ];
+                $rules['curp'] = [
+                    'sometimes',
+                    'string',
+                    'regex:/^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$/'
+                ];
+            } else {
+                $rules['razon_social'] = [
+                    'sometimes',
+                    'string',
+                    'min:5',
+                    'max:100',
+                    'regex:/^[a-zA-ZÀ-ÿ0-9\s\.\,\-\(\)]+$/'
+                ];
+            }
+
+            // RFC validation if provided
+            $rules['rfc'] = [
+                'sometimes',
+                'string',
+                'regex:/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/'
+            ];
+
+            $messages = [
+                // Mensajes de error específicos y elegantes
+                'tramite_id.required' => 'Error del sistema: ID de trámite requerido.',
+                'tramite_id.exists' => 'Error del sistema: Trámite no válido.',
+                
+                'giro.required' => 'El giro de la empresa es obligatorio.',
+                'giro.min' => 'El giro debe tener al menos 5 caracteres.',
+                'giro.max' => 'El giro no puede exceder 500 caracteres.',
+                'giro.regex' => 'El giro contiene caracteres no válidos. Use solo letras, números y signos básicos.',
+                
+                'actividades_seleccionadas.required' => 'Debe seleccionar al menos una actividad económica.',
+                'actividades_seleccionadas.min' => 'Debe seleccionar al menos una actividad económica.',
+                
+                'contacto_nombre.required' => 'El nombre del contacto es obligatorio.',
+                'contacto_nombre.min' => 'El nombre debe tener entre 3 y 40 caracteres.',
+                'contacto_nombre.max' => 'El nombre debe tener entre 3 y 40 caracteres.',
+                'contacto_nombre.regex' => 'El nombre solo puede contener letras y espacios.',
+                
+                'contacto_cargo.required' => 'El cargo del contacto es obligatorio.',
+                'contacto_cargo.min' => 'El cargo debe tener entre 3 y 50 caracteres.',
+                'contacto_cargo.max' => 'El cargo debe tener entre 3 y 50 caracteres.',
+                'contacto_cargo.regex' => 'El cargo solo puede contener letras y espacios.',
+                
+                'contacto_correo.required' => 'El correo electrónico del contacto es obligatorio.',
+                'contacto_correo.email' => 'Ingrese un correo electrónico válido (ejemplo: usuario@dominio.com).',
+                'contacto_correo.max' => 'El correo electrónico es demasiado largo.',
+                'contacto_correo.regex' => 'Formato de correo electrónico no válido.',
+                
+                'contacto_telefono.required' => 'El teléfono del contacto es obligatorio.',
                 'contacto_telefono.regex' => 'El teléfono debe tener exactamente 10 dígitos.',
-                'pagina_web.regex' => 'Ingrese una URL válida (ej: https://www.ejemplo.com)',
-            ]);
+                
+                'pagina_web.url' => 'Ingrese una URL válida (ejemplo: https://www.ejemplo.com).',
+                'pagina_web.max' => 'La URL es demasiado larga.',
+                
+                'nombre_completo.min' => 'El nombre completo debe tener entre 5 y 255 caracteres.',
+                'nombre_completo.max' => 'El nombre completo debe tener entre 5 y 255 caracteres.',
+                'nombre_completo.regex' => 'El nombre completo solo puede contener letras y espacios.',
+                
+                'razon_social.min' => 'La razón social debe tener entre 5 y 100 caracteres.',
+                'razon_social.max' => 'La razón social debe tener entre 5 y 100 caracteres.',
+                'razon_social.regex' => 'La razón social contiene caracteres no válidos.',
+                
+                'curp.regex' => 'CURP inválida. Formato: ABCD123456HDFXYZ12 (18 caracteres).',
+                'rfc.regex' => 'RFC inválido. Formato: ABC123456789 (12-13 caracteres).',
+            ];
+
+            $request->validate($rules, $messages);
 
             // Validación adicional para actividades seleccionadas
             $this->validateActividadesSeleccionadas($request);
@@ -497,34 +558,73 @@ class DatosGeneralesController extends Controller
     }
 
     /**
-     * Valida que se hayan seleccionado actividades (similar al JavaScript)
+     * Valida que se hayan seleccionado actividades válidas
      */
     private function validateActividadesSeleccionadas(Request $request)
     {
         $actividadesSeleccionadas = $request->input('actividades_seleccionadas', '');
         $tieneActividades = false;
+        $actividadesValidas = [];
 
-        if (!empty($actividadesSeleccionadas)) {
-            try {
-                $actividades = json_decode($actividadesSeleccionadas, true);
-                if (is_array($actividades) && count($actividades) > 0) {
-                    // Verificar que al menos una actividad no esté vacía
-                    foreach ($actividades as $actividad) {
-                        if (!empty($actividad)) {
-                            $tieneActividades = true;
-                            break;
-                        }
+        if (empty($actividadesSeleccionadas) || $actividadesSeleccionadas === '[]' || $actividadesSeleccionadas === '') {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'actividades_seleccionadas' => 'Debe seleccionar al menos una actividad económica.'
+            ]);
+        }
+
+        try {
+            $actividades = json_decode($actividadesSeleccionadas, true);
+            
+            if (!is_array($actividades)) {
+                throw new \Exception('Formato de actividades inválido');
+            }
+
+            if (count($actividades) === 0) {
+                throw new \Exception('No hay actividades seleccionadas');
+            }
+
+            // Verificar que las actividades existan en la base de datos
+            foreach ($actividades as $actividadId) {
+                if (!empty($actividadId) && is_numeric($actividadId)) {
+                    $actividadExiste = Actividad::where('id', $actividadId)->exists();
+                    if ($actividadExiste) {
+                        $actividadesValidas[] = $actividadId;
+                        $tieneActividades = true;
+                    } else {
+                        Log::warning('Actividad no encontrada en base de datos', [
+                            'actividad_id' => $actividadId,
+                            'user_id' => Auth::id()
+                        ]);
                     }
                 }
-            } catch (\Exception $e) {
-                // Si no se puede decodificar el JSON, asumir que no hay actividades
-                $tieneActividades = false;
             }
+
+            if (count($actividadesValidas) === 0) {
+                throw new \Exception('Ninguna actividad seleccionada es válida');
+            }
+
+            Log::info('Actividades validadas correctamente', [
+                'total_enviadas' => count($actividades),
+                'actividades_validas' => count($actividadesValidas),
+                'ids_validas' => $actividadesValidas,
+                'user_id' => Auth::id()
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al validar actividades seleccionadas', [
+                'actividades_raw' => $actividadesSeleccionadas,
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id()
+            ]);
+
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'actividades_seleccionadas' => 'Las actividades seleccionadas no son válidas. Por favor, seleccione actividades de la lista.'
+            ]);
         }
 
         if (!$tieneActividades) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'actividades_seleccionadas' => 'Debe seleccionar al menos una actividad.'
+                'actividades_seleccionadas' => 'Debe seleccionar al menos una actividad económica válida.'
             ]);
         }
     }

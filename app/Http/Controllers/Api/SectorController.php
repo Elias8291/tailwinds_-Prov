@@ -123,14 +123,14 @@ class SectorController extends Controller
     {
         try {
             $query = $request->get('q', '');
-            $limit = (int) $request->get('limit', 50);
+            $limit = (int) $request->get('limit', 20);
             
             // Validar query mínimo
             if (strlen($query) < 2) {
                 return response()->json([
                     'success' => true,
                     'data' => [],
-                    'message' => 'Query demasiado corto',
+                    'message' => 'Query demasiado corto - ingrese al menos 2 caracteres',
                     'query' => $query
                 ]);
             }
@@ -139,13 +139,20 @@ class SectorController extends Controller
             $query = strip_tags($query);
             $query = trim($query);
             
-            // Buscar actividades
+            // Buscar actividades con mejor ordenamiento
             $actividades = Actividad::with('sector')
                 ->where(function($q) use ($query) {
                     $q->where('nombre', 'LIKE', "%{$query}%")
                       ->orWhere('codigo_scian', 'LIKE', "%{$query}%")
                       ->orWhere('descripcion', 'LIKE', "%{$query}%");
                 })
+                ->orderByRaw("CASE 
+                    WHEN nombre LIKE ? THEN 1
+                    WHEN nombre LIKE ? THEN 2
+                    WHEN codigo_scian LIKE ? THEN 3
+                    ELSE 4
+                END", ["{$query}%", "%{$query}%", "%{$query}%"])
+                ->orderBy('nombre')
                 ->limit($limit)
                 ->get()
                 ->map(function($actividad) {
@@ -154,26 +161,89 @@ class SectorController extends Controller
                         'nombre' => $actividad->nombre,
                         'codigo_scian' => $actividad->codigo_scian,
                         'descripcion' => $actividad->descripcion,
-                        'sector' => $actividad->sector ? [
-                            'id' => $actividad->sector->id,
-                            'nombre' => $actividad->sector->nombre
-                        ] : null
+                        'sector' => $actividad->sector ? $actividad->sector->nombre : 'Sin sector especificado'
+                    ];
+                });
+
+            Log::info('Búsqueda de actividades realizada', [
+                'query' => $query,
+                'resultados' => $actividades->count(),
+                'limit' => $limit
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $actividades,
+                'query' => $query,
+                'count' => $actividades->count(),
+                'message' => $actividades->count() > 0 ? 
+                    "Se encontraron {$actividades->count()} actividades" : 
+                    'No se encontraron actividades para su búsqueda'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error en buscarActividades', [
+                'query' => $query ?? 'N/A',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en la búsqueda de actividades',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get activities by IDs array
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function obtenerPorIds(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'integer|exists:actividad,id'
+            ]);
+
+            $ids = $request->input('ids');
+
+            $actividades = Actividad::with('sector')
+                ->whereIn('id', $ids)
+                ->get()
+                ->map(function($actividad) {
+                    return [
+                        'id' => $actividad->id,
+                        'nombre' => $actividad->nombre,
+                        'codigo_scian' => $actividad->codigo_scian,
+                        'descripcion' => $actividad->descripcion,
+                        'sector' => $actividad->sector ? $actividad->sector->nombre : 'Sin sector',
+                        'sector_id' => $actividad->sector_id
                     ];
                 });
 
             return response()->json([
                 'success' => true,
                 'data' => $actividades,
-                'query' => $query,
                 'count' => $actividades->count()
             ]);
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos de entrada inválidos',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
-            Log::error('Error en buscarActividades: ' . $e->getMessage());
+            Log::error('Error en obtenerPorIds: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Error en la búsqueda',
+                'message' => 'Error al obtener actividades por IDs',
                 'error' => $e->getMessage()
             ], 500);
         }

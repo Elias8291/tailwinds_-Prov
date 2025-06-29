@@ -530,6 +530,174 @@
             </div>
         </div>
     </div>
+
+    <!-- Controles de Scroll Inteligentes -->
+    <div id="scroll-controls" 
+         class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40 opacity-0 transition-all duration-500 ease-out"
+         x-data="{ 
+            visible: false,
+            scrolling: false,
+            autoShow: true,
+            canScrollUp: false,
+            canScrollDown: false,
+            
+            init() {
+                // Mostrar automáticamente después de 1.5 segundos
+                setTimeout(() => {
+                    this.autoShow = true;
+                    this.checkVisibility();
+                }, 1500);
+                
+                this.checkVisibility();
+                window.addEventListener('scroll', () => {
+                    if (!this.scrolling) {
+                        this.checkVisibility();
+                    }
+                });
+            },
+            
+            checkVisibility() {
+                const scrollHeight = document.documentElement.scrollHeight;
+                const clientHeight = document.documentElement.clientHeight;
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // Determinar direcciones disponibles
+                this.canScrollUp = scrollTop > 100;
+                this.canScrollDown = scrollTop < scrollHeight - clientHeight - 100;
+                
+                // Mostrar si hay contenido suficiente y al menos una dirección disponible
+                this.visible = this.autoShow && 
+                               (scrollHeight > clientHeight + 300) && 
+                               (this.canScrollUp || this.canScrollDown);
+                
+                // Actualizar clases
+                const controls = document.getElementById('scroll-controls');
+                if (this.visible) {
+                    controls.classList.remove('opacity-0', 'pointer-events-none', 'scale-75');
+                    controls.classList.add('opacity-100', 'scale-100');
+                } else {
+                    controls.classList.add('opacity-0', 'pointer-events-none', 'scale-75');
+                    controls.classList.remove('opacity-100', 'scale-100');
+                }
+            },
+            
+            async scrollUp() {
+                if (this.scrolling || !this.canScrollUp) return;
+                
+                this.scrolling = true;
+                const currentScroll = window.pageYOffset;
+                const windowHeight = window.innerHeight;
+                
+                let targetScroll = Math.max(0, currentScroll - windowHeight * 0.7);
+                
+                window.scrollTo({
+                    top: targetScroll,
+                    behavior: 'smooth'
+                });
+                
+                setTimeout(() => {
+                    this.scrolling = false;
+                    this.checkVisibility();
+                }, 1000);
+            },
+            
+            async scrollDown() {
+                if (this.scrolling || !this.canScrollDown) return;
+                
+                this.scrolling = true;
+                const currentScroll = window.pageYOffset;
+                const windowHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                
+                let targetScroll = Math.min(
+                    documentHeight - windowHeight,
+                    currentScroll + windowHeight * 0.7
+                );
+                
+                window.scrollTo({
+                    top: targetScroll,
+                    behavior: 'smooth'
+                });
+                
+                setTimeout(() => {
+                    this.scrolling = false;
+                    this.checkVisibility();
+                }, 1000);
+            }
+         }">
+        
+        <!-- Contenedor de controles -->
+        <div class="flex flex-col items-center space-y-1">
+            
+            <!-- Botón de scroll hacia arriba -->
+            <div x-show="canScrollUp" 
+                 x-transition:enter="transition ease-out duration-300 transform"
+                 x-transition:enter-start="opacity-0 -translate-y-2 scale-75"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="transition ease-in duration-200 transform"
+                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave-end="opacity-0 -translate-y-2 scale-75"
+                 @click="scrollUp()"
+                 class="group cursor-pointer select-none flex items-center space-x-2 px-3 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg border border-gray-200 hover:border-blue-300 transition-all duration-300">
+                
+                <!-- Botón circular pequeño -->
+                <div class="relative w-8 h-8 bg-gradient-to-t from-gray-100 to-white group-hover:from-blue-100 group-hover:to-blue-50 rounded-full shadow-sm transition-all duration-300 flex items-center justify-center">
+                    <!-- Flecha hacia arriba -->
+                    <svg class="w-3 h-3 text-gray-600 group-hover:text-blue-600 transform transition-all duration-300 group-hover:-translate-y-0.5" 
+                         fill="none" 
+                         stroke="currentColor" 
+                         viewBox="0 0 24 24"
+                         stroke-width="3">
+                        <path stroke-linecap="round" 
+                              stroke-linejoin="round" 
+                              d="M5 15l7-7 7 7"/>
+                    </svg>
+                </div>
+                
+                <!-- Texto al lado -->
+                <span class="text-sm font-medium text-gray-700 group-hover:text-blue-700 transition-colors duration-300">
+                    Subir
+                </span>
+            </div>
+            
+            <!-- Separador elegante -->
+            <div class="flex justify-center my-1" x-show="canScrollUp && canScrollDown">
+                <div class="w-8 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+            </div>
+            
+            <!-- Botón de scroll hacia abajo -->
+            <div x-show="canScrollDown" 
+                 x-transition:enter="transition ease-out duration-300 transform"
+                 x-transition:enter-start="opacity-0 translate-y-2 scale-75"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="transition ease-in duration-200 transform"
+                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-2 scale-75"
+                 @click="scrollDown()"
+                 class="group cursor-pointer select-none flex items-center space-x-2 px-3 py-2 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg border border-gray-200 hover:border-blue-300 transition-all duration-300">
+                
+                <!-- Botón circular pequeño -->
+                <div class="relative w-8 h-8 bg-gradient-to-b from-gray-100 to-white group-hover:from-blue-100 group-hover:to-blue-50 rounded-full shadow-sm transition-all duration-300 flex items-center justify-center">
+                    <!-- Flecha hacia abajo -->
+                    <svg class="w-3 h-3 text-gray-600 group-hover:text-blue-600 transform transition-all duration-300 group-hover:translate-y-0.5" 
+                         fill="none" 
+                         stroke="currentColor" 
+                         viewBox="0 0 24 24"
+                         stroke-width="3">
+                        <path stroke-linecap="round" 
+                              stroke-linejoin="round" 
+                              d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+                
+                <!-- Texto al lado -->
+                <span class="text-sm font-medium text-gray-700 group-hover:text-blue-700 transition-colors duration-300">
+                    Bajar
+                </span>
+            </div>
+            
+        </div>
+    </div>
 </div>
 
 @push('styles')
@@ -1056,10 +1224,1475 @@
             transition: none !important;
         }
     }
+
+    /* 🎡 ESTILOS PARA CONTROLES DE SCROLL BIDIRECCIONALES */
+    #scroll-controls {
+        will-change: transform, opacity;
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+    }
+
+    /* Animación de entrada suave para los controles */
+    @keyframes controls-fade-in {
+        from {
+            opacity: 0;
+            transform: translate(-50%, 15px) scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, 0) scale(1);
+        }
+    }
+
+    #scroll-controls.opacity-100 {
+        animation: controls-fade-in 0.5s ease-out;
+    }
+
+    /* Animación de salida suave */
+    @keyframes controls-fade-out {
+        from {
+            opacity: 1;
+            transform: translate(-50%, 0) scale(1);
+        }
+        to {
+            opacity: 0;
+            transform: translate(-50%, 15px) scale(0.8);
+        }
+    }
+
+    #scroll-controls.opacity-0 {
+        animation: controls-fade-out 0.3s ease-in;
+    }
+
+    /* Efectos de hover mejorados para botones de scroll */
+    #scroll-controls .group:hover > div:first-child {
+        transform: translateY(-1px);
+        box-shadow: 
+            0 6px 20px rgba(0, 0, 0, 0.15),
+            0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    }
+
+    /* Animaciones específicas para cada dirección */
+    @keyframes arrow-bounce-up {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-2px);
+        }
+    }
+
+    @keyframes arrow-bounce-down {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(2px);
+        }
+    }
+
+    #scroll-controls .group:hover svg[d*="5 15l7-7 7 7"] {
+        animation: arrow-bounce-up 0.8s ease-in-out infinite;
+    }
+
+    #scroll-controls .group:hover svg[d*="19 9l-7 7-7-7"] {
+        animation: arrow-bounce-down 0.8s ease-in-out infinite;
+    }
+
+    /* Pulso suave para indicadores centrales */
+    @keyframes indicator-pulse {
+        0%, 100% {
+            opacity: 0.6;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+    }
+
+    #scroll-controls .bg-blue-400 {
+        animation: indicator-pulse 2s ease-in-out infinite;
+    }
+
+    /* Estados de scrolling activo */
+    #scroll-controls.scrolling .group > div:first-child {
+        transform: scale(0.95);
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    #scroll-controls.scrolling svg {
+        animation: spin 1s linear infinite;
+    }
+
+    /* Efectos responsivos para móvil */
+    @media (max-width: 640px) {
+        #scroll-controls {
+            bottom: 2rem;
+            transform: translate(-50%, 0) scale(0.95);
+        }
+        
+        #scroll-controls .w-8 {
+            width: 1.75rem;
+            height: 1.75rem;
+        }
+        
+        #scroll-controls svg {
+            width: 0.65rem;
+            height: 0.65rem;
+        }
+        
+        #scroll-controls .space-y-2 {
+            gap: 0.25rem;
+        }
+        
+        #scroll-controls .text-sm {
+            font-size: 0.75rem;
+        }
+        
+        #scroll-controls .px-3 {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        
+        #scroll-controls .py-2 {
+            padding-top: 0.375rem;
+            padding-bottom: 0.375rem;
+        }
+        
+        #scroll-controls .space-x-2 > * + * {
+            margin-left: 0.375rem;
+        }
+    }
+
+    /* Accesibilidad mejorada */
+    #scroll-controls .group:focus-within > div:first-child {
+        outline: none;
+        box-shadow: 
+            0 6px 20px rgba(0, 0, 0, 0.15),
+            0 0 0 3px rgba(59, 130, 246, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    }
+
+    /* Gradientes específicos para cada dirección */
+    #scroll-controls .bg-gradient-to-t {
+        background: linear-gradient(to top, 
+            rgba(249, 250, 251, 0.9), 
+            rgba(243, 244, 246, 0.8));
+    }
+
+    #scroll-controls .bg-gradient-to-b {
+        background: linear-gradient(to bottom, 
+            rgba(249, 250, 251, 0.8), 
+            rgba(243, 244, 246, 0.9));
+    }
+
+    /* Hover states para gradientes */
+    #scroll-controls .group:hover .bg-gradient-to-t {
+        background: linear-gradient(to top, 
+            rgba(249, 250, 251, 1), 
+            rgba(239, 241, 245, 1));
+    }
+
+    #scroll-controls .group:hover .bg-gradient-to-b {
+        background: linear-gradient(to bottom, 
+            rgba(249, 250, 251, 1), 
+            rgba(239, 241, 245, 1));
+    }
+
+    /* Sombras mejoradas */
+    #scroll-controls .shadow-md {
+        box-shadow: 
+            0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    #scroll-controls .hover\\:shadow-lg:hover {
+        box-shadow: 
+            0 10px 15px -3px rgba(0, 0, 0, 0.1), 
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Animación especial de primera aparición */
+    @keyframes controls-first-appearance {
+        0% {
+            opacity: 0;
+            transform: translate(-50%, 25px) scale(0.2);
+        }
+        50% {
+            transform: translate(-50%, -5px) scale(1.15);
+        }
+        100% {
+            opacity: 1;
+            transform: translate(-50%, 0) scale(1);
+        }
+    }
+
+    #scroll-controls[data-first-show="true"] {
+        animation: controls-first-appearance 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    /* Efectos de transición para botones que aparecen/desaparecen */
+    #scroll-controls [x-transition] {
+        transition-property: opacity, transform;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Estilos para los botones compactos */
+    #scroll-controls .text-sm {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        letter-spacing: 0.01em;
+        font-weight: 500;
+    }
+
+    /* Efectos especiales para los botones */
+    #scroll-controls .rounded-full {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Animaciones para hover en contenedor completo */
+    #scroll-controls .group:hover {
+        transform: scale(1.02);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    /* Efectos de entrada suave */
+    @keyframes button-fade-in {
+        from {
+            opacity: 0;
+            transform: translateY(8px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    #scroll-controls [x-show] {
+        animation: button-fade-in 0.4s ease-out;
+    }
+
+    /* Efecto de pulso sutil en hover */
+    #scroll-controls .group:hover .w-8 {
+        animation: gentle-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes gentle-pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    /* Sombras mejoradas */
+    #scroll-controls .shadow-md {
+        box-shadow: 
+            0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+            0 2px 4px -1px rgba(0, 0, 0, 0.06),
+            0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    }
+
+    #scroll-controls .hover\\:shadow-lg:hover {
+        box-shadow: 
+            0 10px 15px -3px rgba(0, 0, 0, 0.1), 
+            0 4px 6px -2px rgba(0, 0, 0, 0.05),
+            0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+
+    /* Efecto de gradiente en hover para el separador */
+    #scroll-controls .via-gray-300 {
+        transition: all 0.3s ease;
+    }
+
+    #scroll-controls:hover .via-gray-300 {
+        background: linear-gradient(to right, transparent, rgb(59 130 246 / 0.3), transparent);
+    }
+
+    /* 🔥 ESTILOS ADICIONALES PARA MODAL DE ADVERTENCIA */
+    
+    /* Animación de destacado para errores */
+    @keyframes error-highlight {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+        }
+    }
+
+    /* Animación de entrada para modal */
+    @keyframes modal-enter {
+        from {
+            opacity: 0;
+            transform: scale(0.7) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    /* Animación de salida para modal */
+    @keyframes modal-exit {
+        from {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.7) translateY(20px);
+        }
+    }
+
+    /* Efectos especiales para el modal de advertencia */
+    #modal-advertencia .animate-enter {
+        animation: modal-enter 0.3s ease-out forwards;
+    }
+
+    #modal-advertencia .animate-exit {
+        animation: modal-exit 0.3s ease-in forwards;
+    }
+
+    /* Mejoras visuales para campos con error */
+    .form-group.error input:focus,
+    .form-group.error select:focus,
+    .form-group.error textarea:focus {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+        outline: none !important;
+    }
+
+    /* Estilo especial para el mensaje de error animado */
+    .error-message {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .error-message::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.1), transparent);
+        animation: error-sweep 1.5s ease-in-out;
+    }
+
+    @keyframes error-sweep {
+        0% {
+            left: -100%;
+        }
+        100% {
+            left: 100%;
+        }
+    }
+
+    /* Efectos de hover mejorados para botones del modal */
+    #modal-advertencia button:hover {
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    #modal-advertencia button:active {
+        transform: translateY(0);
+    }
+
+    /* Responsive del modal */
+    @media (max-width: 480px) {
+        #modal-advertencia .max-w-md {
+            max-width: 95% !important;
+            margin: 0 auto;
+        }
+        
+        #modal-advertencia .p-6 {
+            padding: 1rem;
+        }
+        
+        #modal-advertencia .text-xl {
+            font-size: 1.125rem;
+        }
+    }
+
+    /* Accesibilidad para el modal */
+    #modal-advertencia button:focus {
+        outline: none;
+        ring-width: 2px;
+        ring-color: rgba(59, 130, 246, 0.5);
+    }
+
+    /* Animaciones de pulso para elementos decorativos */
+    @keyframes decorative-pulse {
+        0%, 100% {
+            opacity: 0.2;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.4;
+            transform: scale(1.1);
+        }
+    }
+
+    #modal-advertencia .animate-ping {
+        animation: decorative-pulse 2s ease-in-out infinite;
+    }
+
+    /* 🔥 ESTILOS PARA VALIDACIONES DE DATOS GENERALES */
+    .form-group.error input,
+    .form-group.error select,
+    .form-group.error textarea {
+        border-color: #ef4444 !important;
+        background-color: #fef2f2 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+    }
+
+    .form-group.error label {
+        color: #dc2626 !important;
+    }
+
+    .form-group.valid input,
+    .form-group.valid select,
+    .form-group.valid textarea {
+        border-color: #10b981 !important;
+        background-color: #f0fdf4 !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+    }
+
+    .form-group.valid label {
+        color: #059669 !important;
+    }
+
+    /* Animaciones de validación */
+    .form-group.error {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 20%, 40%, 60%, 80%, 100% {
+            transform: translateX(0);
+        }
+        10%, 30%, 50%, 70%, 90% {
+            transform: translateX(-5px);
+        }
+    }
+
+    .form-group.valid {
+        animation: success-pulse 0.6s ease-out;
+    }
+
+    @keyframes success-pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.02);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Estilo para mensajes de error */
+    .error-message {
+        animation: fadeInUp 0.3s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Indicadores visuales para campos requeridos */
+    input[required]:not([readonly]):focus,
+    select[required]:not([readonly]):focus,
+    textarea[required]:not([readonly]):focus {
+        box-shadow: 0 0 0 3px rgba(157, 36, 73, 0.15);
+    }
+
+    /* Estados hover mejorados para validación */
+    .form-group:not(.error) input:hover,
+    .form-group:not(.error) select:hover,
+    .form-group:not(.error) textarea:hover {
+        border-color: rgba(157, 36, 73, 0.3);
+    }
+
+    /* Mejoras responsivas para validaciones */
+    @media (max-width: 640px) {
+        .form-group.error input,
+        .form-group.error select,
+        .form-group.error textarea {
+            font-size: 16px; /* Evitar zoom en iOS */
+        }
+        
+        .error-message {
+            font-size: 0.75rem;
+        }
+    }
 </style>
 @endpush
 
 @push('scripts')
+<script>
+    // 🔥 INTEGRACIÓN DE VALIDACIONES DATOS GENERALES
+    
+    // Variables globales para validaciones
+    let formularioValidado = false;
+    let tramiteId = null;
+    
+    // Función para inicializar validaciones de datos generales
+    function inicializarValidacionDatosGenerales() {
+        const formulario = document.getElementById('datos-generales-form');
+        
+        if (!formulario) {
+            console.log('Formulario de datos generales no encontrado');
+            return;
+        }
+
+        // Detectar tramite_id desde el formulario o desde Alpine.js
+        const tramiteIdInput = document.querySelector('input[name="tramite_id"]');
+        if (tramiteIdInput && tramiteIdInput.value) {
+            tramiteId = tramiteIdInput.value;
+        } else {
+            // Intentar obtener desde Alpine.js
+            const alpineContainer = document.querySelector('[x-data*="tramiteId"]');
+            if (alpineContainer && window.Alpine) {
+                const alpineData = Alpine.$data(alpineContainer);
+                if (alpineData && alpineData.tramiteId) {
+                    tramiteId = alpineData.tramiteId;
+                }
+            }
+        }
+        
+        // Validar que tramite_id sea válido
+        if (!tramiteId || tramiteId.trim() === '' || tramiteId === 'undefined' || tramiteId === 'null') {
+            console.warn('tramite_id no válido:', tramiteId);
+            return;
+        }
+
+        // Verificar que tramite_id sea un número válido
+        if (isNaN(parseInt(tramiteId))) {
+            console.warn('tramite_id no es un número:', tramiteId);
+            return;
+        }
+
+        console.log('✅ Validaciones inicializadas para tramite_id:', tramiteId);
+
+        // Configurar eventos del formulario
+        configurarEventosDatosGenerales(formulario);
+    }
+
+    // Configurar eventos del formulario de datos generales
+    function configurarEventosDatosGenerales(formulario) {
+        // Configurar validación en tiempo real
+        const campos = formulario.querySelectorAll('input, select, textarea');
+        campos.forEach(campo => {
+            campo.addEventListener('blur', validarCampoDatosGenerales);
+            campo.addEventListener('change', validarCampoDatosGenerales);
+        });
+
+        // Interceptar envío del formulario
+        formulario.addEventListener('submit', function(e) {
+            console.log('Enviando formulario de datos generales...');
+            if (!validarFormularioCompletoP()) {
+                console.log('❌ Validación fallida');
+                e.preventDefault();
+                return false;
+            }
+            console.log('✅ Validación exitosa');
+        });
+    }
+
+         // Función para validar un campo individual con mensajes específicos
+    function validarCampoDatosGenerales(event) {
+        const campo = event.target;
+        const valor = campo.value.trim();
+        let esValido = true;
+        let mensajeError = '';
+        
+        // Validaciones específicas según el tipo de campo
+        if (campo.hasAttribute('required') && !valor) {
+            esValido = false;
+            mensajeError = 'Este campo es obligatorio';
+        }
+        
+        // Validaciones específicas por tipo
+        if (esValido) {
+            switch(campo.type) {
+                case 'email':
+                    if (valor && !validarEmail(valor)) {
+                        esValido = false;
+                        mensajeError = 'Ingrese un email válido (ejemplo: usuario@dominio.com)';
+                    }
+                    break;
+                case 'tel':
+                    if (valor && !validarTelefono(valor)) {
+                        esValido = false;
+                        mensajeError = 'El teléfono debe tener exactamente 10 dígitos';
+                    }
+                    break;
+            }
+        }
+
+        // Validaciones específicas por nombre
+        if (esValido) {
+            switch(campo.name) {
+                case 'rfc':
+                    if (valor && !validarRFC(valor)) {
+                        esValido = false;
+                        mensajeError = 'RFC inválido. Formato: ABC123456789 (12-13 caracteres)';
+                    }
+                    break;
+                case 'curp':
+                    if (valor && !validarCURP(valor)) {
+                        esValido = false;
+                        mensajeError = 'CURP inválida. Formato: ABCD123456HDFXYZ12 (18 caracteres)';
+                    }
+                    break;
+                case 'actividades_seleccionadas':
+                    if (!valor || valor === '[]' || valor === '') {
+                        esValido = false;
+                        mensajeError = 'Debe seleccionar al menos una actividad económica';
+                    }
+                    break;
+                case 'contacto_nombre':
+                    if (valor && (valor.length < 3 || valor.length > 40)) {
+                        esValido = false;
+                        mensajeError = 'El nombre debe tener entre 3 y 40 caracteres';
+                    }
+                    break;
+                case 'contacto_cargo':
+                    if (valor && (valor.length < 3 || valor.length > 50)) {
+                        esValido = false;
+                        mensajeError = 'El cargo debe tener entre 3 y 50 caracteres';
+                    }
+                    break;
+                case 'contacto_telefono':
+                    if (valor && !validarTelefono(valor)) {
+                        esValido = false;
+                        mensajeError = 'El teléfono debe tener exactamente 10 dígitos';
+                    }
+                    break;
+                case 'razon_social':
+                    if (valor && (valor.length < 5 || valor.length > 100)) {
+                        esValido = false;
+                        mensajeError = 'La razón social debe tener entre 5 y 100 caracteres';
+                    }
+                    break;
+                case 'nombre_completo':
+                    if (valor && (valor.length < 5 || valor.length > 255)) {
+                        esValido = false;
+                        mensajeError = 'El nombre completo debe tener entre 5 y 255 caracteres';
+                    }
+                    break;
+            }
+        }
+        
+        // Actualizar UI según el resultado con mensaje específico
+        actualizarUIValidacionDatos(campo, esValido, mensajeError);
+        
+        return esValido;
+    }
+
+    // Función para validar el formulario completo
+    function validarFormularioCompletoP() {
+        const formulario = document.getElementById('datos-generales-form');
+        
+        if (!formulario) {
+            console.warn('Formulario de datos generales no encontrado');
+            return false;
+        }
+
+        // Validar que tramite_id esté presente
+        if (!tramiteId || tramiteId.trim() === '') {
+            console.warn('tramite_id faltante');
+            return false;
+        }
+
+        // Verificar que tramite_id sea válido
+        if (isNaN(parseInt(tramiteId))) {
+            console.warn('tramite_id inválido:', tramiteId);
+            return false;
+        }
+
+        let todosValidos = true;
+        const campos = formulario.querySelectorAll('input[required], select[required], textarea[required]');
+        
+        campos.forEach(campo => {
+            if (!validarCampoDatosGenerales({ target: campo })) {
+                todosValidos = false;
+            }
+        });
+
+                 // Validación especial para actividades seleccionadas
+        const actividadesInput = document.getElementById('actividades_seleccionadas_input');
+        if (actividadesInput) {
+            const actividades = actividadesInput.value;
+            if (!actividades || actividades === '[]' || actividades === '') {
+                console.warn('No hay actividades seleccionadas');
+                todosValidos = false;
+                actualizarUIValidacionDatos(actividadesInput, false, 'Debe seleccionar al menos una actividad económica');
+            }
+        }
+
+        if (todosValidos) {
+            formularioValidado = true;
+            console.log('✅ Formulario completamente validado');
+        } else {
+            console.log('❌ Formulario tiene errores - bloqueando navegación');
+            // Bloquear navegación si hay errores
+            bloquearNavegacion();
+        }
+
+        return todosValidos;
+    }
+
+         // Función para actualizar la UI de validación con mensajes personalizados
+    function actualizarUIValidacionDatos(campo, esValido, mensajeError = '') {
+        const contenedor = campo.closest('.form-group') || campo.parentElement;
+        
+        if (esValido) {
+            contenedor.classList.remove('error');
+            contenedor.classList.add('valid');
+            // Remover mensaje de error si existe
+            const errorMsg = contenedor.querySelector('.error-message');
+            if (errorMsg) errorMsg.remove();
+        } else {
+            contenedor.classList.remove('valid');
+            contenedor.classList.add('error');
+            
+            // Actualizar o crear mensaje de error
+            let errorMsg = contenedor.querySelector('.error-message');
+            if (errorMsg) {
+                errorMsg.textContent = mensajeError || 'Este campo requiere atención';
+            } else {
+                errorMsg = document.createElement('p');
+                errorMsg.className = 'error-message text-xs text-red-500 mt-1 flex items-center';
+                errorMsg.innerHTML = `
+                    <i class="fas fa-exclamation-triangle mr-1 text-red-400"></i>
+                    <span>${mensajeError || 'Este campo requiere atención'}</span>
+                `;
+                contenedor.appendChild(errorMsg);
+            }
+        }
+    }
+
+    // Funciones de validación específicas
+    function validarRFC(rfc) {
+        const rfcPattern = /^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/;
+        return rfcPattern.test(rfc.toUpperCase());
+    }
+
+    function validarCURP(curp) {
+        const curpPattern = /^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z][0-9]$/;
+        return curpPattern.test(curp.toUpperCase());
+    }
+
+    function validarEmail(email) {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailPattern.test(email);
+    }
+
+    function validarTelefono(telefono) {
+        const telefonoPattern = /^[0-9]{10}$/;
+        return telefonoPattern.test(telefono.replace(/\D/g, ''));
+    }
+
+    // Función para obtener datos del formulario
+    function obtenerDatosFormularioDG() {
+        const formulario = document.getElementById('datos-generales-form');
+        if (!formulario) return null;
+
+        const formData = new FormData(formulario);
+        const datos = {};
+        
+        for (let [key, value] of formData.entries()) {
+            datos[key] = value;
+        }
+        
+        return datos;
+    }
+
+    // Función para guardar datos automáticamente (integrada con el formulario)
+    async function guardarDatosAutomaticamente() {
+        if (!formularioValidado || !tramiteId) {
+            console.warn('No se puede guardar: formulario no validado o tramite_id faltante');
+            return;
+        }
+
+        const datos = obtenerDatosFormularioDG();
+        if (!datos) {
+            console.warn('No se pudieron obtener los datos del formulario');
+            return;
+        }
+
+        try {
+            const response = await fetch('/datos-generales/guardar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(datos)
+            });
+
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.message || 'Error al guardar');
+            }
+
+            console.log('✅ Datos guardados automáticamente');
+            return result;
+        } catch (error) {
+            console.error('❌ Error al guardar datos automáticamente:', error);
+            throw error;
+        }
+    }
+
+         // Función para bloquear navegación
+    function bloquearNavegacion() {
+        // Deshabilitar botón de siguiente paso
+        const btnSiguiente = document.querySelector('button[onclick*="navegarSiguiente"], button[type="submit"]');
+        if (btnSiguiente) {
+            btnSiguiente.disabled = true;
+            btnSiguiente.style.opacity = '0.5';
+            btnSiguiente.style.cursor = 'not-allowed';
+            btnSiguiente.title = 'Corrija los errores antes de continuar';
+        }
+
+        // Interceptar navegación con Alpine.js
+        if (window.Alpine) {
+            const alpineContainer = document.querySelector('[x-data*="currentStep"]');
+            if (alpineContainer) {
+                const alpineData = Alpine.$data(alpineContainer);
+                if (alpineData) {
+                    alpineData.navigationBlocked = true;
+                }
+            }
+        }
+    }
+
+    // Función para desbloquear navegación
+    function desbloquearNavegacion() {
+        // Habilitar botón de siguiente paso
+        const btnSiguiente = document.querySelector('button[onclick*="navegarSiguiente"], button[type="submit"]');
+        if (btnSiguiente) {
+            btnSiguiente.disabled = false;
+            btnSiguiente.style.opacity = '1';
+            btnSiguiente.style.cursor = 'pointer';
+            btnSiguiente.title = '';
+        }
+
+        // Desbloquear navegación con Alpine.js
+        if (window.Alpine) {
+            const alpineContainer = document.querySelector('[x-data*="currentStep"]');
+            if (alpineContainer) {
+                const alpineData = Alpine.$data(alpineContainer);
+                if (alpineData) {
+                    alpineData.navigationBlocked = false;
+                }
+            }
+        }
+    }
+
+    // Función para mostrar errores del servidor en campos específicos
+    function mostrarErroresServidor(errores) {
+        console.log('Mostrando errores del servidor:', errores);
+        
+        // Limpiar errores previos
+        limpiarErroresValidacionDG();
+
+        if (typeof errores === 'object' && errores !== null) {
+            Object.keys(errores).forEach(campo => {
+                const input = document.querySelector(`[name="${campo}"]`);
+                if (input) {
+                    const mensajes = Array.isArray(errores[campo]) ? errores[campo] : [errores[campo]];
+                    const mensaje = mensajes.join(', ');
+                    actualizarUIValidacionDatos(input, false, mensaje);
+                }
+            });
+        }
+
+        // Bloquear navegación si hay errores del servidor
+        bloquearNavegacion();
+    }
+
+         // Función mejorada para guardar datos con manejo de errores del servidor
+    async function guardarDatosConValidacionServidor() {
+        // Validar primero en el frontend
+        if (!validarFormularioCompletoP()) {
+            console.warn('❌ Validación del frontend falló');
+            mostrarNotificacionError('Por favor, corrija los errores marcados antes de continuar.');
+            return false;
+        }
+
+        const datos = obtenerDatosFormularioDG();
+        if (!datos) {
+            console.warn('❌ No se pudieron obtener los datos del formulario');
+            mostrarNotificacionError('Error al obtener los datos del formulario.');
+            return false;
+        }
+
+        // Obtener el formulario real para usar su action y método
+        const formulario = document.getElementById('datos-generales-form');
+        const formData = new FormData(formulario);
+        
+        console.log('📤 Enviando datos al servidor...', {
+            url: formulario.action,
+            datos: Object.fromEntries(formData)
+        });
+
+        try {
+            const response = await fetch(formulario.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (!response.ok) {
+                // Manejar errores de validación del servidor (422)
+                if (response.status === 422 && result.errors) {
+                    console.error('❌ Errores de validación del servidor:', result.errors);
+                    mostrarErroresServidor(result.errors);
+                    mostrarNotificacionError('Por favor, corrija los errores marcados en rojo.');
+                    return false;
+                } else {
+                    console.error('❌ Error del servidor:', result);
+                    throw new Error(result.message || `Error del servidor (${response.status})`);
+                }
+            }
+
+            console.log('✅ Datos guardados exitosamente:', result);
+            desbloquearNavegacion();
+            mostrarNotificacionExito('Datos guardados correctamente.');
+            return result;
+            
+        } catch (error) {
+            console.error('💥 Error al guardar datos:', error);
+            
+            // Mostrar notificación de error
+            mostrarNotificacionError('Error de conexión. Verifique su conexión a internet e intente nuevamente.');
+            bloquearNavegacion();
+            return false;
+        }
+    }
+
+    // Función para mostrar notificaciones de éxito
+    function mostrarNotificacionExito(mensaje) {
+        // Crear notificación si no existe
+        let notificacion = document.getElementById('success-notification');
+        if (!notificacion) {
+            notificacion = document.createElement('div');
+            notificacion.id = 'success-notification';
+            notificacion.className = 'fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300';
+            document.body.appendChild(notificacion);
+        }
+
+        notificacion.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i>
+                <span>${mensaje}</span>
+                <button onclick="cerrarNotificacionExito()" class="ml-4 text-white hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+
+        // Mostrar notificación
+        setTimeout(() => {
+            notificacion.classList.remove('translate-x-full');
+        }, 100);
+
+        // Auto-cerrar después de 3 segundos
+        setTimeout(() => {
+            cerrarNotificacionExito();
+        }, 3000);
+    }
+
+    // Función para cerrar notificación de éxito
+    function cerrarNotificacionExito() {
+        const notificacion = document.getElementById('success-notification');
+        if (notificacion) {
+            notificacion.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notificacion.parentNode) {
+                    notificacion.parentNode.removeChild(notificacion);
+                }
+            }, 300);
+        }
+    }
+
+    // Función para mostrar modal de advertencia elegante
+    function mostrarNotificacionError(mensaje) {
+        mostrarModalAdvertencia(mensaje);
+    }
+
+    // Modal de advertencia elegante con Tailwind
+    function mostrarModalAdvertencia(mensaje, titulo = "⚠️ Atención - Errores Detectados") {
+        // Verificar si ya existe un modal
+        const modalExistente = document.getElementById('modal-advertencia');
+        if (modalExistente) {
+            modalExistente.remove();
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'modal-advertencia';
+        modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+        modal.innerHTML = `
+            <!-- Overlay con backdrop blur -->
+            <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300 opacity-0" 
+                 id="modal-overlay"
+                 onclick="cerrarModalAdvertencia()"></div>
+            
+            <!-- Contenedor del modal -->
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="relative w-full max-w-md mx-auto">
+                    
+                    <!-- Modal principal -->
+                    <div id="modal-content" 
+                         class="bg-white rounded-2xl shadow-2xl transform transition-all duration-300 scale-90 opacity-0 relative overflow-hidden">
+                        
+                        <!-- Header con gradiente de advertencia -->
+                        <div class="relative bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 p-6 text-white">
+                            <!-- Patrón decorativo -->
+                            <div class="absolute inset-0 bg-black bg-opacity-10">
+                                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                        <pattern id="warning-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                                            <circle cx="10" cy="10" r="1" fill="white" opacity="0.1"/>
+                                        </pattern>
+                                    </defs>
+                                    <rect width="100%" height="100%" fill="url(#warning-pattern)" />
+                                </svg>
+                            </div>
+                            
+                            <!-- Icono de advertencia animado -->
+                            <div class="relative z-10 flex items-center justify-center mb-4">
+                                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center animate-pulse">
+                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Título -->
+                            <h3 class="text-xl font-bold text-center relative z-10">${titulo}</h3>
+                        </div>
+                        
+                        <!-- Cuerpo del modal -->
+                        <div class="p-6">
+                            <!-- Mensaje principal -->
+                            <div class="mb-6 text-center">
+                                <p class="text-gray-700 leading-relaxed text-sm">
+                                    ${mensaje}
+                                </p>
+                            </div>
+                            
+                            <!-- Lista de acciones recomendadas -->
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                                <h4 class="font-semibold text-amber-800 mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    ¿Qué hacer?
+                                </h4>
+                                <ul class="text-amber-700 text-sm space-y-2">
+                                    <li class="flex items-start">
+                                        <span class="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                                        Revise los campos marcados en <span class="font-semibold text-red-600">rojo</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                                        Corrija la información según las indicaciones
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                                        Intente enviar nuevamente el formulario
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Botones de acción -->
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <!-- Botón secundario -->
+                                <button onclick="cerrarModalAdvertencia()" 
+                                        class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                                    <i class="fas fa-times mr-2"></i>Cerrar
+                                </button>
+                                
+                                <!-- Botón principal -->
+                                <button onclick="cerrarModalAdvertencia(); desplazarAPrimerError();" 
+                                        class="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-300 shadow-lg">
+                                    <i class="fas fa-search mr-2"></i>Ver Errores
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Decoración inferior -->
+                        <div class="h-1 bg-gradient-to-r from-amber-400 via-orange-400 to-red-400"></div>
+                    </div>
+                    
+                    <!-- Efectos decorativos flotantes -->
+                    <div class="absolute -top-4 -left-4 w-8 h-8 bg-amber-400 rounded-full opacity-20 animate-ping"></div>
+                    <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-orange-400 rounded-full opacity-30 animate-ping" style="animation-delay: 0.5s"></div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Animar entrada
+        setTimeout(() => {
+            const overlay = document.getElementById('modal-overlay');
+            const content = document.getElementById('modal-content');
+            
+            if (overlay) overlay.classList.remove('opacity-0');
+            if (content) {
+                content.classList.remove('scale-90', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }
+        }, 50);
+
+        // Prevenir scroll del body
+        document.body.style.overflow = 'hidden';
+
+        // Auto-cerrar después de 15 segundos (más tiempo para leer)
+        setTimeout(() => {
+            if (document.getElementById('modal-advertencia')) {
+                cerrarModalAdvertencia();
+            }
+        }, 15000);
+    }
+
+    // Función para cerrar el modal de advertencia
+    function cerrarModalAdvertencia() {
+        const modal = document.getElementById('modal-advertencia');
+        if (!modal) return;
+
+        const overlay = document.getElementById('modal-overlay');
+        const content = document.getElementById('modal-content');
+
+        // Animar salida
+        if (overlay) overlay.classList.add('opacity-0');
+        if (content) {
+            content.classList.add('scale-90', 'opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+        }
+
+        // Remover modal después de la animación
+        setTimeout(() => {
+            if (modal.parentNode) {
+                modal.parentNode.removeChild(modal);
+            }
+            // Restaurar scroll del body
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+    // Función para desplazarse al primer error
+    function desplazarAPrimerError() {
+        const primerError = document.querySelector('.form-group.error input, .form-group.error select, .form-group.error textarea');
+        if (primerError) {
+            primerError.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+            
+            // Enfocar el campo después del scroll
+            setTimeout(() => {
+                primerError.focus();
+                
+                // Añadir un pulso visual temporal
+                primerError.style.animation = 'none';
+                setTimeout(() => {
+                    primerError.style.animation = 'error-highlight 2s ease-in-out';
+                }, 10);
+            }, 500);
+        }
+    }
+
+    // Función para limpiar errores de validación
+    function limpiarErroresValidacionDG() {
+        const campos = document.querySelectorAll('.form-group.error');
+        campos.forEach(campo => {
+            campo.classList.remove('error');
+            const errorMsg = campo.querySelector('.error-message');
+            if (errorMsg) errorMsg.remove();
+        });
+        
+        // Desbloquear navegación al limpiar errores
+        desbloquearNavegacion();
+    }
+
+    // Función para cerrar notificación (compatibilidad)
+    function cerrarNotificacion() {
+        cerrarModalAdvertencia();
+    }
+
+         // Función para interceptar envío del formulario y validar antes
+    function interceptarEnvioFormulario() {
+        const formulario = document.getElementById('datos-generales-form');
+        if (formulario) {
+            formulario.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                console.log('🎯 Formulario interceptado - ejecutando validación completa');
+                
+                // Ejecutar validación completa
+                const esValido = validarFormularioCompletoP();
+                
+                if (esValido) {
+                    console.log('✅ Validación exitosa - procediendo a guardar');
+                    const resultado = await guardarDatosConValidacionServidor();
+                    
+                    if (resultado) {
+                        console.log('✅ Datos guardados - continuando navegación');
+                        // Solo aquí permitir que continúe el proceso normal
+                        desbloquearNavegacion();
+                    }
+                } else {
+                    console.log('❌ Validación falló - bloqueando envío');
+                    bloquearNavegacion();
+                    mostrarNotificacionError('Por favor, corrija los errores antes de continuar.');
+                }
+            });
+        }
+    }
+
+    // Ejecutar interceptor cuando se carga el DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', interceptarEnvioFormulario);
+    } else {
+        interceptarEnvioFormulario();
+    }
+
+    // Exposición de funciones globales para compatibilidad
+    window.validarDatosGenerales = validarFormularioCompletoP;
+    window.obtenerDatosGenerales = obtenerDatosFormularioDG;
+    window.guardarDatosGenerales = guardarDatosConValidacionServidor;
+    window.limpiarErroresDatosGenerales = limpiarErroresValidacionDG;
+    window.mostrarErroresServidor = mostrarErroresServidor;
+    window.cerrarNotificacion = cerrarNotificacion;
+    window.cerrarNotificacionExito = cerrarNotificacionExito;
+    window.bloquearNavegacion = bloquearNavegacion;
+    window.desbloquearNavegacion = desbloquearNavegacion;
+
+    // 🔽 FUNCIONALIDAD AVANZADA DE DESPLAZAMIENTO AUTOMÁTICO
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Configuración de desplazamiento inteligente
+        const scrollConfig = {
+            speed: 800,           // Duración en ms
+            offset: 100,          // Offset del scroll
+            easing: 'easeInOutQuart' // Tipo de easing
+        };
+        
+        // Función de easing personalizada
+        function easeInOutQuart(t) {
+            return t < 0.5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t;
+        }
+        
+        // Función de scroll suave personalizada
+        function smoothScrollTo(targetPosition, duration = scrollConfig.speed) {
+            const startPosition = window.pageYOffset;
+            const distance = targetPosition - startPosition;
+            let startTime = null;
+            
+            function animation(currentTime) {
+                if (startTime === null) startTime = currentTime;
+                const timeElapsed = currentTime - startTime;
+                const progress = Math.min(timeElapsed / duration, 1);
+                
+                const ease = easeInOutQuart(progress);
+                window.scrollTo(0, startPosition + (distance * ease));
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animation);
+                } else {
+                    // Callback cuando termina el scroll
+                    const controls = document.getElementById('scroll-controls');
+                    if (controls) {
+                        controls.classList.remove('scrolling');
+                        // Recheck visibility
+                        if (window.Alpine) {
+                            const component = Alpine.$data(controls);
+                            if (component && component.checkVisibility) {
+                                component.checkVisibility();
+                            }
+                        }
+                    }
+                }
+            }
+            
+            requestAnimationFrame(animation);
+        }
+        
+        // Función para detectar secciones visibles
+        function findNextSection() {
+            const sections = document.querySelectorAll('[x-show*="currentStep"], .form-section, .max-w-3xl > div');
+            const currentScroll = window.pageYOffset;
+            const windowHeight = window.innerHeight;
+            
+            for (let section of sections) {
+                const rect = section.getBoundingClientRect();
+                const sectionTop = rect.top + currentScroll;
+                
+                // Si la sección está más abajo que la posición actual + un offset
+                if (sectionTop > currentScroll + 50) {
+                    return Math.min(sectionTop - scrollConfig.offset, 
+                                  document.documentElement.scrollHeight - windowHeight);
+                }
+            }
+            
+            // Si no hay más secciones, ir al final del documento
+            return document.documentElement.scrollHeight - windowHeight;
+        }
+        
+                 // Función global para desplazamiento inteligente con controles
+        window.smartScrollDown = function() {
+            const controls = document.getElementById('scroll-controls');
+            if (!controls) return;
+            
+            // Marcar como scrolling
+            controls.classList.add('scrolling');
+            
+            // Encontrar la siguiente sección o calcular scroll automático
+            let targetPosition = findNextSection();
+            
+            // Si estamos cerca del final, ir al final completo
+            const currentScroll = window.pageYOffset;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            
+            if (currentScroll > maxScroll - 200) {
+                targetPosition = maxScroll;
+            }
+            
+            // Realizar scroll suave
+            smoothScrollTo(targetPosition);
+        };
+        
+        // Función para auto-hide de los controles
+        function autoHideControls() {
+            const controls = document.getElementById('scroll-controls');
+            if (!controls) return;
+            
+            const scrollPercent = (window.pageYOffset / 
+                (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            
+            // Trigger Alpine component update
+            if (window.Alpine) {
+                const component = Alpine.$data(controls);
+                if (component && component.checkVisibility) {
+                    component.checkVisibility();
+                }
+            }
+        }
+        
+        // Función especial para la primera aparición
+        function showControlsFirstTime() {
+            const controls = document.getElementById('scroll-controls');
+            if (!controls) return;
+            
+            // Marcar para animación especial
+            controls.setAttribute('data-first-show', 'true');
+            
+            // Trigger Alpine component
+            if (window.Alpine) {
+                const component = Alpine.$data(controls);
+                if (component && component.checkVisibility) {
+                    component.autoShow = true;
+                    component.checkVisibility();
+                }
+            }
+            
+            // Remover el atributo después de la animación
+            setTimeout(() => {
+                controls.removeAttribute('data-first-show');
+            }, 1000);
+        }
+        
+                 // Event listeners mejorados para los controles
+        let scrollTimeout;
+        window.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(autoHideControls, 50);
+        }, { passive: true });
+        
+        // Detectar cambios en el contenido del formulario
+        const observer = new MutationObserver(function(mutations) {
+            let shouldUpdate = false;
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList' || 
+                    (mutation.type === 'attributes' && mutation.attributeName === 'x-show')) {
+                    shouldUpdate = true;
+                }
+            });
+            
+            if (shouldUpdate) {
+                setTimeout(() => {
+                    autoHideControls();
+                    // Trigger Alpine component update if exists
+                    const controls = document.getElementById('scroll-controls');
+                    if (controls && window.Alpine) {
+                        const component = Alpine.$data(controls);
+                        if (component && component.checkVisibility) {
+                            component.checkVisibility();
+                        }
+                    }
+                }, 100);
+            }
+        });
+        
+        // Observar cambios en el contenedor principal
+        const formContainer = document.querySelector('[x-data*="currentStep"]');
+        if (formContainer) {
+            observer.observe(formContainer, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['x-show', 'class', 'style']
+            });
+        }
+        
+                 // Inicialización con animación especial
+        setTimeout(() => {
+            autoHideControls();
+            // Mostrar controles con animación especial después de cargar
+            setTimeout(showControlsFirstTime, 1000);
+        }, 500);
+
+        // 🔥 Inicializar validaciones de datos generales
+        setTimeout(() => {
+            inicializarValidacionDatosGenerales();
+        }, 800);
+    });
+    
+    // Función de compatibilidad con Alpine
+    document.addEventListener('alpine:init', () => {
+        // El componente de Alpine ya maneja la lógica básica
+        // Esta es una mejora adicional
+        
+        // También inicializar validaciones cuando Alpine esté listo
+        setTimeout(() => {
+            inicializarValidacionDatosGenerales();
+        }, 1000);
+    });
+</script>
 <script>
     // ✅ FUNCIÓN GLOBAL DE NAVEGACIÓN PARA FORMULARIOS
     window.navegarSiguiente = function() {

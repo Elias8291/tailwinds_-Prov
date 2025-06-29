@@ -1,94 +1,19 @@
 @props(['title' => 'Datos Generales', 'datosTramite' => [], 'datosSolicitante' => [], 'readonly' => false])
-<!-- Asegúrate de incluir Font Awesome -->
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<!-- Incluir dependencias para validación y carga -->
-<script src="{{ asset('js/components/loading-states.js') }}" defer></script>
-<script src="{{ asset('js/validators/datos-generales-validator.js') }}" defer></script>
-<script>
-function datosGeneralesData() {
-    return {
-        tipoPersona: @json($datosSolicitante['tipo_persona'] ?? $datosTramite['tipo_persona'] ?? ''),
-        rfc: @json($datosSolicitante['rfc'] ?? $datosTramite['rfc'] ?? ''),
-        curp: @json($datosSolicitante['curp'] ?? $datosTramite['curp'] ?? ''),
-        nombreCompleto: @json($datosSolicitante['nombre_completo'] ?? $datosTramite['nombre_completo'] ?? ''),
-        razonSocial: @json($datosSolicitante['razon_social'] ?? $datosTramite['razon_social'] ?? ''),
-        giro: @json(old('giro', $datosTramite['giro'] ?? '')),
-        esEdicion: @json(isset($datosTramite['tramite_id']) && $datosTramite['tramite_id'] ? true : false),
-        async init() {
-                // Los datos ya están cargados desde el servidor
-            // Test de conectividad con el controlador
-            await this.testConectividad();
-            // Inicializar validaciones después de que el DOM esté listo
-                    this.$nextTick(() => {
-                if (typeof initDatosGeneralesValidation === 'function') {
-                    initDatosGeneralesValidation();
-                }
-            });
-        },
-        async testConectividad() {
-            try {
-                // Test de conectividad
-                // Test 1: Ruta de controller con auth
-                try {
-                    const response1 = await fetch('/formularios/datos-generales/test', {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        }
-                    });
-                    const data1 = await response1.json();
-                    // Test exitoso
-                } catch (error1) {
-                    // Error en test de controlador
-                }
-                // Test 2: Ruta de debug simple sin auth
-                try {
-                    const response2 = await fetch('/debug/datos-generales', {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                        },
-                        body: JSON.stringify({
-                            test: 'data',
-                            timestamp: new Date().toISOString()
-                        })
-                    });
-                    const data2 = await response2.json();
-                    // Test de ruta debug exitoso
-                } catch (error2) {
-                    // Error en test de ruta debug
-                }
-            } catch (error) {
-                // Error general en test de conectividad
-            }
-        }
-    }
-}
-</script>
-<div x-data="datosGeneralesData()">
-    <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-6" data-validate="true">
+
+<div class="max-w-4xl mx-auto">
+    <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-8">
         @csrf
+        
+        <!-- Campos ocultos -->
         <input type="hidden" name="form_action" value="next">
         <input type="hidden" name="seccion" value="1">
-        @if(isset($datosTramite['tramite_id']))
-            <input type="hidden" name="tramite_id" value="{{ $datosTramite['tramite_id'] }}">
-        @else
-            <!-- Buscar tramite_id en la URL o contexto -->
-            <input type="hidden" name="tramite_id" value="{{ request()->route('tramite') ?? session('tramite_id') ?? '' }}">
-        @endif
-        @if(isset($datosTramite['tipo_tramite']))
-            <input type="hidden" name="tipo_tramite" value="{{ $datosTramite['tipo_tramite'] }}">
-        @else
-            <!-- Buscar tipo_tramite en la URL o contexto -->
-            <input type="hidden" name="tipo_tramite" value="{{ request()->route('tipo_tramite') ?? 'inscripcion' }}">
-        @endif
+        <input type="hidden" name="tramite_id" value="{{ $datosTramite['tramite_id'] ?? request()->route('tramite') ?? session('tramite_id') ?? '' }}">
+        <input type="hidden" name="tipo_tramite" value="{{ $datosTramite['tipo_tramite'] ?? request()->route('tipo_tramite') ?? 'inscripcion' }}">
+
         <!-- Datos del Proveedor -->
-        <div class="space-y-6 pt-2">
-            <!-- Título de sección con icono -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
                     <i class="fas fa-building text-lg"></i>
@@ -98,267 +23,211 @@ function datosGeneralesData() {
                     <p class="text-sm text-gray-500">Información general del solicitante</p>
                 </div>
             </div>
-        <!-- Información Principal -->
-        <div class="space-y-4">
-            <!-- Tipo de Proveedor y RFC -->
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Tipo de Proveedor (Solo lectura) -->
+                <!-- Tipo de Proveedor -->
                 <div class="form-group">
                     <label for="tipo_persona" class="block text-sm font-medium text-gray-700 mb-2">
-                        Tipo de Proveedor
-                        <span class="text-red-500">*</span>
+                        Tipo de Proveedor <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative">
                         <input type="text" 
                                id="tipo_persona"
                                name="tipo_persona"
                                value="{{ $datosSolicitante['tipo_persona'] ?? '' }}" 
                                class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
-                               aria-label="Tipo de proveedor"
                                readonly>
                         </div>
-                </div>
-                <!-- RFC (Solo lectura) -->
+
+                <!-- RFC -->
                 <div class="form-group">
                     <label for="rfc" class="block text-sm font-medium text-gray-700 mb-2">
-                        RFC
-                        <span class="text-red-500">*</span>
+                        RFC <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative">
                         <input type="text" 
                                id="rfc"
                                name="rfc"
                                value="{{ $datosSolicitante['rfc'] ?? '' }}" 
                                class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
-                               aria-label="RFC"
                                readonly>
                     </div>
                 </div>
-            </div>
-            <!-- CURP - Solo visible para persona física (Solo lectura) -->
+
+            <!-- CURP (Solo persona física) -->
             @if(($datosSolicitante['tipo_persona'] ?? '') === 'Física')
-            <div class="form-group">
+            <div class="form-group mt-6">
                 <label for="curp" class="block text-sm font-medium text-gray-700 mb-2">
-                    CURP
-                    <span class="text-red-500">*</span>
+                    CURP <span class="text-red-500">*</span>
                 </label>
-                <div class="relative">
                     <input type="text" 
                            id="curp"
                            name="curp"
                            value="{{ $datosSolicitante['curp'] ?? '' }}" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
-                           aria-label="CURP"
                            readonly>
                 </div>
-                </div>
             @endif
-            <!-- Nombre Completo (Solo para persona física) -->
+
+            <!-- Nombre Completo (Solo persona física) -->
             @if(($datosSolicitante['tipo_persona'] ?? '') === 'Física')
-            <div class="form-group">
+            <div class="form-group mt-6">
                 <label for="nombre_completo" class="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre Completo
-                    <span class="text-red-500">*</span>
+                    Nombre Completo <span class="text-red-500">*</span>
                 </label>
-                <div class="relative">
                     <input type="text" 
                            id="nombre_completo"
                            name="nombre_completo"
                            value="{{ $datosSolicitante['nombre_completo'] ?? auth()->user()->name ?? '' }}" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
-                           aria-label="Nombre completo"
                            readonly>
-                </div>
             </div>
             @endif
-            <!-- Razón Social (Solo para persona moral) -->
+
+            <!-- Razón Social (Solo persona moral) -->
             @if(($datosSolicitante['tipo_persona'] ?? '') === 'Moral')
-            <div class="form-group">
+            <div class="form-group mt-6">
                 <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
-                    Razón Social
-                    <span class="text-red-500">*</span>
+                    Razón Social <span class="text-red-500">*</span>
                 </label>
-                <div class="relative">
                     <input type="text" 
                            id="razon_social"
                            name="razon_social"
                            value="{{ $datosSolicitante['razon_social'] ?? auth()->user()->name ?? '' }}" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
-                           aria-label="Razón social"
                            readonly>
-                </div>
             </div>
             @endif
+
             <!-- Giro -->
-            <div class="form-group">
+            @unless($readonly)
+            <div class="form-group mt-6">
                 <label for="giro" class="block text-sm font-medium text-gray-700 mb-2">
-                    Giro
-                    <span class="text-red-500">*</span>
+                    Giro <span class="text-red-500">*</span>
                 </label>
-                <div class="relative group">
-                    <textarea id="giro" name="giro" rows="4"
-                              class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50' }} border rounded-lg resize-none @error('giro') border-red-500 @enderror"
-                              placeholder="{{ $readonly ? '' : 'Describa el giro de la empresa' }}"
-                              x-model="giro"
-                              maxlength="500" 
-                              minlength="10"
-                              data-validation="required|minLength:10|maxLength:500"
-                              aria-label="Giro de la empresa"
-                              {{ $readonly ? 'readonly' : 'required' }}>{{ old('giro', $datosTramite['giro'] ?? '') }}</textarea>
-                    @if(!$readonly)
-                    <div class="absolute bottom-2 right-2 text-xs text-gray-400">
-                        <span x-text="giro ? giro.length : 0">0</span>/500
-                    </div>
-                    @endif
-                </div>
-                @if(!$readonly)
+                <textarea id="giro" 
+                          name="giro" 
+                          rows="4"
+                          class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('giro') border-red-500 @enderror"
+                          placeholder="Describa el giro de la empresa">{{ old('giro', $datosTramite['giro'] ?? '') }}</textarea>
                     @error('giro')
                         <p class="mt-1 text-sm text-red-600">{{ $errors->first('giro') }}</p>
                     @enderror
-                @endif
             </div>
+            @else
+            <div class="form-group mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Giro</label>
+                <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
+                    <p class="text-gray-700">{{ $datosTramite['giro'] ?? 'No especificado' }}</p>
             </div>
         </div>
+            @endunless
+        </div>
+
         <!-- Actividades Económicas -->
-        <div class="space-y-6 pt-6 border-t border-gray-100">
-            <!-- Título de sección con icono -->
+        @unless($readonly)
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
                     <i class="fas fa-chart-line text-lg"></i>
                 </div>
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800">Actividades Económicas</h3>
-                    <p class="text-sm text-gray-500">{{ $readonly ? 'Actividades económicas registradas' : 'Selecciona las actividades económicas que realizas' }}</p>
+                    <p class="text-sm text-gray-500">Selecciona las actividades económicas que realizas</p>
                 </div>
             </div>
-        <div class="space-y-6">
-            @if($readonly)
-                <!-- Mostrar actividades en modo solo lectura -->
-                <div class="form-group">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Actividades Seleccionadas
-                    </label>
-                                    <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
-                    @php
-                        $actividades_ids = json_decode($datosTramite['actividades_seleccionadas'] ?? '[]', true);
-                        $actividades_nombres = [];
-                        if (!empty($actividades_ids)) {
-                            // Obtener los nombres de las actividades desde la base de datos
-                            $actividades_nombres = \App\Models\Actividad::whereIn('id', $actividades_ids)
-                                ->select('id', 'nombre', 'sector_id')
-                                ->get()
-                                ->keyBy('id');
-                        }
-                    @endphp
-                    @if(empty($actividades_ids))
-                        <p class="text-gray-500 italic">No hay actividades seleccionadas</p>
-                    @else
-                        <div class="flex flex-wrap gap-2">
-                            @foreach($actividades_ids as $actividad_id)
-                                @php
-                                    $actividad = $actividades_nombres->get($actividad_id);
-                                @endphp
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20">
-                                    <i class="fas fa-check-circle mr-1"></i>
-                                    @if($actividad)
-                                        {{ $actividad->nombre }}
-                                    @else
-                                        Actividad no encontrada (ID: {{ $actividad_id }})
-                                    @endif
-                                </span>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-                </div>
-            @else
-                <!-- Actividad en modo editable -->
-                <div class="form-group">
+
+            <!-- Buscador de actividades -->
+            <div class="form-group mb-6">
                 <label for="actividad_search" class="block text-sm font-medium text-gray-700 mb-2">
                     Buscar Actividades *
                     </label>
-                <!-- Nota informativa -->
-                <div class="mb-4 p-3 bg-gradient-to-r from-[#9d2449]/5 to-[#9d2449]/10 border border-[#9d2449]/20 rounded-lg">
-                    <div class="flex items-start space-x-3">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-lightbulb text-[#9d2449] text-lg"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-700 font-medium mb-1">¿Cómo agregar tus actividades?</p>
-                            <p class="text-xs text-gray-600 leading-relaxed">
-                                Agrega las actividades económicas <span class="font-semibold text-[#9d2449]">tal como aparecen en tu constancia de situación fiscal</span>. 
-                                Puedes buscar por palabras clave y agregar <span class="font-semibold text-[#9d2449]">todas las actividades</span> que realizas. Si no encuentras una actividad, puedes agregarla manualmente.
+                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p class="text-sm text-blue-700">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        Agrega las actividades económicas tal como aparecen en tu constancia de situación fiscal.
                             </p>
                     </div>
-                    </div>
-                </div>
-                    <div class="relative group">
-                    <!-- Input de búsqueda -->
+                
+                <div class="relative">
                     <input type="text" 
                            id="actividad_search" 
                            placeholder="Escriba para buscar actividad..."
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50 @error('actividades_seleccionadas') border-red-500 @enderror"
-                           aria-label="Buscar actividad"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
                            autocomplete="off">
-                    <!-- Icono de búsqueda -->
                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <i id="actividad-search-icon" class="fas fa-search text-gray-400 text-sm"></i>
+                        <i class="fas fa-search text-gray-400"></i>
                         </div>
-                    <!-- Dropdown de resultados -->
-                    <div id="actividad-dropdown" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl hidden max-h-64 overflow-hidden backdrop-blur-sm">
-                        <!-- Header del dropdown -->
-                        <div class="px-4 py-3 bg-gradient-to-r from-[#9d2449]/5 to-[#9d2449]/10 border-b border-gray-100">
-                            <div class="flex items-center text-sm text-gray-600">
-                                <i class="fas fa-search text-[#9d2449] mr-2"></i>
-                                <span>Resultados de búsqueda</span>
                     </div>
-                        </div>
-                        <!-- Contenedor de resultados con scroll -->
-                        <div class="max-h-48 overflow-y-auto">
-                            <div id="actividad-resultados">
-                                <!-- Los resultados se cargarán aquí -->
-                            </div>
-                        </div>
-                        <!-- Mensaje sin resultados -->
+                
+                <!-- Dropdown de resultados -->
+                <div id="actividad-dropdown" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl hidden max-h-64 overflow-hidden">
+                    <div id="actividad-resultados" class="max-h-48 overflow-y-auto"></div>
                         <div id="actividad-no-resultados" class="px-6 py-8 text-center hidden">
-                            <div class="flex flex-col items-center">
-                                <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-4">
-                                    <i class="fas fa-search text-gray-400 text-xl"></i>
-                                </div>
-                                <p class="text-gray-500 text-sm font-medium mb-2">No se encontraron actividades</p>
-                                <p class="text-gray-400 text-xs mb-4">Intenta con otros términos de búsqueda</p>
-                                <!-- Botón para agregar actividad manualmente -->
+                        <p class="text-gray-500 text-sm">No se encontraron actividades</p>
                                 <button type="button" 
                                         id="btn-agregar-manual"
-                                        onclick="agregarActividadManual()"
-                                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white text-sm rounded-lg hover:from-[#8a203f] hover:to-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-md">
-                                    <i class="fas fa-plus mr-2"></i>
-                                    Agregar actividad personalizada
+                                class="mt-4 px-4 py-2 bg-[#9d2449] text-white text-sm rounded-lg hover:bg-[#8a203f] transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Agregar actividad personalizada
                                 </button>
                             </div>
                         </div>
                     </div>
+
+            <!-- Actividades seleccionadas -->
+            <div class="form-group">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Actividades Seleccionadas</label>
+                <div id="actividades-seleccionadas" class="min-h-[60px] p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div id="no-actividades-message" class="flex items-center justify-center text-gray-400 text-sm italic">
+                        <i class="fas fa-plus-circle mr-2"></i>No hay actividades seleccionadas
                 </div>
+                </div>
+                <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
                 @error('actividades_seleccionadas')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('actividades_seleccionadas') }}</p>
                     @enderror
             </div>
-            <!-- Tags de Actividades Seleccionadas -->
-            <div id="actividades-seleccionadas" class="flex flex-wrap gap-3 p-4 bg-gradient-to-br from-[#9d2449]/5 to-white rounded-xl border border-[#9d2449]/20 shadow-sm min-h-[60px] transition-all duration-300 hover:shadow-md hover:border-[#9d2449]/30">
-                <!-- Los tags se agregarán aquí dinámicamente -->
-                <div class="flex items-center justify-center w-full text-gray-400 text-sm italic" id="no-actividades-message">
-                    <i class="fas fa-plus-circle mr-2"></i>
-                    No hay actividades seleccionadas
+                </div>
+        @else
+        <!-- Mostrar actividades en modo solo lectura -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
+                    <i class="fas fa-chart-line text-lg"></i>
+            </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Actividades Económicas</h3>
+                    <p class="text-sm text-gray-500">Actividades económicas registradas</p>
                 </div>
             </div>
-                <!-- Input oculto para almacenar las actividades seleccionadas -->
-    <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
+            <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
+                @php
+                    $actividades_ids = json_decode($datosTramite['actividades_seleccionadas'] ?? '[]', true);
+                    $actividades_nombres = [];
+                    if (!empty($actividades_ids)) {
+                        $actividades_nombres = \App\Models\Actividad::whereIn('id', $actividades_ids)
+                            ->select('id', 'nombre', 'sector_id')
+                            ->get()
+                            ->keyBy('id');
+                    }
+                @endphp
+                @if(empty($actividades_ids))
+                    <p class="text-gray-500 italic">No hay actividades seleccionadas</p>
+                @else
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($actividades_ids as $actividad_id)
+                            @php $actividad = $actividades_nombres->get($actividad_id); @endphp
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                {{ $actividad->nombre ?? 'Actividad no encontrada' }}
+                            </span>
+                        @endforeach
+                    </div>
             @endif
         </div>
         </div>
+        @endunless
+
         <!-- Información Adicional -->
-        <div class="space-y-6 pt-6 border-t border-gray-100">
-            <!-- Título de sección con icono -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
                     <i class="fas fa-globe text-lg"></i>
@@ -368,29 +237,35 @@ function datosGeneralesData() {
                     <p class="text-sm text-gray-500">Datos opcionales del solicitante</p>
                 </div>
             </div>
+
             <div class="form-group">
-                <label for="pagina_web" class="block text-sm font-medium text-gray-700 mb-2">
-                    Página Web
-                </label>
-                <div class="relative group">
-                    <input type="url" id="pagina_web" name="pagina_web"
-                           class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50' }} border rounded-lg @error('pagina_web') border-red-500 @enderror"
-                           placeholder="{{ $readonly ? '' : 'https://www.ejemplo.com' }}"
-                           data-validation="url"
-                           aria-label="Página web"
-                           value="{{ old('pagina_web', $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? '') }}"
-                           {{ $readonly ? 'readonly' : '' }}>
-                </div>
-                @if(!$readonly)
+                <label for="pagina_web" class="block text-sm font-medium text-gray-700 mb-2">Página Web</label>
+                @unless($readonly)
+                <input type="url" 
+                       id="pagina_web" 
+                       name="pagina_web"
+                       class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('pagina_web') border-red-500 @enderror"
+                       placeholder="https://www.ejemplo.com"
+                       value="{{ old('pagina_web', $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? '') }}">
                     @error('pagina_web')
                         <p class="mt-1 text-sm text-red-600">{{ $errors->first('pagina_web') }}</p>
                     @enderror
+                @else
+                <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                    @if(!empty($datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? ''))
+                        <a href="{{ $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                            {{ $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] }}
+                        </a>
+                    @else
+                        <span class="text-gray-500">No especificada</span>
                 @endif
             </div>
+                @endunless
         </div>
+        </div>
+
         <!-- Datos de Contacto -->
-        <div class="space-y-6 pt-6 border-t border-gray-100">
-            <!-- Título de sección con icono mejorado -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
                     <i class="fas fa-address-card text-lg"></i>
@@ -400,763 +275,757 @@ function datosGeneralesData() {
                     <p class="text-sm text-gray-500">Persona de referencia para comunicaciones</p>
                 </div>
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Nombre -->
                 <div class="form-group">
                     <label for="contacto_nombre" class="block text-sm font-medium text-gray-700 mb-2">
-                        Nombre Completo
-                        <span class="text-red-500">*</span>
+                        Nombre Completo <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative group">
-                        <input type="text" id="contacto_nombre" name="contacto_nombre"
-                               class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50' }} border rounded-lg @error('contacto_nombre') border-red-500 @enderror"
-                               placeholder="{{ $readonly ? '' : 'Nombre completo del contacto' }}"
-                               maxlength="100"
-                               minlength="2"
-                               data-validation="required|minLength:2|maxLength:100|text"
-                               aria-label="Nombre del contacto"
-                               value="{{ old('contacto_nombre', $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? '') }}" 
-                               {{ $readonly ? 'readonly' : 'required' }}>
-                    </div>
-                    @if(!$readonly)
+                    @unless($readonly)
+                    <input type="text" 
+                           id="contacto_nombre" 
+                           name="contacto_nombre"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_nombre') border-red-500 @enderror"
+                           placeholder="Nombre completo del contacto"
+                           value="{{ old('contacto_nombre', $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? '') }}">
                         @error('contacto_nombre')
                             <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_nombre') }}</p>
                         @enderror
-                    @endif
+                    @else
+                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                        {{ $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? 'No especificado' }}
                 </div>
+                    @endunless
+                </div>
+
                 <!-- Cargo -->
                 <div class="form-group">
                     <label for="contacto_cargo" class="block text-sm font-medium text-gray-700 mb-2">
-                        Cargo o Puesto
-                        <span class="text-red-500">*</span>
+                        Cargo o Puesto <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative group">
-                        <input type="text" id="contacto_cargo" name="contacto_cargo"
-                               class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50' }} border rounded-lg @error('contacto_cargo') border-red-500 @enderror"
-                               placeholder="{{ $readonly ? '' : 'Cargo en la empresa' }}"
-                               maxlength="50"
-                               minlength="2"
-                               data-validation="required|minLength:2|maxLength:50|text"
-                               aria-label="Cargo del contacto"
-                               value="{{ old('contacto_cargo', $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? '') }}" 
-                               {{ $readonly ? 'readonly' : 'required' }}>
-                    </div>
-                    @if(!$readonly)
+                    @unless($readonly)
+                    <input type="text" 
+                           id="contacto_cargo" 
+                           name="contacto_cargo"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_cargo') border-red-500 @enderror"
+                           placeholder="Cargo en la empresa"
+                           value="{{ old('contacto_cargo', $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? '') }}">
                         @error('contacto_cargo')
                             <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_cargo') }}</p>
                         @enderror
-                    @endif
+                    @else
+                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                        {{ $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? 'No especificado' }}
                 </div>
+                    @endunless
+                </div>
+
                 <!-- Email -->
                 <div class="form-group">
                     <label for="contacto_correo" class="block text-sm font-medium text-gray-700 mb-2">
-                        Correo Electrónico
-                        <span class="text-red-500">*</span>
+                        Correo Electrónico <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative group">
-                        <input type="email" id="contacto_correo" name="contacto_correo"
-                               class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50' }} border rounded-lg @error('contacto_correo') border-red-500 @enderror"
-                               placeholder="{{ $readonly ? '' : 'correo@ejemplo.com' }}"
-                               data-validation="required|email"
-                               aria-label="Correo del contacto"
-                               value="{{ old('contacto_correo', $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? '') }}" 
-                               {{ $readonly ? 'readonly' : 'required' }}>
-                    </div>
-                    @if(!$readonly)
+                    @unless($readonly)
+                    <input type="email" 
+                           id="contacto_correo" 
+                           name="contacto_correo"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_correo') border-red-500 @enderror"
+                           placeholder="correo@ejemplo.com"
+                           value="{{ old('contacto_correo', $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? '') }}">
                         @error('contacto_correo')
                             <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_correo') }}</p>
                         @enderror
-                    @endif
+                    @else
+                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                        {{ $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? 'No especificado' }}
                 </div>
+                    @endunless
+                </div>
+
                 <!-- Teléfono -->
                 <div class="form-group">
                     <label for="contacto_telefono" class="block text-sm font-medium text-gray-700 mb-2">
-                        Teléfono de Contacto
-                        <span class="text-red-500">*</span>
+                        Teléfono de Contacto <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative group">
-                        <input type="tel" id="contacto_telefono" name="contacto_telefono"
-                               class="block w-full px-4 py-2.5 {{ $readonly ? 'text-gray-600 bg-gray-100 border-gray-200 cursor-not-allowed' : 'text-gray-700 bg-white border-gray-200 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all hover:border-[#9d2449]/50' }} border rounded-lg @error('contacto_telefono') border-red-500 @enderror"
-                               placeholder="{{ $readonly ? '' : '10 dígitos' }}"
-                               pattern="[0-9]{10}"
-                               maxlength="10"
-                               minlength="10"
-                               inputmode="numeric"
-                               data-validation="required|phone|minLength:10|maxLength:10"
-                               aria-label="Teléfono del contacto"
-                               value="{{ old('contacto_telefono', $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? '') }}" 
-                               {{ $readonly ? 'readonly' : 'required' }}>
-                    </div>
-                    @if(!$readonly)
+                    @unless($readonly)
+                    <input type="tel" 
+                           id="contacto_telefono" 
+                           name="contacto_telefono"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_telefono') border-red-500 @enderror"
+                           placeholder="10 dígitos"
+                           value="{{ old('contacto_telefono', $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? '') }}">
                         @error('contacto_telefono')
                             <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_telefono') }}</p>
                         @enderror
-                    @endif
+                    @else
+                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                        {{ $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? 'No especificado' }}
             </div>
+                    @endunless
         </div>
         </div>
-        @if(!$readonly)
-            @if(!isset($mostrar_navegacion) || $mostrar_navegacion !== false)
-            <!-- Botones de navegación -->
-            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
-                <button type="button" 
-                        id="btn-guardar-datos-generales"
-                        onclick="guardarYSiguiente()"
-                        class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg hover:from-[#8a203f] hover:to-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-                    <span id="btn-text-datos-generales">
-                        <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
-                    </span>
-                    <span id="btn-loading-datos-generales" class="hidden">
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 004 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Guardando...
-                    </span>
-                </button>
             </div>
-            @else
-            <!-- Botón navegación integrado cuando mostrar_navegacion es false -->
-            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
-                <button type="button" 
-                        id="btn-guardar-datos-generales-alt"
-                        onclick="guardarYSiguiente()"
-                        class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg hover:from-[#8a203f] hover:to-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-                    <span id="btn-text-datos-generales-alt">
-                        <i class="fas fa-save mr-2"></i> Guardar y Continuar <i class="fas fa-arrow-right ml-2"></i>
-                    </span>
-                    <span id="btn-loading-datos-generales-alt" class="hidden">
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Guardando...
-                    </span>
-                </button>
-            </div>
-            @endif
 
+        <!-- Botones de navegación -->
+        @unless($readonly)
+        @if(!isset($mostrar_navegacion) || $mostrar_navegacion !== false)
+        <div class="flex justify-end">
+            <button type="submit" 
+                    class="px-8 py-3 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg hover:from-[#8a203f] hover:to-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#9d2449] focus:ring-offset-2">
+                <i class="fas fa-save mr-2"></i>
+                Guardar y Continuar
+                <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
         @endif
+        @endunless
     </form>
 </div>
+
+@unless($readonly)
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Solo ejecutar en modo editable
-    @if($readonly)
-        return; // No ejecutar JavaScript en modo solo lectura
-    @endif
-    // Variables
+    console.log('🎯 Iniciando datos generales - script simplificado');
+    
+    // Variables para el buscador de actividades
     const searchInput = document.getElementById('actividad_search');
     const dropdown = document.getElementById('actividad-dropdown');
     const resultados = document.getElementById('actividad-resultados');
     const noResultados = document.getElementById('actividad-no-resultados');
-    const searchIcon = document.getElementById('actividad-search-icon');
     const tagsContainer = document.getElementById('actividades-seleccionadas');
     const noActivitiesMessage = document.getElementById('no-actividades-message');
     const hiddenInput = document.getElementById('actividades_seleccionadas_input');
+    const formulario = document.getElementById('datos-generales-form');
+    
     let searchTimeout;
-    let selectedIndex = -1;
     let actividadesSeleccionadas = [];
-    // Función para mostrar loading
-    function mostrarLoading() {
-        searchIcon.className = 'fas fa-spinner fa-spin text-[#9d2449] text-sm';
+
+    // MANEJO SIMPLIFICADO DEL FORMULARIO
+    if (formulario) {
+        console.log('📋 Formulario encontrado, configurando manejo simplificado');
+        
+        // Antes de reemplazar el formulario, guardar referencias importantes
+        const searchInputOriginal = searchInput;
+        const dropdownOriginal = dropdown;
+        const resultadosOriginal = resultados;
+        const noResultadosOriginal = noResultados;
+        const tagsContainerOriginal = tagsContainer;
+        const hiddenInputOriginal = hiddenInput;
+        
+        // Remover todos los event listeners existentes del formulario
+        const nuevoFormulario = formulario.cloneNode(true);
+        formulario.parentNode.replaceChild(nuevoFormulario, formulario);
+        
+        // Actualizar referencias después del reemplazo
+        const newSearchInput = document.getElementById('actividad_search');
+        const newDropdown = document.getElementById('actividad-dropdown');
+        const newResultados = document.getElementById('actividad-resultados');
+        const newNoResultados = document.getElementById('actividad-no-resultados');
+        const newTagsContainer = document.getElementById('actividades-seleccionadas');
+        const newHiddenInput = document.getElementById('actividades_seleccionadas_input');
+        
+        // Reconfigurar event listeners para actividades en el nuevo formulario
+        if (newSearchInput) {
+            console.log('🔍 Reconfigurando buscador de actividades...');
+            newSearchInput.addEventListener('input', function(e) {
+                const query = e.target.value.trim();
+                if (searchTimeout) clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => buscarActividades(query, newDropdown, newResultados, newNoResultados), 300);
+            });
+        }
+        
+        // Reconfigurar cerrar dropdown
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#actividad_search') && !e.target.closest('#actividad-dropdown')) {
+                if (newDropdown) newDropdown.classList.add('hidden');
+            }
+        });
+        
+        // Reconfigurar botón agregar manual
+        const newBtnAgregarManual = document.getElementById('btn-agregar-manual');
+        if (newBtnAgregarManual) {
+            newBtnAgregarManual.addEventListener('click', function() {
+                const query = newSearchInput.value.trim();
+                if (!query) return;
+
+                const actividadPersonalizada = {
+                    id: Date.now(),
+                    nombre: query,
+                    sector: 'Actividad personalizada',
+                    custom: true
+                };
+
+                if (actividadesSeleccionadas.some(act => act.nombre.toLowerCase() === query.toLowerCase())) {
+                    return;
+                }
+
+                agregarActividad(actividadPersonalizada, newSearchInput, newTagsContainer, newHiddenInput, newDropdown);
+            });
+        }
+        
+        // Actualizar referencias globales
+        Object.assign(window, {
+            searchInput: newSearchInput,
+            dropdown: newDropdown,
+            resultados: newResultados,
+            noResultados: newNoResultados,
+            tagsContainer: newTagsContainer,
+            hiddenInput: newHiddenInput
+        });
+        
+        // Cargar actividades existentes después del reemplazo
+        cargarActividadesExistentes(newHiddenInput, newTagsContainer);
+        
+        console.log('✅ Buscador de actividades reconfigurado');
+        
+        // Agregar el nuevo manejador simplificado del formulario
+        nuevoFormulario.addEventListener('submit', function(e) {
+            console.log('🚀 Enviando formulario de datos generales...');
+            console.log('📋 Formulario action:', nuevoFormulario.action);
+            console.log('📋 Formulario method:', nuevoFormulario.method);
+            
+            // Mostrar todos los datos del formulario
+            const formData = new FormData(nuevoFormulario);
+            const datosFormulario = {};
+            for (let [key, value] of formData.entries()) {
+                datosFormulario[key] = value;
+            }
+            console.log('📄 Datos del formulario:', datosFormulario);
+            
+            // Validación básica
+            let esValido = true;
+            const camposRequeridos = nuevoFormulario.querySelectorAll('[required]');
+            console.log(`🔍 Validando ${camposRequeridos.length} campos requeridos...`);
+            
+            // Validar campos requeridos
+            camposRequeridos.forEach(campo => {
+                if (!campo.value.trim()) {
+                    console.log(`❌ Campo requerido vacío: ${campo.name} (${campo.type})`);
+                    esValido = false;
+                    
+                    // Agregar clase de error
+                    campo.classList.add('border-red-500', 'bg-red-50');
+                    setTimeout(() => {
+                        campo.classList.remove('border-red-500', 'bg-red-50');
+                    }, 3000);
+                } else {
+                    console.log(`✅ Campo válido: ${campo.name} = "${campo.value.substring(0, 50)}${campo.value.length > 50 ? '...' : ''}"`);
+                }
+            });
+            
+            // Validar actividades seleccionadas
+            const actividadesInput = nuevoFormulario.querySelector('#actividades_seleccionadas_input');
+            if (actividadesInput) {
+                const actividades = actividadesInput.value;
+                console.log('🏢 Actividades seleccionadas:', actividades);
+                if (!actividades || actividades === '[]' || actividades.trim() === '') {
+                    console.log('❌ No hay actividades seleccionadas');
+                    esValido = false;
+                    mostrarError('Debe seleccionar al menos una actividad económica');
+                } else {
+                    try {
+                        const actividadesArray = JSON.parse(actividades);
+                        console.log(`✅ ${actividadesArray.length} actividades válidas seleccionadas`);
+                    } catch (e) {
+                        console.log('❌ Error al parsear actividades:', e);
+                        esValido = false;
+                    }
+                }
+            } else {
+                console.log('⚠️ Input de actividades no encontrado');
+            }
+            
+            if (!esValido) {
+                console.log('❌ Validación fallida - evitando envío');
+                e.preventDefault();
+                return false;
+            }
+            
+            console.log('✅ Validación exitosa - permitiendo envío del formulario');
+            console.log('⏳ Enviando a:', nuevoFormulario.action);
+            
+            // Prevenir el envío normal del formulario
+            e.preventDefault();
+            
+            // Enviar datos vía AJAX
+            console.log('📡 Enviando datos vía AJAX...');
+            enviarDatosAjax(nuevoFormulario);
+            
+            return false;
+        });
+        
+        console.log('✅ Manejador de formulario configurado');
     }
-    // Función para ocultar loading
-    function ocultarLoading() {
-        searchIcon.className = 'fas fa-search text-gray-400 text-sm';
+
+    // Función para mostrar errores
+    function mostrarError(mensaje) {
+        // Crear o actualizar modal de error
+        let modal = document.getElementById('modal-error-datos');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'modal-error-datos';
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl p-6 max-w-md mx-4 shadow-2xl">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-red-100 rounded-full p-2 mr-3">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">Error de Validación</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4" id="mensaje-error-datos">${mensaje}</p>
+                    <button onclick="cerrarModalError()" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">
+                        Entendido
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        } else {
+            document.getElementById('mensaje-error-datos').textContent = mensaje;
+            modal.style.display = 'flex';
+        }
     }
+
+    // Función global para cerrar modal de error
+    window.cerrarModalError = function() {
+        const modal = document.getElementById('modal-error-datos');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    // Cargar actividades existentes al inicio
+    async function cargarActividadesExistentes(hiddenInput, tagsContainer) {
+        if (!hiddenInput.value) return;
+
+        try {
+            const actividadesIds = JSON.parse(hiddenInput.value);
+            if (!Array.isArray(actividadesIds) || actividadesIds.length === 0) return;
+
+            console.log('🔄 Cargando actividades para IDs:', actividadesIds);
+
+            const response = await fetch('/api/actividades/obtener-por-ids', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ ids: actividadesIds })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log('📥 Respuesta del servidor:', result);
+            
+            // Manejar diferentes formatos de respuesta
+            let actividades = [];
+            if (result.success && result.data) {
+                actividades = result.data;
+            } else if (Array.isArray(result)) {
+                actividades = result;
+            } else if (result.actividades) {
+                actividades = result.actividades;
+            } else {
+                throw new Error('Formato de respuesta no reconocido');
+            }
+
+            if (!Array.isArray(actividades)) {
+                throw new Error('Los datos de actividades no son un array válido');
+            }
+
+            // Asegurar que cada actividad tenga nombre
+            actividadesSeleccionadas = actividades.map(actividad => {
+                if (typeof actividad === 'object' && actividad.nombre) {
+                    return {
+                        id: actividad.id,
+                        nombre: actividad.nombre,
+                        sector: actividad.sector || 'Sin sector especificado'
+                    };
+                } else {
+                    // Si no tiene nombre, usar un fallback
+                    return {
+                        id: actividad.id || actividad,
+                        nombre: `Actividad ${actividad.id || actividad}`,
+                        sector: 'Información incompleta'
+                    };
+                }
+            });
+
+            actualizarTags(tagsContainer);
+            console.log(`✅ ${actividadesSeleccionadas.length} actividades cargadas con nombres:`, 
+                       actividadesSeleccionadas.map(a => `ID: ${a.id}, Nombre: "${a.nombre}"`));
+            
+        } catch (e) {
+            console.error('❌ Error al cargar actividades existentes:', e);
+            
+            // Fallback más robusto: mostrar los IDs con nombres descriptivos
+            try {
+                const actividadesIds = JSON.parse(hiddenInput.value);
+                console.warn('🔄 Aplicando fallback para IDs:', actividadesIds);
+                
+                actividadesSeleccionadas = actividadesIds.map(id => ({
+                    id: id,
+                    nombre: `Actividad ${id} (no cargada)`,
+                    sector: 'Error al cargar información'
+                }));
+                
+                actualizarTags(tagsContainer);
+                console.log('⚠️ Fallback aplicado exitosamente');
+                
+            } catch (fallbackError) {
+                console.error('💥 Error crítico en fallback:', fallbackError);
+                // Último recurso: limpiar todo
+                actividadesSeleccionadas = [];
+                actualizarTags(tagsContainer);
+            }
+        }
+    }
+
+    // Ejecutar carga inicial
+    cargarActividadesExistentes(hiddenInput, tagsContainer);
+
     // Función para buscar actividades
-    async function buscarActividades(query) {
+    async function buscarActividades(query, dropdown, resultados, noResultados) {
         if (!query || query.length < 2) {
-            ocultarDropdown();
+            dropdown.classList.add('hidden');
             return;
         }
-        mostrarLoading();
+
         try {
             const response = await fetch(`/api/actividades/buscar?q=${encodeURIComponent(query)}&limit=20`);
-            if (!response.ok) {
-                throw new Error('Error en la búsqueda');
-            }
+            if (!response.ok) throw new Error('Error en la búsqueda');
+            
             const result = await response.json();
             if (result.success && result.data) {
-                // Filtrar actividades ya seleccionadas
                 const actividadesFiltradas = result.data.filter(actividad => 
                     !actividadesSeleccionadas.some(sel => sel.id === actividad.id)
                 );
-                mostrarResultados(actividadesFiltradas, query);
+                mostrarResultados(actividadesFiltradas, dropdown, resultados, noResultados);
             } else {
-                mostrarSinResultados();
+                mostrarSinResultados(dropdown, noResultados);
             }
         } catch (error) {
-                // Error buscando actividades
-            mostrarSinResultados();
-        } finally {
-            ocultarLoading();
+            mostrarSinResultados(dropdown, noResultados);
         }
     }
+
     // Función para mostrar resultados
-    function mostrarResultados(actividades, query) {
+    function mostrarResultados(actividades, dropdown, resultados, noResultados) {
         resultados.innerHTML = '';
         noResultados.classList.add('hidden');
-        selectedIndex = -1;
+
         if (actividades.length === 0) {
-            mostrarSinResultados();
+            mostrarSinResultados(dropdown, noResultados);
             return;
         }
-        actividades.forEach((actividad, index) => {
+
+        actividades.forEach(actividad => {
             const item = document.createElement('div');
-            item.className = 'px-4 py-3 cursor-pointer transition-all duration-200 border-b border-gray-100/50 last:border-b-0 hover:bg-gradient-to-r hover:from-[#9d2449]/5 hover:to-[#9d2449]/10 hover:text-[#9d2449] group';
-            item.dataset.id = actividad.id;
-            item.dataset.index = index;
-            const nombre = resaltarTexto(actividad.nombre, query);
-            const sector = typeof actividad.sector === 'string' ? actividad.sector : 'Sin sector';
+            item.className = 'px-4 py-3 cursor-pointer transition-all duration-200 border-b border-gray-100 last:border-b-0 hover:bg-gray-50';
             item.innerHTML = `
-                <div class="flex items-start justify-between">
-                    <div class="flex-1 min-w-0">
-                        <div class="font-medium text-gray-900 group-hover:text-[#9d2449] transition-colors text-sm leading-tight">${nombre}</div>
-                        <div class="flex items-center mt-1">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 group-hover:bg-[#9d2449]/10 group-hover:text-[#9d2449] transition-colors">
-                                <i class="fas fa-building mr-1 text-xs"></i>
-                                ${sector}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="ml-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <i class="fas fa-plus-circle text-[#9d2449] text-lg"></i>
-                    </div>
-                </div>
+                <div class="font-medium text-gray-900 text-sm">${actividad.nombre}</div>
+                <div class="text-xs text-gray-500 mt-1">${actividad.sector || 'Sin sector'}</div>
             `;
-            item.addEventListener('click', () => agregarActividad(actividad));
-            item.addEventListener('mouseenter', () => {
-                selectedIndex = index;
-                actualizarSeleccionVisual();
-            });
+            item.addEventListener('click', () => agregarActividad(actividad, 
+                document.getElementById('actividad_search'), 
+                document.getElementById('actividades-seleccionadas'), 
+                document.getElementById('actividades_seleccionadas_input'), 
+                dropdown
+            ));
             resultados.appendChild(item);
         });
-        mostrarDropdown();
-    }
-    // Función para mostrar sin resultados
-    function mostrarSinResultados() {
-        resultados.innerHTML = '';
-        noResultados.classList.remove('hidden');
-        // Asegurar que el botón esté disponible
-        const btnAgregar = document.getElementById('btn-agregar-manual');
-        if (btnAgregar) {
-            btnAgregar.style.display = 'inline-flex';
-        }
-        mostrarDropdown();
-    }
-    // Función para mostrar dropdown
-    function mostrarDropdown() {
+
         dropdown.classList.remove('hidden');
     }
-    // Función para ocultar dropdown
-    function ocultarDropdown() {
-        dropdown.classList.add('hidden');
-        selectedIndex = -1;
+
+    // Función para mostrar sin resultados
+    function mostrarSinResultados(dropdown, noResultados) {
+        const resultados = document.getElementById('actividad-resultados');
+        if (resultados) resultados.innerHTML = '';
+        if (noResultados) noResultados.classList.remove('hidden');
+        if (dropdown) dropdown.classList.remove('hidden');
     }
-    // Función para agregar actividad (selección múltiple)
-    function agregarActividad(actividad) {
-        // Verificar si ya está seleccionada
-        if (actividadesSeleccionadas.some(sel => sel.id === actividad.id)) {
-            return;
-        }
-        // Agregar a la lista
+
+    // Función para agregar actividad
+    function agregarActividad(actividad, searchInputRef, tagsContainerRef, hiddenInputRef, dropdownRef) {
+        if (actividadesSeleccionadas.some(sel => sel.id === actividad.id)) return;
+
         actividadesSeleccionadas.push(actividad);
-        // Limpiar búsqueda
-        searchInput.value = '';
-        // Actualizar interfaz
-        actualizarTags();
-        actualizarInputHidden();
-        // Cerrar dropdown
-        ocultarDropdown();
+        if (searchInputRef) searchInputRef.value = '';
+        actualizarTags(tagsContainerRef);
+        actualizarInputHidden(hiddenInputRef);
+        if (dropdownRef) dropdownRef.classList.add('hidden');
     }
+
     // Función para remover actividad
     function removerActividad(actividadId) {
         actividadesSeleccionadas = actividadesSeleccionadas.filter(act => act.id !== actividadId);
-        actualizarTags();
-        actualizarInputHidden();
+        const currentTagsContainer = document.getElementById('actividades-seleccionadas');
+        const currentHiddenInput = document.getElementById('actividades_seleccionadas_input');
+        actualizarTags(currentTagsContainer);
+        actualizarInputHidden(currentHiddenInput);
     }
+
     // Función para actualizar tags visuales
-    function actualizarTags() {
-        // Limpiar contenedor
-        tagsContainer.innerHTML = '';
+    function actualizarTags(tagsContainerRef) {
+        if (!tagsContainerRef) tagsContainerRef = document.getElementById('actividades-seleccionadas');
+        tagsContainerRef.innerHTML = '';
+
         if (actividadesSeleccionadas.length === 0) {
-            // Mostrar mensaje vacío
             const emptyMessage = document.createElement('div');
             emptyMessage.id = 'no-actividades-message';
-            emptyMessage.className = 'flex items-center justify-center w-full text-gray-400 text-sm italic';
-            emptyMessage.innerHTML = '<i class="fas fa-plus-circle mr-2"></i> No hay actividades seleccionadas';
-            tagsContainer.appendChild(emptyMessage);
+            emptyMessage.className = 'flex items-center justify-center text-gray-400 text-sm italic';
+            emptyMessage.innerHTML = '<i class="fas fa-plus-circle mr-2"></i>No hay actividades seleccionadas';
+            tagsContainerRef.appendChild(emptyMessage);
         } else {
-            // Mostrar tags
             actividadesSeleccionadas.forEach(actividad => {
                 const tag = document.createElement('div');
-                // Estilo diferente para actividades personalizadas
-                const isCustom = actividad.custom || false;
-                const baseClass = 'inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200 hover:shadow-sm animate-pulse-once';
-                if (isCustom) {
-                    tag.className = baseClass + ' bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-blue-200 hover:from-blue-100 hover:to-blue-150';
-                } else {
-                    tag.className = baseClass + ' bg-gradient-to-r from-[#9d2449]/10 to-[#9d2449]/15 text-[#9d2449] border-[#9d2449]/20 hover:from-[#9d2449]/15 hover:to-[#9d2449]/20';
-                }
-                const sector = (typeof actividad.sector === 'string' && actividad.sector) ? ` - ${actividad.sector}` : '';
-                const icon = isCustom ? 'fas fa-edit' : 'fas fa-check-circle';
-                const iconColor = isCustom ? 'text-blue-600' : 'text-[#9d2449]';
+                tag.className = 'inline-flex items-center gap-2 px-3 py-1 bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20 rounded-lg text-sm';
                 tag.innerHTML = `
-                    <span class="flex items-center gap-1">
-                        <i class="${icon} ${iconColor}"></i>
-                        <span class="font-medium">${actividad.nombre}</span>
-                        <span class="text-xs opacity-75">${sector}</span>
-                    </span>
-                    <button type="button" class="ml-1 hover:text-red-500 transition-colors duration-150 rounded-full p-1 hover:bg-red-100" onclick="removerActividad(${actividad.id})">
+                    <span>${actividad.nombre}</span>
+                    <button type="button" onclick="removerActividad(${actividad.id})" class="hover:text-red-500 transition-colors">
                         <i class="fas fa-times text-xs"></i>
                     </button>
                 `;
-                tagsContainer.appendChild(tag);
+                tagsContainerRef.appendChild(tag);
             });
         }
     }
+
     // Función para actualizar input hidden
-    function actualizarInputHidden() {
+    function actualizarInputHidden(hiddenInputRef) {
+        if (!hiddenInputRef) hiddenInputRef = document.getElementById('actividades_seleccionadas_input');
         const actividadesIds = actividadesSeleccionadas.map(act => act.id);
-        hiddenInput.value = JSON.stringify(actividadesIds);
+        hiddenInputRef.value = JSON.stringify(actividadesIds);
     }
-    // Función para resaltar texto
-    function resaltarTexto(texto, busqueda) {
-        if (!busqueda) return texto;
-        const regex = new RegExp(`(${busqueda.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        return texto.replace(regex, '<mark class="bg-yellow-200 px-1 rounded">$1</mark>');
-    }
-    // Función para actualizar selección visual
-    function actualizarSeleccionVisual() {
-        const items = resultados.querySelectorAll('[data-index]');
-        items.forEach((item, index) => {
-            if (index === selectedIndex) {
-                item.classList.add('bg-gradient-to-r', 'from-[#9d2449]/10', 'to-[#9d2449]/15', 'text-[#9d2449]');
-                item.classList.remove('hover:from-[#9d2449]/5', 'hover:to-[#9d2449]/10');
-            } else {
-                item.classList.remove('bg-gradient-to-r', 'from-[#9d2449]/10', 'to-[#9d2449]/15', 'text-[#9d2449]');
-                item.classList.add('hover:from-[#9d2449]/5', 'hover:to-[#9d2449]/10');
-            }
-        });
-    }
-    // Event listeners
-    searchInput.addEventListener('input', function(e) {
-        const query = e.target.value.trim();
-        if (searchTimeout) {
-            clearTimeout(searchTimeout);
-        }
-        searchTimeout = setTimeout(() => {
-            buscarActividades(query);
-        }, 300);
-    });
-    // Navegación con teclado
-    searchInput.addEventListener('keydown', function(e) {
-        const items = resultados.querySelectorAll('[data-index]');
-        switch (e.key) {
-            case 'ArrowDown':
-                e.preventDefault();
-                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
-                actualizarSeleccionVisual();
-                break;
-            case 'ArrowUp':
-                e.preventDefault();
-                selectedIndex = Math.max(selectedIndex - 1, -1);
-                actualizarSeleccionVisual();
-                break;
-            case 'Enter':
-                e.preventDefault();
-                if (selectedIndex >= 0 && items[selectedIndex]) {
-                    const actividadId = parseInt(items[selectedIndex].dataset.id);
-                    const actividad = {
-                        id: actividadId,
-                        nombre: items[selectedIndex].querySelector('.font-medium').textContent.replace(/<[^>]*>/g, ''),
-                        sector: items[selectedIndex].querySelector('.text-xs').textContent.trim()
-                    };
-                    agregarActividad(actividad);
-                }
-                break;
-            case 'Escape':
-                e.preventDefault();
-                ocultarDropdown();
-                break;
-        }
-    });
-    // Cerrar dropdown al hacer click fuera
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('#actividad_search') && !e.target.closest('#actividad-dropdown')) {
-            ocultarDropdown();
-        }
-    });
-    // Función global para remover actividades (llamada desde HTML)
+
+    // Función global para remover actividades
     window.removerActividad = removerActividad;
-    // Función global para agregar actividad manual
-    window.agregarActividadManual = function() {
-        const query = searchInput.value.trim();
-        if (!query || query.length < 2) {
-            alert('Por favor escriba el nombre de la actividad que desea agregar (mínimo 2 caracteres).');
-            searchInput.focus();
-                return;
-            }
-        // Crear actividad personalizada
-        const actividadPersonalizada = {
-            id: Date.now(), // ID único temporal
-            nombre: query,
-            sector: 'Actividad personalizada',
-            custom: true // Marcador para identificar actividades personalizadas
-        };
-        // Verificar si ya existe
-        const yaExiste = actividadesSeleccionadas.some(act => 
-            act.nombre.toLowerCase() === query.toLowerCase()
-        );
-        if (yaExiste) {
-            alert('Esta actividad ya ha sido agregada.');
-            return;
-        }
-        // Agregar la actividad
-        agregarActividad(actividadPersonalizada);
-        // Limpiar búsqueda y cerrar dropdown
-        searchInput.value = '';
-        ocultarDropdown();
-        // Mostrar mensaje de confirmación
-        setTimeout(() => {
-            alert('Actividad personalizada agregada correctamente.');
-        }, 100);
-    };
-    // Manejo del formulario con validaciones
 
-    window.guardarYSiguiente = async function() {
-        console.log('🚀 Iniciando guardarYSiguiente()');
-        
-        // Buscar el botón para activar loading
-        const btn = document.getElementById('btn-guardar-datos-generales') || document.getElementById('btn-guardar-datos-generales-alt');
-        const btnText = document.getElementById('btn-text-datos-generales') || document.getElementById('btn-text-datos-generales-alt');
-        const btnLoading = document.getElementById('btn-loading-datos-generales') || document.getElementById('btn-loading-datos-generales-alt');
-
-        // Activar loading en el botón
-        if (btn && btnText && btnLoading) {
-            btn.disabled = true;
-            btnText.classList.add('hidden');
-            btnLoading.classList.remove('hidden');
-        }
-        
+    // Función para enviar datos vía AJAX
+    async function enviarDatosAjax(formulario) {
         try {
-            // Buscar el formulario
-            const form = document.getElementById('datos-generales-form');
-            if (!form) {
-                mostrarError('Error: No se encontró el formulario.');
-                return;
+            console.log('📡 Preparando envío AJAX...');
+            
+            // Obtener datos del formulario
+            const formData = new FormData(formulario);
+            const datos = {};
+            for (let [key, value] of formData.entries()) {
+                datos[key] = value;
             }
             
-            console.log('📝 Formulario encontrado:', form);
-
-            // Validación simple de campos obligatorios
-            const tramiteId = form.querySelector('input[name="tramite_id"]');
-            const giroInput = document.getElementById('giro');
-            const contactoNombre = document.getElementById('contacto_nombre');
-            const contactoCargo = document.getElementById('contacto_cargo');
-            const contactoCorreo = document.getElementById('contacto_correo');
-            const contactoTelefono = document.getElementById('contacto_telefono');
+            console.log('📄 Datos a enviar:', datos);
             
-            console.log('🔍 Validando campos obligatorios...');
+            // Mostrar indicador de carga
+            mostrarIndicadorCarga(true);
             
-            // Verificar tramite_id
-            if (!tramiteId || !tramiteId.value) {
-                mostrarError('Error: No se encontró el ID del trámite. Recargue la página.');
-                return;
-            }
-            
-            // Verificar giro
-            if (!giroInput || !giroInput.value || giroInput.value.trim().length < 10) {
-                mostrarError('El giro debe tener al menos 10 caracteres.');
-                giroInput?.focus();
-                return;
-            }
-            
-            // Verificar contacto nombre
-            if (!contactoNombre || !contactoNombre.value || contactoNombre.value.trim().length < 2) {
-                mostrarError('El nombre del contacto es obligatorio (mínimo 2 caracteres).');
-                contactoNombre?.focus();
-                return;
-            }
-            
-            // Verificar contacto cargo
-            if (!contactoCargo || !contactoCargo.value || contactoCargo.value.trim().length < 2) {
-                mostrarError('El cargo del contacto es obligatorio (mínimo 2 caracteres).');
-                contactoCargo?.focus();
-                return;
-            }
-            
-            // Verificar contacto correo
-            if (!contactoCorreo || !contactoCorreo.value || !contactoCorreo.value.includes('@')) {
-                mostrarError('El correo electrónico del contacto es obligatorio y debe ser válido.');
-                contactoCorreo?.focus();
-                return;
-            }
-            
-            // Verificar contacto teléfono
-            if (!contactoTelefono || !contactoTelefono.value || contactoTelefono.value.replace(/\D/g, '').length !== 10) {
-                mostrarError('El teléfono del contacto es obligatorio y debe tener 10 dígitos.');
-                contactoTelefono?.focus();
-                return;
-            }
-
-            console.log('✅ Validaciones pasaron correctamente');
-
-            // Preparar datos del formulario
-            const formData = new FormData(form);
-            
-            // Obtener token CSRF
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            if (csrfToken) {
-                formData.set('_token', csrfToken);
-            }
-            
-            // Mostrar cantidad de datos a enviar para verificación
-            const dataCount = Array.from(formData.entries()).length;
-            console.log(`📦 Enviando ${dataCount} campos de datos`);
-
-            // Obtener URL del action del formulario (método simplificado)
-            const actionUrl = form.getAttribute('action');
-            if (!actionUrl) {
-                mostrarError('Error: No se encontró la URL de destino del formulario.');
-                return;
-            }
-
-            console.log('🌐 Enviando a URL:', actionUrl);
-
-            // Hacer la petición
-            const response = await fetch(actionUrl, {
+            // Enviar petición AJAX
+            const response = await fetch(formulario.action, {
                 method: 'POST',
-                body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(datos)
             });
-
+            
             console.log('📡 Respuesta recibida:', response.status, response.statusText);
-
-            if (!response.ok) {
-                // Intentar obtener el mensaje de error del servidor
-                let errorText = 'Error del servidor';
-                try {
-                    const errorData = await response.json();
-                    errorText = errorData.message || errorText;
-                } catch (e) {
-                    errorText = await response.text() || errorText;
-                }
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
-            }
-
+            
             const result = await response.json();
-            console.log('✅ Resultado:', result);
-
-            if (result.success) {
-                console.log('🎉 Guardado exitoso');
-                // Guardado exitoso, navegando al siguiente paso
-                if (typeof window.navegarSiguiente === 'function') {
-                    console.log('🔄 Llamando a navegarSiguiente()');
-                    window.navegarSiguiente();
-                } else {
-                    console.log('🔄 Recargando página');
-                    window.location.reload();
-                }
+            console.log('📄 Datos de respuesta:', result);
+            
+            // Ocultar indicador de carga
+            mostrarIndicadorCarga(false);
+            
+            if (response.ok && result.success) {
+                // Guardado exitoso
+                console.log('✅ Datos guardados exitosamente');
+                
+                // Mostrar mensaje de éxito
+                mostrarMensajeExito('Datos guardados correctamente. Avanzando al siguiente paso...');
+                
+                // Avanzar al siguiente paso
+                setTimeout(() => {
+                    avanzarAlPasoSiguiente(result.next_step || 2);
+                }, 500);
+                
             } else {
-                console.error('❌ Error del servidor:', result);
-                let errorMessage = 'Error al guardar los datos.';
+                // Error en el guardado
+                console.error('❌ Error al guardar:', result);
                 
-                if (result.message) {
-                    errorMessage = result.message;
-                } else if (result.errors) {
-                    const errorList = Object.values(result.errors).flat();
-                    errorMessage = errorList.join(' ');
+                if (result.errors) {
+                    // Errores de validación
+                    mostrarErroresValidacion(result.errors);
+        } else {
+                    // Error general
+                    mostrarError(result.message || 'Error al guardar los datos');
                 }
-                
-                mostrarError(errorMessage);
             }
-
+            
         } catch (error) {
-            console.error('💥 Error en guardarYSiguiente:', error);
-            
-            let errorMessage = 'Error de conexión. Inténtelo de nuevo.';
-            
-            // Diagnóstico específico
-            if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
-                errorMessage = 'Error de red. Verifique su conexión a internet.';
-            } else if (error.message.includes('404')) {
-                errorMessage = 'Ruta no encontrada. Contacte al administrador.';
-            } else if (error.message.includes('500')) {
-                errorMessage = 'Error del servidor. Inténtelo más tarde.';
-            } else if (error.message.includes('419')) {
-                errorMessage = 'Sesión expirada. Recargue la página.';
-            } else if (error.message.includes('403')) {
-                errorMessage = 'No tiene permisos para esta acción.';
-            } else if (error.message.includes('422')) {
-                errorMessage = 'Datos de validación incorrectos. Revise los campos.';
-            } else {
-                errorMessage = error.message || errorMessage;
-            }
-            
-            mostrarError(errorMessage);
-        } finally {
-            // Limpiar estado de loading
-            if (btn && btnText && btnLoading) {
-                btn.disabled = false;
-                btnText.classList.remove('hidden');
-                btnLoading.classList.add('hidden');
-            }
+            console.error('❌ Error en AJAX:', error);
+            mostrarIndicadorCarga(false);
+            mostrarError('Error de conexión. Por favor, intente nuevamente.');
         }
-    };
+    }
     
-    // Función auxiliar para mostrar errores
-    function mostrarError(mensaje) {
-        console.error('🚨 Error:', mensaje);
+    // Función para mostrar indicador de carga
+    function mostrarIndicadorCarga(mostrar) {
+        let indicador = document.getElementById('indicador-carga-datos');
         
-        // Remover error anterior si existe
-        const errorAnterior = document.getElementById('datos-generales-error');
-        if (errorAnterior) {
-            errorAnterior.remove();
+        if (mostrar) {
+            if (!indicador) {
+                indicador = document.createElement('div');
+                indicador.id = 'indicador-carga-datos';
+                indicador.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                indicador.innerHTML = `
+                    <div class="bg-white rounded-xl p-6 max-w-sm mx-4 shadow-2xl">
+                        <div class="flex items-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#9d2449] mr-4"></div>
+                            <span class="text-gray-700">Guardando datos...</span>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(indicador);
+                } else {
+                indicador.style.display = 'flex';
+                }
+            } else {
+            if (indicador) {
+                indicador.style.display = 'none';
+            }
         }
-        
-        // Crear contenedor de error
-        const errorContainer = document.createElement('div');
-        errorContainer.id = 'datos-generales-error';
-        errorContainer.className = 'fixed top-4 right-4 z-50 max-w-md p-4 bg-red-50 border border-red-200 rounded-lg shadow-lg';
-        errorContainer.style.animation = 'slideInError 0.3s ease-out';
-        
-        errorContainer.innerHTML = `
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div class="ml-3 flex-1">
-                    <h3 class="text-sm font-medium text-red-800">Error</h3>
-                    <p class="mt-1 text-sm text-red-700">${mensaje}</p>
-                </div>
-                <div class="ml-4 flex-shrink-0">
-                    <button onclick="this.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-600 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
+    }
+    
+    // Función para mostrar mensaje de éxito
+    function mostrarMensajeExito(mensaje) {
+        const elemento = document.createElement('div');
+        elemento.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300';
+        elemento.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>${mensaje}</span>
             </div>
         `;
         
-        // Insertar en el body
-        document.body.appendChild(errorContainer);
+        document.body.appendChild(elemento);
         
-        // Auto-hide después de 8 segundos
+        // Animar entrada
+         setTimeout(() => {
+            elemento.classList.add('translate-x-0');
+        }, 100);
+        
+        // Remover después de 3 segundos
         setTimeout(() => {
-            if (errorContainer && errorContainer.parentNode) {
-                errorContainer.style.animation = 'fadeOut 0.3s ease-out';
-                setTimeout(() => errorContainer.remove(), 300);
+            elemento.classList.add('translate-x-full', 'opacity-0');
+            setTimeout(() => {
+                if (elemento.parentNode) {
+                    elemento.parentNode.removeChild(elemento);
+                }
+            }, 300);
+        }, 3000);
+    }
+    
+    // Función para mostrar errores de validación
+    function mostrarErroresValidacion(errores) {
+        console.log('🔍 Mostrando errores de validación:', errores);
+        
+        // Limpiar errores anteriores
+        document.querySelectorAll('.error-message').forEach(el => el.remove());
+        document.querySelectorAll('.border-red-500').forEach(el => {
+            el.classList.remove('border-red-500', 'bg-red-50');
+        });
+        
+        // Mostrar nuevos errores
+        for (const [campo, mensajes] of Object.entries(errores)) {
+            const elemento = document.getElementById(campo) || document.querySelector(`[name="${campo}"]`);
+            if (elemento) {
+                // Agregar clases de error
+                elemento.classList.add('border-red-500', 'bg-red-50');
+                
+                // Agregar mensaje de error
+                const contenedor = elemento.closest('.form-group') || elemento.parentElement;
+                const errorMsg = document.createElement('p');
+                errorMsg.className = 'error-message text-xs text-red-500 mt-1 flex items-center';
+                errorMsg.innerHTML = `
+                    <i class="fas fa-exclamation-triangle mr-1 text-red-400"></i>
+                    <span>${Array.isArray(mensajes) ? mensajes[0] : mensajes}</span>
+                `;
+                contenedor.appendChild(errorMsg);
             }
-        }, 8000);
+        }
+        
+        // Scroll al primer error
+        const primerError = document.querySelector('.border-red-500');
+        if (primerError) {
+            primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+    
+    // Función para avanzar al paso siguiente
+    function avanzarAlPasoSiguiente(pasoDestino) {
+        console.log('🔄 Avanzando al paso:', pasoDestino);
+        
+        try {
+            // Buscar el componente Alpine.js del stepper
+            const formContainer = document.querySelector('[x-data*="currentStep"]');
+            if (formContainer && window.Alpine) {
+                const alpineData = Alpine.$data(formContainer);
+                if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                    console.log('📊 Paso actual:', alpineData.currentStep);
+                    alpineData.currentStep = pasoDestino;
+                    console.log('✅ Paso cambiado a:', alpineData.currentStep);
+                    
+                    // Trigger update en caso de que sea necesario
+                    if (alpineData.$dispatch) {
+                        alpineData.$dispatch('step-changed', { step: pasoDestino });
+                    }
+                } else {
+                    console.log('⚠️ No se encontró Alpine data con currentStep');
+                }
+            } else {
+                console.log('⚠️ No se encontró contenedor Alpine o Alpine no está disponible');
+            }
+        } catch (error) {
+            console.error('❌ Error al cambiar paso:', error);
+        }
     }
 });
 </script>
+
 <style>
-/* Animación para los nuevos tags */
-@keyframes pulse-once {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-.animate-pulse-once {
-    animation: pulse-once 0.3s ease-out;
-}
-/* Scrollbar personalizada para dropdown */
-#actividad-dropdown .max-h-48::-webkit-scrollbar {
-    width: 8px;
-}
-#actividad-dropdown .max-h-48::-webkit-scrollbar-track {
-    background: linear-gradient(to bottom, rgba(157, 36, 73, 0.05), rgba(157, 36, 73, 0.1));
-    border-radius: 4px;
-    margin: 4px 0;
-}
-#actividad-dropdown .max-h-48::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, rgba(157, 36, 73, 0.3), rgba(157, 36, 73, 0.5));
-    border-radius: 4px;
-    border: 1px solid rgba(157, 36, 73, 0.1);
-}
-#actividad-dropdown .max-h-48::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, rgba(157, 36, 73, 0.5), rgba(157, 36, 73, 0.7));
-}
-/* Animación para el dropdown */
-#actividad-dropdown {
-    animation: dropdownSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    transform-origin: top;
-}
-@keyframes dropdownSlideIn {
-    0% {
-        opacity: 0;
-        transform: translateY(-10px) scale(0.95);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-/* Efectos hover suaves */
-.form-group:hover input,
-.form-group:hover select,
-.form-group:hover textarea {
-    border-color: rgb(157 36 73 / 0.5);
-}
 /* Transiciones suaves */
 input, select, textarea, button {
     transition: all 0.2s ease-in-out;
 }
-/* Estilos de validación */
-.border-green-300 {
-    border-color: rgb(134 239 172) !important;
-}
-.focus\:border-green-500:focus {
-    border-color: rgb(34 197 94) !important;
-}
-.focus\:ring-green-200:focus {
-    --tw-ring-color: rgb(187 247 208) !important;
-}
-.border-red-500 {
-    border-color: rgb(239 68 68) !important;
-}
-.focus\:border-red-500:focus {
-    border-color: rgb(239 68 68) !important;
-}
-.focus\:ring-red-200:focus {
-    --tw-ring-color: rgb(254 202 202) !important;
-}
-/* Animaciones para mensajes de error */
-.error-message {
-    animation: slideInError 0.3s ease-out;
+
+/* Efectos hover */
+.form-group:hover input:not([readonly]),
+.form-group:hover select:not([readonly]),
+.form-group:hover textarea:not([readonly]) {
+    border-color: rgb(157 36 73 / 0.3);
 }
 
-@keyframes slideInError {
-    0% {
+/* Dropdown styles */
+#actividad-dropdown {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
         opacity: 0;
-        transform: translateX(100%) scale(0.8);
+        transform: translateY(-10px);
     }
-    100% {
+    to {
         opacity: 1;
-        transform: translateX(0) scale(1);
+        transform: translateY(0);
     }
 }
-
-@keyframes fadeOut {
-    0% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-}
-
-
 </style>
+@endunless

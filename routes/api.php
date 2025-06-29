@@ -29,6 +29,7 @@ Route::get('/proveedor/historial', [HistorialProveedorController::class, 'buscar
 
 // Actividades Routes (orden específico a general)
 Route::get('/actividades/buscar', [SectorController::class, 'buscarActividades']);
+Route::post('/actividades/obtener-por-ids', [SectorController::class, 'obtenerPorIds']);
 Route::get('/actividades/{actividad}', [SectorController::class, 'getActividad']);
 Route::get('/actividades', [SectorController::class, 'getAllActividades']);
 

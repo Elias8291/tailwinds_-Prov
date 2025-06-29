@@ -227,14 +227,79 @@ Route::post('/debug/datos-generales', function(\Illuminate\Http\Request $request
         'method' => $request->method(),
         'url' => $request->url(),
         'data' => $request->all(),
-        'headers' => $request->headers->all()
+        'headers' => $request->headers->all(),
+        'user_authenticated' => \Illuminate\Support\Facades\Auth::check(),
+        'user_id' => \Illuminate\Support\Facades\Auth::id(),
+        'session_id' => session()->getId(),
+        'csrf_token_valid' => csrf_token() === $request->input('_token')
     ]);
     
-    return response()->json([
-        'success' => true,
-        'message' => 'Debug route working',
-        'data_received' => $request->except(['_token'])
+    // Validar campos básicos
+    $errores = [];
+    
+    if (!$request->input('tramite_id')) {
+        $errores[] = 'tramite_id requerido';
+    }
+    
+    if (!$request->input('giro')) {
+        $errores[] = 'giro requerido';
+    }
+    
+    if (!$request->input('contacto_nombre')) {
+        $errores[] = 'contacto_nombre requerido';
+    }
+    
+    if (!$request->input('contacto_cargo')) {
+        $errores[] = 'contacto_cargo requerido';
+    }
+    
+    if (!$request->input('contacto_correo')) {
+        $errores[] = 'contacto_correo requerido';
+    }
+    
+    if (!$request->input('contacto_telefono')) {
+        $errores[] = 'contacto_telefono requerido';
+    }
+    
+    if (!$request->input('actividades_seleccionadas')) {
+        $errores[] = 'actividades_seleccionadas requerido';
+    }
+    
+    \Illuminate\Support\Facades\Log::info('Validación debug completada', [
+        'errores_encontrados' => $errores,
+        'total_errores' => count($errores)
     ]);
+    
+    if (empty($errores)) {
+        // Si no hay errores, simular una redirección exitosa
+        \Illuminate\Support\Facades\Log::info('✅ Validación exitosa - simulando redirección');
+        
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Datos procesados correctamente',
+                'next_step' => 2,
+                'redirect_url' => '/tramites/inscripcion/' . $request->input('tramite_id')
+            ]);
+        }
+        
+        // Para formularios normales, redirigir
+        return redirect('/tramites/inscripcion/' . $request->input('tramite_id'))
+            ->with('success', 'Datos guardados correctamente');
+    } else {
+        // Si hay errores, mostrarlos
+        \Illuminate\Support\Facades\Log::warning('❌ Errores de validación encontrados', $errores);
+        
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $errores,
+                'message' => 'Errores de validación encontrados'
+            ], 422);
+        }
+        
+        return back()->withErrors($errores)->withInput();
+    }
 })->name('debug.datos-generales');
 
 // ============================================================================
