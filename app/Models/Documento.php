@@ -13,8 +13,8 @@ class Documento extends Model
 
     protected $fillable = [
         'nombre',
-        'tipo_persona',
         'descripcion',
+        'tipo_persona',
         'es_visible'
     ];
 
@@ -31,10 +31,11 @@ class Documento extends Model
                     ->withTimestamps();
     }
 
-    public function tramites()
+    /**
+     * Obtiene los documentos solicitantes asociados.
+     */
+    public function documentosSolicitante()
     {
-        return $this->belongsToMany(Tramite::class, 'documento_solicitante')
-            ->withPivot(['ruta_archivo', 'estado', 'comentario'])
-            ->withTimestamps();
+        return $this->hasMany(DocumentoSolicitante::class, 'documento_id');
     }
 } 

@@ -20,6 +20,8 @@ use App\Http\Controllers\Formularios\AccionistasController;
 use App\Http\Controllers\Formularios\ApoderadoLegalController;
 use App\Http\Controllers\Formularios\DocumentosController;
 use App\Http\Controllers\TramiteSolicitanteController;
+use Illuminate\Http\JsonResponse;
+use App\Events\SolicitudCorreccionesEvent;
 
 class RevisionController extends Controller
 {
@@ -428,48 +430,6 @@ class RevisionController extends Controller
     }
 
     /**
-     * Ver documento desencriptado
-     */
-    public function verDocumento(Tramite $tramite, $documentoId)
-    {
-        try {
-            // Buscar el documento del solicitante
-            $documentoSolicitante = DocumentoSolicitante::where('tramite_id', $tramite->id)
-                ->where('documento_id', $documentoId)
-                ->first();
-
-            if (!$documentoSolicitante || !$documentoSolicitante->ruta_archivo) {
-                abort(404, 'Documento no encontrado');
-            }
-
-            // Desencriptar la ruta del archivo
-            try {
-                $rutaArchivo = \Illuminate\Support\Facades\Crypt::decryptString($documentoSolicitante->ruta_archivo);
-            } catch (\Exception $e) {
-                // Si no está encriptado, usar la ruta directamente
-                $rutaArchivo = $documentoSolicitante->ruta_archivo;
-            }
-
-            $rutaCompleta = storage_path('app/public/' . $rutaArchivo);
-
-            if (!file_exists($rutaCompleta)) {
-                abort(404, 'El archivo no existe en el servidor');
-            }
-
-            return response()->file($rutaCompleta);
-
-        } catch (\Exception $e) {
-            Log::error('Error al ver documento:', [
-                'tramite_id' => $tramite->id,
-                'documento_id' => $documentoId,
-                'error' => $e->getMessage()
-            ]);
-
-            abort(500, 'Error al cargar el documento');
-        }
-    }
-
-    /**
      * Obtener documentos agrupados por sección
      */
     private function obtenerDocumentosPorSeccion(Tramite $tramite)
@@ -504,11 +464,11 @@ class RevisionController extends Controller
                         }
                         
                         $documentosPorSeccion[$seccionNombre][] = [
-                            'id' => $documento->id,
+                            'id' => $docSolicitante->id, // ID del DocumentoSolicitante, no del Documento
                             'nombre' => $documento->nombre,
                             'descripcion' => $documento->descripcion,
                             'estado' => $docSolicitante->estado,
-                            'ruta_archivo' => route('revision.ver-documento', ['tramite' => $tramite->id, 'documentoId' => $documento->id]),
+                            'ruta_archivo' => $docSolicitante->ruta_archivo ? route('documentos.ver', $docSolicitante->id) : null,
                             'fecha_entrega' => $docSolicitante->fecha_entrega,
                             'observaciones' => $docSolicitante->observaciones,
                             'seccion_id' => $seccion->id,
@@ -524,9 +484,9 @@ class RevisionController extends Controller
                 'tramite_id' => $tramite->id,
                 'error' => $e->getMessage()
             ]);
-                         return [];
-         }
-     }
+            return [];
+        }
+    }
 
     /**
      * Obtener comentarios generales del trámite
@@ -890,6 +850,62 @@ class RevisionController extends Controller
     }
 
     /**
+     * Solicitar correcciones para el trámite
+     */
+    public function solicitarCorrecciones(Request $request, Tramite $tramite)
+    {
+        try {
+            // Validar que el trámite esté en un estado válido para solicitar correcciones
+            if (!in_array($tramite->estado, ['en_revision', 'en_correccion'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El trámite no está en un estado válido para solicitar correcciones'
+                ], 400);
+            }
+
+            // Actualizar el estado del trámite
+            $tramite->update([
+                'estado' => 'en_correccion',
+                'fecha_ultima_actualizacion' => now()
+            ]);
+
+            // Registrar el evento en el historial
+            $this->registrarHistorial($tramite, 'Se solicitaron correcciones', $request->comentario);
+
+            // Notificar al solicitante
+            event(new SolicitudCorreccionesEvent($tramite));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Se han solicitado las correcciones correctamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al solicitar correcciones: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Registra un evento en el historial del trámite.
+     *
+     * @param Tramite $tramite
+     * @param string $accion
+     * @param string|null $comentario
+     * @return void
+     */
+    protected function registrarHistorial(Tramite $tramite, string $accion, ?string $comentario = null)
+    {
+        $tramite->historial()->create([
+            'accion' => $accion,
+            'comentario' => $comentario,
+            'usuario_id' => Auth::id(),
+            'fecha' => now()
+        ]);
+    }
+
+    /**
      * Pausar revisión del trámite
      */
     public function pausarRevision(Request $request, Tramite $tramite)
@@ -911,5 +927,237 @@ class RevisionController extends Controller
         }
     }
 
+    /**
+     * Obtener estado actual de las revisiones por sección (AJAX)
+     */
+    public function obtenerEstadoRevisiones(Tramite $tramite)
+    {
+        try {
+            // Determinar secciones según tipo de persona
+            $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
+            $seccionesRequeridas = $tipoPersona === 'Moral' 
+                ? [1 => 'General', 2 => 'Domicilio', 3 => 'Constitución', 4 => 'Accionistas', 5 => 'Apoderado', 6 => 'Documentos']
+                : [1 => 'General', 2 => 'Domicilio', 6 => 'Documentos'];
+            
+            // Obtener revisiones existentes
+            $revisiones = $tramite->seccionesRevision()
+                ->whereIn('seccion_id', array_keys($seccionesRequeridas))
+                ->get()
+                ->keyBy('seccion_id');
+            
+            $estadoSecciones = [];
+            $todasAprobadas = true;
+            $algunaRechazada = false;
+            
+            foreach ($seccionesRequeridas as $seccionId => $nombre) {
+                $revision = $revisiones->get($seccionId);
+                $estado = $revision ? $revision->estado : 'pendiente';
+                $comentario = $revision ? $revision->comentario : '';
+                $fechaRevision = $revision ? $revision->fecha_revision : null;
+                $revisor = $revision && $revision->revisor ? $revision->revisor->name : '';
+                
+                $estadoSecciones[$seccionId] = [
+                    'seccion_id' => $seccionId,
+                    'nombre' => $nombre,
+                    'estado' => $estado,
+                    'comentario' => $comentario,
+                    'fecha_revision' => $fechaRevision ? $fechaRevision->format('d/m/Y H:i') : null,
+                    'revisor' => $revisor
+                ];
+                
+                if ($estado !== 'aprobado') {
+                    $todasAprobadas = false;
+                }
+                
+                if ($estado === 'rechazado') {
+                    $algunaRechazada = true;
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'secciones' => $estadoSecciones,
+                'todas_aprobadas' => $todasAprobadas,
+                'alguna_rechazada' => $algunaRechazada,
+                'puede_aprobar_todo' => $todasAprobadas && !$algunaRechazada,
+                'tipo_persona' => $tipoPersona,
+                'total_secciones' => count($seccionesRequeridas),
+                'aprobadas' => collect($estadoSecciones)->where('estado', 'aprobado')->count(),
+                'rechazadas' => collect($estadoSecciones)->where('estado', 'rechazado')->count(),
+                'pendientes' => collect($estadoSecciones)->where('estado', 'pendiente')->count()
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error al obtener estado de revisiones:', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener el estado de las revisiones'
+            ], 500);
+        }
+    }
 
+    /**
+     * Guardar comentario de sección via AJAX
+     */
+    public function guardarComentarioSeccion(Request $request, Tramite $tramite, $seccionId)
+    {
+        $request->validate([
+            'comentario' => 'required|string|max:500'
+        ]);
+
+        try {
+            $revision = SeccionRevision::where('tramite_id', $tramite->id)
+                ->where('seccion_id', $seccionId)
+                ->first();
+                
+            if ($revision) {
+                $revision->update([
+                    'comentario' => $request->comentario,
+                    'revisor_id' => Auth::id()
+                ]);
+            } else {
+                SeccionRevision::create([
+                    'tramite_id' => $tramite->id,
+                    'seccion_id' => $seccionId,
+                    'estado' => 'pendiente',
+                    'comentario' => $request->comentario,
+                    'revisor_id' => Auth::id(),
+                    'fecha_revision' => now()
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Comentario guardado correctamente'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error al guardar comentario de sección:', [
+                'tramite_id' => $tramite->id,
+                'seccion_id' => $seccionId,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar el comentario'
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtiene los documentos asociados a una sección específica del trámite
+     *
+     * @param Tramite $tramite
+     * @param int $seccionId
+     * @return array
+     */
+    private function getDocumentosPorSeccion(Tramite $tramite, $seccionId)
+    {
+        // Obtener documentos que pertenecen a la sección
+        $documentos = Documento::whereHas('secciones', function($query) use ($seccionId) {
+            $query->where('seccion_id', $seccionId);
+        })->get();
+
+        // Obtener los documentos del solicitante para este trámite
+        $documentosSolicitante = DocumentoSolicitante::where('tramite_id', $tramite->id)
+            ->whereIn('documento_id', $documentos->pluck('id'))
+            ->with('documento')
+            ->get();
+
+        // Mapear los documentos con su estado y ruta
+        $documentosMapeados = $documentos->map(function($documento) use ($documentosSolicitante) {
+            $docSolicitante = $documentosSolicitante->firstWhere('documento_id', $documento->id);
+            
+            return [
+                'id' => $docSolicitante ? $docSolicitante->id : null, // ID del DocumentoSolicitante, no del Documento
+                'nombre' => $documento->nombre,
+                'descripcion' => $documento->descripcion,
+                'estado' => $docSolicitante ? $docSolicitante->estado : 'pendiente',
+                'ruta_archivo' => $docSolicitante ? $docSolicitante->ruta_archivo : null,
+                'comentario' => $docSolicitante ? $docSolicitante->observaciones : null,
+                'version' => $docSolicitante ? $docSolicitante->version_documento : 1
+            ];
+        });
+
+        // Filtrar solo los documentos que tienen DocumentoSolicitante asociado
+        return $documentosMapeados->filter(function($doc) {
+            return $doc['id'] !== null;
+        })->values();
+    }
+
+    /**
+     * Obtiene los documentos de una sección vía AJAX
+     */
+    public function getDocumentosSeccion(Request $request, Tramite $tramite)
+    {
+        try {
+            Log::info('Solicitando documentos de sección', [
+                'tramite_id' => $tramite->id,
+                'seccion_id' => $request->query('seccion_id')
+            ]);
+
+            // Validar que el ID de sección sea válido
+            $seccionId = $request->query('seccion_id');
+            if (!$seccionId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ID de sección no proporcionado'
+                ], 400);
+            }
+
+            // Obtener documentos de la sección específica usando la tabla intermedia documento_seccion
+            $documentos = DocumentoSolicitante::with(['documento'])
+                ->where('tramite_id', $tramite->id)
+                ->whereExists(function ($query) use ($seccionId) {
+                    $query->select(DB::raw(1))
+                          ->from('documento_seccion')
+                          ->whereColumn('documento_seccion.documento_id', 'documento_solicitante.documento_id')
+                          ->where('documento_seccion.seccion_id', $seccionId);
+                })
+                ->get();
+
+            Log::info('Documentos encontrados', [
+                'cantidad' => $documentos->count(),
+                'tramite_id' => $tramite->id,
+                'seccion_id' => $seccionId
+            ]);
+
+            // Transformar los documentos para la respuesta
+            $documentosFormateados = $documentos->map(function ($documentoSolicitante) {
+                return [
+                    'id' => $documentoSolicitante->id,
+                    'nombre' => $documentoSolicitante->documento->nombre ?? 'Sin nombre',
+                    'descripcion' => $documentoSolicitante->documento->descripcion ?? '',
+                    'estado' => $documentoSolicitante->estado ?? 'Pendiente',
+                    'fecha_carga' => optional($documentoSolicitante->fecha_entrega)->format('d/m/Y'),
+                    'version' => $documentoSolicitante->version_documento,
+                    'observaciones' => $documentoSolicitante->observaciones,
+                    'url' => $documentoSolicitante->ruta_archivo ? route('documentos.ver', $documentoSolicitante->id) : null
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'documentos' => $documentosFormateados
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al obtener documentos de sección', [
+                'tramite_id' => $tramite->id,
+                'seccion_id' => $request->query('seccion_id'),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los documentos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 } 

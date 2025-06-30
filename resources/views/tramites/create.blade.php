@@ -864,29 +864,29 @@
                                         
                                         <!-- Checkbox de aceptación formal -->
                                         <div class="border-2 border-[#9d2449] rounded-lg p-6 bg-gradient-to-r from-red-50 to-pink-50">
-                                            <div class="flex items-start space-x-4">
+                                <div class="flex items-start space-x-4">
                                                 <div class="flex-shrink-0 mt-2">
-                                                    <input type="checkbox" 
-                                                           x-model="terminosAceptados"
-                                                           id="aceptar-terminos"
+                                        <input type="checkbox" 
+                                               x-model="terminosAceptados"
+                                               id="aceptar-terminos"
                                                            class="w-6 h-6 text-[#9d2449] border-3 border-[#9d2449] rounded-md focus:ring-[#9d2449] focus:ring-3 transition-all duration-300 shadow-lg">
-                                                </div>
-                                                <div class="flex-1">
-                                                    <label for="aceptar-terminos" class="cursor-pointer">
+                                    </div>
+                                    <div class="flex-1">
+                                        <label for="aceptar-terminos" class="cursor-pointer">
                                                         <h3 class="text-xl font-bold text-[#9d2449] mb-3 tracking-wide">
                                                             ✓ ACEPTO LOS TÉRMINOS Y CONDICIONES
-                                                        </h3>
+                                            </h3>
                                                         <p class="text-gray-700 leading-relaxed font-medium">
                                                             <strong>Manifiesto mi conformidad</strong> con todos los puntos anteriores y 
                                                             <strong>otorgo mi consentimiento expreso</strong> para dar inicio al proceso de trámite 
                                                             correspondiente, comprometiéndome a proporcionar información verídica y a cumplir 
                                                             con todos los requisitos establecidos.
-                                                        </p>
-                                                    </label>
+                                            </p>
+                                        </label>
                                                 </div>
-                                            </div>
-                                        </div>
-                                        
+                                    </div>
+                                </div>
+                                
                                         <!-- Información de fecha y hora -->
                                         <div class="text-center text-xs text-gray-500 bg-gray-100 rounded-lg p-3">
                                             <p>

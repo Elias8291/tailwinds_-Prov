@@ -658,6 +658,201 @@ class MapHandler {
     }
 
     /**
+     * Inicializa un mapa simple para panel lateral (solo mapa + punto)
+     * @param {string} containerId - ID del contenedor del mapa
+     * @param {string} direccion - Dirección a mostrar en el mapa
+     */
+    initializeSimpleMap(containerId, direccion) {
+        if (!this.checkGoogleMapsAPI()) {
+            this.showSimpleMapError(containerId, 'Google Maps no está disponible');
+            return;
+        }
+
+        const mapContainer = document.getElementById(containerId);
+        if (!mapContainer) {
+            console.error('Contenedor del mapa no encontrado:', containerId);
+            return;
+        }
+
+        // Configuración del mapa simple y elegante
+        const mapOptions = {
+            zoom: 16,
+            center: { lat: 19.4326, lng: -99.1332 }, // Ciudad de México por defecto
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            streetViewControl: false,
+            mapTypeControl: false,
+            fullscreenControl: false,
+            zoomControl: true,
+            scaleControl: false,
+            gestureHandling: 'cooperative',
+            // Estilo minimalista y limpio
+            styles: [
+                {
+                    featureType: 'all',
+                    elementType: 'labels',
+                    stylers: [{ visibility: 'off' }] // Ocultar todas las etiquetas
+                },
+                {
+                    featureType: 'road',
+                    elementType: 'labels',
+                    stylers: [{ visibility: 'off' }] // Ocultar nombres de calles
+                },
+                {
+                    featureType: 'poi',
+                    elementType: 'all',
+                    stylers: [{ visibility: 'off' }] // Ocultar puntos de interés
+                },
+                {
+                    featureType: 'transit',
+                    elementType: 'all',
+                    stylers: [{ visibility: 'off' }] // Ocultar transporte público
+                },
+                {
+                    featureType: 'water',
+                    elementType: 'all',
+                    stylers: [{ color: '#4A90E2' }, { lightness: 20 }]
+                },
+                {
+                    featureType: 'road',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#F5F5F5' }, { weight: 0.5 }]
+                },
+                {
+                    featureType: 'landscape',
+                    elementType: 'all',
+                    stylers: [{ color: '#FAFAFA' }]
+                }
+            ]
+        };
+
+        // Crear el mapa simple
+        const simpleMap = new google.maps.Map(mapContainer, mapOptions);
+
+        // Geocodificar la dirección si está disponible
+        if (direccion && direccion !== 'Dirección no disponible') {
+            this.geocodeSimpleLocation(direccion, simpleMap);
+        } else {
+            console.warn('Dirección no disponible para el mapa simple');
+        }
+    }
+
+    /**
+     * Geocodifica una dirección y coloca un marcador simple
+     * @param {string} direccion - Dirección a geocodificar
+     * @param {Object} map - Instancia del mapa de Google Maps
+     */
+    geocodeSimpleLocation(direccion, map) {
+        const geocoder = new google.maps.Geocoder();
+        
+        // Agregar "México" al final para mejorar la precisión
+        const direccionCompleta = direccion.includes('México') ? direccion : direccion + ', México';
+
+        geocoder.geocode({ 
+            address: direccionCompleta,
+            region: 'MX' // Limitar a México
+        }, (results, status) => {
+            if (status === google.maps.GeocoderStatus.OK && results[0]) {
+                const location = results[0].geometry.location;
+                
+                // Centrar el mapa en la ubicación
+                map.setCenter(location);
+                map.setZoom(16);
+
+                // Crear marcador simple y elegante
+                const marker = new google.maps.Marker({
+                    position: location,
+                    map: map,
+                    title: 'Ubicación del domicilio',
+                    animation: google.maps.Animation.DROP,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: '#DC2626',
+                        fillOpacity: 1,
+                        strokeColor: '#FFFFFF',
+                        strokeWeight: 3,
+                        scale: 10
+                    }
+                });
+
+                // Crear ventana de información simple
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div class="p-3 max-w-xs">
+                            <div class="flex items-center mb-2">
+                                <div class="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center mr-2">
+                                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <h6 class="font-medium text-gray-800 text-sm">Domicilio</h6>
+                            </div>
+                            <p class="text-sm text-gray-600">${direccion}</p>
+                        </div>
+                    `,
+                    maxWidth: 280
+                });
+
+                // Evento del marcador
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+
+                console.log('Mapa simple cargado correctamente para:', direccion);
+            } else {
+                console.error('Error al geocodificar dirección simple:', status, direccion);
+                this.showSimpleGeocodeError(map, direccion);
+            }
+        });
+    }
+
+    /**
+     * Muestra error de geocodificación en el mapa simple
+     * @param {Object} map - Instancia del mapa
+     * @param {string} direccion - Dirección que falló
+     */
+    showSimpleGeocodeError(map, direccion) {
+        const infoWindow = new google.maps.InfoWindow({
+            content: `
+                <div class="p-3 max-w-xs">
+                    <div class="flex items-center mb-2">
+                        <svg class="w-5 h-5 text-amber-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                        <h6 class="font-medium text-gray-800 text-sm">Ubicación no encontrada</h6>
+                    </div>
+                    <p class="text-xs text-gray-600">${direccion}</p>
+                </div>
+            `,
+            position: map.getCenter()
+        });
+
+        infoWindow.open(map);
+    }
+
+    /**
+     * Muestra error cuando Google Maps no está disponible en mapa simple
+     * @param {string} containerId - ID del contenedor
+     * @param {string} message - Mensaje de error
+     */
+    showSimpleMapError(containerId, message) {
+        const mapContainer = document.getElementById(containerId);
+        if (mapContainer) {
+            mapContainer.innerHTML = `
+                <div class="flex items-center justify-center h-full bg-gradient-to-br from-red-50 to-orange-50 rounded-lg">
+                    <div class="text-center p-4">
+                        <svg class="w-12 h-12 mx-auto mb-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <p class="text-sm font-medium text-gray-700 mb-1">${message}</p>
+                        <p class="text-xs text-gray-500">Intente recargar la página</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    /**
      * Limpia el mapa actual
      */
     cleanup() {
@@ -729,6 +924,11 @@ window.mapHandler = new MapHandler();
 // Función global para compatibilidad
 window.inicializarMapa = function(seccion, direccion) {
     window.mapHandler.initializeMap(seccion, direccion);
+};
+
+// Función global para mapa simple
+window.inicializarMapaSimple = function(containerId, direccion) {
+    window.mapHandler.initializeSimpleMap(containerId, direccion);
 };
 
 // Función global para obtener dirección

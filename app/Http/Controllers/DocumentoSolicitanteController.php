@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\DocumentoSolicitante;
 use App\Models\Documento;
 use App\Models\Tramite;
+use App\Models\DocumentoVersion;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DocumentoSolicitanteController extends Controller
 {
@@ -121,5 +123,66 @@ class DocumentoSolicitanteController extends Controller
             ]);
             throw new \Exception('Error al actualizar el estado del documento: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Muestra el documento solicitado.
+     *
+     * @param DocumentoSolicitante $documentoSolicitante
+     * @return StreamedResponse
+     */
+    public function ver(DocumentoSolicitante $documentoSolicitante)
+    {
+        // Verificar que el usuario tenga acceso al documento
+        // $this->authorize('ver', $documentoSolicitante);
+
+        if (!$documentoSolicitante->ruta_archivo) {
+            abort(404, 'Archivo no encontrado');
+        }
+
+        try {
+            // Desencriptar la ruta del archivo
+            $rutaDesencriptada = Crypt::decryptString($documentoSolicitante->ruta_archivo);
+            
+            if (!Storage::disk('public')->exists($rutaDesencriptada)) {
+                abort(404, 'Archivo no encontrado en el storage');
+            }
+
+            $filename = basename($rutaDesencriptada);
+            $fullPath = Storage::disk('public')->path($rutaDesencriptada);
+            $mimeType = mime_content_type($fullPath) ?: 'application/octet-stream';
+
+            return response()->stream(function () use ($rutaDesencriptada) {
+                echo Storage::disk('public')->get($rutaDesencriptada);
+            }, 200, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error al desencriptar ruta de archivo:', [
+                'documento_solicitante_id' => $documentoSolicitante->id,
+                'error' => $e->getMessage()
+            ]);
+            abort(404, 'No se pudo acceder al archivo');
+        }
+    }
+
+    /**
+     * Muestra una versión específica del documento.
+     *
+     * @param DocumentoVersion $documentoVersion
+     * @return StreamedResponse
+     */
+    public function verVersion(DocumentoVersion $documentoVersion)
+    {
+        // Verificar que el usuario tenga acceso a la versión del documento
+        $this->authorize('ver', $documentoVersion->documentoSolicitante);
+
+        if (!Storage::exists($documentoVersion->archivo)) {
+            abort(404, 'Archivo no encontrado');
+        }
+
+        return Storage::response($documentoVersion->archivo);
     }
 } 

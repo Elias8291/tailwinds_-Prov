@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Documento;
+use App\Models\Tramite;
+use App\Models\DocumentoVersion;
 
 class DocumentoSolicitante extends Model
 {
@@ -14,24 +17,36 @@ class DocumentoSolicitante extends Model
     protected $fillable = [
         'tramite_id',
         'documento_id',
-        'fecha_entrega',
+        'archivo',
         'estado',
-        'version_documento',
-        'observaciones',
-        'ruta_archivo',
+        'comentarios'
     ];
 
     protected $attributes = [
         'estado' => 'pendiente',
     ];
 
-    public function tramite()
-    {
-        return $this->belongsTo(Tramite::class);
-    }
-
+    /**
+     * Obtiene el documento base asociado.
+     */
     public function documento()
     {
-        return $this->belongsTo(Documento::class);
+        return $this->belongsTo(Documento::class, 'documento_id');
+    }
+
+    /**
+     * Obtiene el trámite asociado.
+     */
+    public function tramite()
+    {
+        return $this->belongsTo(Tramite::class, 'tramite_id');
+    }
+
+    /**
+     * Obtiene las versiones anteriores del documento.
+     */
+    public function versiones()
+    {
+        return $this->hasMany(DocumentoVersion::class, 'documento_solicitante_id');
     }
 } 

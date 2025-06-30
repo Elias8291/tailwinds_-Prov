@@ -13,9 +13,9 @@ class SeccionTramite extends Model
 
     protected $fillable = [
         'nombre',
+        'slug',
         'descripcion',
-        'orden',
-        'es_requerido'
+        'orden'
     ];
 
     protected $casts = [
@@ -32,11 +32,14 @@ class SeccionTramite extends Model
                     ->withTimestamps();
     }
 
+    /**
+     * Obtiene los trámites que tienen esta sección
+     */
     public function tramites()
     {
-        return $this->belongsToMany(Tramite::class, 'progreso_tramite')
-            ->withPivot(['estado', 'observaciones', 'fecha_inicio', 'fecha_completado'])
-            ->withTimestamps();
+        return $this->belongsToMany(Tramite::class, 'seccion_tramite_tramite')
+                    ->withPivot(['estado', 'comentarios'])
+                    ->withTimestamps();
     }
 
     public function progresoTramites()

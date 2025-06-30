@@ -52,6 +52,12 @@ use App\Http\Controllers\MembreteController;
 // Controladores de Estado
 use App\Http\Controllers\MiEstadoProveedorController;
 
+// Controladores de Documentos
+use App\Http\Controllers\DocumentoSolicitanteController;
+
+// Controladores de Notificaciones
+use App\Http\Controllers\NotificacionController;
+
 // ============================================================================
 // RUTAS PÚBLICAS (Sin autenticación requerida)
 // ============================================================================
@@ -393,43 +399,51 @@ Route::middleware(['auth', 'can:tramites-solicitante.ver'])->prefix('tramites-so
 // MÓDULO DE REVISIÓN DE TRÁMITES
 // ============================================================================
 
-Route::middleware(['auth', 'can:revision-tramites.ver'])->prefix('revision')->group(function () {
+Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-tramites.ver'])->group(function () {
+    // Rutas básicas de revisión
+    Route::get('/', [RevisionController::class, 'index'])->name('index');
+    Route::get('/{tramite}', [RevisionController::class, 'show'])->name('show');
     
-    // LISTADO Y GESTIÓN DE REVISIONES
-    Route::get('/', [RevisionController::class, 'index'])->name('revision.index');
-    Route::get('/{tramite}', [RevisionController::class, 'show'])->name('revision.show');
-    Route::get('/{tramite}/documento/{documentoId}', [RevisionController::class, 'verDocumento'])->name('revision.ver-documento');
+    // Rutas de acciones de revisión
+    Route::post('/{tramite}/aprobar', [RevisionController::class, 'aprobarTodo'])
+        ->middleware('can:revision-tramites.aprobar')
+        ->name('aprobar');
     
-    // REVISIÓN DE DATOS GENERALES
-    Route::get('/{tramite}/datos-generales', [\App\Http\Controllers\DatosGeneralesController::class, 'prepararDatosRevision'])
-        ->name('revision.datos-generales');
+    Route::post('/{tramite}/rechazar', [RevisionController::class, 'rechazarTodo'])
+        ->middleware('can:revision-tramites.rechazar')
+        ->name('rechazar');
     
-    // ACCIONES DE REVISIÓN POR SECCIÓN
+    Route::post('/{tramite}/solicitar-correcciones', [RevisionController::class, 'solicitarCorrecciones'])
+        ->middleware('can:revision-tramites.revisar')
+        ->name('solicitar-correcciones');
+    
+    Route::post('/{tramite}/pausar', [RevisionController::class, 'pausarRevision'])
+        ->middleware('can:revision-tramites.pausar')
+        ->name('pausar');
+    
+    // Rutas de acciones por sección
     Route::post('/{tramite}/seccion/{seccion}/aprobar', [RevisionController::class, 'aprobarSeccion'])
         ->middleware('can:revision-tramites.aprobar')
-        ->name('revision.seccion.aprobar');
+        ->name('seccion.aprobar');
+    
     Route::post('/{tramite}/seccion/{seccion}/rechazar', [RevisionController::class, 'rechazarSeccion'])
         ->middleware('can:revision-tramites.rechazar')
-        ->name('revision.seccion.rechazar');
+        ->name('seccion.rechazar');
     
-    // ACCIONES MASIVAS DE REVISIÓN
-    Route::post('/{tramite}/aprobar-todo', [RevisionController::class, 'aprobarTodo'])
-        ->middleware('can:revision-tramites.aprobar')
-        ->name('revision.aprobar-todo');
-    Route::post('/{tramite}/rechazar-todo', [RevisionController::class, 'rechazarTodo'])
-        ->middleware('can:revision-tramites.rechazar')
-        ->name('revision.rechazar-todo');
-    Route::post('/{tramite}/pausar', [RevisionController::class, 'pausarRevision'])
-        ->name('revision.pausar');
+    // Ruta para agregar comentarios
+    Route::post('/{tramite}/comentar', [RevisionController::class, 'agregarComentario'])
+        ->middleware('can:revision-tramites.comentar')
+        ->name('comentar');
     
-    // ESTADO DE REVISIONES
-    Route::get('/{tramite}/estado-revisiones', [\App\Http\Controllers\SeccionRevisionController::class, 'obtenerEstadoRevisiones'])
-        ->name('revision.estado-revisiones');
+    // AJAX endpoints para revisión avanzada
+    Route::get('/{tramite}/estado-revisiones', [RevisionController::class, 'obtenerEstadoRevisiones'])
+        ->name('estado');
     
-    // COMENTARIOS DE REVISIÓN
-    Route::post('/{tramite}/comentario', [RevisionController::class, 'agregarComentario'])
-        ->middleware('can:revision-tramites.comentarios')
-        ->name('revision.agregar-comentario');
+    Route::post('/{tramite}/seccion/{seccion}/comentario', [RevisionController::class, 'guardarComentarioSeccion'])
+        ->name('seccion.comentario');
+    
+    Route::get('/{tramite}/documentos-seccion', [RevisionController::class, 'getDocumentosSeccion'])
+        ->name('documentos-seccion');
 });
 
 // ============================================================================
@@ -440,7 +454,6 @@ Route::middleware(['auth', 'can:documentos.ver'])->prefix('documentos')->group(f
     Route::get('/', [DocumentoController::class, 'index'])->name('documentos.index');
     Route::get('/create', [DocumentoController::class, 'create'])->middleware('can:documentos.crear')->name('documentos.create');
     Route::post('/', [DocumentoController::class, 'store'])->middleware('can:documentos.crear')->name('documentos.store');
-    Route::get('/{documento}', [DocumentoController::class, 'show'])->name('documentos.show');
     Route::get('/{documento}/edit', [DocumentoController::class, 'edit'])->middleware('can:documentos.editar')->name('documentos.edit');
     Route::put('/{documento}', [DocumentoController::class, 'update'])->middleware('can:documentos.editar')->name('documentos.update');
     Route::delete('/{documento}', [DocumentoController::class, 'destroy'])->middleware('can:documentos.eliminar')->name('documentos.destroy');
@@ -565,8 +578,6 @@ Route::middleware(['auth'])->prefix('membretes')->group(function () {
     Route::get('/ejemplo/actualizacion', [MembreteController::class, 'ejemploActualizacion'])->name('membretes.ejemplo.actualizacion');
 });
 
-
-
 // ============================================================================
 // RUTAS DE PRUEBA PARA PÁGINAS DE ERROR (Solo en desarrollo)
 // ============================================================================
@@ -681,5 +692,11 @@ Route::middleware(['auth'])->prefix('notificaciones')->name('notificaciones.')->
     
     // Crear notificación (para administradores)
     Route::post('/crear', [\App\Http\Controllers\NotificacionController::class, 'crear'])->name('crear');
+});
+
+// Rutas para documentos
+Route::prefix('documentos')->name('documentos.')->middleware(['auth'])->group(function () {
+    Route::get('/{documentoSolicitante}', [DocumentoSolicitanteController::class, 'ver'])->name('ver');
+    Route::get('/version/{documentoVersion}', [DocumentoSolicitanteController::class, 'verVersion'])->name('ver-version');
 });
 
