@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
     <!-- Título del Trámite -->
-    <div class="max-w-4xl mx-auto mb-6">
+    <div class="max-w-6xl mx-auto mb-6">
         <div class="bg-white rounded-2xl shadow-lg p-6 backdrop-blur-lg border border-gray-100">
             <div class="flex items-center gap-4">
                 <div class="bg-gradient-to-br from-[#9d2449] to-[#7a1d37] rounded-xl p-3 shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg relative overflow-hidden">
@@ -23,16 +23,19 @@
     </div>
 
             <!-- Form Container -->
-    <div class="max-w-4xl mx-auto mt-4 sm:mt-8 md:mt-16 bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-8 relative z-10"
+    <div class="max-w-6xl mx-auto mt-4 sm:mt-8 md:mt-16 bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-8 relative z-10"
          x-data="{ 
-            currentStep: 1,
-            totalSteps: 3,
+            currentStep: 0,  // Cambiado a 0 para incluir términos y condiciones
+            totalSteps: 4,   // Incrementado para incluir términos
             tipoPersona: 'Física',
             isPersonaFisica: true,
             rfc: '',
             curp: '',
             tramiteId: null,
+            terminosAceptados: false,
+            tipoTramite: 'inscripcion',
             steps: [
+                {number: '00', label: 'Términos y Condiciones'},
                 {number: '01', label: 'Datos Generales'},
                 {number: '02', label: 'Domicilio'},
                 {number: '03', label: 'Documentos'}
@@ -64,21 +67,37 @@
                     // Actualizar datos con validación completa
                     await new Promise(resolve => setTimeout(resolve, 300));
                     
-                    this.currentStep = data.paso_inicial || data.progreso_tramite || 1;
+                    // Verificar si ya se aceptaron términos para este trámite
+                    const terminosKey = `terminos_aceptados_${data.tipo_tramite || 'inscripcion'}_${data.rfc || 'sin_rfc'}`;
+                    const terminosGuardados = localStorage.getItem(terminosKey);
+                    
+                    if (terminosGuardados) {
+                        const terminosData = JSON.parse(terminosGuardados);
+                        this.terminosAceptados = terminosData.aceptado || false;
+                        // Si ya aceptó términos, comenzar en paso 1
+                        this.currentStep = this.terminosAceptados ? (data.paso_inicial || data.progreso_tramite || 1) : 0;
+                    } else {
+                        // Si no hay términos guardados, comenzar en paso 0
+                        this.currentStep = 0;
+                    }
+                    
                     this.tipoPersona = data.tipo_persona || 'Física';
                     this.isPersonaFisica = this.tipoPersona === 'Física';
-                    this.totalSteps = this.isPersonaFisica ? 3 : 6;
+                    this.totalSteps = this.isPersonaFisica ? 4 : 7; // +1 por términos
                     this.rfc = data.rfc || '';
                     this.curp = data.curp || '';
                     this.tramiteId = data.tramite_id || null;
+                    this.tipoTramite = data.tipo_tramite || 'inscripcion';
                     
                     this.steps = this.isPersonaFisica ? 
                         [
+                            {number: '00', label: 'Términos y Condiciones'},
                             {number: '01', label: 'Datos Generales'},
                             {number: '02', label: 'Domicilio'},
                             {number: '03', label: 'Documentos'}
                         ] : 
                         [
+                            {number: '00', label: 'Términos y Condiciones'},
                             {number: '01', label: 'Datos Generales'},
                             {number: '02', label: 'Domicilio'},
                             {number: '03', label: 'Constitución'},
@@ -105,15 +124,133 @@
                 // Finalizar loading
                 this.isLoading = false;
                 console.log('🎉 Carga completada');
+            },
+            
+            // Función para aceptar términos y avanzar
+            aceptarTerminos() {
+                if (!this.terminosAceptados) {
+                    alert('Debe aceptar los términos y condiciones para continuar.');
+                    return;
+                }
+                
+                // Guardar aceptación en localStorage
+                const terminosKey = `terminos_aceptados_${this.tipoTramite}_${this.rfc || 'sin_rfc'}`;
+                localStorage.setItem(terminosKey, JSON.stringify({
+                    aceptado: true,
+                    fecha: new Date().toISOString(),
+                    tipoTramite: this.tipoTramite,
+                    rfc: this.rfc
+                }));
+                
+                // Avanzar al siguiente paso
+                this.currentStep = 1;
+            },
+            
+            // Función para obtener contenido de términos específico
+            obtenerTerminosEspecificos() {
+                const terminos = {
+                    inscripcion: {
+                        titulo: 'Términos y Condiciones - Inscripción al Padrón',
+                        descripcion: 'Para su proceso de inscripción inicial al padrón de proveedores',
+                        condiciones: [
+                            {
+                                titulo: 'Requisitos para Inscripción',
+                                icono: 'fas fa-user-plus',
+                                color: 'blue',
+                                contenido: 'Como solicitante de primera inscripción, deberá cumplir con todos los requisitos establecidos por la normativa vigente. La documentación debe ser actual y veraz.',
+                                puntos: [
+                                    'Documentación completa y actualizada',
+                                    'Información veraz y verificable',
+                                    'Cumplimiento de requisitos fiscales',
+                                    'Capacidad técnica y financiera demostrable'
+                                ]
+                            },
+                            {
+                                titulo: 'Proceso de Evaluación',
+                                icono: 'fas fa-search',
+                                color: 'green',
+                                contenido: 'Su solicitud será evaluada por nuestro equipo técnico especializado para verificar el cumplimiento de todos los criterios.',
+                                puntos: [
+                                    'Revisión documental completa',
+                                    'Verificación de datos con autoridades',
+                                    'Evaluación de capacidades técnicas',
+                                    'Tiempo estimado: 15-20 días hábiles'
+                                ]
+                            }
+                        ]
+                    },
+                    renovacion: {
+                        titulo: 'Términos y Condiciones - Renovación de Registro',
+                        descripcion: 'Para la renovación de su registro en el padrón de proveedores',
+                        condiciones: [
+                            {
+                                titulo: 'Renovación Oportuna',
+                                icono: 'fas fa-sync-alt',
+                                color: 'orange',
+                                contenido: 'La renovación debe realizarse antes del vencimiento para mantener su estatus activo sin interrupciones.',
+                                puntos: [
+                                    'Presentar solicitud 30 días antes del vencimiento',
+                                    'Actualizar información que haya cambiado',
+                                    'Mantener capacidad técnica y financiera',
+                                    'Estar al corriente en obligaciones fiscales'
+                                ]
+                            },
+                            {
+                                titulo: 'Documentación Actualizada',
+                                icono: 'fas fa-file-alt',
+                                color: 'purple',
+                                contenido: 'Debe presentar documentación actualizada que demuestre el mantenimiento de sus capacidades.',
+                                puntos: [
+                                    'Documentos no mayores a 3 meses',
+                                    'Estados financieros actualizados',
+                                    'Constancias de cumplimiento fiscal',
+                                    'Certificaciones vigentes'
+                                ]
+                            }
+                        ]
+                    },
+                    actualizacion: {
+                        titulo: 'Términos y Condiciones - Actualización de Datos',
+                        descripcion: 'Para la actualización de información en su registro',
+                        condiciones: [
+                            {
+                                titulo: 'Cambios Significativos',
+                                icono: 'fas fa-edit',
+                                color: 'indigo',
+                                contenido: 'Debe notificar cualquier cambio relevante en su información registrada dentro de 30 días naturales.',
+                                puntos: [
+                                    'Cambios en razón social o denominación',
+                                    'Modificaciones en domicilio fiscal',
+                                    'Cambios en representación legal',
+                                    'Actualizaciones en capacidad técnica'
+                                ]
+                            },
+                            {
+                                titulo: 'Proceso de Actualización',
+                                icono: 'fas fa-cogs',
+                                color: 'teal',
+                                contenido: 'Las actualizaciones serán revisadas para verificar que no afecten su elegibilidad en el padrón.',
+                                puntos: [
+                                    'Revisión de impacto en capacidades',
+                                    'Verificación de nueva documentación',
+                                    'Mantenimiento de requisitos mínimos',
+                                    'Proceso expedito: 5-10 días hábiles'
+                                ]
+                            }
+                        ]
+                    }
+                };
+                
+                return terminos[this.tipoTramite] || terminos.inscripcion;
             }
          }"
          @next-step="
-            if (currentStep < totalSteps) {
+            if (currentStep < totalSteps - 1) {
                 currentStep++;
             }
          "
          @prev-step="
-            if (currentStep > 1) {
+            if (currentStep > 0) {
                 currentStep--;
             }
          "
@@ -271,38 +408,31 @@
                     <div class="text-right flex-shrink-0">
                         <div x-show="!vencido" class="relative">
                             <!-- Contador principal -->
-                            <div class="text-lg sm:text-xl font-bold font-mono tiempo-contador-mini relative" 
-                                 :class="{
-                                    'text-red-700': color === 'red',
-                                    'text-yellow-700': color === 'yellow',
-                                    'text-blue-700': color === 'blue' || color === 'green'
-                                 }">
+                            <div class="text-lg sm:text-xl font-bold font-mono tiempo-contador-mini relative">
                                 <div class="flex items-center gap-1">
-                                    <div class="text-center">
+                                    <!-- Horas - Rojo elegante -->
+                                    <div class="text-center text-red-600">
                                         <div x-text="String(horasRestantes).padStart(2, '0')" class="leading-tight">{{ str_pad($tiempoLimite['horas_restantes'], 2, '0', STR_PAD_LEFT) }}</div>
-                                        <div class="text-xs opacity-70">h</div>
+                                        <div class="text-xs opacity-80 text-red-500">h</div>
                                     </div>
-                                    <div class="text-sm">:</div>
-                                    <div class="text-center">
+                                    <div class="text-sm text-gray-400">:</div>
+                                    <!-- Minutos - Cyan/Turquesa -->
+                                    <div class="text-center text-cyan-600">
                                         <div x-text="String(minutosRestantes).padStart(2, '0')" class="leading-tight">{{ str_pad($tiempoLimite['minutos_restantes'], 2, '0', STR_PAD_LEFT) }}</div>
-                                        <div class="text-xs opacity-70">m</div>
+                                        <div class="text-xs opacity-80 text-cyan-500">m</div>
                                     </div>
-                                    <div class="text-sm">:</div>
-                                    <div class="text-center">
+                                    <div class="text-sm text-gray-400">:</div>
+                                    <!-- Segundos - Púrpura elegante -->
+                                    <div class="text-center text-purple-600">
                                         <div x-text="String(segundosRestantes).padStart(2, '0')" class="leading-tight">{{ str_pad($tiempoLimite['segundos_restantes'], 2, '0', STR_PAD_LEFT) }}</div>
-                                        <div class="text-xs opacity-70">s</div>
+                                        <div class="text-xs opacity-80 text-purple-500">s</div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Barra de progreso mini -->
+                            <!-- Barra de progreso mini con gradiente elegante -->
                             <div class="mt-1 w-full bg-gray-200 rounded-full h-1 overflow-hidden">
-                                <div class="h-full transition-all duration-1000 rounded-full"
-                                     :class="{
-                                        'bg-red-500': color === 'red',
-                                        'bg-yellow-500': color === 'yellow',
-                                        'bg-blue-500': color === 'blue' || color === 'green'
-                                     }"
+                                <div class="h-full transition-all duration-1000 rounded-full bg-gradient-to-r from-red-500 via-cyan-500 to-purple-500"
                                      :style="'width: ' + (100 - ((horasRestantes * 3600 + minutosRestantes * 60 + segundosRestantes) / (48 * 3600) * 100)) + '%'">
                                 </div>
                             </div>
@@ -326,46 +456,46 @@
         <!-- Mobile Progress Indicator -->
         <div class="md:hidden mb-4 text-center">
             <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-800 text-white shadow-lg">
-                <span class="text-xl font-bold" x-text="currentStep - 1">0</span>
+                <span class="text-xl font-bold" x-text="currentStep">0</span>
                 <span class="text-xs">/</span>
                 <span class="text-sm" x-text="totalSteps - 1"></span>
             </div>
-            <div class="mt-1 text-xs text-gray-600 font-medium" x-text="steps[currentStep - 1]?.label || ''"></div>
+            <div class="mt-1 text-xs text-gray-600 font-medium" x-text="steps[currentStep]?.label || ''"></div>
             <div class="mt-2 text-xs text-gray-500">
-                <span x-text="Math.round(((currentStep - 1) / (totalSteps - 1)) * 100) + '%'">0%</span> Completado
+                <span x-text="Math.round((currentStep / (totalSteps - 1)) * 100) + '%'">0%</span> Completado
             </div>
         </div>
 
         <!-- Desktop Progress Container -->
         <div class="hidden md:block">
-            <div class="max-w-3xl mx-auto mb-10 h-[100px] flex flex-col md:flex-row items-center gap-6">
+            <div class="max-w-6xl mx-auto mb-10 h-[100px] flex flex-col md:flex-row items-center gap-6">
                 <!-- Progress Info -->
                 <div class="flex flex-col items-center min-w-[80px]">
-                    <span class="text-2xl md:text-3xl font-bold text-red-800 h-[36px] flex items-center" x-text="Math.round(((currentStep - 1) / (totalSteps - 1)) * 100) + '%'">0%</span>
+                    <span class="text-2xl md:text-3xl font-bold text-red-800 h-[36px] flex items-center" x-text="Math.round((currentStep / (totalSteps - 1)) * 100) + '%'">0%</span>
                     <span class="text-xs uppercase text-gray-500 tracking-wide">Completado</span>
                 </div>
                 <!-- Progress Bar -->
                 <div class="w-full h-2 relative">
                     <div class="h-2 bg-gray-200 rounded-full absolute inset-0">
-                        <div class="h-full bg-red-800 rounded-full transition-all duration-500 transform-gpu" x-bind:style="'width: ' + ((currentStep - 1) / (totalSteps - 1) * 100) + '%'"></div>
+                        <div class="h-full bg-red-800 rounded-full transition-all duration-500 transform-gpu" x-bind:style="'width: ' + (currentStep / (totalSteps - 1) * 100) + '%'"></div>
                     </div>
                 </div>
             </div>
 
             <!-- Progress Tracker (Steps) - Only visible on desktop -->
-            <div class="relative max-w-3xl mx-auto mb-12 h-[80px]">
+            <div class="relative max-w-6xl mx-auto mb-12 h-[80px]">
                 <div class="absolute top-4 left-10 right-10 h-0.5 bg-gray-200"></div>
-                <div class="absolute top-4 left-10 h-0.5 bg-red-800 transition-all duration-600 transform-gpu" x-bind:style="'width: ' + ((currentStep - 1) / (totalSteps - 1) * 100) + '%'"></div>
+                <div class="absolute top-4 left-10 h-0.5 bg-red-800 transition-all duration-600 transform-gpu" x-bind:style="'width: ' + (currentStep / (totalSteps - 1) * 100) + '%'"></div>
                 <div class="flex justify-between">
                     <template x-for="(step, index) in steps" :key="index">
                         <div class="flex flex-col items-center relative z-10 w-24">
                             <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 border-2 border-gray-200 text-gray-500 font-semibold text-sm transition-all duration-300 transform-gpu"
                                  :class="{
-                                    'bg-red-800 border-red-800 text-white': currentStep > index + 1,
-                                    'bg-red-800 border-red-800 text-white shadow-[0_0_0_3px_rgba(157,36,73,0.2)]': currentStep === index + 1,
-                                    'bg-gray-100 border-gray-200 text-gray-500': currentStep < index + 1
+                                    'bg-red-800 border-red-800 text-white': currentStep > index,
+                                    'bg-red-800 border-red-800 text-white shadow-[0_0_0_3px_rgba(157,36,73,0.2)]': currentStep === index,
+                                    'bg-gray-100 border-gray-200 text-gray-500': currentStep < index
                                  }"
-                                 @click="if(currentStep > index + 1) currentStep = index + 1">
+                                 @click="if(currentStep > index || (index === 0 && terminosAceptados)) currentStep = index">
                                 <span x-text="step.number"></span>
                             </div>
                             <span class="mt-2 text-xs text-center text-gray-500 font-medium" x-text="step.label"></span>
@@ -401,7 +531,424 @@
             </div>
             
             <!-- Form Sections -->
-            <div class="max-w-3xl mx-auto">
+            <div class="max-w-6xl mx-auto">
+                
+                <!-- =============================================== -->
+                <!-- PASO 0: TÉRMINOS Y CONDICIONES ESPECÍFICOS    -->
+                <!-- =============================================== -->
+                <div x-show="currentStep === 0" 
+                     x-cloak
+                     x-transition:enter="transition ease-out duration-300 transform"
+                     x-transition:enter-start="opacity-0 translate-y-2"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-200 transform"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 -translate-y-2">
+                    
+                    <div class="space-y-8" x-data="{ terminos: obtenerTerminosEspecificos() }">
+                        
+                        <!-- Encabezado Compacto y Elegante -->
+                        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                            <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-6 py-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-4">
+                                            <i class="fas fa-file-contract text-lg text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h1 class="text-xl font-bold text-white">
+                                                Términos y Condiciones
+                                            </h1>
+                                            <p class="text-white/80 text-sm" x-text="terminos.descripcion">
+                                                Condiciones específicas para su trámite
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Información del Trámite Compacta -->
+                            <div class="px-6 py-4 bg-gray-50">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="flex items-center bg-white rounded-lg p-3 shadow-sm">
+                                        <div class="w-8 h-8 bg-[#9d2449] rounded-md flex items-center justify-center mr-3">
+                                            <i class="fas fa-clipboard-list text-white text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500 font-medium">Tipo de Trámite</p>
+                                            <p class="text-sm font-bold text-gray-800 capitalize" x-text="tipoTramite">Inscripción</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center bg-white rounded-lg p-3 shadow-sm" x-show="rfc">
+                                        <div class="w-8 h-8 bg-[#9d2449] rounded-md flex items-center justify-center mr-3">
+                                            <i class="fas fa-hashtag text-white text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500 font-medium">RFC</p>
+                                            <p class="text-sm font-bold text-gray-800 font-mono" x-text="rfc">---</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center bg-white rounded-lg p-3 shadow-sm">
+                                        <div class="w-8 h-8 bg-[#9d2449] rounded-md flex items-center justify-center mr-3">
+                                            <i class="fas fa-user text-white text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500 font-medium">Tipo de Persona</p>
+                                            <p class="text-sm font-bold text-gray-800" x-text="tipoPersona">Física</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Términos Específicos -->
+                        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                            <div class="px-8 py-6 border-b border-gray-200">
+                                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                                    <i class="fas fa-list-alt text-[#9d2449] mr-3"></i>
+                                    Condiciones Específicas
+                                </h2>
+                            </div>
+                            <div class="p-8 space-y-6">
+                                
+                                <!-- Condiciones Dinámicas -->
+                                <template x-for="(condicion, index) in terminos.condiciones" :key="index">
+                                    <div class="border-l-4 border-[#9d2449] pl-6 py-4 bg-gray-50 rounded-r-lg">
+                                        <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                                            <i :class="condicion.icono + ' text-[#9d2449] mr-3'"></i>
+                                            <span x-text="condicion.titulo"></span>
+                                        </h3>
+                                        <p class="text-gray-700 mb-4 leading-relaxed" x-text="condicion.contenido"></p>
+                                        
+                                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                                            <h4 class="font-semibold text-gray-800 mb-3">Requisitos:</h4>
+                                            <ul class="space-y-2">
+                                                <template x-for="punto in condicion.puntos" :key="punto">
+                                                    <li class="flex items-start">
+                                                        <span class="w-2 h-2 bg-[#9d2449] rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                                        <span class="text-gray-600 text-sm" x-text="punto"></span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Disposiciones Generales -->
+                                <div class="border-t border-gray-200 pt-6">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center">
+                                        <i class="fas fa-info-circle text-[#9d2449] mr-3"></i>
+                                        Disposiciones Generales
+                                    </h3>
+                                    
+                                    <!-- Diseño Formal Gubernamental -->
+                                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            
+                                            <!-- Protección de Datos -->
+                                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
+                                                <div class="p-4">
+                                                    <div class="flex items-start">
+                                                        <div class="w-10 h-10 bg-[#9d2449] rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                                            <i class="fas fa-shield-alt text-white text-sm"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-semibold text-gray-800 mb-2 text-sm">
+                                                                Protección de Datos
+                                                            </h4>
+                                                            <p class="text-xs text-gray-600 leading-relaxed">Sus datos serán tratados conforme a la normativa de protección de datos personales.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Veracidad de Información -->
+                                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
+                                                <div class="p-4">
+                                                    <div class="flex items-start">
+                                                        <div class="w-10 h-10 bg-[#9d2449] rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                                            <i class="fas fa-check-circle text-white text-sm"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-semibold text-gray-800 mb-2 text-sm">
+                                                                Veracidad de Información
+                                                            </h4>
+                                                            <p class="text-xs text-gray-600 leading-relaxed">Usted es responsable de la veracidad de toda la información proporcionada.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Tiempos de Respuesta -->
+                                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
+                                                <div class="p-4">
+                                                    <div class="flex items-start">
+                                                        <div class="w-10 h-10 bg-[#9d2449] rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                                            <i class="fas fa-clock text-white text-sm"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-semibold text-gray-800 mb-2 text-sm">
+                                                                Tiempos de Respuesta
+                                                            </h4>
+                                                            <p class="text-xs text-gray-600 leading-relaxed">Los tiempos son estimados y pueden variar según la complejidad del caso.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Notificaciones -->
+                                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
+                                                <div class="p-4">
+                                                    <div class="flex items-start">
+                                                        <div class="w-10 h-10 bg-[#9d2449] rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                                            <i class="fas fa-envelope text-white text-sm"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-semibold text-gray-800 mb-2 text-sm">
+                                                                Notificaciones
+                                                            </h4>
+                                                            <p class="text-xs text-gray-600 leading-relaxed">Las comunicaciones oficiales se enviarán a su correo electrónico registrado.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Cotejo Presencial - Destacado -->
+                                            <div class="bg-gradient-to-br from-[#9d2449] to-[#8a203f] rounded-lg shadow-md border-2 border-[#9d2449] hover:shadow-lg transition-shadow duration-300">
+                                                <div class="p-4">
+                                                    <div class="flex items-start">
+                                                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                                            <i class="fas fa-calendar-check text-white text-sm"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-semibold text-white mb-2 text-sm">
+                                                                Cotejo Presencial
+                                                            </h4>
+                                                            <p class="text-xs text-white/90 leading-relaxed">Debe asistir a un cotejo presencial una vez aprobado su trámite para su culminación final.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Inasistencia - Advertencia -->
+                                            <div class="bg-gray-800 rounded-lg shadow-md border border-gray-700 hover:shadow-lg transition-shadow duration-300">
+                                                <div class="p-4">
+                                                    <div class="flex items-start">
+                                                        <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                                            <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-semibold text-white mb-2 text-sm">
+                                                                Advertencia de Inasistencia
+                                                            </h4>
+                                                            <p class="text-xs text-gray-300 leading-relaxed">Si no asiste al cotejo presencial, el trámite no culminará y se reiniciará de nuevo.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                        
+                                        <!-- Nota Importante -->
+                                        <div class="mt-6 p-4 bg-white rounded-lg border-l-4 border-[#9d2449] shadow-sm">
+                                            <div class="flex items-start">
+                                                <div class="w-8 h-8 bg-[#9d2449] rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                                    <i class="fas fa-info text-white text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <h5 class="font-semibold text-gray-800 text-sm mb-1">Nota Importante</h5>
+                                                    <p class="text-xs text-gray-600">
+                                                        El cumplimiento de todos estos términos es obligatorio para la correcta tramitación de su solicitud. 
+                                                        La falta de cumplimiento de alguno de estos requisitos puede resultar en la cancelación o reinicio del proceso.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Aceptación Formal de Términos y Condiciones -->
+                        <div class="bg-white rounded-xl shadow-xl border-2 border-gray-300 overflow-hidden relative">
+                            <!-- Marco decorativo oficial -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 opacity-50"></div>
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#9d2449] via-amber-500 to-[#9d2449]"></div>
+                            
+                            <!-- Encabezado oficial -->
+                            <div class="relative bg-gradient-to-r from-gray-100 to-gray-50 border-b-2 border-gray-200 px-8 py-6">
+                                <div class="flex items-center justify-center">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-[#9d2449] to-[#7a1d37] rounded-full flex items-center justify-center shadow-lg mr-6">
+                                        <i class="fas fa-balance-scale text-white text-2xl"></i>
+                                    </div>
+                                    <div class="text-center">
+                                        <h2 class="text-2xl font-bold text-gray-800 tracking-wide">
+                                            DECLARACIÓN LEGAL
+                                        </h2>
+                                        <p class="text-sm text-gray-600 font-medium mt-1">
+                                            Aceptación de Términos y Condiciones
+                                        </p>
+                                    </div>
+                                    <div class="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center shadow-lg ml-6">
+                                        <i class="fas fa-certificate text-white text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Contenido principal -->
+                            <div class="relative p-8">
+                                <!-- Sello de agua decorativo -->
+                                <div class="absolute top-4 right-4 opacity-5">
+                                    <i class="fas fa-stamp text-[#9d2449] text-8xl transform rotate-12"></i>
+                                </div>
+                                
+                                <!-- Marco decorativo interno -->
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gradient-to-br from-gray-50 to-white">
+                                    
+                                    <!-- Contenido de la declaración -->
+                                    <div class="space-y-6">
+                                        
+                                        <!-- Preámbulo formal -->
+                                        <div class="text-center border-b border-gray-200 pb-4">
+                                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                                DECLARACIÓN BAJO PROTESTA DE DECIR VERDAD
+                                            </p>
+                                        </div>
+                                        
+                                        <!-- Texto legal principal -->
+                                        <div class="space-y-4 text-justify leading-relaxed">
+                                            <p class="text-gray-800 font-medium">
+                                                <span class="text-lg font-bold text-[#9d2449]">YO, EL SUSCRITO,</span> 
+                                                declaro bajo protesta de decir verdad que:
+                                            </p>
+                                            
+                                            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                                                <ul class="space-y-3 text-gray-700">
+                                                    <li class="flex items-start">
+                                                        <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">1</span>
+                                                        <span>He <strong>leído íntegramente</strong> y <strong>comprendido</strong> todos los términos y condiciones establecidos para el trámite de <strong class="text-[#9d2449] capitalize" x-text="tipoTramite">inscripción</strong> al Padrón de Proveedores.</span>
+                                                    </li>
+                                                    <li class="flex items-start">
+                                                        <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">2</span>
+                                                        <span><strong>Acepto y me comprometo</strong> a cumplir con todas las disposiciones, requisitos y obligaciones establecidas en la normativa aplicable.</span>
+                                                    </li>
+                                                    <li class="flex items-start">
+                                                        <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">3</span>
+                                                        <span><strong>Confirmo que toda la información</strong> que proporcionaré es <strong>veraz, actual y completa</strong>, y me hago responsable de su autenticidad.</span>
+                                                    </li>
+                                                    <li class="flex items-start">
+                                                        <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">4</span>
+                                                        <span>Estoy <strong>consciente de las implicaciones legales</strong> de proporcionar información falsa o incompleta, así como del incumplimiento de las obligaciones contraídas.</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <!-- Advertencia legal -->
+                                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                                <div class="flex items-start">
+                                                    <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                                        <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="font-bold text-amber-800 mb-2">ADVERTENCIA LEGAL</h4>
+                                                        <p class="text-sm text-amber-700 leading-relaxed">
+                                                            El incumplimiento de las disposiciones aquí aceptadas, así como la falsedad en las declaraciones realizadas, 
+                                                            podrán dar lugar a las sanciones administrativas y penales que correspondan conforme a la legislación aplicable.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Checkbox de aceptación formal -->
+                                        <div class="border-2 border-[#9d2449] rounded-lg p-6 bg-gradient-to-r from-red-50 to-pink-50">
+                                            <div class="flex items-start space-x-4">
+                                                <div class="flex-shrink-0 mt-2">
+                                                    <input type="checkbox" 
+                                                           x-model="terminosAceptados"
+                                                           id="aceptar-terminos"
+                                                           class="w-6 h-6 text-[#9d2449] border-3 border-[#9d2449] rounded-md focus:ring-[#9d2449] focus:ring-3 transition-all duration-300 shadow-lg">
+                                                </div>
+                                                <div class="flex-1">
+                                                    <label for="aceptar-terminos" class="cursor-pointer">
+                                                        <h3 class="text-xl font-bold text-[#9d2449] mb-3 tracking-wide">
+                                                            ✓ ACEPTO LOS TÉRMINOS Y CONDICIONES
+                                                        </h3>
+                                                        <p class="text-gray-700 leading-relaxed font-medium">
+                                                            <strong>Manifiesto mi conformidad</strong> con todos los puntos anteriores y 
+                                                            <strong>otorgo mi consentimiento expreso</strong> para dar inicio al proceso de trámite 
+                                                            correspondiente, comprometiéndome a proporcionar información verídica y a cumplir 
+                                                            con todos los requisitos establecidos.
+                                                        </p>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Información de fecha y hora -->
+                                        <div class="text-center text-xs text-gray-500 bg-gray-100 rounded-lg p-3">
+                                            <p>
+                                                <i class="fas fa-calendar-alt mr-2"></i>
+                                                <strong>Fecha y hora de aceptación:</strong> 
+                                                <span id="fecha-aceptacion"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Botón formal para continuar -->
+                                <div class="mt-8 text-center">
+                                    <button @click="aceptarTerminos()" 
+                                            :disabled="!terminosAceptados"
+                                            :class="terminosAceptados ? 
+                                                'bg-gradient-to-r from-[#9d2449] via-red-600 to-[#7a1d37] hover:from-[#8a203f] hover:via-red-700 hover:to-[#6b1a30] text-white shadow-2xl hover:shadow-3xl transform hover:scale-105 border-2 border-[#9d2449]' : 
+                                                'bg-gray-300 text-gray-500 cursor-not-allowed border-2 border-gray-300'"
+                                            class="px-12 py-5 rounded-xl font-bold text-lg transition-all duration-300 flex items-center space-x-4 mx-auto relative overflow-hidden">
+                                        
+                                        <!-- Efecto de brillo -->
+                                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -skew-x-12 group-hover:animate-pulse"></div>
+                                        
+                                        <i class="fas fa-file-signature text-xl relative z-10"></i>
+                                        <span class="relative z-10 tracking-wide">CONTINUAR CON EL TRÁMITE OFICIAL</span>
+                                        <i class="fas fa-arrow-right text-xl relative z-10"></i>
+                                    </button>
+                                    
+                                    <p class="mt-4 text-xs text-gray-500 italic">
+                                        Al hacer clic, se registrará su aceptación con fecha y hora oficial
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <script>
+                            // Actualizar fecha y hora en tiempo real
+                            function actualizarFechaHora() {
+                                const ahora = new Date();
+                                const opciones = { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric', 
+                                    hour: '2-digit', 
+                                    minute: '2-digit', 
+                                    second: '2-digit',
+                                    timeZoneName: 'short'
+                                };
+                                const fechaFormateada = ahora.toLocaleDateString('es-MX', opciones);
+                                const elemento = document.getElementById('fecha-aceptacion');
+                                if (elemento) {
+                                    elemento.textContent = fechaFormateada;
+                                }
+                            }
+                            
+                            // Actualizar cada segundo
+                            setInterval(actualizarFechaHora, 1000);
+                            actualizarFechaHora(); // Llamada inicial
+                        </script>
+                    </div>
+                </div>
+
                 <!-- Datos Generales -->
                 <div x-show="currentStep === 1" 
                      x-cloak
@@ -837,13 +1384,13 @@
     }
     
     /* Mejoras para el contenedor del título */
-    .max-w-4xl.mx-auto.mb-6 .bg-white {
+    .max-w-6xl.mx-auto.mb-6 .bg-white {
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
         backdrop-filter: blur(10px);
         transition: all 0.3s ease;
     }
     
-    .max-w-4xl.mx-auto.mb-6 .bg-white:hover {
+    .max-w-6xl.mx-auto.mb-6 .bg-white:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 16px rgba(157, 36, 73, 0.1);
     }
@@ -1123,20 +1670,59 @@
         letter-spacing: 1px;
     }
 
-    /* Animación de pulso suave para tiempo crítico */
-    @keyframes pulso-suave {
+    /* Animaciones elegantes para cada unidad de tiempo */
+    @keyframes pulso-horas {
         0%, 100% {
             opacity: 1;
             transform: scale(1);
+            text-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
         }
         50% {
-            opacity: 0.8;
-            transform: scale(1.02);
+            opacity: 0.9;
+            transform: scale(1.03);
+            text-shadow: 0 0 12px rgba(220, 38, 38, 0.6);
         }
     }
 
-    .tiempo-color-red .tiempo-contador-mini {
-        animation: pulso-suave 2s infinite;
+    @keyframes pulso-minutos {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+            text-shadow: 0 0 8px rgba(8, 145, 178, 0.4);
+        }
+        50% {
+            opacity: 0.9;
+            transform: scale(1.03);
+            text-shadow: 0 0 12px rgba(8, 145, 178, 0.6);
+        }
+    }
+
+    @keyframes pulso-segundos {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+            text-shadow: 0 0 8px rgba(124, 58, 237, 0.4);
+        }
+        50% {
+            opacity: 0.9;
+            transform: scale(1.03);
+            text-shadow: 0 0 12px rgba(124, 58, 237, 0.6);
+        }
+    }
+
+    /* Aplicar animaciones cuando el tiempo es crítico */
+    .tiempo-color-red .text-red-600 {
+        animation: pulso-horas 2s infinite;
+    }
+
+    .tiempo-color-red .text-cyan-600 {
+        animation: pulso-minutos 1.8s infinite;
+        animation-delay: 0.2s;
+    }
+
+    .tiempo-color-red .text-purple-600 {
+        animation: pulso-segundos 1.5s infinite;
+        animation-delay: 0.4s;
     }
 
     /* Animación de parpadeo para emojis */
@@ -1153,28 +1739,49 @@
         animation: parpadeo-emoji 1.5s infinite;
     }
 
-    /* Animación sutil para la barra de progreso */
-    @keyframes progreso-glow {
+    /* Animación elegante para la barra de progreso con gradiente */
+    @keyframes gradiente-glow {
         0%, 100% {
-            box-shadow: 0 0 3px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 8px rgba(220, 38, 38, 0.3);
         }
-        50% {
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+        33% {
+            box-shadow: 0 0 10px rgba(8, 145, 178, 0.3);
+        }
+        66% {
+            box-shadow: 0 0 12px rgba(124, 58, 237, 0.3);
         }
     }
 
-    .tiempo-limite-container-mini .bg-blue-500 {
-        animation: progreso-glow 3s infinite;
+    .tiempo-limite-container-mini .bg-gradient-to-r {
+        animation: gradiente-glow 4s infinite ease-in-out;
     }
 
-    .tiempo-limite-container-mini .bg-yellow-500 {
-        animation: progreso-glow 3s infinite;
-        box-shadow: 0 0 3px rgba(245, 158, 11, 0.3);
+    /* Efectos hover elegantes para cada color */
+    .tiempo-contador-mini .text-red-600:hover {
+        transform: scale(1.08);
+        text-shadow: 0 0 16px rgba(220, 38, 38, 0.7);
+        transition: all 0.3s ease;
     }
 
-    .tiempo-limite-container-mini .bg-red-500 {
-        animation: progreso-glow 2s infinite;
-        box-shadow: 0 0 3px rgba(239, 68, 68, 0.3);
+    .tiempo-contador-mini .text-cyan-600:hover {
+        transform: scale(1.08);
+        text-shadow: 0 0 16px rgba(8, 145, 178, 0.7);
+        transition: all 0.3s ease;
+    }
+
+    .tiempo-contador-mini .text-purple-600:hover {
+        transform: scale(1.08);
+        text-shadow: 0 0 16px rgba(124, 58, 237, 0.7);
+        transition: all 0.3s ease;
+    }
+
+    /* Efectos suaves para los labels */
+    .tiempo-contador-mini .text-red-500:hover,
+    .tiempo-contador-mini .text-cyan-500:hover,
+    .tiempo-contador-mini .text-purple-500:hover {
+        opacity: 1;
+        transform: scale(1.1);
+        transition: all 0.3s ease;
     }
 
     /* Responsive para móvil - versión mini */
@@ -1640,6 +2247,124 @@
 
     #modal-advertencia .animate-ping {
         animation: decorative-pulse 2s ease-in-out infinite;
+    }
+
+    /* 📋 ESTILOS SIMPLES PARA TÉRMINOS Y CONDICIONES */
+    
+    /* Transiciones suaves */
+    .terminos-card {
+        transition: all 0.3s ease;
+    }
+    
+    .terminos-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Efectos para el checkbox */
+    .terminos-checkbox:checked {
+        animation: checkboxBounce 0.3s ease;
+    }
+    
+    @keyframes checkboxBounce {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Botón de continuar */
+    .btn-terminos-continuar {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-terminos-continuar:hover {
+        transform: translateY(-1px) scale(1.05);
+        box-shadow: 0 8px 20px rgba(157, 36, 73, 0.3);
+    }
+    
+    .btn-terminos-continuar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-terminos-continuar:hover::before {
+        left: 100%;
+    }
+    
+    /* Iconos animados */
+    .terminos-icon {
+        transition: all 0.3s ease;
+    }
+    
+    .terminos-icon:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Efectos para las secciones de términos */
+    .terminos-section {
+        transition: all 0.3s ease;
+    }
+    
+    .terminos-section:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Animaciones de entrada */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .terminos-fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    /* Estados de focus */
+    .terminos-checkbox:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(157, 36, 73, 0.2);
+    }
+    
+    .btn-terminos-continuar:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(157, 36, 73, 0.2);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .terminos-card {
+            margin-bottom: 1rem;
+        }
+        
+        .btn-terminos-continuar {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+    
+    /* Accesibilidad */
+    @media (prefers-reduced-motion: reduce) {
+        .terminos-card,
+        .terminos-icon,
+        .btn-terminos-continuar,
+        .terminos-fade-in {
+            animation: none;
+            transition: none;
+        }
     }
 
     /* 🔥 ESTILOS PARA VALIDACIONES DE DATOS GENERALES */
@@ -2544,7 +3269,7 @@
         
         // Función para detectar secciones visibles
         function findNextSection() {
-            const sections = document.querySelectorAll('[x-show*="currentStep"], .form-section, .max-w-3xl > div');
+            const sections = document.querySelectorAll('[x-show*="currentStep"], .form-section, .max-w-6xl > div');
             const currentScroll = window.pageYOffset;
             const windowHeight = window.innerHeight;
             
@@ -3199,3 +3924,4 @@
 </script>
 @endpush
 @endsection
+

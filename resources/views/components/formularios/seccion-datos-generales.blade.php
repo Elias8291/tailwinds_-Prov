@@ -2,7 +2,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<div class="max-w-4xl mx-auto">
+<div class="max-w-6xl mx-auto">
     <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-8">
         @csrf
         
