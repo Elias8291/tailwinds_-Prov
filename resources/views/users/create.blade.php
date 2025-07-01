@@ -165,7 +165,6 @@
                                 </p>
                                 @enderror
                             </div>
-<<<<<<< HEAD
 
                             <!-- RFC -->
                             <div class="input-floating">
@@ -188,9 +187,6 @@
                                 </p>
                                 @enderror
                             </div>
-
-=======
->>>>>>> c0f914d6e5f49bac2ec8351bbd9cdd9675e19456
                             <!-- Contraseña -->
                             <div>
                                 <label for="password" class="block text-xs font-medium text-gray-500 mb-1">
