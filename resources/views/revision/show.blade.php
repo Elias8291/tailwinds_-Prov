@@ -1468,6 +1468,66 @@
             console.log('Sistema de revisión avanzado cargado');
         });
 
+        // Función para mostrar notificaciones
+        function mostrarNotificacion(mensaje, tipo = 'info', duracion = 4000) {
+            // Crear contenedor de notificaciones si no existe
+            let contenedor = document.getElementById('notificaciones-container');
+            if (!contenedor) {
+                contenedor = document.createElement('div');
+                contenedor.id = 'notificaciones-container';
+                contenedor.className = 'fixed top-4 right-4 z-50 space-y-2';
+                document.body.appendChild(contenedor);
+            }
+            
+            // Crear la notificación
+            const notificacion = document.createElement('div');
+            notificacion.className = `p-4 rounded-lg shadow-lg max-w-sm transform transition-all duration-300 ease-in-out translate-x-full`;
+            
+            // Aplicar estilos según el tipo
+            switch(tipo) {
+                case 'success':
+                    notificacion.classList.add('bg-green-500', 'text-white');
+                    break;
+                case 'error':
+                    notificacion.classList.add('bg-red-500', 'text-white');
+                    break;
+                case 'warning':
+                    notificacion.classList.add('bg-yellow-500', 'text-white');
+                    break;
+                default:
+                    notificacion.classList.add('bg-blue-500', 'text-white');
+            }
+            
+            notificacion.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium">${mensaje}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            class="ml-3 text-white hover:text-gray-200 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            contenedor.appendChild(notificacion);
+            
+            // Animar entrada
+            setTimeout(() => {
+                notificacion.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto-eliminar
+            setTimeout(() => {
+                notificacion.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notificacion.parentElement) {
+                        notificacion.remove();
+                    }
+                }, 300);
+            }, duracion);
+        }
+        
         // Hacer funciones globales para uso en onclick
         window.abrirMapaDomicilio = abrirMapaDomicilio;
         window.cerrarModalMapa = cerrarModalMapa;
@@ -1484,6 +1544,7 @@
         window.abrirModalDocumentoRevision = abrirModalDocumentoRevision;
         window.aplicarRevisionDocumento = aplicarRevisionDocumento;
         window.guardarComentarioDocumento = guardarComentarioDocumento;
+        window.mostrarNotificacion = mostrarNotificacion;
         
         // Sistema de redimensionamiento
         function initResizeSystem() {
@@ -1620,41 +1681,98 @@
         }
 
         // Actualizar visualización del estado de sección
-        function actualizarEstadoSeccion(estadoSpanOrSeccion, estado) {
-            let estadoSpan;
+        function actualizarEstadoSeccion(seccion, estado) {
+            console.log('🔄 Actualizando estado de sección:', seccion, 'a:', estado);
             
-            // Si se pasa un string, obtener el elemento
-            if (typeof estadoSpanOrSeccion === 'string') {
-                estadoSpan = obtenerEstadoSpan(estadoSpanOrSeccion);
-            } else {
-                estadoSpan = estadoSpanOrSeccion;
-            }
-            
-            // Validar que estadoSpan existe
-            if (!estadoSpan) {
-                console.warn('actualizarEstadoSeccion: estadoSpan es null para:', typeof estadoSpanOrSeccion === 'string' ? estadoSpanOrSeccion : 'elemento');
+            // Buscar el span de estado en la sección actual
+            const revisionControl = document.querySelector(`.revision-controls[data-seccion="${seccion}"]`);
+            if (!revisionControl) {
+                console.warn('⚠️ No se encontró revision-controls para sección:', seccion);
                 return;
             }
             
+            const estadoSpan = revisionControl.querySelector('.estado-seccion');
+            if (!estadoSpan) {
+                console.warn('⚠️ No se encontró estado-seccion span para:', seccion);
+                return;
+            }
+            
+            // Limpiar clases anteriores
             estadoSpan.className = 'px-2 py-1 text-xs font-medium rounded-full';
             
+            // Aplicar nuevo estado
             switch(estado) {
                 case 'aprobado':
-                    estadoSpan.classList.add('bg-green-100', 'text-green-800');
+                    estadoSpan.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-200');
                     estadoSpan.textContent = '✅ Aprobado';
+                    console.log('✅ Estado actualizado a APROBADO');
                     break;
                 case 'rechazado':
-                    estadoSpan.classList.add('bg-red-100', 'text-red-800');
+                    estadoSpan.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-200');
                     estadoSpan.textContent = '❌ Rechazado';
+                    console.log('❌ Estado actualizado a RECHAZADO');
                     break;
                 default:
-                    estadoSpan.classList.add('bg-yellow-100', 'text-yellow-800');
+                    estadoSpan.classList.add('bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-200');
                     estadoSpan.textContent = '⏳ Pendiente';
+                    console.log('⏳ Estado actualizado a PENDIENTE');
             }
             
             // Actualizar indicador en el tab
-            const seccionActual = typeof estadoSpanOrSeccion === 'string' ? estadoSpanOrSeccion : window.seccionActual;
-            actualizarIndicadorTab(seccionActual, estado);
+            actualizarIndicadorTab(seccion, estado);
+            
+            // Actualizar también los botones para reflejar el estado
+            actualizarBotonesRevision(seccion, estado);
+        }
+        
+        // Nueva función para actualizar el estado de los botones
+        function actualizarBotonesRevision(seccion, estado) {
+            const revisionControl = document.querySelector(`.revision-controls[data-seccion="${seccion}"]`);
+            if (!revisionControl) return;
+            
+            const btnAprobar = revisionControl.querySelector('.btn-aprobar-seccion');
+            const btnRechazar = revisionControl.querySelector('.btn-rechazar-seccion');
+            
+            if (!btnAprobar || !btnRechazar) return;
+            
+            // Resetear clases de botones
+            btnAprobar.classList.remove('bg-green-700', 'ring-2', 'ring-green-300');
+            btnRechazar.classList.remove('bg-red-700', 'ring-2', 'ring-red-300');
+            
+            // Aplicar estado visual a los botones
+            switch(estado) {
+                case 'aprobado':
+                    btnAprobar.classList.add('bg-green-700', 'ring-2', 'ring-green-300');
+                    btnAprobar.innerHTML = `
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        ✅ Aprobado
+                    `;
+                    break;
+                case 'rechazado':
+                    btnRechazar.classList.add('bg-red-700', 'ring-2', 'ring-red-300');
+                    btnRechazar.innerHTML = `
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        ❌ Rechazado
+                    `;
+                    break;
+                default:
+                    btnAprobar.innerHTML = `
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Aprobar
+                    `;
+                    btnRechazar.innerHTML = `
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Rechazar
+                    `;
+            }
         }
         
         // Actualizar indicador visual en el tab
@@ -1731,13 +1849,27 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     comentario: comentario
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                // Verificar si la respuesta es JSON antes de parsear
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    // Si no es JSON, leer como texto para debug
+                    return response.text().then(text => {
+                        console.error('Respuesta no es JSON:', text);
+                        throw new Error(`Error ${response.status}: Respuesta no válida del servidor`);
+                    });
+                }
+            })
             .then(data => {
                 if (data.success) {
                     window.revisionesSecciones[seccion] = { estado: 'aprobado', comentario: comentario };
@@ -1803,13 +1935,27 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     comentario: comentario
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                // Verificar si la respuesta es JSON antes de parsear
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    // Si no es JSON, leer como texto para debug
+                    return response.text().then(text => {
+                        console.error('Respuesta no es JSON:', text);
+                        throw new Error(`Error ${response.status}: Respuesta no válida del servidor`);
+                    });
+                }
+            })
             .then(data => {
                 if (data.success) {
                     window.revisionesSecciones[seccion] = { estado: 'rechazado', comentario: comentario };
@@ -1874,13 +2020,27 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     comentario: comentario
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                // Verificar si la respuesta es JSON antes de parsear
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    // Si no es JSON, leer como texto para debug
+                    return response.text().then(text => {
+                        console.error('Respuesta no es JSON:', text);
+                        throw new Error(`Error ${response.status}: Respuesta no válida del servidor`);
+                    });
+                }
+            })
             .then(data => {
                 if (data.success) {
                     if (!window.revisionesSecciones[seccion]) {

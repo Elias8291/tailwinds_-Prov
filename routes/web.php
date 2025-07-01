@@ -421,13 +421,11 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
         ->middleware('can:revision-tramites.pausar')
         ->name('pausar');
     
-    // Rutas de acciones por sección
+    // Rutas de acciones por sección (permisos verificados en el controlador para AJAX)
     Route::post('/{tramite}/seccion/{seccion}/aprobar', [RevisionController::class, 'aprobarSeccion'])
-        ->middleware('can:revision-tramites.aprobar')
         ->name('seccion.aprobar');
     
     Route::post('/{tramite}/seccion/{seccion}/rechazar', [RevisionController::class, 'rechazarSeccion'])
-        ->middleware('can:revision-tramites.rechazar')
         ->name('seccion.rechazar');
     
     // Ruta para agregar comentarios

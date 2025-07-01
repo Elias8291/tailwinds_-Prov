@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Tramite;
 use App\Models\Solicitante;
 use App\Models\SeccionRevision;
@@ -563,6 +564,22 @@ class RevisionController extends Controller
      */
     public function aprobarSeccion(Request $request, Tramite $tramite, $seccionId)
     {
+        // Verificar permisos siempre
+        if (!Gate::allows('revision-tramites.aprobar')) {
+            // Detectar si es petición AJAX
+            $isAjax = $request->expectsJson() || 
+                     $request->header('Accept') === 'application/json' || 
+                     $request->header('X-Requested-With') === 'XMLHttpRequest';
+                     
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes permisos para aprobar secciones'
+                ], 403);
+            }
+            abort(403, 'No tienes permisos para aprobar secciones');
+        }
+
         $request->validate([
             'comentario' => 'nullable|string|max:500'
         ]);
@@ -581,6 +598,19 @@ class RevisionController extends Controller
                 ]
             );
 
+            // Determinar si es petición AJAX
+            $isAjax = $request->expectsJson() || 
+                     $request->header('Accept') === 'application/json' || 
+                     $request->header('X-Requested-With') === 'XMLHttpRequest';
+                     
+            if ($isAjax) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Sección aprobada correctamente',
+                    'estado' => 'aprobado'
+                ]);
+            }
+
             return redirect()->back()->with('success', 'Sección aprobada correctamente');
         } catch (\Exception $e) {
             Log::error('Error al aprobar sección:', [
@@ -588,6 +618,14 @@ class RevisionController extends Controller
                 'seccion_id' => $seccionId,
                 'error' => $e->getMessage()
             ]);
+
+            // Determinar si es petición AJAX
+            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al aprobar la sección'
+                ], 500);
+            }
 
             return redirect()->back()->with('error', 'Error al aprobar la sección');
         }
@@ -598,6 +636,17 @@ class RevisionController extends Controller
      */
     public function rechazarSeccion(Request $request, Tramite $tramite, $seccionId)
     {
+        // Verificar permisos siempre
+        if (!Gate::allows('revision-tramites.rechazar')) {
+            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes permisos para rechazar secciones'
+                ], 403);
+            }
+            abort(403, 'No tienes permisos para rechazar secciones');
+        }
+
         $request->validate([
             'comentario' => 'required|string|max:500'
         ], [
@@ -618,6 +667,15 @@ class RevisionController extends Controller
                 ]
             );
 
+            // Determinar si es petición AJAX
+            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Sección rechazada correctamente',
+                    'estado' => 'rechazado'
+                ]);
+            }
+
             return redirect()->back()->with('success', 'Sección rechazada correctamente');
         } catch (\Exception $e) {
             Log::error('Error al rechazar sección:', [
@@ -625,6 +683,14 @@ class RevisionController extends Controller
                 'seccion_id' => $seccionId,
                 'error' => $e->getMessage()
             ]);
+
+            // Determinar si es petición AJAX
+            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al rechazar la sección'
+                ], 500);
+            }
 
             return redirect()->back()->with('error', 'Error al rechazar la sección');
         }
