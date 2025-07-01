@@ -4,23 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oficio de Inscripción - Padrón de Proveedores</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         @page {
-            size: 8.5in 11in; /* 216mm x 279mm */
+            size: 8.5in 11in;
             margin: 0;
         }
         
         body {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Montserrat', Arial, Helvetica, sans-serif;
             margin: 0;
             padding: 0;
             width: 216mm;
             height: 279mm;
             position: relative;
             background: white;
+            font-size: 8pt;
         }
         
-        /* Header Section */
         .header {
             position: absolute;
             top: 0;
@@ -52,58 +53,28 @@
             width: 150mm;
             text-align: center;
             font-style: italic;
-            font-size: 10pt;
-        }
-
-        /* Document Info Section */
-        .document-info {
-            position: absolute;
-            top: 38mm;
-            right: 20mm;
             font-size: 8pt;
         }
 
-        .document-info .label {
+        .origen-oficio-asunto-fecha {
+            position: absolute;
+            top: 38mm;
+            left: 50mm;
+            width: 127mm;
+            font-size: 8pt;
+            text-align: right;
+            line-height: 1.2;
             font-weight: bold;
         }
-        
-        .origen {
-            position: absolute;
-            top: 38mm;
-            left: 131mm;
-            font-size: 8pt;
-        }
-        
-        .oficio-no {
-            position: absolute;
-            top: 42mm;
-            left: 134mm;
-            font-size: 8pt;
-        }
-        
-        .asunto {
-            position: absolute;
-            top: 46mm;
-            left: 120mm;
-            font-size: 8pt;
-            width: 60mm;
-        }
-        
-        .fecha-lugar {
-            position: absolute;
-            top: 56mm;
-            left: 128mm;
-            font-size: 8pt;
-        }
-        
-        /* Recipient Section */
+
         .destinatario {
             position: absolute;
-            top: 65mm;
+            top: 60mm;
             left: 19mm;
             width: 130mm;
             font-size: 8pt;
             font-weight: bold;
+            line-height: 1.2;
         }
 
         .destinatario-persona-moral {
@@ -114,10 +85,9 @@
             line-height: 1.2;
         }
         
-        /* Main Content */
         .contenido-principal {
             position: absolute;
-            top: 96mm; /* Ajustable según tipo de persona */
+            top: 90mm;
             left: 19mm;
             width: 172mm;
             font-size: 8pt;
@@ -126,41 +96,42 @@
         }
 
         .contenido-principal-fisica {
-            top: 91mm;
+            top: 83mm;
         }
 
-        /* Signature Section */
         .firma {
             position: absolute;
-            top: 214mm;
+            top: 210mm;
             left: 25mm;
             width: 160mm;
             text-align: center;
             font-size: 8pt;
             font-weight: bold;
-            line-height: 1.3;
+            line-height: 1.5; /* Increased from 1.3 for more spacing between lines */
+        }
+
+        .signature-space {
+            height: 10mm; /* Space for physical signature */
         }
         
-        /* Footer */
         .footer {
             position: absolute;
             bottom: 17mm;
             left: 19mm;
             width: 180mm;
-            font-size: 6pt;
+            font-size: 5pt;
             font-weight: bold;
             line-height: 1.2;
         }
 
         .copias {
             position: absolute;
-            bottom: 27mm;
+            top: 228mm; /* Adjusted from 225mm to accommodate increased firma spacing */
             left: 19mm;
-            font-size: 6pt;
+            font-size: 5pt;
             line-height: 1.2;
         }
         
-        /* QR Code */
         .qr-code {
             position: absolute;
             bottom: 30mm;
@@ -180,17 +151,15 @@
             right: 25mm;
             width: 20mm;
             text-align: center;
-            font-size: 5pt;
+            font-size: 3pt;
             color: #666;
         }
 
-        /* Utility classes */
         .text-center { text-align: center; }
         .text-justify { text-align: justify; }
         .font-bold { font-weight: bold; }
         .font-italic { font-style: italic; }
         
-        /* Print styles */
         @media print {
             body { print-color-adjust: exact; }
             .no-print { display: none; }
@@ -198,104 +167,71 @@
     </style>
 </head>
 <body>
-    <!-- Header Section -->
     <div class="header">
-        <!-- Logo Principal -->
         <img src="{{ asset('images/logo_encabezado2022.jpg') }}" alt="Logo Encabezado" class="logo-encabezado">
-        
-        <!-- Logo Lateral -->
         <img src="{{ asset('images/logo_lateral2022.jpg') }}" alt="Logo Lateral" class="logo-lateral">
-        
-        <!-- Lema Constitucional -->
         <div class="lema-constitucional">
             "2025, BICENTENARIO DE LA PRIMERA CONSTITUCIÓN POLÍTICA DEL ESTADO LIBRE Y SOBERANO DE OAXACA"
         </div>
     </div>
 
-    <!-- Document Information -->
-        <div class="origen">
-        <span class="label">ORIGEN:</span> Dirección de Recursos Materiales
-        </div>
-
-    <div class="oficio-no">
-        <span class="label">OFICIO No.:</span> SA/DRM/DMRA/001/01/2025
-        </div>
-
-        <div class="asunto">
-        <span class="label">ASUNTO:</span> Registro en el Padrón de Proveedores de la Administración Pública Estatal
+    <div class="origen-oficio-asunto-fecha">
+        ORIGEN: Dirección de Recursos Materiales<br>
+        OFICIO No.: {{ $oficio->numero_oficio ?? 'SA/DRM/DMRA/001/01/2025' }}<br>
+        ASUNTO: Registro en el Padrón de Proveedores de la Administración Pública Estatal<br>
+        Tlalixtac de Cabrera, Oax., {{ $fechaTexto ?? '1 de julio de 2025' }}
     </div>
 
-    <div class="fecha-lugar">
-        Tlalixtac de Cabrera, Oax., {{ date('d') }} de {{ ['', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][date('n')] }} de {{ date('Y') }}.
-    </div>
-
-    <!-- Recipient Information -->
     <div class="destinatario">
-        {{-- Para Persona Moral --}}
         <div class="destinatario-persona-moral">
-            LIC. JUAN CARLOS PÉREZ GONZÁLEZ<br>
-            REPRESENTANTE LEGAL DE EMPRESAS CONSTRUCTORAS DEL SUR S.A. DE C.V.<br>
-            CALLE BENITO JUÁREZ NÚMERO EXTERIOR 123, COL. CENTRO, OAXACA DE JUÁREZ, OAXACA, C.P. 68000<br>
-            RFC: ECS850315ABC<br>
+            {{ isset($detalleTramite) && isset($detalleTramite->representanteLegal) ? strtoupper($detalleTramite->representanteLegal->nombre_completo) : 'LIC. JUAN CARLOS PÉREZ GONZÁLEZ' }}<br>
+            REPRESENTANTE LEGAL DE {{ isset($detalleTramite) ? strtoupper($detalleTramite->razon_social ?? 'EMPRESAS CONSTRUCTORAS DEL SUR S.A. DE C.V.') : 'EMPRESAS CONSTRUCTORAS DEL SUR S.A. DE C.V.' }}<br>
+            {{ isset($detalleTramite) && isset($detalleTramite->direccion) ? strtoupper($detalleTramite->direccion->calle ?? 'CALLE BENITO JUÁREZ NÚMERO EXTERIOR 123, COL. CENTRO, OAXACA DE JUÁREZ, OAXACA, C.P. 68000') : 'CALLE BENITO JUÁREZ NÚMERO EXTERIOR 123, COL. CENTRO, OAXACA DE JUÁREZ, OAXACA, C.P. 68000' }}<br>
+            RFC: {{ isset($solicitante) ? $solicitante->rfc : 'ECS850315ABC' }}<br>
             P R E S E N T E
         </div>
-        
-        {{-- Para Persona Física (comentado para este ejemplo)
-        <div class="destinatario-persona-fisica" style="display: none;">
-            MARÍA GUADALUPE HERNÁNDEZ LÓPEZ<br>
-            CALLE BENITO JUÁREZ NÚMERO EXTERIOR 123, COL. CENTRO, OAXACA DE JUÁREZ, OAXACA, C.P. 68000<br>
-            RFC: HELM850315ABC<br>
-            P R E S E N T E
-        </div>
-        --}}
     </div>
 
-    <!-- Main Content -->
     <div class="contenido-principal">
-        Se hace referencia a su solicitud de registro ante el Padrón de Proveedores de la Administración Pública Estatal y anexos que acompaña fechada el 15 de enero de 2025, recibida en esta Dirección de Recursos Materiales el 16 de enero de 2025.
-            <br><br>
-        Sobre el particular, y en atención a la misma, una vez revisada y analizada, así como cotejados los documentos presentados en original, se informa que se procedió al registro ante el Padrón de Proveedores de la Administración Pública Estatal, de la persona moral "EMPRESAS CONSTRUCTORAS DEL SUR S.A. DE C.V.", cuyo giro y/o clasificación se establece de manera enunciativa mas no limitativa como a continuación se describe "CONSTRUCCIÓN, REMODELACIÓN Y MANTENIMIENTO DE OBRAS CIVILES, INDUSTRIALES Y COMERCIALES", y demás actividades comerciales, profesionales, mercantiles o de negocios de conformidad con sus actividades económicas y su objeto social registrado y autorizado, con cédula de inscripción 12345 asignada, que lo acredita como Proveedor Estatal, cuya vigencia será anual a partir del 16 DE ENERO DE 2025 hasta el 15 DE ENERO DE 2026, dejando constancia de ello, en el expediente respectivo.
-            <br><br>
-            Así mismo, se informa que, para renovar este registro, deberá presentar su solicitud dentro de los siete días hábiles previos a su vencimiento, en caso de que omita presentar dicha solicitud en el plazo indicado, se cancelará el registro a su vencimiento, sin perjuicio de lo anterior, podrá formular una nueva solicitud de inscripción, es importante puntualizar que en cualquier tiempo siempre que se encuentre vigente su registro, deberá comunicar a esta Secretaría a través de esta Dirección, las modificaciones legales, de capacidad técnica, económica o productiva y aquellas que puedan implicar un cambio en su giro y/o clasificación.
-            <br><br>
-            Por último, se exhorta a que en todos los trámites, procedimientos y contratos que celebre con las Dependencias o Entidades de la Administración Pública Estatal, se abstenga de adoptar conductas que vayan en contravención de la normatividad aplicable.
-            <br><br>
+        Se hace referencia a su solicitud de registro ante el Padrón de Proveedores de la Administración Pública Estatal y anexos que acompaña fechada el {{ isset($tramite) ? $tramite->created_at->format('d') . ' de ' . $tramite->created_at->translatedFormat('F') . ' de ' . $tramite->created_at->format('Y') : '15 de enero de 2025' }}, recibida en esta Dirección de Recursos Materiales el {{ isset($tramite) ? $tramite->created_at->addDay()->format('d') . ' de ' . $tramite->created_at->addDay()->translatedFormat('F') . ' de ' . $tramite->created_at->addDay()->format('Y') : '16 de enero de 2025' }}.
+        <br><br>
+        Sobre el particular, y en atención a la misma, una vez revisada y analizada, así como cotejados los documentos presentados en original, se informa que se procedió al registro ante el Padrón de Proveedores de la Administración Pública Estatal, de la persona moral "{{ isset($detalleTramite) ? strtoupper($detalleTramite->razon_social ?? 'EMPRESAS CONSTRUCTORAS DEL SUR S.A. DE C.V.') : 'EMPRESAS CONSTRUCTORAS DEL SUR S.A. DE C.V.' }}", cuyo giro y/o clasificación se establece de manera enunciativa mas no limitativa como a continuación se describe "{{ isset($detalleTramite) ? strtoupper($detalleTramite->giro ?? 'CONSTRUCCIÓN, REMODELACIÓN Y MANTENIMIENTO DE OBRAS CIVILES, INDUSTRIALES Y COMERCIALES') : 'CONSTRUCCIÓN, REMODELACIÓN Y MANTENIMIENTO DE OBRAS CIVILES, INDUSTRIALES Y COMERCIALES' }}", y demás actividades comerciales, profesionales, mercantiles o de negocios de conformidad con sus actividades económicas y su objeto social registrado y autorizado, con cédula de inscripción {{ isset($proveedor) ? $proveedor->pv : '12345' }} asignada, que lo acredita como Proveedor Estatal, cuya vigencia será anual a partir del {{ isset($proveedor) ? strtoupper($proveedor->fecha_registro->format('d') . ' DE ' . $proveedor->fecha_registro->translatedFormat('F') . ' DE ' . $proveedor->fecha_registro->format('Y')) : '16 DE ENERO DE 2025' }} hasta el {{ isset($proveedor) ? strtoupper($proveedor->fecha_vencimiento->format('d') . ' DE ' . $proveedor->fecha_vencimiento->translatedFormat('F') . ' DE ' . $proveedor->fecha_vencimiento->format('Y')) : '15 DE ENERO DE 2026' }}, dejando constancia de ello, en el expediente respectivo.
+        <br><br>
+        Así mismo, se informa que, para renovar este registro, deberá presentar su solicitud dentro de los siete días hábiles previos a su vencimiento, en caso de que omita presentar dicha solicitud en el plazo indicado, se cancelará el registro a su vencimiento, sin perjuicio de lo anterior, podrá formular una nueva solicitud de inscripción, es importante puntualizar que en cualquier tiempo siempre que se encuentre vigente su registro, deberá comunicar a esta Secretaría a través de esta Dirección, las modificaciones legales, de capacidad técnica, económica o productiva y aquellas que puedan implicar un cambio en su giro y/o clasificación.
+        <br><br>
+        Por último, se exhorta a que en todos los trámites, procedimientos y contratos que celebre con las Dependencias o Entidades de la Administración Pública Estatal, se abstenga de adoptar conductas que vayan en contravención de la normatividad aplicable.
+        <br><br>
         Lo anterior con fundamento en los artículos 1, 3 fracción XIV, 6, 11, 48, 49, 50, 51, 92, 93 y 94 de la Ley de Adquisiciones, Enajenaciones, Arrendamientos, Prestación de Servicios y Administración de Bienes Muebles e Inmuebles del Estado de Oaxaca, 46, 47, 48 y 49 de su Reglamento.
-            <br><br>
-            Sin otro particular, le reitero la seguridad de mi consideración distinguida.
+        <br><br>
+        Sin otro particular, le reitero la seguridad de mi consideración distinguida.
     </div>
 
-    <!-- Signature Section -->
-        <div class="firma">
+    <div class="firma">
         A T E N T A M E N T E.<br>
         SUFRAGIO EFECTIVO, NO REELECCIÓN.<br>
         "EL RESPETO AL DERECHO AJENO ES LA PAZ"<br>
-        DIRECTORA DE RECURSOS MATERIALES<br><br><br><br>
-        LIC. SARA ZÁRATE SANTIAGO
+        DIRECTORA DE RECURSOS MATERIALES<br>
+        LIC. SARA ZÁRATE SANTIAGO<br>
+        <div class="signature-space"></div>
     </div>
 
-    <!-- Copies Section -->
     <div class="copias">
         C.c.p.- Expediente y Minutario.<br>
         SZS/TEST
     </div>
 
-    <!-- QR Code -->
-    @if(isset($qrCode))
-    <div class="qr-code">
-        {!! $qrCode !!}
-    </div>
-    <div class="qr-text">
-        Verificar autenticidad
-    </div>
-    @endif
-
-    <!-- Footer -->
     <div class="footer">
         Carretera Internacional Oaxaca-Istmo Km. 11.5, Ciudad Administrativa Benemérito de las Américas Edificio 2, Planta Baja, Tlalixtac de Cabrera, Oaxaca. C.P. 68270 Tel. Conmutador 01(951)5015000 Ext. 10004 y 10031.
     </div>
 
-    <!-- Print Button (No Print) -->
+    <!-- Código QR para validación -->
+    <div class="qr-code">
+        {!! $qrCode !!}
+    </div>
+    <div class="qr-text">
+        Validar documento
+    </div>
+
     <div class="no-print" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
         <button onclick="window.print()" 
                 style="background: #9d2449; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
@@ -308,11 +244,8 @@
     </div>
 
     <script>
-        // Auto-adjust content for different persona types
         document.addEventListener('DOMContentLoaded', function() {
-            // This would be dynamic based on data in real implementation
-            const personaType = 'moral'; // 'moral' or 'fisica'
-            
+            const personaType = 'moral';
             if (personaType === 'fisica') {
                 const contenido = document.querySelector('.contenido-principal');
                 contenido.classList.add('contenido-principal-fisica');
@@ -320,4 +253,44 @@
         });
     </script>
 </body>
-</html> 
+</html>
+            if (personaType === 'fisica') {
+                const contenido = document.querySelector('.contenido-principal');
+                contenido.classList.add('contenido-principal-fisica');
+            }
+        });
+    </script>
+</body>
+</html>
+            if (personaType === 'fisica') {
+                const contenido = document.querySelector('.contenido-principal');
+                contenido.classList.add('contenido-principal-fisica');
+            }
+        });
+    </script>
+</body>
+</html>
+            if (personaType === 'fisica') {
+                const contenido = document.querySelector('.contenido-principal');
+                contenido.classList.add('contenido-principal-fisica');
+            }
+        });
+    </script>
+</body>
+</html>
+            if (personaType === 'fisica') {
+                const contenido = document.querySelector('.contenido-principal');
+                contenido.classList.add('contenido-principal-fisica');
+            }
+        });
+    </script>
+</body>
+</html>
+            if (personaType === 'fisica') {
+                const contenido = document.querySelector('.contenido-principal');
+                contenido.classList.add('contenido-principal-fisica');
+            }
+        });
+    </script>
+</body>
+</html>

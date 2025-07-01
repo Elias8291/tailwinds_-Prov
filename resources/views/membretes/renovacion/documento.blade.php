@@ -157,9 +157,9 @@
 
     <div class="origen-oficio-asunto-fecha">
         ORIGEN: Dirección de Recursos Materiales<br>
-        OFICIO No.: SA/DRM/DMRA/001/01/2025<br>
+        OFICIO No.: {{ $oficio->numero_oficio ?? 'SA/DRM/DMRA/REN/002/2025' }}<br>
         ASUNTO: Renovación en el Padrón de Proveedores de la Administración Pública Estatal<br>
-        Tlalixtac de Cabrera, Oax., 1 de julio de 2025
+        Tlalixtac de Cabrera, Oax., {{ $fechaTexto ?? '1 de julio de 2025' }}
     </div>
 
     <div class="destinatario">
@@ -173,9 +173,9 @@
     </div>
 
     <div class="contenido-principal">
-        Se hace referencia a su solicitud de **renovación** ante el Padrón de Proveedores de la Administración Pública Estatal y anexos que acompaña fechada el 15 de enero de 2025, recibida en esta Dirección de Recursos Materiales el 16 de enero de 2025.
+        Se hace referencia a su solicitud de renovación ante el Padrón de Proveedores de la Administración Pública Estatal y anexos que acompaña fechada el 15 de enero de 2025, recibida en esta Dirección de Recursos Materiales el 16 de enero de 2025.
         <br><br>
-        Sobre el particular, y en atención a la misma, una vez revisada y analizada, así como cotejados los documentos presentados en original, se informa que se procedió a la **renovación** ante el Padrón de Proveedores de la Administración Pública Estatal, de la persona moral "EMPRESAS CONSTRUCTORAS DEL SUR S.A. DE C.V.", cuyo giro y/o clasificación se establece de manera enunciativa mas no limitativa como a continuación se describe "CONSTRUCCIÓN, REMODELACIÓN Y MANTENIMIENTO DE OBRAS CIVILES, INDUSTRIALES Y COMERCIALES", y demás actividades comerciales, profesionales, mercantiles o de negocios de conformidad con sus actividades económicas y su objeto social registrado y autorizado, con cédula de inscripción 12345 asignada, que lo acredita como Proveedor Estatal, cuya vigencia será anual a partir del 16 DE ENERO DE 2025 hasta el 15 DE ENERO DE 2026, dejando constancia de ello, en el expediente respectivo.
+        Sobre el particular, y en atención a la misma, una vez revisada y analizada, así como cotejados los documentos presentados en original, se informa que se procedió a la renovación ante el Padrón de Proveedores de la Administración Pública Estatal, de la persona moral "EMPRESAS CONSTRUCTORAS DEL SUR S.A. DE C.V.", cuyo giro y/o clasificación se establece de manera enunciativa mas no limitativa como a continuación se describe "CONSTRUCCIÓN, REMODELACIÓN Y MANTENIMIENTO DE OBRAS CIVILES, INDUSTRIALES Y COMERCIALES", y demás actividades comerciales, profesionales, mercantiles o de negocios de conformidad con sus actividades económicas y su objeto social registrado y autorizado, con cédula de inscripción 12345 asignada, que lo acredita como Proveedor Estatal, cuya vigencia será anual a partir del 16 DE ENERO DE 2025 hasta el 15 DE ENERO DE 2026, dejando constancia de ello, en el expediente respectivo.
         <br><br>
         Así mismo, se informa que, para renovar este registro nuevamente, deberá presentar su solicitud dentro de los siete días hábiles previos a su vencimiento. En caso de que omita presentar dicha solicitud en el plazo indicado, se cancelará el registro a su vencimiento. Sin perjuicio de lo anterior, podrá formular una nueva solicitud de inscripción. Es importante puntualizar que en cualquier tiempo, siempre que se encuentre vigente su registro, deberá comunicar a esta Secretaría a través de esta Dirección, las modificaciones legales, de capacidad técnica, económica o productiva y aquellas que puedan implicar un cambio en su giro y/o clasificación.
         <br><br>
@@ -204,6 +204,14 @@
         Carretera Internacional Oaxaca-Istmo Km. 11.5, Ciudad Administrativa Benemérito de las Américas Edificio 2, Planta Baja, Tlalixtac de Cabrera, Oaxaca. C.P. 68270 Tel. Conmutador 01(951)5015000 Ext. 10004 y 10031.
     </div>
 
+    <!-- Código QR para validación -->
+    <div class="qr-code">
+        {!! $qrCode !!}
+    </div>
+    <div class="qr-text">
+        Validar documento
+    </div>
+
     <div class="no-print" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
         <button onclick="window.print()" 
                 style="background: #9d2449; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
@@ -219,6 +227,46 @@
         document.addEventListener('DOMContentLoaded', function() {
             const personaType = 'moral';
             if (personaType === 'fisica') {
+                const contenido = document.querySelector('.contenido-principal');
+                contenido.classList.add('contenido-principal-fisica');
+            }
+        });
+    </script>
+</body>
+</html>
+
+                const contenido = document.querySelector('.contenido-principal');
+                contenido.classList.add('contenido-principal-fisica');
+            }
+        });
+    </script>
+</body>
+</html>
+
+                const contenido = document.querySelector('.contenido-principal');
+                contenido.classList.add('contenido-principal-fisica');
+            }
+        });
+    </script>
+</body>
+</html>
+
+                const contenido = document.querySelector('.contenido-principal');
+                contenido.classList.add('contenido-principal-fisica');
+            }
+        });
+    </script>
+</body>
+</html>
+
+                const contenido = document.querySelector('.contenido-principal');
+                contenido.classList.add('contenido-principal-fisica');
+            }
+        });
+    </script>
+</body>
+</html>
+
                 const contenido = document.querySelector('.contenido-principal');
                 contenido.classList.add('contenido-principal-fisica');
             }

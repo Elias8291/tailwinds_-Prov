@@ -313,7 +313,7 @@
 
 <script>
     // Configurar PDF.js
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
     
     // Variables globales
     let documentProcessed = false;

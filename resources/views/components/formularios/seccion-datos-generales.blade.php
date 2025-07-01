@@ -386,7 +386,7 @@
 @unless($readonly)
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎯 Iniciando datos generales - script simplificado');
+
     
     // Variables para el buscador de actividades
     const searchInput = document.getElementById('actividad_search');
@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // MANEJO SIMPLIFICADO DEL FORMULARIO
     if (formulario) {
-        console.log('📋 Formulario encontrado, configurando manejo simplificado');
+
         
         // Antes de reemplazar el formulario, guardar referencias importantes
         const searchInputOriginal = searchInput;
@@ -427,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Reconfigurar event listeners para actividades en el nuevo formulario
         if (newSearchInput) {
-            console.log('🔍 Reconfigurando buscador de actividades...');
+
             newSearchInput.addEventListener('input', function(e) {
                 const query = e.target.value.trim();
                 if (searchTimeout) clearTimeout(searchTimeout);
@@ -477,13 +477,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Cargar actividades existentes después del reemplazo
         cargarActividadesExistentes(newHiddenInput, newTagsContainer);
         
-        console.log('✅ Buscador de actividades reconfigurado');
+
         
         // Agregar el nuevo manejador simplificado del formulario
         nuevoFormulario.addEventListener('submit', function(e) {
-            console.log('🚀 Enviando formulario de datos generales...');
-            console.log('📋 Formulario action:', nuevoFormulario.action);
-            console.log('📋 Formulario method:', nuevoFormulario.method);
             
             // Mostrar todos los datos del formulario
             const formData = new FormData(nuevoFormulario);
@@ -491,71 +488,55 @@ document.addEventListener('DOMContentLoaded', function() {
             for (let [key, value] of formData.entries()) {
                 datosFormulario[key] = value;
             }
-            console.log('📄 Datos del formulario:', datosFormulario);
             
             // Validación básica
             let esValido = true;
             const camposRequeridos = nuevoFormulario.querySelectorAll('[required]');
-            console.log(`🔍 Validando ${camposRequeridos.length} campos requeridos...`);
+
             
             // Validar campos requeridos
-            camposRequeridos.forEach(campo => {
-                if (!campo.value.trim()) {
-                    console.log(`❌ Campo requerido vacío: ${campo.name} (${campo.type})`);
-                    esValido = false;
+                          camposRequeridos.forEach(campo => {
+                  if (!campo.value.trim()) {
+                      esValido = false;
                     
                     // Agregar clase de error
                     campo.classList.add('border-red-500', 'bg-red-50');
                     setTimeout(() => {
                         campo.classList.remove('border-red-500', 'bg-red-50');
                     }, 3000);
-                } else {
-                    console.log(`✅ Campo válido: ${campo.name} = "${campo.value.substring(0, 50)}${campo.value.length > 50 ? '...' : ''}"`);
-                }
+                                  }
             });
             
             // Validar actividades seleccionadas
             const actividadesInput = nuevoFormulario.querySelector('#actividades_seleccionadas_input');
-            if (actividadesInput) {
-                const actividades = actividadesInput.value;
-                console.log('🏢 Actividades seleccionadas:', actividades);
-                if (!actividades || actividades === '[]' || actividades.trim() === '') {
-                    console.log('❌ No hay actividades seleccionadas');
+                          if (actividadesInput) {
+                  const actividades = actividadesInput.value;
+                  if (!actividades || actividades === '[]' || actividades.trim() === '') {
                     esValido = false;
                     mostrarError('Debe seleccionar al menos una actividad económica');
-                } else {
-                    try {
-                        const actividadesArray = JSON.parse(actividades);
-                        console.log(`✅ ${actividadesArray.length} actividades válidas seleccionadas`);
-                    } catch (e) {
-                        console.log('❌ Error al parsear actividades:', e);
+                                  } else {
+                      try {
+                          const actividadesArray = JSON.parse(actividades);
+                      } catch (e) {
                         esValido = false;
                     }
                 }
-            } else {
-                console.log('⚠️ Input de actividades no encontrado');
+                          } else {
             }
             
-            if (!esValido) {
-                console.log('❌ Validación fallida - evitando envío');
-                e.preventDefault();
-                return false;
-            }
-            
-            console.log('✅ Validación exitosa - permitiendo envío del formulario');
-            console.log('⏳ Enviando a:', nuevoFormulario.action);
+                          if (!esValido) {
+                  e.preventDefault();
+                  return false;
+              }
             
             // Prevenir el envío normal del formulario
             e.preventDefault();
             
-            // Enviar datos vía AJAX
-            console.log('📡 Enviando datos vía AJAX...');
-            enviarDatosAjax(nuevoFormulario);
+                          // Enviar datos vía AJAX
+              enviarDatosAjax(nuevoFormulario);
             
             return false;
         });
-        
-        console.log('✅ Manejador de formulario configurado');
     }
 
     // Función para mostrar errores
@@ -603,7 +584,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const actividadesIds = JSON.parse(hiddenInput.value);
             if (!Array.isArray(actividadesIds) || actividadesIds.length === 0) return;
 
-            console.log('🔄 Cargando actividades para IDs:', actividadesIds);
+    
 
             const response = await fetch('/api/actividades/obtener-por-ids', {
                 method: 'POST',
@@ -619,7 +600,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const result = await response.json();
-            console.log('📥 Respuesta del servidor:', result);
+
             
             // Manejar diferentes formatos de respuesta
             let actividades = [];
@@ -656,8 +637,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             actualizarTags(tagsContainer);
-            console.log(`✅ ${actividadesSeleccionadas.length} actividades cargadas con nombres:`, 
-                       actividadesSeleccionadas.map(a => `ID: ${a.id}, Nombre: "${a.nombre}"`));
+
             
         } catch (e) {
             console.error('❌ Error al cargar actividades existentes:', e);
@@ -674,7 +654,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }));
                 
                 actualizarTags(tagsContainer);
-                console.log('⚠️ Fallback aplicado exitosamente');
+
                 
             } catch (fallbackError) {
                 console.error('💥 Error crítico en fallback:', fallbackError);
@@ -809,7 +789,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Función para enviar datos vía AJAX
     async function enviarDatosAjax(formulario) {
         try {
-            console.log('📡 Preparando envío AJAX...');
+
             
             // Obtener datos del formulario
             const formData = new FormData(formulario);
@@ -818,7 +798,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 datos[key] = value;
             }
             
-            console.log('📄 Datos a enviar:', datos);
+
             
             // Mostrar indicador de carga
             mostrarIndicadorCarga(true);
@@ -835,17 +815,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(datos)
             });
             
-            console.log('📡 Respuesta recibida:', response.status, response.statusText);
-            
             const result = await response.json();
-            console.log('📄 Datos de respuesta:', result);
             
             // Ocultar indicador de carga
             mostrarIndicadorCarga(false);
             
             if (response.ok && result.success) {
                 // Guardado exitoso
-                console.log('✅ Datos guardados exitosamente');
+
                 
                 // Mostrar mensaje de éxito
                 mostrarMensajeExito('Datos guardados correctamente. Avanzando al siguiente paso...');
@@ -934,7 +911,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para mostrar errores de validación
     function mostrarErroresValidacion(errores) {
-        console.log('🔍 Mostrando errores de validación:', errores);
+
         
         // Limpiar errores anteriores
         document.querySelectorAll('.error-message').forEach(el => el.remove());
@@ -970,7 +947,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para avanzar al paso siguiente
     function avanzarAlPasoSiguiente(pasoDestino) {
-        console.log('🔄 Avanzando al paso:', pasoDestino);
+
         
         try {
             // Buscar el componente Alpine.js del stepper
@@ -978,19 +955,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (formContainer && window.Alpine) {
                 const alpineData = Alpine.$data(formContainer);
                 if (alpineData && typeof alpineData.currentStep !== 'undefined') {
-                    console.log('📊 Paso actual:', alpineData.currentStep);
-                    alpineData.currentStep = pasoDestino;
-                    console.log('✅ Paso cambiado a:', alpineData.currentStep);
+                                    alpineData.currentStep = pasoDestino;
                     
                     // Trigger update en caso de que sea necesario
                     if (alpineData.$dispatch) {
                         alpineData.$dispatch('step-changed', { step: pasoDestino });
                     }
-                } else {
-                    console.log('⚠️ No se encontró Alpine data con currentStep');
+                                  } else {
                 }
             } else {
-                console.log('⚠️ No se encontró contenedor Alpine o Alpine no está disponible');
             }
         } catch (error) {
             console.error('❌ Error al cambiar paso:', error);

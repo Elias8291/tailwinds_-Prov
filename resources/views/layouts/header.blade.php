@@ -265,8 +265,9 @@ function notificaciones() {
         contadorNoLeidas: 0,
         
         init() {
-            this.cargarNotificaciones();
-            // Actualizar cada 30 segundos
+            // Solo cargar el contador inicial, no las notificaciones completas
+            this.cargarContador();
+            // Actualizar contador cada 30 segundos
             setInterval(() => {
                 this.cargarContador();
             }, 30000);
@@ -314,7 +315,8 @@ function notificaciones() {
         
         async toggleNotificaciones() {
             this.open = !this.open;
-            if (this.open) {
+            if (this.open && this.notificaciones.length === 0) {
+                // Solo cargar las notificaciones completas cuando se abre por primera vez
                 await this.cargarNotificaciones();
             }
         },

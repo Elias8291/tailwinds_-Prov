@@ -689,5 +689,4 @@ input:focus {
 </style>
 @endpush
 @push('scripts')
-<script src="{{ asset('js/validators/accionistas-validator.js') }}"></script>
 @endpush

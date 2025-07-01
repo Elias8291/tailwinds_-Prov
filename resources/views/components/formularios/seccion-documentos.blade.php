@@ -927,5 +927,4 @@ function navegarAnteriorDocumentos() {
 </style>
 @endpush
 @push('scripts')
-<script src="{{ asset('js/validators/documentos-validator.js') }}"></script>
 @endpush

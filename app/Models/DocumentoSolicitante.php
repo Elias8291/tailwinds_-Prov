@@ -17,13 +17,22 @@ class DocumentoSolicitante extends Model
     protected $fillable = [
         'tramite_id',
         'documento_id',
-        'archivo',
+        'fecha_entrega',
         'estado',
+        'version_documento',
+        'observaciones',
+        'ruta_archivo',
+        'archivo',
         'comentarios'
     ];
 
     protected $attributes = [
-        'estado' => 'pendiente',
+        'estado' => 'Pendiente',
+        'version_documento' => 1,
+    ];
+
+    protected $casts = [
+        'fecha_entrega' => 'date',
     ];
 
     /**
