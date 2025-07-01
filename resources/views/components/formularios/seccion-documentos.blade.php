@@ -71,12 +71,23 @@
                         <!-- Botones de acción para revisión -->
                         <div class="flex items-center space-x-2">
                             @if(!empty($documento['ruta_archivo']))
-                                <a href="{{ route('tramites.solicitante.ver-documento', ['tramite' => $tramite->id ?? 0, 'documento' => $documento['id']]) }}" 
-                                   target="_blank"
-                                   class="text-green-600 hover:text-green-800 text-xs underline">
-                                    <i class="fas fa-eye mr-1"></i>
-                                    Ver
-                                </a>
+                                @if(request()->is('revision/*'))
+                                    {{-- En contexto de revisión, usar la ruta específica de revisión --}}
+                                    <a href="{{ route('revision.ver-documento', ['tramite' => $tramite->id ?? 0, 'documento' => $documento['id']]) }}" 
+                                       target="_blank"
+                                       class="text-green-600 hover:text-green-800 text-xs underline">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        Ver
+                                    </a>
+                                @else
+                                    {{-- En otros contextos, usar la ruta normal --}}
+                                    <a href="{{ route('tramites.solicitante.ver-documento', ['tramite' => $tramite->id ?? 0, 'documento' => $documento['id']]) }}" 
+                                       target="_blank"
+                                       class="text-green-600 hover:text-green-800 text-xs underline">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        Ver
+                                    </a>
+                                @endif
                             @endif
                             @if($documento['estado'] === 'Pendiente')
                                 <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">

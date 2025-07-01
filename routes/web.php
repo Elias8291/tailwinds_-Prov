@@ -442,6 +442,10 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
     
     Route::get('/{tramite}/documentos-seccion', [RevisionController::class, 'getDocumentosSeccion'])
         ->name('documentos-seccion');
+    
+    // Ruta específica para ver documentos en revisión
+    Route::get('/{tramite}/ver-documento/{documento}', [RevisionController::class, 'verDocumento'])
+        ->name('ver-documento');
 });
 
 // ============================================================================

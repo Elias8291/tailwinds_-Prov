@@ -620,7 +620,11 @@ class RevisionController extends Controller
             ]);
 
             // Determinar si es petición AJAX
-            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+            $isAjax = $request->expectsJson() || 
+                     $request->header('Accept') === 'application/json' || 
+                     $request->header('X-Requested-With') === 'XMLHttpRequest';
+                     
+            if ($isAjax) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Error al aprobar la sección'
@@ -638,7 +642,12 @@ class RevisionController extends Controller
     {
         // Verificar permisos siempre
         if (!Gate::allows('revision-tramites.rechazar')) {
-            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+            // Detectar si es petición AJAX
+            $isAjax = $request->expectsJson() || 
+                     $request->header('Accept') === 'application/json' || 
+                     $request->header('X-Requested-With') === 'XMLHttpRequest';
+                     
+            if ($isAjax) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No tienes permisos para rechazar secciones'
@@ -668,7 +677,11 @@ class RevisionController extends Controller
             );
 
             // Determinar si es petición AJAX
-            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+            $isAjax = $request->expectsJson() || 
+                     $request->header('Accept') === 'application/json' || 
+                     $request->header('X-Requested-With') === 'XMLHttpRequest';
+                     
+            if ($isAjax) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Sección rechazada correctamente',
@@ -685,7 +698,11 @@ class RevisionController extends Controller
             ]);
 
             // Determinar si es petición AJAX
-            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+            $isAjax = $request->expectsJson() || 
+                     $request->header('Accept') === 'application/json' || 
+                     $request->header('X-Requested-With') === 'XMLHttpRequest';
+                     
+            if ($isAjax) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Error al rechazar la sección'
@@ -1223,6 +1240,154 @@ class RevisionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener los documentos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Ver documento en contexto de revisión
+     * Permite a los revisores ver cualquier documento sin restricciones de propietario
+     */
+    public function verDocumento(Request $request, Tramite $tramite, $documentoSolicitanteId)
+    {
+        try {
+            Log::info('Revisor intentando ver documento', [
+                'tramite_id' => $tramite->id,
+                'documento_solicitante_id' => $documentoSolicitanteId,
+                'revisor_id' => auth()->id(),
+                'revisor_name' => auth()->user()->name
+            ]);
+
+            // Verificar que el usuario tiene permisos de revisión
+            if (!auth()->user()->can('revision-tramites.ver')) {
+                Log::warning('Usuario sin permisos de revisión intenta ver documento', [
+                    'user_id' => auth()->id(),
+                    'tramite_id' => $tramite->id,
+                    'documento_solicitante_id' => $documentoSolicitanteId
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tiene permisos para ver este documento'
+                ], 403);
+            }
+
+            // Buscar el documento solicitante por su ID directo y verificar que pertenece al trámite
+            $documentoSolicitante = DocumentoSolicitante::where('id', $documentoSolicitanteId)
+                ->where('tramite_id', $tramite->id)
+                ->first();
+
+            if (!$documentoSolicitante || !$documentoSolicitante->ruta_archivo) {
+                Log::warning('Documento no encontrado para revisión', [
+                    'tramite_id' => $tramite->id,
+                    'documento_solicitante_id' => $documentoSolicitanteId,
+                    'existe_registro' => $documentoSolicitante ? 'SI' : 'NO',
+                    'tiene_ruta' => $documentoSolicitante && $documentoSolicitante->ruta_archivo ? 'SI' : 'NO'
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Documento no encontrado'
+                ], 404);
+            }
+
+            Log::info('Documento encontrado para revisión', [
+                'tramite_id' => $tramite->id,
+                'documento_solicitante_id' => $documentoSolicitanteId,
+                'documento_id' => $documentoSolicitante->documento_id,
+                'ruta_encriptada' => $documentoSolicitante->ruta_archivo
+            ]);
+
+            // Desencriptar la ruta del archivo
+            $rutaArchivo = '';
+            try {
+                // Intentar desencriptar con el nuevo método (encrypt/decrypt)
+                $rutaArchivo = decrypt($documentoSolicitante->ruta_archivo);
+                Log::info('Ruta desencriptada con decrypt()', ['ruta' => $rutaArchivo]);
+            } catch (\Exception $e1) {
+                try {
+                    // Intentar desencriptar con Crypt
+                    $rutaArchivo = \Illuminate\Support\Facades\Crypt::decryptString($documentoSolicitante->ruta_archivo);
+                    Log::info('Ruta desencriptada con Crypt::decryptString()', ['ruta' => $rutaArchivo]);
+                } catch (\Exception $e2) {
+                    // Si no se puede desencriptar, usar la ruta directamente
+                    $rutaArchivo = $documentoSolicitante->ruta_archivo;
+                    Log::info('Usando ruta sin encriptar para revisión', ['ruta' => $rutaArchivo]);
+                }
+            }
+
+            // Probar diferentes ubicaciones posibles del archivo
+            $rutasPosibles = [
+                storage_path('app/public/' . $rutaArchivo),
+                storage_path('app/public/documentos_solicitante/' . $tramite->id . '/' . basename($rutaArchivo)),
+                storage_path('app/public/documentos_tramite/' . $tramite->id . '/' . basename($rutaArchivo)),
+                storage_path('app/' . $rutaArchivo),
+                storage_path('app/public/documentos/' . basename($rutaArchivo))
+            ];
+
+            $rutaCompleta = null;
+            foreach ($rutasPosibles as $ruta) {
+                Log::info('Verificando ruta para revisión', ['ruta' => $ruta, 'existe' => file_exists($ruta)]);
+                if (file_exists($ruta)) {
+                    $rutaCompleta = $ruta;
+                    break;
+                }
+            }
+
+            if (!$rutaCompleta) {
+                Log::error('Archivo no encontrado para revisión en ninguna ubicación', [
+                    'tramite_id' => $tramite->id,
+                    'documento_solicitante_id' => $documentoSolicitanteId,
+                    'documento_id' => $documentoSolicitante->documento_id,
+                    'ruta_original' => $rutaArchivo,
+                    'rutas_probadas' => $rutasPosibles
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El archivo no existe en el servidor'
+                ], 404);
+            }
+
+            Log::info('Archivo encontrado para revisión', [
+                'tramite_id' => $tramite->id,
+                'documento_solicitante_id' => $documentoSolicitanteId,
+                'documento_id' => $documentoSolicitante->documento_id,
+                'ruta_final' => $rutaCompleta,
+                'revisor' => auth()->user()->name
+            ]);
+
+            // Obtener información del documento
+            $documento = \App\Models\Documento::find($documentoSolicitante->documento_id);
+            $nombreArchivo = ($documento ? $documento->nombre : 'Documento') . '.pdf';
+
+            // Detectar si es móvil para forzar descarga
+            $userAgent = $request->header('User-Agent');
+            $esMobile = preg_match('/Mobile|Android|iPhone|iPad/', $userAgent);
+
+            if ($esMobile || $request->get('download') === '1') {
+                // Forzar descarga en móviles
+                return response()->download($rutaCompleta, $nombreArchivo);
+            } else {
+                // Mostrar en el navegador (desktop)
+                return response()->file($rutaCompleta, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . $nombreArchivo . '"'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Error al ver documento en revisión:', [
+                'tramite_id' => $tramite->id,
+                'documento_solicitante_id' => $documentoSolicitanteId,
+                'revisor_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al acceder al documento: ' . $e->getMessage()
             ], 500);
         }
     }

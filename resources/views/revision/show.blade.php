@@ -424,6 +424,13 @@
                         <span>Documentos</span>
                     </div>
                 </button>
+                <!-- Sección de Cotejo Presencial -->
+                <button class="seccion-tab px-4 py-2 rounded-lg text-sm font-medium transition-all border" data-seccion="cotejo-presencial">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
+                        <span>Cotejo Presencial</span>
+                    </div>
+                </button>
                 <!-- Sección de Decisión Final -->
                 @if(auth()->user()->can('revision-tramites.aprobar'))
                 <button class="seccion-tab px-4 py-2 rounded-lg text-sm font-medium transition-all border" data-seccion="decision-final">
@@ -1395,7 +1402,8 @@
                 'constitucion': 3,
                 'accionistas': 4,
                 'apoderado': 5,
-                'documentos': 6
+                'documentos': 6,
+                'personal': 7
             };
             return mapeoSecciones[seccionNombre] || 1;
         }
@@ -1408,7 +1416,8 @@
                 3: 'constitucion',
                 4: 'accionistas',
                 5: 'apoderado',
-                6: 'documentos'
+                6: 'documentos',
+                7: 'personal'
             };
             return mapeoInverso[seccionId] || 'datos-generales';
         }
@@ -1443,7 +1452,20 @@
         // Función para generar URL de documento correcta
         // Usar la ruta específica para revisores
         function generateDocumentUrl(documentoId) {
-            return `/tramites-solicitante/ver-documento-revision/${window.tramiteId}/${documentoId}`;
+            return `/revision/${window.tramiteId}/ver-documento/${documentoId}`;
+        }
+        
+        // Función para ver documento desde el componente seccion-documentos
+        function verDocumento(documento) {
+            if (!documento || !documento.id) {
+                mostrarNotificacion('⚠️ Documento no válido', 'warning');
+                return;
+            }
+            
+            const documentoUrl = generateDocumentUrl(documento.id);
+            window.open(documentoUrl, '_blank');
+            
+            mostrarNotificacion(`🔍 Abriendo documento: ${documento.nombre || 'Documento'}`, 'success');
         }
         
         document.addEventListener('DOMContentLoaded', function() {
@@ -1534,6 +1556,7 @@
         window.obtenerDireccionDomicilio = obtenerDireccionDomicilio;
         window.mostrarDocumentoEnPanel = mostrarDocumentoEnPanel;
         window.cerrarVisorDocumento = cerrarVisorDocumento;
+        window.verDocumento = verDocumento;
         window.verDocumentoCompleto = verDocumentoCompleto;
         window.abrirDocumentoNuevaPestana = abrirDocumentoNuevaPestana;
         window.cambiarVistaMapaModal = cambiarVistaMapaModal;
@@ -3362,20 +3385,7 @@
             return `${iconos[estado] || '📄'} ${estado}`;
         }
         
-        // Mapear nombres de sección a IDs
-        function getSeccionId(seccion) {
-            const mapeo = {
-                'general': 1,
-                'datos-generales': 1,
-                'domicilio': 2,
-                'constitucion': 3,
-                'accionistas': 4,
-                'apoderado': 5,
-                'personal': 7,
-                'documentos': 6
-            };
-            return mapeo[seccion] || 1;
-        }
+
     </script>
     @endpush
 
