@@ -9,7 +9,8 @@
         <div class="flex items-center justify-center min-h-screen px-4">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="cerrarModalDocumento()"></div>
             
-            <div class="relative bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
+            <div class="relative bg-white rounded-lg shadow-xl w-full max-w-7xl max-h-[95vh] overflow-hidden">
+                <!-- Header del modal -->
                 <div class="flex items-center justify-between p-4 border-b bg-gradient-to-r from-[#B4325E] to-[#93264B]">
                     <h3 class="text-xl font-semibold text-white" id="documento-modal-title">
                         Visualización de Documento
@@ -21,8 +22,160 @@
                         </svg>
                     </button>
                 </div>
-                <div class="flex-1 overflow-hidden">
-                    <iframe id="documento-iframe" class="w-full h-[70vh]" frameborder="0"></iframe>
+                
+                <!-- Contenido principal del modal -->
+                <div class="flex h-[85vh]">
+                    <!-- Panel izquierdo - Documento -->
+                    <div class="flex-1 flex flex-col">
+                        <div class="flex-1 overflow-hidden">
+                            <iframe id="documento-iframe" class="w-full h-full" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                    
+                    <!-- Panel derecho - Controles de revisión -->
+                    <div class="w-80 border-l border-gray-200 bg-gray-50 flex flex-col">
+                        <!-- Header del panel de revisión -->
+                        <div class="p-4 border-b border-gray-200 bg-white">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-[#B4325E] to-[#93264B] rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-900">Revisión de Documento</h4>
+                                    <p class="text-sm text-gray-500">Evalúe y comente este documento</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Información del documento -->
+                        <div class="p-4 border-b border-gray-200 bg-white">
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</label>
+                                    <p id="documento-nombre-revision" class="text-sm font-medium text-gray-900 mt-1">-</p>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Actual</label>
+                                    <div class="mt-1">
+                                        <span id="documento-estado-actual" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            ⏳ Pendiente
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Versión</label>
+                                    <p id="documento-version" class="text-sm text-gray-700 mt-1">v1</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Controles de revisión -->
+                        <div class="flex-1 p-4 space-y-4 overflow-y-auto">
+                            <!-- Comentarios -->
+                            <div>
+                                <label for="comentario-documento" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Comentarios de Revisión
+                                </label>
+                                <textarea 
+                                    id="comentario-documento" 
+                                    rows="4" 
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#B4325E] focus:border-[#B4325E] resize-none"
+                                    placeholder="Agregue sus observaciones sobre este documento..."></textarea>
+                            </div>
+                            
+                            <!-- Estado del documento -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-3">Estado de Revisión</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="estado-documento" value="pendiente" class="h-4 w-4 text-[#B4325E] focus:ring-[#B4325E] border-gray-300" checked>
+                                        <span class="ml-2 text-sm text-gray-700">⏳ Pendiente de revisión</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="estado-documento" value="aprobado" class="h-4 w-4 text-[#B4325E] focus:ring-[#B4325E] border-gray-300">
+                                        <span class="ml-2 text-sm text-gray-700">✅ Aprobado</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="estado-documento" value="rechazado" class="h-4 w-4 text-[#B4325E] focus:ring-[#B4325E] border-gray-300">
+                                        <span class="ml-2 text-sm text-gray-700">❌ Rechazado</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="estado-documento" value="correccion" class="h-4 w-4 text-[#B4325E] focus:ring-[#B4325E] border-gray-300">
+                                        <span class="ml-2 text-sm text-gray-700">📝 Requiere corrección</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Nivel de prioridad -->
+                            <div>
+                                <label for="prioridad-documento" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Prioridad del Comentario
+                                </label>
+                                <select id="prioridad-documento" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#B4325E] focus:border-[#B4325E]">
+                                    <option value="baja">🟢 Baja - Observación menor</option>
+                                    <option value="media" selected>🟡 Media - Requiere atención</option>
+                                    <option value="alta">🔴 Alta - Problema crítico</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Historial de revisiones previas -->
+                            <div id="historial-revisiones" class="hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Historial de Revisiones
+                                </label>
+                                <div class="bg-white border border-gray-200 rounded-lg p-3 max-h-32 overflow-y-auto">
+                                    <div id="lista-historial" class="space-y-2 text-xs text-gray-600">
+                                        <!-- Se llena dinámicamente -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Botones de acción -->
+                        <div class="p-4 border-t border-gray-200 bg-white space-y-3">
+                            <!-- Botones principales -->
+                            <div class="flex space-x-2">
+                                <button id="btn-aprobar-documento" 
+                                        onclick="aplicarRevisionDocumento('aprobado')"
+                                        class="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-all">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Aprobar
+                                </button>
+                                <button id="btn-rechazar-documento" 
+                                        onclick="aplicarRevisionDocumento('rechazado')"
+                                        class="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-all">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Rechazar
+                                </button>
+                            </div>
+                            
+                            <!-- Botón guardar comentario -->
+                            <button id="btn-guardar-comentario-doc" 
+                                    onclick="guardarComentarioDocumento()"
+                                    class="w-full flex items-center justify-center px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-all">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                                </svg>
+                                Guardar Solo Comentario
+                            </button>
+                            
+                            <!-- Botón solicitar corrección -->
+                            <button id="btn-correccion-documento" 
+                                    onclick="aplicarRevisionDocumento('correccion')"
+                                    class="w-full flex items-center justify-center px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-all">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                Solicitar Corrección
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1234,9 +1387,71 @@
         window.revisionesSecciones = {};
         window.seccionActual = 'general';
         
+        // Mapeo de nombres de sección a IDs
+        function getSeccionId(seccionNombre) {
+            const mapeoSecciones = {
+                'datos-generales': 1,
+                'domicilio': 2,
+                'constitucion': 3,
+                'accionistas': 4,
+                'apoderado': 5,
+                'documentos': 6
+            };
+            return mapeoSecciones[seccionNombre] || 1;
+        }
+        
+        // Mapeo inverso de IDs a nombres de sección
+        function getSeccionNombre(seccionId) {
+            const mapeoInverso = {
+                1: 'datos-generales',
+                2: 'domicilio',
+                3: 'constitucion',
+                4: 'accionistas',
+                5: 'apoderado',
+                6: 'documentos'
+            };
+            return mapeoInverso[seccionId] || 'datos-generales';
+        }
+        
+        // Cargar revisiones existentes desde el backend
+        function cargarRevisionesExistentes() {
+            const revisionesExistentes = @json($revisionesExistentes ?? []);
+            
+            for (const [seccionId, revision] of Object.entries(revisionesExistentes)) {
+                const seccionNombre = getSeccionNombre(parseInt(seccionId));
+                const revisionControl = document.querySelector(`.revision-controls[data-seccion="${seccionNombre}"]`);
+                
+                if (revisionControl) {
+                    // Cargar comentario
+                    const comentarioTextarea = revisionControl.querySelector('.comentario-seccion');
+                    if (comentarioTextarea && revision.comentario) {
+                        comentarioTextarea.value = revision.comentario;
+                    }
+                    
+                    // Actualizar estado visual
+                    actualizarEstadoSeccion(seccionNombre, revision.estado);
+                    
+                    // Guardar en el estado global
+                    window.revisionesSecciones[seccionNombre] = {
+                        estado: revision.estado,
+                        comentario: revision.comentario || ''
+                    };
+                }
+            }
+        }
+        
+        // Función para generar URL de documento correcta
+        // Usar la ruta específica para revisores
+        function generateDocumentUrl(documentoId) {
+            return `/tramites-solicitante/ver-documento-revision/${window.tramiteId}/${documentoId}`;
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Inicializar sistema de redimensionamiento
             initResizeSystem();
+            
+            // Cargar revisiones existentes del backend
+            cargarRevisionesExistentes();
             
             // Inicializar navegación de tabs
             initTabNavigation();
@@ -1264,6 +1479,11 @@
         window.cambiarVistaMapaModal = cambiarVistaMapaModal;
         window.copiarDireccion = copiarDireccion;
         window.abrirEnGoogleMaps = abrirEnGoogleMaps;
+        window.abrirModalDocumento = abrirModalDocumento;
+        window.cerrarModalDocumento = cerrarModalDocumento;
+        window.abrirModalDocumentoRevision = abrirModalDocumentoRevision;
+        window.aplicarRevisionDocumento = aplicarRevisionDocumento;
+        window.guardarComentarioDocumento = guardarComentarioDocumento;
         
         // Sistema de redimensionamiento
         function initResizeSystem() {
@@ -1370,22 +1590,52 @@
             if (!revisionControl) return;
             
             const comentarioTextarea = revisionControl.querySelector('.comentario-seccion');
-            const estadoSpan = revisionControl.querySelector('.estado-seccion');
             
-            if (!comentarioTextarea || !estadoSpan) return;
+            if (!comentarioTextarea) return;
             
             if (window.revisionesSecciones[seccion]) {
                 const revision = window.revisionesSecciones[seccion];
                 comentarioTextarea.value = revision.comentario || '';
-                actualizarEstadoSeccion(estadoSpan, revision.estado || 'pendiente');
+                actualizarEstadoSeccion(seccion, revision.estado || 'pendiente');
             } else {
                 comentarioTextarea.value = '';
-                actualizarEstadoSeccion(estadoSpan, 'pendiente');
+                actualizarEstadoSeccion(seccion, 'pendiente');
             }
         }
         
+        // Función auxiliar para obtener el estadoSpan de manera robusta
+        function obtenerEstadoSpan(seccion) {
+            // Buscar en la sección actual primero
+            const contenidoSeccion = document.getElementById(`contenido-${seccion}`);
+            if (contenidoSeccion && !contenidoSeccion.classList.contains('hidden')) {
+                const revisionControl = contenidoSeccion.querySelector(`.revision-controls[data-seccion="${seccion}"]`);
+                if (revisionControl) {
+                    return revisionControl.querySelector('.estado-seccion');
+                }
+            }
+            
+            // Fallback: buscar globalmente
+            const revisionControl = document.querySelector(`.revision-controls[data-seccion="${seccion}"]`);
+            return revisionControl ? revisionControl.querySelector('.estado-seccion') : null;
+        }
+
         // Actualizar visualización del estado de sección
-        function actualizarEstadoSeccion(estadoSpan, estado) {
+        function actualizarEstadoSeccion(estadoSpanOrSeccion, estado) {
+            let estadoSpan;
+            
+            // Si se pasa un string, obtener el elemento
+            if (typeof estadoSpanOrSeccion === 'string') {
+                estadoSpan = obtenerEstadoSpan(estadoSpanOrSeccion);
+            } else {
+                estadoSpan = estadoSpanOrSeccion;
+            }
+            
+            // Validar que estadoSpan existe
+            if (!estadoSpan) {
+                console.warn('actualizarEstadoSeccion: estadoSpan es null para:', typeof estadoSpanOrSeccion === 'string' ? estadoSpanOrSeccion : 'elemento');
+                return;
+            }
+            
             estadoSpan.className = 'px-2 py-1 text-xs font-medium rounded-full';
             
             switch(estado) {
@@ -1403,7 +1653,8 @@
             }
             
             // Actualizar indicador en el tab
-            actualizarIndicadorTab(window.seccionActual, estado);
+            const seccionActual = typeof estadoSpanOrSeccion === 'string' ? estadoSpanOrSeccion : window.seccionActual;
+            actualizarIndicadorTab(seccionActual, estado);
         }
         
         // Actualizar indicador visual en el tab
@@ -1429,47 +1680,227 @@
         
         // Aprobar sección
         function aprobarSeccion(seccion) {
+            // Primero verificar si la sección está visible
+            const contenidoSeccion = document.getElementById(`contenido-${seccion}`);
+            if (!contenidoSeccion || contenidoSeccion.classList.contains('hidden')) {
+                console.warn('aprobarSeccion: La sección no está visible:', seccion);
+                mostrarNotificacion('❌ Error: La sección no está activa', 'error');
+                return;
+            }
+            
             const revisionControl = document.querySelector(`.revision-controls[data-seccion="${seccion}"]`);
-            if (!revisionControl) return;
+            if (!revisionControl) {
+                console.warn('aprobarSeccion: No se encontró revision-controls para sección:', seccion);
+                mostrarNotificacion('❌ Error: No se encontró la sección de revisión', 'error');
+                return;
+            }
             
-            const comentario = revisionControl.querySelector('.comentario-seccion').value;
+            const comentarioTextarea = revisionControl.querySelector('.comentario-seccion');
             const estadoSpan = revisionControl.querySelector('.estado-seccion');
+            const btnAprobar = revisionControl.querySelector('.btn-aprobar-seccion');
             
-            window.revisionesSecciones[seccion] = { estado: 'aprobado', comentario: comentario };
-            actualizarEstadoSeccion(estadoSpan, 'aprobado');
-            mostrarNotificacion('✅ Sección aprobada correctamente', 'success');
+            // Debug: verificar elementos encontrados
+            console.log('aprobarSeccion debug:', {
+                seccion,
+                contenidoVisible: !contenidoSeccion.classList.contains('hidden'),
+                revisionControl: !!revisionControl,
+                comentarioTextarea: !!comentarioTextarea,
+                estadoSpan: !!estadoSpan,
+                btnAprobar: !!btnAprobar
+            });
+            
+            if (!comentarioTextarea) {
+                console.warn('aprobarSeccion: No se encontró textarea de comentario');
+                return;
+            }
+            
+            if (!btnAprobar) {
+                console.warn('aprobarSeccion: No se encontró botón aprobar');
+                return;
+            }
+            
+            const comentario = comentarioTextarea.value;
+            
+            // Mostrar loading
+            const textoOriginal = btnAprobar.innerHTML;
+            btnAprobar.innerHTML = '<div class="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div> Aprobando...';
+            btnAprobar.disabled = true;
+            
+            // Hacer llamada AJAX al backend
+            fetch(`/revision/${window.tramiteId}/seccion/${getSeccionId(seccion)}/aprobar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    comentario: comentario
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.revisionesSecciones[seccion] = { estado: 'aprobado', comentario: comentario };
+                    actualizarEstadoSeccion(seccion, 'aprobado');
+                    mostrarNotificacion('✅ Sección aprobada correctamente', 'success');
+                } else {
+                    mostrarNotificacion('❌ Error al aprobar la sección: ' + (data.message || 'Error desconocido'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('❌ Error de conexión al aprobar la sección', 'error');
+            })
+            .finally(() => {
+                // Restaurar botón
+                btnAprobar.innerHTML = textoOriginal;
+                btnAprobar.disabled = false;
+            });
         }
         
         // Rechazar sección
         function rechazarSeccion(seccion) {
-            const revisionControl = document.querySelector(`.revision-controls[data-seccion="${seccion}"]`);
-            if (!revisionControl) return;
+            // Primero verificar si la sección está visible
+            const contenidoSeccion = document.getElementById(`contenido-${seccion}`);
+            if (!contenidoSeccion || contenidoSeccion.classList.contains('hidden')) {
+                console.warn('rechazarSeccion: La sección no está visible:', seccion);
+                mostrarNotificacion('❌ Error: La sección no está activa', 'error');
+                return;
+            }
             
-            const comentario = revisionControl.querySelector('.comentario-seccion').value;
+            const revisionControl = document.querySelector(`.revision-controls[data-seccion="${seccion}"]`);
+            if (!revisionControl) {
+                console.warn('rechazarSeccion: No se encontró revision-controls para sección:', seccion);
+                return;
+            }
+            
+            const comentarioTextarea = revisionControl.querySelector('.comentario-seccion');
             const estadoSpan = revisionControl.querySelector('.estado-seccion');
+            const btnRechazar = revisionControl.querySelector('.btn-rechazar-seccion');
+            
+            if (!comentarioTextarea || !btnRechazar) {
+                console.warn('rechazarSeccion: Elementos no encontrados:', {
+                    comentarioTextarea: !!comentarioTextarea,
+                    btnRechazar: !!btnRechazar
+                });
+                return;
+            }
+            
+            const comentario = comentarioTextarea.value;
             
             if (!comentario.trim()) {
                 mostrarNotificacion('⚠️ Debe agregar un comentario para rechazar', 'warning');
                 return;
             }
             
-            window.revisionesSecciones[seccion] = { estado: 'rechazado', comentario: comentario };
-            actualizarEstadoSeccion(estadoSpan, 'rechazado');
-            mostrarNotificacion('❌ Sección rechazada', 'warning');
+            // Mostrar loading
+            const textoOriginal = btnRechazar.innerHTML;
+            btnRechazar.innerHTML = '<div class="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div> Rechazando...';
+            btnRechazar.disabled = true;
+            
+            // Hacer llamada AJAX al backend
+            fetch(`/revision/${window.tramiteId}/seccion/${getSeccionId(seccion)}/rechazar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    comentario: comentario
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.revisionesSecciones[seccion] = { estado: 'rechazado', comentario: comentario };
+                    actualizarEstadoSeccion(seccion, 'rechazado');
+                    mostrarNotificacion('❌ Sección rechazada', 'warning');
+                } else {
+                    mostrarNotificacion('❌ Error al rechazar la sección: ' + (data.message || 'Error desconocido'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('❌ Error de conexión al rechazar la sección', 'error');
+            })
+            .finally(() => {
+                // Restaurar botón
+                btnRechazar.innerHTML = textoOriginal;
+                btnRechazar.disabled = false;
+            });
         }
         
         // Guardar solo comentario
         function guardarComentarioSeccion(seccion) {
-            const revisionControl = document.querySelector(`.revision-controls[data-seccion="${seccion}"]`);
-            if (!revisionControl) return;
-            
-            const comentario = revisionControl.querySelector('.comentario-seccion').value;
-            
-            if (!window.revisionesSecciones[seccion]) {
-                window.revisionesSecciones[seccion] = {};
+            // Primero verificar si la sección está visible
+            const contenidoSeccion = document.getElementById(`contenido-${seccion}`);
+            if (!contenidoSeccion || contenidoSeccion.classList.contains('hidden')) {
+                console.warn('guardarComentarioSeccion: La sección no está visible:', seccion);
+                mostrarNotificacion('❌ Error: La sección no está activa', 'error');
+                return;
             }
-            window.revisionesSecciones[seccion].comentario = comentario;
-            mostrarNotificacion('💾 Comentario guardado', 'success');
+            
+            const revisionControl = document.querySelector(`.revision-controls[data-seccion="${seccion}"]`);
+            if (!revisionControl) {
+                console.warn('guardarComentarioSeccion: No se encontró revision-controls para sección:', seccion);
+                return;
+            }
+            
+            const comentarioTextarea = revisionControl.querySelector('.comentario-seccion');
+            const btnGuardar = revisionControl.querySelector('.btn-guardar-comentario');
+            
+            if (!comentarioTextarea || !btnGuardar) {
+                console.warn('guardarComentarioSeccion: Elementos no encontrados:', {
+                    comentarioTextarea: !!comentarioTextarea,
+                    btnGuardar: !!btnGuardar
+                });
+                return;
+            }
+            
+            const comentario = comentarioTextarea.value;
+            
+            if (!comentario.trim()) {
+                mostrarNotificacion('⚠️ Escriba un comentario antes de guardar', 'warning');
+                return;
+            }
+            
+            // Mostrar loading
+            const textoOriginal = btnGuardar.innerHTML;
+            btnGuardar.innerHTML = '<div class="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600 mr-1"></div> Guardando...';
+            btnGuardar.disabled = true;
+            
+            // Hacer llamada AJAX al backend
+            fetch(`/revision/${window.tramiteId}/seccion/${getSeccionId(seccion)}/comentario`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    comentario: comentario
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (!window.revisionesSecciones[seccion]) {
+                        window.revisionesSecciones[seccion] = {};
+                    }
+                    window.revisionesSecciones[seccion].comentario = comentario;
+                    mostrarNotificacion('💾 Comentario guardado', 'success');
+                } else {
+                    mostrarNotificacion('❌ Error al guardar comentario: ' + (data.message || 'Error desconocido'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('❌ Error de conexión al guardar comentario', 'error');
+            })
+            .finally(() => {
+                // Restaurar botón
+                btnGuardar.innerHTML = textoOriginal;
+                btnGuardar.disabled = false;
+            });
         }
 
         // Función para toggle del panel de material de apoyo
@@ -1486,17 +1917,31 @@
             }
         }
 
-        // Funciones para el modal de documentos (mantener para compatibilidad)
-        function abrirModalDocumento(url, nombre) {
+        // Variables globales para revisión de documentos
+        let documentoActualIdRevision = null;
+        let documentoActualDatos = null;
+
+        // Funciones para el modal de documentos mejorado
+        function abrirModalDocumento(url, nombre, documentoId = null, documentoData = null) {
             const modal = document.getElementById('documento-modal');
             const iframe = document.getElementById('documento-iframe');
             const titulo = document.getElementById('documento-modal-title');
             
             // Construir URL correcta para el documento
-            const documentoUrl = url ? `/documentos/${url.split('/').pop()}` : '#';
+            const documentoUrl = url ? generateDocumentUrl(url.split('/').pop()) : '#';
             
+            // Guardar información del documento actual
+            documentoActualIdRevision = documentoId || url.split('/').pop();
+            documentoActualDatos = documentoData || { nombre: nombre };
+            
+            // Cargar documento
             iframe.src = documentoUrl;
             titulo.textContent = `📄 ${nombre}`;
+            
+            // Actualizar panel de revisión
+            actualizarPanelRevisionDocumento(nombre, documentoData);
+            
+            // Mostrar modal
             modal.classList.remove('hidden');
         }
 
@@ -1506,6 +1951,292 @@
             
             iframe.src = '';
             modal.classList.add('hidden');
+            
+            // Limpiar variables globales
+            documentoActualIdRevision = null;
+            documentoActualDatos = null;
+            
+            // Resetear controles de revisión
+            resetearControlesRevision();
+        }
+
+        // Actualizar panel de revisión con información del documento
+        function actualizarPanelRevisionDocumento(nombre, documentoData) {
+            // Actualizar nombre del documento
+            const nombreElement = document.getElementById('documento-nombre-revision');
+            if (nombreElement) {
+                nombreElement.textContent = nombre;
+            }
+            
+            // Actualizar estado actual
+            const estadoElement = document.getElementById('documento-estado-actual');
+            if (estadoElement && documentoData) {
+                const estado = documentoData.estado || 'Pendiente';
+                estadoElement.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getEstadoClases(estado)}`;
+                estadoElement.textContent = formatearEstado(estado);
+            }
+            
+            // Actualizar versión
+            const versionElement = document.getElementById('documento-version');
+            if (versionElement && documentoData) {
+                versionElement.textContent = `v${documentoData.version || '1'}`;
+            }
+            
+            // Cargar comentarios existentes si los hay
+            cargarComentariosExistentes(documentoActualIdRevision);
+        }
+
+        // Resetear controles de revisión
+        function resetearControlesRevision() {
+            // Limpiar comentario
+            const comentarioTextarea = document.getElementById('comentario-documento');
+            if (comentarioTextarea) {
+                comentarioTextarea.value = '';
+            }
+            
+            // Resetear radio buttons a "pendiente"
+            const radioPendiente = document.querySelector('input[name="estado-documento"][value="pendiente"]');
+            if (radioPendiente) {
+                radioPendiente.checked = true;
+            }
+            
+            // Resetear prioridad a "media"
+            const selectPrioridad = document.getElementById('prioridad-documento');
+            if (selectPrioridad) {
+                selectPrioridad.value = 'media';
+            }
+            
+            // Ocultar historial
+            const historial = document.getElementById('historial-revisiones');
+            if (historial) {
+                historial.classList.add('hidden');
+            }
+        }
+
+        // Aplicar revisión al documento
+        function aplicarRevisionDocumento(accion) {
+            if (!documentoActualIdRevision) {
+                mostrarNotificacion('❌ Error: No hay documento seleccionado', 'error');
+                return;
+            }
+            
+            const comentario = document.getElementById('comentario-documento').value;
+            const prioridad = document.getElementById('prioridad-documento').value;
+            
+            // Validar que hay comentario si se rechaza o solicita corrección
+            if ((accion === 'rechazado' || accion === 'correccion') && !comentario.trim()) {
+                mostrarNotificacion('⚠️ Debe agregar un comentario para esta acción', 'warning');
+                return;
+            }
+            
+            // Datos de la revisión
+            const datosRevision = {
+                documento_id: documentoActualIdRevision,
+                tramite_id: window.tramiteId,
+                accion: accion,
+                comentario: comentario,
+                prioridad: prioridad,
+                revisor_id: {{ auth()->id() }}
+            };
+            
+            // Mostrar loading
+            const btnAccion = document.getElementById(`btn-${accion === 'correccion' ? 'correccion' : accion === 'aprobado' ? 'aprobar' : 'rechazar'}-documento`);
+            const textoOriginal = btnAccion.innerHTML;
+            btnAccion.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1"></div> Procesando...';
+            btnAccion.disabled = true;
+            
+            // Simular envío (aquí integrarías con tu backend)
+            setTimeout(() => {
+                // Actualizar estado local
+                if (!window.revisionesDocumentos) {
+                    window.revisionesDocumentos = {};
+                }
+                
+                window.revisionesDocumentos[documentoActualIdRevision] = datosRevision;
+                
+                // Actualizar radio button correspondiente
+                const radioAccion = document.querySelector(`input[name="estado-documento"][value="${accion}"]`);
+                if (radioAccion) {
+                    radioAccion.checked = true;
+                }
+                
+                // Actualizar estado visual en el panel
+                actualizarEstadoDocumentoVisual(accion);
+                
+                // Mostrar notificación de éxito
+                const mensajes = {
+                    'aprobado': '✅ Documento aprobado correctamente',
+                    'rechazado': '❌ Documento rechazado',
+                    'correccion': '📝 Corrección solicitada'
+                };
+                
+                mostrarNotificacion(mensajes[accion], accion === 'aprobado' ? 'success' : 'warning');
+                
+                // Restaurar botón
+                btnAccion.innerHTML = textoOriginal;
+                btnAccion.disabled = false;
+                
+                // Agregar al historial
+                agregarAlHistorial(accion, comentario, prioridad);
+                
+            }, 1500); // Simular delay de red
+        }
+
+        // Guardar solo comentario sin cambiar estado
+        function guardarComentarioDocumento() {
+            if (!documentoActualIdRevision) {
+                mostrarNotificacion('❌ Error: No hay documento seleccionado', 'error');
+                return;
+            }
+            
+            const comentario = document.getElementById('comentario-documento').value;
+            const prioridad = document.getElementById('prioridad-documento').value;
+            
+            if (!comentario.trim()) {
+                mostrarNotificacion('⚠️ Agregue un comentario antes de guardar', 'warning');
+                return;
+            }
+            
+            // Simular guardado
+            const btn = document.getElementById('btn-guardar-comentario-doc');
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1"></div> Guardando...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                // Guardar en estado local
+                if (!window.comentariosDocumentos) {
+                    window.comentariosDocumentos = {};
+                }
+                
+                window.comentariosDocumentos[documentoActualIdRevision] = {
+                    comentario: comentario,
+                    prioridad: prioridad,
+                    fecha: new Date().toISOString()
+                };
+                
+                mostrarNotificacion('💾 Comentario guardado correctamente', 'success');
+                
+                // Restaurar botón
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+                
+                // Agregar al historial
+                agregarAlHistorial('comentario', comentario, prioridad);
+                
+            }, 1000);
+        }
+
+        // Actualizar estado visual del documento
+        function actualizarEstadoDocumentoVisual(estado) {
+            const estadoElement = document.getElementById('documento-estado-actual');
+            if (!estadoElement) return;
+            
+            const estadosConfig = {
+                'aprobado': { clases: 'bg-green-100 text-green-800', texto: '✅ Aprobado' },
+                'rechazado': { clases: 'bg-red-100 text-red-800', texto: '❌ Rechazado' },
+                'correccion': { clases: 'bg-yellow-100 text-yellow-800', texto: '📝 Requiere corrección' },
+                'pendiente': { clases: 'bg-gray-100 text-gray-800', texto: '⏳ Pendiente' }
+            };
+            
+            const config = estadosConfig[estado] || estadosConfig['pendiente'];
+            estadoElement.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.clases}`;
+            estadoElement.textContent = config.texto;
+        }
+
+        // Agregar entrada al historial de revisiones
+        function agregarAlHistorial(accion, comentario, prioridad) {
+            const historialContainer = document.getElementById('historial-revisiones');
+            const listaHistorial = document.getElementById('lista-historial');
+            
+            if (!historialContainer || !listaHistorial) return;
+            
+            // Mostrar historial si estaba oculto
+            historialContainer.classList.remove('hidden');
+            
+            // Crear nueva entrada
+            const fecha = new Date().toLocaleString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            const iconos = {
+                'aprobado': '✅',
+                'rechazado': '❌',
+                'correccion': '📝',
+                'comentario': '💬'
+            };
+            
+            const colores = {
+                'aprobado': 'text-green-600',
+                'rechazado': 'text-red-600',
+                'correccion': 'text-yellow-600',
+                'comentario': 'text-blue-600'
+            };
+            
+            const nuevaEntrada = document.createElement('div');
+            nuevaEntrada.className = 'p-2 bg-gray-50 rounded border-l-2 border-gray-300';
+            nuevaEntrada.innerHTML = `
+                <div class="flex items-center justify-between mb-1">
+                    <span class="font-medium ${colores[accion] || 'text-gray-600'}">
+                        ${iconos[accion] || '📄'} ${accion.charAt(0).toUpperCase() + accion.slice(1)}
+                    </span>
+                    <span class="text-gray-400">${fecha}</span>
+                </div>
+                ${comentario ? `<p class="text-gray-700">${comentario}</p>` : ''}
+                <div class="flex items-center justify-between mt-1">
+                    <span class="text-xs text-gray-500">Prioridad: ${prioridad}</span>
+                    <span class="text-xs text-gray-500">{{ auth()->user()->name }}</span>
+                </div>
+            `;
+            
+            // Insertar al inicio del historial
+            listaHistorial.insertBefore(nuevaEntrada, listaHistorial.firstChild);
+        }
+
+        // Función específica para abrir modal con datos de revisión
+        function abrirModalDocumentoRevision(documentoId, nombre, estado, version, observaciones) {
+            const documentoData = {
+                id: documentoId,
+                nombre: nombre,
+                estado: estado,
+                version: version,
+                observaciones: observaciones
+            };
+            
+            const documentoUrl = generateDocumentUrl(documentoId);
+            abrirModalDocumento(documentoUrl, nombre, documentoId, documentoData);
+        }
+
+        // Cargar comentarios existentes del documento
+        function cargarComentariosExistentes(documentoId) {
+            // Aquí puedes hacer una llamada AJAX para cargar comentarios existentes
+            // Por ahora simulamos que no hay comentarios previos
+            
+            if (window.comentariosDocumentos && window.comentariosDocumentos[documentoId]) {
+                const comentarioGuardado = window.comentariosDocumentos[documentoId];
+                const comentarioTextarea = document.getElementById('comentario-documento');
+                const selectPrioridad = document.getElementById('prioridad-documento');
+                
+                if (comentarioTextarea) {
+                    comentarioTextarea.value = comentarioGuardado.comentario;
+                }
+                if (selectPrioridad) {
+                    selectPrioridad.value = comentarioGuardado.prioridad;
+                }
+            }
+            
+            if (window.revisionesDocumentos && window.revisionesDocumentos[documentoId]) {
+                const revision = window.revisionesDocumentos[documentoId];
+                const radioEstado = document.querySelector(`input[name="estado-documento"][value="${revision.accion}"]`);
+                if (radioEstado) {
+                    radioEstado.checked = true;
+                }
+                actualizarEstadoDocumentoVisual(revision.accion);
+            }
         }
 
         // Variables globales para el documento actual
@@ -1529,8 +2260,8 @@
             documentoActualId = documentoId;
             documentoActualNombre = nombreDocumento;
             
-            // Construir URL correcta para el documento
-            const documentoUrl = `/documentos/${documentoId}`;
+            // Construir URL correcta para el documento usando la ruta de DocumentoSolicitanteController
+            const documentoUrl = generateDocumentUrl(documentoId);
             
             // Ocultar lista y mostrar visor
             listaDocumentos.style.display = 'none';
@@ -1592,7 +2323,7 @@
             }
             
             // Construir URL correcta para el documento
-            const documentoUrl = `/documentos/${documentoActualId}`;
+            const documentoUrl = generateDocumentUrl(documentoActualId);
             
             iframe.src = documentoUrl;
             titulo.textContent = `🔍 ${documentoActualNombre} - Vista Completa`;
@@ -1608,7 +2339,7 @@
                 return;
             }
             
-            const documentoUrl = `/documentos/${documentoActualId}`;
+            const documentoUrl = generateDocumentUrl(documentoActualId);
             window.open(documentoUrl, '_blank');
             
             mostrarNotificacion(`🆕 Abriendo en nueva pestaña: ${documentoActualNombre}`, 'success');
@@ -1620,8 +2351,9 @@
             if (modal) {
                 modal.classList.remove('hidden');
                 
-                // Obtener dirección del domicilio
+                // Obtener dirección del domicilio usando la función mejorada
                 const direccion = obtenerDireccionDomicilio();
+                console.log('🗺️ Abriendo mapa con dirección:', direccion);
                 
                 // Actualizar dirección en el modal
                 const direccionModalCompleta = document.getElementById('direccion-modal-completa');
@@ -1638,6 +2370,7 @@
                 // Inicializar mapa después de un pequeño delay para asegurar que el modal esté visible
                 setTimeout(() => {
                     if (window.mapHandler) {
+                        console.log('🗺️ Inicializando mapa con MapHandler:', direccion);
                         window.mapHandler.initializeMap('domicilio', direccion);
                         // Remover el loading overlay
                         setTimeout(() => {
@@ -1645,8 +2378,9 @@
                             if (loadingOverlay) {
                                 loadingOverlay.style.display = 'none';
                             }
-                        }, 2000);
+                        }, 3000); // Incrementé el tiempo para permitir la geocodificación
                     } else {
+                        console.warn('⚠️ MapHandler no disponible, usando fallback');
                         // Fallback mejorado si no hay map handler
                         const loadingOverlay = mapContainer.querySelector('.absolute.inset-0');
                         if (loadingOverlay) {
@@ -1689,6 +2423,9 @@
                         mostrarNotificacion('⚠️ Google Maps no está disponible', 'warning');
                     }
                 }, 500);
+                
+                // Mostrar notificación de debugging
+                mostrarNotificacion(`📍 Dirección detectada: ${direccion}`, 'success');
             }
         }
 
@@ -1751,49 +2488,171 @@
                     return 'Dirección no disponible';
                 }
 
-                // Buscar campos de domicilio específicos
+                // Buscar campos específicos por etiquetas
                 const datos = {};
                 
-                // Buscar elementos con texto visible (divs readonly o spans con datos)
-                const elementos = domicilioSection.querySelectorAll('.bg-gray-50, input[readonly], .text-gray-700');
-                
-                elementos.forEach(elemento => {
-                    const texto = (elemento.textContent || elemento.value || '').trim();
-                    
-                    if (texto && texto !== 'No especificado' && texto !== '' && texto.length > 2) {
-                        // Identificar el tipo de campo por contexto o etiquetas cercanas
-                        const etiqueta = elemento.closest('.grid')?.querySelector('label')?.textContent?.toLowerCase() || '';
-                        
-                        if (etiqueta.includes('calle') || (texto.length > 10 && !datos.calle)) {
-                            datos.calle = texto;
-                        } else if (etiqueta.includes('número') || texto.match(/^\d+[A-Z]?$/)) {
-                            datos.numero = texto;
-                        } else if (etiqueta.includes('colonia') || etiqueta.includes('asentamiento')) {
-                            datos.colonia = texto;
-                        } else if (etiqueta.includes('municipio') || etiqueta.includes('delegación')) {
-                            datos.municipio = texto;
-                        } else if (etiqueta.includes('estado') || etiqueta.includes('entidad')) {
-                            datos.estado = texto;
-                        } else if (etiqueta.includes('postal') || texto.match(/^\d{5}$/)) {
-                            datos.cp = texto;
+                // Función helper para encontrar valor por etiqueta
+                function buscarValorPorEtiqueta(seccion, textoEtiqueta) {
+                    const labels = seccion.querySelectorAll('label');
+                    for (let label of labels) {
+                        const labelText = label.textContent.toLowerCase().replace(/\*/g, '').trim();
+                        if (labelText.includes(textoEtiqueta.toLowerCase())) {
+                            // Buscar el div hermano o siguiente que contenga el valor
+                            const parent = label.closest('.form-group');
+                            if (parent) {
+                                const valorDiv = parent.querySelector('.bg-gray-50.border.border-gray-200, input[readonly]');
+                                if (valorDiv) {
+                                    const texto = (valorDiv.textContent || valorDiv.value || '').trim();
+                                    if (texto && texto !== 'No especificado' && texto !== '') {
+                                        return texto;
+                                    }
+                                }
+                            }
                         }
                     }
-                });
+                    return null;
+                }
 
-                // Construir dirección completa
+                // Extraer cada campo específico
+                datos.codigoPostal = buscarValorPorEtiqueta(domicilioSection, 'código postal') || 
+                                    buscarValorPorEtiqueta(domicilioSection, 'postal');
+                
+                datos.estado = buscarValorPorEtiqueta(domicilioSection, 'estado');
+                
+                datos.municipio = buscarValorPorEtiqueta(domicilioSection, 'municipio');
+                
+                datos.asentamiento = buscarValorPorEtiqueta(domicilioSection, 'asentamiento') || 
+                                    buscarValorPorEtiqueta(domicilioSection, 'colonia');
+                
+                datos.calle = buscarValorPorEtiqueta(domicilioSection, 'calle');
+                
+                datos.numeroExterior = buscarValorPorEtiqueta(domicilioSection, 'número exterior') || 
+                                      buscarValorPorEtiqueta(domicilioSection, 'exterior');
+                
+                datos.numeroInterior = buscarValorPorEtiqueta(domicilioSection, 'número interior') || 
+                                      buscarValorPorEtiqueta(domicilioSection, 'interior');
+
+                // Debug: mostrar datos encontrados
+                console.log('Datos extraídos del domicilio:', datos);
+
+                // Construir dirección en formato estándar de Google Maps
+                // Formato: Calle Número, Colonia, Municipio, Estado, CP, México
                 let direccion = '';
-                if (datos.calle) direccion += datos.calle;
-                if (datos.numero) direccion += ' ' + datos.numero;
-                if (datos.colonia) direccion += ', ' + datos.colonia;
-                if (datos.municipio) direccion += ', ' + datos.municipio;
-                if (datos.estado) direccion += ', ' + datos.estado;
-                if (datos.cp) direccion += ' ' + datos.cp;
+                
+                // 1. Calle y números
+                if (datos.calle) {
+                    direccion += datos.calle;
+                    
+                    // Agregar número exterior
+                    if (datos.numeroExterior && datos.numeroExterior !== 'S/N') {
+                        direccion += ' ' + datos.numeroExterior;
+                    }
+                    
+                    // Agregar número interior si existe
+                    if (datos.numeroInterior) {
+                        direccion += '-' + datos.numeroInterior;
+                    }
+                }
+                
+                // 2. Asentamiento/Colonia
+                if (datos.asentamiento) {
+                    if (direccion) direccion += ', ';
+                    direccion += datos.asentamiento;
+                }
+                
+                // 3. Municipio
+                if (datos.municipio) {
+                    if (direccion) direccion += ', ';
+                    direccion += datos.municipio;
+                }
+                
+                // 4. Estado
+                if (datos.estado) {
+                    if (direccion) direccion += ', ';
+                    direccion += datos.estado;
+                }
+                
+                // 5. Código Postal
+                if (datos.codigoPostal) {
+                    if (direccion) direccion += ' ';
+                    direccion += datos.codigoPostal;
+                }
+                
+                // 6. País
+                if (direccion) {
+                    direccion += ', México';
+                }
 
+                // Si no se pudo construir una dirección válida, usar datos del backend
+                if (!direccion || direccion === ', México') {
+                    direccion = obtenerDireccionDesdeDatosBackend();
+                }
+
+                console.log('Dirección construida para Google Maps:', direccion);
+                
                 return direccion || 'Ciudad de México, México';
                 
             } catch (error) {
                 console.error('Error al obtener dirección:', error);
-                return 'Ciudad de México, México';
+                return obtenerDireccionDesdeDatosBackend() || 'Ciudad de México, México';
+            }
+        }
+
+        // Función auxiliar para obtener dirección desde datos del backend
+        function obtenerDireccionDesdeDatosBackend() {
+            try {
+                // Intentar obtener datos desde las variables PHP del backend
+                const datosDomicilio = @json($datosDomicilio ?? []);
+                console.log('🔧 Datos domicilio desde backend:', datosDomicilio);
+                
+                if (datosDomicilio && Object.keys(datosDomicilio).length > 0) {
+                    let direccion = '';
+                    
+                    // Construir dirección desde datos del backend
+                    if (datosDomicilio.calle) {
+                        direccion += datosDomicilio.calle;
+                        
+                        if (datosDomicilio.numero_exterior && datosDomicilio.numero_exterior !== 'S/N') {
+                            direccion += ' ' + datosDomicilio.numero_exterior;
+                        }
+                        
+                        if (datosDomicilio.numero_interior) {
+                            direccion += '-' + datosDomicilio.numero_interior;
+                        }
+                    }
+                    
+                    if (datosDomicilio.colonia || datosDomicilio.asentamiento) {
+                        if (direccion) direccion += ', ';
+                        direccion += (datosDomicilio.colonia || datosDomicilio.asentamiento);
+                    }
+                    
+                    if (datosDomicilio.municipio) {
+                        if (direccion) direccion += ', ';
+                        direccion += datosDomicilio.municipio;
+                    }
+                    
+                    if (datosDomicilio.estado) {
+                        if (direccion) direccion += ', ';
+                        direccion += datosDomicilio.estado;
+                    }
+                    
+                    if (datosDomicilio.codigo_postal) {
+                        if (direccion) direccion += ' ';
+                        direccion += datosDomicilio.codigo_postal;
+                    }
+                    
+                    if (direccion) {
+                        direccion += ', México';
+                    }
+                    
+                    console.log('Dirección obtenida desde backend:', direccion);
+                    return direccion;
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error al obtener dirección desde backend:', error);
+                return null;
             }
         }
         
@@ -2018,12 +2877,12 @@
                     <!-- Lista de documentos -->
                     <div id="lista-documentos" class="flex-1 space-y-2">
                         ${documentos.map(doc => `
-                            <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 hover:border-[#B4325E] cursor-pointer"
-                                 onclick="mostrarDocumentoEnPanel('${doc.id}', '${doc.nombre}')">
+                            <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 hover:border-[#B4325E] cursor-pointer">
                                 <div class="p-3">
                                     <div class="flex items-center justify-between">
                                         <!-- Icono y nombre -->
-                                        <div class="flex items-center space-x-3 flex-1 min-w-0">
+                                        <div class="flex items-center space-x-3 flex-1 min-w-0" 
+                                             onclick="mostrarDocumentoEnPanel('${doc.id}', '${doc.nombre}')">
                             <div class="flex-shrink-0">
                                                 <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 hover:from-[#B4325E] hover:to-[#93264B] rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm group">
                                                     <svg class="w-5 h-5 text-gray-500 group-hover:text-white transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2044,16 +2903,24 @@
                                     </div>
                             </div>
                             
-                                        <!-- Botón para abrir en nueva pestaña -->
-                                        <div class="flex-shrink-0 ml-2">
-                                <a href="/documentos/${doc.id}" target="_blank" 
-                                               class="text-gray-400 hover:text-[#B4325E] transition-colors p-1" 
-                                               title="Abrir en nueva pestaña"
-                                               onclick="event.stopPropagation();">
+                                        <!-- Botones de acción -->
+                                        <div class="flex-shrink-0 ml-2 flex items-center space-x-1">
+                                            <!-- Botón para modal con revisión -->
+                                            <button onclick="abrirModalDocumentoRevision('${doc.id}', '${doc.nombre}', '${doc.estado}', '${doc.version || '1'}', '${doc.observaciones || ''}')"
+                                                    class="text-gray-400 hover:text-[#B4325E] transition-colors p-1.5 rounded hover:bg-gray-100" 
+                                                    title="Revisar documento">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                            </button>
+                                            <!-- Botón para abrir en nueva pestaña -->
+                                <button onclick="window.open(generateDocumentUrl('${doc.id}'), '_blank');"
+                                               class="text-gray-400 hover:text-blue-600 transition-colors p-1.5 rounded hover:bg-blue-50" 
+                                               title="Abrir en nueva pestaña">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                     </svg>
-                                </a>
+                                </button>
                             </div>
                         </div>
                         
@@ -2129,6 +2996,7 @@
         function mostrarMapaEnPanel() {
             const panelDocumentos = document.getElementById('panel-documentos-revision');
             const direccion = obtenerDireccionDomicilio();
+            console.log('🗺️ Panel lateral - Dirección detectada:', direccion);
             
             panelDocumentos.innerHTML = `
                 <div class="h-full flex flex-col">
@@ -2202,8 +3070,10 @@
             // Inicializar mapa simple en el panel después de un pequeño delay
             setTimeout(() => {
                 if (window.mapHandler && window.mapHandler.initializeSimpleMap) {
+                    console.log('🗺️ Inicializando mapa simple en panel lateral:', direccion);
                     window.mapHandler.initializeSimpleMap('mapa-panel-lateral', direccion);
                 } else {
+                    console.warn('⚠️ MapHandler simple no disponible, usando fallback');
                     // Fallback si no hay map handler
                     crearMapaFallbackPanel(direccion);
                 }
@@ -2215,24 +3085,48 @@
             const container = document.getElementById('mapa-panel-lateral');
             if (container) {
                 container.innerHTML = `
-                    <div class="flex items-center justify-center h-full bg-gradient-to-br from-red-50 to-orange-50">
-                        <div class="text-center text-gray-700 p-4">
-                            <svg class="w-12 h-12 mx-auto mb-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 616 0z"/>
-                            </svg>
-                            <h4 class="text-sm font-bold text-gray-800 mb-2">🗺️ Mapa no disponible</h4>
-                            <p class="text-xs text-gray-600 mb-3">Verifique su conexión a internet</p>
-                            
-                            <div class="bg-white border border-gray-300 rounded-lg p-2 mb-3 text-left">
-                                <p class="text-xs text-gray-500 mb-1">📍 Dirección:</p>
-                                <p class="text-xs font-medium text-gray-800 leading-tight">${direccion}</p>
+                    <div class="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                        <div class="text-center text-gray-700 p-4 max-w-xs">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 616 0z"/>
+                                </svg>
                             </div>
                             
-                            <button onclick="abrirMapaDomicilio()" 
-                                    class="w-full px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs font-medium">
-                                🔍 Ver Análisis Completo
-                            </button>
+                            <h4 class="text-sm font-bold text-gray-800 mb-2">🗺️ Vista de Mapa</h4>
+                            <p class="text-xs text-gray-600 mb-4">Use el botón "Ver Análisis Completo" para acceder al mapa interactivo</p>
+                            
+                            <div class="bg-white border border-blue-200 rounded-lg p-3 mb-4 text-left">
+                                <div class="flex items-start space-x-2">
+                                    <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 616 0z"/>
+                                    </svg>
+                                    <div class="flex-1">
+                                        <p class="text-xs text-gray-500 mb-1">Dirección Registrada:</p>
+                                        <p class="text-xs font-medium text-gray-800 leading-tight">${direccion}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <button onclick="abrirMapaDomicilio()" 
+                                        class="w-full px-3 py-2 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:from-green-700 hover:to-teal-700 transition-all text-xs font-medium flex items-center justify-center space-x-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                    <span>Ver Análisis Completo</span>
+                                </button>
+                                
+                                <button onclick="window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('${direccion}'), '_blank')" 
+                                        class="w-full px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium flex items-center justify-center space-x-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                    <span>Abrir en Google Maps</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -2442,6 +3336,112 @@
             margin-bottom: 2rem;
         }
         
+        /* Estilos para el modal de documentos mejorado */
+        #documento-modal {
+            backdrop-filter: blur(4px);
+        }
+        
+        #documento-modal .relative {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Panel de revisión de documentos */
+        #documento-modal .w-80 {
+            background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+        }
+        
+        /* Botones de revisión de documentos */
+        #btn-aprobar-documento:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+        }
+        
+        #btn-rechazar-documento:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+        
+        #btn-correccion-documento:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+        
+        #btn-guardar-comentario-doc:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(75, 85, 99, 0.4);
+        }
+        
+        /* Radio buttons customizados */
+        input[type="radio"]:checked {
+            background-color: #B4325E;
+            border-color: #B4325E;
+        }
+        
+        /* Textarea de comentarios */
+        #comentario-documento:focus {
+            box-shadow: 0 0 0 3px rgba(180, 50, 94, 0.1);
+        }
+        
+        /* Select de prioridad */
+        #prioridad-documento:focus {
+            box-shadow: 0 0 0 3px rgba(180, 50, 94, 0.1);
+        }
+        
+        /* Historial de revisiones */
+        #historial-revisiones .border-l-2 {
+            border-left-color: #B4325E;
+        }
+        
+        /* Animaciones para el historial */
+        #lista-historial > div {
+            animation: slideInFromTop 0.3s ease-out;
+        }
+        
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Efectos de loading en botones */
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Responsividad para el modal de documentos */
+        @media (max-width: 1024px) {
+            #documento-modal .relative {
+                max-width: calc(100vw - 2rem);
+            }
+            
+            #documento-modal .w-80 {
+                width: 300px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            #documento-modal .flex {
+                flex-direction: column;
+            }
+            
+            #documento-modal .w-80 {
+                width: 100%;
+                max-height: 40vh;
+            }
+            
+            #documento-modal .h-\[85vh\] {
+                height: auto;
+                max-height: 80vh;
+            }
+        }
+        
         /* Asegurar que el modal del mapa sea responsivo */
         #mapa-modal .relative {
             margin: 1rem;
@@ -2453,6 +3453,89 @@
                 max-width: calc(100vw - 1rem);
                 max-height: calc(100vh - 1rem);
             }
+        }
+        
+        /* Estilos específicos para el mapa del panel lateral */
+        #mapa-panel-lateral {
+            min-height: 250px;
+            max-height: 300px;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 2px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        
+        #mapa-panel-lateral .gm-style {
+            border-radius: 12px;
+            font-family: inherit;
+        }
+        
+        #mapa-panel-lateral .gm-style-iw {
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        #mapa-panel-lateral .gm-style-iw-d {
+            overflow: hidden !important;
+        }
+        
+        /* Mejorar la visibilidad de los controles de Google Maps */
+        #mapa-panel-lateral .gm-bundled-control {
+            margin: 8px !important;
+        }
+        
+        #mapa-panel-lateral .gm-control-active {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border-radius: 6px !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+        }
+        
+        #mapa-panel-lateral .gm-control-active:hover {
+            background-color: rgba(255, 255, 255, 1) !important;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2) !important;
+        }
+        
+        /* Estilos para los marcadores en el mapa simple */
+        #mapa-panel-lateral .gm-style-iw-c {
+            padding: 0 !important;
+        }
+        
+        #mapa-panel-lateral .gm-style-iw-tc {
+            display: none !important;
+        }
+        
+        /* Responsividad para el mapa del panel */
+        @media (max-width: 1024px) {
+            #mapa-panel-lateral {
+                min-height: 200px;
+                max-height: 250px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            #mapa-panel-lateral {
+                min-height: 180px;
+                max-height: 220px;
+                border-radius: 8px;
+            }
+            
+            #mapa-panel-lateral .gm-bundled-control {
+                margin: 4px !important;
+            }
+        }
+        
+        /* Animación para cuando se carga el mapa */
+        #mapa-panel-lateral.loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
     @endpush
