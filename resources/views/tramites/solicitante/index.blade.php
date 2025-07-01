@@ -752,13 +752,36 @@
 @endpush
 
 @push('scripts')
-<!-- Scripts necesarios para SAT -->
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js"></script>
-<script src="/js/scrapers/sat-scraper.js"></script>
-<script src="/js/validators/sat-validator.js"></script>
-<script src="/js/components/qr-reader.js"></script>
-<script src="/js/components/qr-handler.js"></script>
+<!-- Scripts necesarios para SAT - Carga lazy para optimizar rendimiento -->
+<script>
+    // Función para cargar scripts de forma asíncrona solo cuando se necesiten
+    window.loadSATScripts = function() {
+        if (window.satScriptsLoaded) return Promise.resolve();
+        
+        return Promise.all([
+            loadScript('https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js'),
+            loadScript('https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js'),
+            loadScript('/js/scrapers/sat-scraper.js'),
+            loadScript('/js/validators/sat-validator.js'),
+            loadScript('/js/components/qr-reader.js'),
+            loadScript('/js/components/qr-handler.js')
+        ]).then(() => {
+            window.satScriptsLoaded = true;
+        }).catch((error) => {
+            console.warn('Error cargando scripts SAT:', error);
+        });
+    };
+    
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+</script>
 
 <script>
     // Función para volver a la vista de trámites
@@ -769,49 +792,32 @@
     @if(isset($tramite) && isset($paso_actual))
     // Funciones de navegación globales para integración con componentes
     window.navegarSiguiente = function() {
-        console.log('🚀 Ejecutando window.navegarSiguiente()');
-        
         // Usar SOLO Alpine.js - navegación SPA sin recargar página
         const alpineContainer = document.querySelector('[x-data]');
-        
-        console.log('🔍 Alpine container encontrado:', alpineContainer);
         
         if (alpineContainer) {
             try {
                 // Intentar acceder al componente Alpine y aumentar currentStep
                 if (typeof Alpine !== 'undefined') {
-                    console.log('✅ Alpine.js disponible');
                     const alpineData = Alpine.$data(alpineContainer);
-                    console.log('📊 Datos de Alpine:', alpineData);
                     
                     if (alpineData && typeof alpineData.currentStep !== 'undefined') {
-                        console.log(`📍 Paso actual: ${alpineData.currentStep}, Total: ${alpineData.totalSteps}`);
-                        
                         if (alpineData.currentStep < alpineData.totalSteps) {
-                            console.log('➡️ Avanzando al siguiente paso');
                             alpineData.currentStep++;
                             return;
                         } else {
-                            console.log('🏁 Ya está en el último paso');
                             return;
                         }
-                    } else {
-                        console.log('⚠️ alpineData.currentStep no encontrado');
                     }
-                } else {
-                    console.log('❌ Alpine.js no disponible');
                 }
                 
                 // Fallback: usar event dispatch para comunicarse con Alpine
-                console.log('🔄 Usando fallback: dispatch event');
                 alpineContainer.dispatchEvent(new CustomEvent('next-step'));
                 return;
                 
             } catch (error) {
-                console.error('💥 Error en navegarSiguiente:', error);
+                // Error silencioso, continuar con fallback
             }
-        } else {
-            console.log('❌ No se encontró contenedor Alpine');
         }
     };
 
@@ -845,10 +851,20 @@
     let rfcValidated = false;
     
     // Función para mostrar el modal con datos del SAT
-    window.showSatModal = function() {
+    window.showSatModal = async function() {
         if (!satDataExtracted) {
             alert('No hay datos del SAT disponibles para mostrar');
             return;
+        }
+
+        // Cargar scripts SAT solo cuando sea necesario
+        try {
+            await window.loadSATScripts();
+            if (window.configurePDFJS) {
+                window.configurePDFJS();
+            }
+        } catch (error) {
+            // Continuar sin scripts SAT si fallan
         }
 
         const modal = document.getElementById('satDataModal');
@@ -954,12 +970,18 @@
     window.cargarDatosSAT = async function() {
         // Por ahora, los datos del SAT se procesan dinámicamente con la simulación
         // Esta función se mantiene para compatibilidad futura
-        console.log('Función cargarDatosSAT ejecutada - datos se procesan dinámicamente');
         return false;
     };
 
     // Función para simular la validación del RFC y activar botón "Ver Datos"
-    window.simularValidacionRFC = function(rfc, verBtnId = 'verDatosBtn') {
+    window.simularValidacionRFC = async function(rfc, verBtnId = 'verDatosBtn') {
+        // Cargar scripts SAT de forma asíncrona antes de validar
+        try {
+            await window.loadSATScripts();
+        } catch (error) {
+            // Continuar sin scripts SAT si fallan
+        }
+
         // Mostrar loading mientras se "valida"
         const btn = event.target;
         const originalText = btn.innerHTML;
@@ -1081,17 +1103,27 @@
         }
     });
 
-    // Carga instantánea - sin retrasos
-    document.addEventListener('DOMContentLoaded', function() {
-        // Las tarjetas cargan inmediatamente sin animación de retraso
-        
-        // Configurar PDF.js si está disponible
-        if (typeof pdfjsLib !== 'undefined') {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
+    // Configuración inicial - optimizada para evitar interferencias con el header
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializePage);
+    } else {
+        // Delay para permitir que Alpine.js del header se inicialice primero
+        setTimeout(initializePage, 100);
+    }
+    
+    function initializePage() {
+        // Configuración mínima sin interferir con Alpine.js del header
+        try {
+            // Solo configurar PDF.js si será necesario (cuando se usen scripts SAT)
+            window.configurePDFJS = function() {
+                if (typeof pdfjsLib !== 'undefined') {
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
+                }
+            };
+        } catch (error) {
+            // Error silencioso
         }
-        
-        console.log('Vista de trámites cargada correctamente');
-    });
+    }
 </script>
 @endpush
 @endsection 
