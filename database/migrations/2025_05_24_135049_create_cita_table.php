@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('citas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('tramite_id')->nullable()->constrained('tramite')->onDelete('cascade');
             $table->dateTime('fecha_hora');
             $table->string('motivo');
             $table->enum('estado', ['pendiente', 'confirmada', 'cancelada', 'completada'])->default('pendiente');

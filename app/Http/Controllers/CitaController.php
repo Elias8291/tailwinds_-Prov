@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\DetalleTramiteController;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class CitaController extends Controller
 {
@@ -286,5 +287,157 @@ class CitaController extends Controller
         }
         
         return view('citas.agendar', compact('tramite'));
+    }
+
+    /**
+     * Completar cita de cotejo físico y crear proveedor
+     */
+    public function completarCotejo(Request $request, Cita $cita)
+    {
+        $request->validate([
+            'resultado' => 'required|in:exitoso,fallido',
+            'observaciones' => 'nullable|string|max:1000'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Verificar que es una cita de cotejo
+            if (!str_contains($cita->motivo, 'Cotejo físico')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Esta cita no es de cotejo físico'
+                ], 400);
+            }
+
+            $exitoso = $request->resultado === 'exitoso';
+            
+            // Completar la cita
+            $tramite = $cita->completarCotejo($exitoso, $request->observaciones);
+            
+            if ($exitoso && $tramite) {
+                // Crear el proveedor después del cotejo exitoso
+                $proveedor = \App\Models\Proveedor::crearDesdeTramiite($tramite);
+                
+                // Cambiar estado del trámite a "Aprobado"
+                $tramite->update([
+                    'estado' => 'Aprobado',
+                    'observaciones' => ($tramite->observaciones ?? '') . "\nCotejo físico completado exitosamente."
+                ]);
+                
+                // Cambiar rol de usuario
+                if ($tramite->solicitante && $tramite->solicitante->usuario_id) {
+                    $usuario = \App\Models\User::find($tramite->solicitante->usuario_id);
+                    if ($usuario) {
+                        $usuario->removeRole('Solicitante');
+                        $usuario->assignRole('Proveedor');
+                    }
+                }
+                
+                // Enviar notificación de éxito
+                if ($tramite->solicitante && $tramite->solicitante->usuario_id) {
+                    \App\Models\Notificacion::crearParaUsuario(
+                        '🎉 ¡Ya eres Proveedor Oficial!',
+                        "¡Felicitaciones! El cotejo físico de documentos fue exitoso. " .
+                        "Su código de proveedor oficial es: " . $proveedor->pv . ". " .
+                        "Ya puede participar en licitaciones del Gobierno del Estado de Oaxaca.",
+                        'Informativo',
+                        $tramite->solicitante->usuario_id
+                    );
+                }
+                
+                Log::info('Cotejo completado exitosamente y proveedor creado:', [
+                    'cita_id' => $cita->id,
+                    'tramite_id' => $tramite->id,
+                    'proveedor_pv' => $proveedor->pv
+                ]);
+                
+                $mensaje = 'Cotejo completado exitosamente. Proveedor creado con código: ' . $proveedor->pv;
+                
+            } else {
+                // Cotejo fallido
+                if ($tramite) {
+                    $tramite->update([
+                        'estado' => 'Rechazado',
+                        'observaciones' => ($tramite->observaciones ?? '') . "\nCotejo físico fallido: " . ($request->observaciones ?? 'Sin observaciones')
+                    ]);
+                    
+                    // Enviar notificación de fallo
+                    if ($tramite->solicitante && $tramite->solicitante->usuario_id) {
+                        \App\Models\Notificacion::crearParaUsuario(
+                            '❌ Cotejo Físico No Exitoso',
+                            "El cotejo físico de documentos no fue exitoso. " .
+                            "Observaciones: " . ($request->observaciones ?? 'Sin observaciones específicas') . ". " .
+                            "Por favor, corrija los puntos observados y solicite una nueva cita.",
+                            'Advertencia',
+                            $tramite->solicitante->usuario_id
+                        );
+                    }
+                }
+                
+                $mensaje = 'Cotejo marcado como fallido. Se ha notificado al solicitante.';
+            }
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => $mensaje
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('Error al completar cotejo:', [
+                'cita_id' => $cita->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al completar el cotejo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Listar citas de cotejo pendientes
+     */
+    public function citasCotejo(Request $request)
+    {
+        $query = Cita::with(['user', 'tramite.solicitante'])
+                    ->where('motivo', 'like', '%Cotejo físico%')
+                    ->whereIn('estado', ['pendiente', 'confirmada']);
+
+        if ($request->filled('fecha')) {
+            $query->whereDate('fecha_hora', $request->fecha);
+        }
+
+        $citas = $query->orderBy('fecha_hora', 'asc')->get();
+
+        return view('citas.cotejo', compact('citas'));
+    }
+
+    /**
+     * Mostrar dashboard de citas de hoy
+     */
+    public function dashboardCotejo()
+    {
+        $citasHoy = Cita::with(['user', 'tramite.solicitante'])
+                        ->where('motivo', 'like', '%Cotejo físico%')
+                        ->whereDate('fecha_hora', today())
+                        ->whereIn('estado', ['pendiente', 'confirmada'])
+                        ->orderBy('fecha_hora', 'asc')
+                        ->get();
+
+        $citasProximas = Cita::with(['user', 'tramite.solicitante'])
+                            ->where('motivo', 'like', '%Cotejo físico%')
+                            ->where('fecha_hora', '>', now())
+                            ->whereIn('estado', ['pendiente', 'confirmada'])
+                            ->orderBy('fecha_hora', 'asc')
+                            ->limit(5)
+                            ->get();
+
+        return view('citas.dashboard-cotejo', compact('citasHoy', 'citasProximas'));
     }
 } 

@@ -571,6 +571,17 @@
                                 </button>
                             </form>
                         @endif
+                    @elseif(isset($tipoTramite['mensaje_bloqueo']) && $tipoTramite['mensaje_bloqueo'])
+                        <!-- Mensaje de bloqueo por no tener 7 meses activo -->
+                        <div class="w-full bg-yellow-50 border border-yellow-200 py-4 px-4 rounded-xl text-center">
+                            <div class="flex items-center justify-center mb-2">
+                                <i class="fas fa-clock text-yellow-600 text-lg mr-2"></i>
+                                <span class="text-sm font-semibold text-yellow-800">Tiempo Mínimo Requerido</span>
+                            </div>
+                            <p class="text-xs text-yellow-700 leading-relaxed">
+                                {{ $tipoTramite['mensaje_bloqueo'] }}
+                            </p>
+                        </div>
                     @else
                         <div class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-semibold text-sm text-center border border-gray-200">
                             <i class="fas fa-lock mr-2"></i>

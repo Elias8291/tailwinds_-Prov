@@ -168,6 +168,22 @@ class RevisionController extends Controller
             // 7. Obtener comentarios generales del trámite
             $comentariosGenerales = $this->obtenerComentariosGenerales($tramite);
 
+            // 8. Verificar si existe una cita de cotejo para este trámite
+            $citaCotejo = \App\Models\Cita::where('tramite_id', $tramite->id)
+                ->where('motivo', 'like', '%Cotejo físico%')
+                ->first();
+
+            // 9. Verificar si todas las secciones están revisadas (aprobadas)
+            $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
+            $seccionesRequeridas = $tipoPersona === 'Moral' ? [1, 2, 3, 4, 5, 6] : [1, 2, 3];
+            
+            $seccionesAprobadas = $tramite->seccionesRevision()
+                ->whereIn('seccion_id', $seccionesRequeridas)
+                ->where('estado', 'aprobado')
+                ->count();
+            
+            $todasSeccionesAprobadas = $seccionesAprobadas === count($seccionesRequeridas);
+
             return view('revision.show', compact(
                 'tramite',
                 'datosTramite',
@@ -181,7 +197,9 @@ class RevisionController extends Controller
                 'datosApoderado',
                 'datosConstitucion',
                 'revisionesExistentes',
-                'comentariosGenerales'
+                'comentariosGenerales',
+                'citaCotejo',
+                'todasSeccionesAprobadas'
             ));
 
         } catch (\Exception $e) {
@@ -714,7 +732,7 @@ class RevisionController extends Controller
     }
 
     /**
-     * Aprobar todo el trámite y crear proveedor automáticamente
+     * Completar revisión digital y agendar cita para cotejo físico
      */
     public function aprobarTodo(Request $request, Tramite $tramite)
     {
@@ -725,7 +743,7 @@ class RevisionController extends Controller
             $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
             $seccionesAAprobar = $tipoPersona === 'Moral' ? [1, 2, 3, 4, 5, 6] : [1, 2, 3]; // 3 es documentos para persona física
             
-            Log::info('Iniciando aprobación completa de trámite:', [
+            Log::info('Iniciando revisión digital completa de trámite:', [
                 'tramite_id' => $tramite->id,
                 'tipo_persona' => $tipoPersona,
                 'secciones_a_aprobar' => $seccionesAAprobar,
@@ -741,68 +759,49 @@ class RevisionController extends Controller
                     ],
                     [
                         'estado' => 'aprobado',
-                        'comentario' => 'Aprobado en revisión completa',
+                        'comentario' => 'Aprobado en revisión digital completa',
                         'revisor_id' => Auth::id(),
                         'fecha_revision' => now()
                     ]
                 );
             }
 
-            // Actualizar estado del trámite
+            // Actualizar estado del trámite a "Revisión Digital Completada"
             $tramite->update([
-                'estado' => 'Aprobado',
+                'estado' => 'Revision Digital Completada',
                 'fecha_revision' => now(),
-                'revisado_por' => Auth::id()
+                'revisado_por' => Auth::id(),
+                'observaciones' => 'Revisión digital aprobada. Pendiente cotejo físico de documentos.'
             ]);
 
-            // ✅ CREAR AUTOMÁTICAMENTE EL PROVEEDOR
-            $proveedor = Proveedor::crearDesdeTramiite($tramite);
-
-            // 🔄 CAMBIAR ROL DE SOLICITANTE A PROVEEDOR
-            if ($tramite->solicitante && $tramite->solicitante->usuario_id) {
-                try {
-                    $usuario = \App\Models\User::find($tramite->solicitante->usuario_id);
-                    if ($usuario) {
-                        // Remover el rol de Solicitante y asignar el rol de Proveedor
-                        $usuario->removeRole('Solicitante');
-                        $usuario->assignRole('Proveedor');
-                        
-                        Log::info('Usuario cambió de rol automáticamente:', [
-                            'usuario_id' => $usuario->id,
-                            'tramite_id' => $tramite->id,
-                            'rol_anterior' => 'Solicitante',
-                            'rol_nuevo' => 'Proveedor',
-                            'proveedor_pv' => $proveedor->pv
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Error al cambiar rol de usuario:', [
-                        'tramite_id' => $tramite->id,
-                        'usuario_id' => $tramite->solicitante->usuario_id,
-                        'error' => $e->getMessage()
-                    ]);
-                }
-            }
+            // ✅ AGENDAR CITA AUTOMÁTICAMENTE PARA COTEJO FÍSICO
+            $cita = \App\Models\Cita::agendarCotejoAutomatico($tramite);
 
             // 🔔 CREAR NOTIFICACIÓN PARA EL USUARIO
-            if ($tramite->solicitante && $tramite->solicitante->usuario_id) {
+            if ($tramite->solicitante && $tramite->solicitante->usuario_id && $cita) {
                 try {
-                    Notificacion::crearParaUsuario(
-                        '¡Felicitaciones! Ya eres Proveedor Oficial',
-                        "Su trámite #" . str_pad($tramite->id, 6, '0', STR_PAD_LEFT) . " ha sido aprobado completamente. " .
-                        "¡Bienvenido al Padrón de Proveedores! Su código oficial es: " . $proveedor->pv . ". " .
-                        "Ahora puede participar en licitaciones del Gobierno del Estado de Oaxaca y gestionar renovaciones desde su panel.",
+                    $fechaCita = $cita->fecha_hora->format('d/m/Y');
+                    $horaCita = $cita->fecha_hora->format('H:i');
+                    
+                    \App\Models\Notificacion::crearParaUsuario(
+                        '✅ Revisión Digital Aprobada - Cita Agendada',
+                        "¡Excelente noticia! Su trámite #" . str_pad($tramite->id, 6, '0', STR_PAD_LEFT) . " ha completado exitosamente la revisión digital. " .
+                        "Se ha agendado automáticamente una cita para el cotejo físico de sus documentos:\n\n" .
+                        "📅 Fecha: {$fechaCita}\n⏰ Hora: {$horaCita}\n📍 Ubicación: Oficinas del Gobierno del Estado\n\n" .
+                        "Por favor, traiga TODOS los documentos originales para su verificación. " .
+                        "Después del cotejo exitoso, se le otorgará su código de proveedor oficial.",
                         'Informativo',
                         $tramite->solicitante->usuario_id
                     );
                     
-                    Log::info('Notificación de aprobación enviada:', [
+                    Log::info('Notificación de cita agendada enviada:', [
                         'tramite_id' => $tramite->id,
                         'usuario_id' => $tramite->solicitante->usuario_id,
-                        'proveedor_pv' => $proveedor->pv
+                        'cita_id' => $cita->id,
+                        'fecha_cita' => $cita->fecha_hora->format('Y-m-d H:i')
                     ]);
                 } catch (\Exception $e) {
-                    Log::error('Error al crear notificación de aprobación:', [
+                    Log::error('Error al crear notificación de cita:', [
                         'tramite_id' => $tramite->id,
                         'error' => $e->getMessage()
                     ]);
@@ -811,27 +810,28 @@ class RevisionController extends Controller
 
             DB::commit();
 
-            Log::info('Trámite aprobado completamente y proveedor creado:', [
+            Log::info('Revisión digital completada y cita agendada:', [
                 'tramite_id' => $tramite->id,
                 'revisor' => Auth::id(),
                 'tipo_persona' => $tipoPersona,
-                'proveedor_pv' => $proveedor->pv,
-                'proveedor_estado' => $proveedor->estado
+                'cita_id' => $cita->id,
+                'fecha_cita' => $cita->fecha_hora->format('Y-m-d H:i'),
+                'nuevo_estado' => 'Revision Digital Completada'
             ]);
 
             return redirect()->route('revision.index')->with('success', 
-                'Trámite aprobado completamente. Proveedor creado con código: ' . $proveedor->pv);
+                'Revisión digital completada exitosamente. Cita agendada para el ' . $cita->fecha_hora->format('d/m/Y') . ' a las ' . $cita->fecha_hora->format('H:i') . ' para cotejo físico de documentos.');
 
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Error al aprobar todo el trámite:', [
+            Log::error('Error al completar revisión digital:', [
                 'tramite_id' => $tramite->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return redirect()->back()->with('error', 'Error al aprobar el trámite: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al completar la revisión digital: ' . $e->getMessage());
         }
     }
 
@@ -1389,6 +1389,173 @@ class RevisionController extends Controller
                 'success' => false,
                 'message' => 'Error al acceder al documento: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Aprobar documento individual
+     */
+    public function aprobarDocumento(Request $request, Tramite $tramite, $documentoSolicitanteId)
+    {
+        try {
+            // Verificar permisos
+            if (!Gate::allows('revision-tramites.aprobar')) {
+                $isAjax = $request->expectsJson() || 
+                         $request->header('Accept') === 'application/json' || 
+                         $request->header('X-Requested-With') === 'XMLHttpRequest';
+                         
+                if ($isAjax) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No tienes permisos para aprobar documentos'
+                    ], 403);
+                }
+                abort(403, 'No tienes permisos para aprobar documentos');
+            }
+
+            // Buscar el documento
+            $documentoSolicitante = DocumentoSolicitante::where('id', $documentoSolicitanteId)
+                ->where('tramite_id', $tramite->id)
+                ->first();
+
+            if (!$documentoSolicitante) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Documento no encontrado'
+                ], 404);
+            }
+
+            // Actualizar estado del documento
+            $documentoSolicitante->update([
+                'estado' => 'Aprobado',
+                'observaciones' => $request->input('comentario', 'Documento aprobado')
+            ]);
+
+            Log::info('Documento aprobado individualmente', [
+                'tramite_id' => $tramite->id,
+                'documento_solicitante_id' => $documentoSolicitanteId,
+                'revisor_id' => auth()->id(),
+                'comentario' => $request->input('comentario')
+            ]);
+
+            $isAjax = $request->expectsJson() || 
+                     $request->header('Accept') === 'application/json' || 
+                     $request->header('X-Requested-With') === 'XMLHttpRequest';
+                     
+            if ($isAjax) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Documento aprobado correctamente'
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Documento aprobado correctamente');
+
+        } catch (\Exception $e) {
+            Log::error('Error al aprobar documento:', [
+                'tramite_id' => $tramite->id,
+                'documento_solicitante_id' => $documentoSolicitanteId,
+                'error' => $e->getMessage()
+            ]);
+
+            $isAjax = $request->expectsJson() || 
+                     $request->header('Accept') === 'application/json' || 
+                     $request->header('X-Requested-With') === 'XMLHttpRequest';
+                     
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al aprobar el documento'
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Error al aprobar el documento');
+        }
+    }
+
+    /**
+     * Rechazar documento individual
+     */
+    public function rechazarDocumento(Request $request, Tramite $tramite, $documentoSolicitanteId)
+    {
+        try {
+            // Verificar permisos
+            if (!Gate::allows('revision-tramites.rechazar')) {
+                $isAjax = $request->expectsJson() || 
+                         $request->header('Accept') === 'application/json' || 
+                         $request->header('X-Requested-With') === 'XMLHttpRequest';
+                         
+                if ($isAjax) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No tienes permisos para rechazar documentos'
+                    ], 403);
+                }
+                abort(403, 'No tienes permisos para rechazar documentos');
+            }
+
+            // Validar que se proporcione un comentario
+            $request->validate([
+                'comentario' => 'required|string|min:10'
+            ]);
+
+            // Buscar el documento
+            $documentoSolicitante = DocumentoSolicitante::where('id', $documentoSolicitanteId)
+                ->where('tramite_id', $tramite->id)
+                ->first();
+
+            if (!$documentoSolicitante) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Documento no encontrado'
+                ], 404);
+            }
+
+            // Actualizar estado del documento
+            $documentoSolicitante->update([
+                'estado' => 'Rechazado',
+                'observaciones' => $request->input('comentario')
+            ]);
+
+            Log::info('Documento rechazado individualmente', [
+                'tramite_id' => $tramite->id,
+                'documento_solicitante_id' => $documentoSolicitanteId,
+                'revisor_id' => auth()->id(),
+                'comentario' => $request->input('comentario')
+            ]);
+
+            $isAjax = $request->expectsJson() || 
+                     $request->header('Accept') === 'application/json' || 
+                     $request->header('X-Requested-With') === 'XMLHttpRequest';
+                     
+            if ($isAjax) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Documento rechazado correctamente'
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Documento rechazado correctamente');
+
+        } catch (\Exception $e) {
+            Log::error('Error al rechazar documento:', [
+                'tramite_id' => $tramite->id,
+                'documento_solicitante_id' => $documentoSolicitanteId,
+                'error' => $e->getMessage()
+            ]);
+
+            $isAjax = $request->expectsJson() || 
+                     $request->header('Accept') === 'application/json' || 
+                     $request->header('X-Requested-With') === 'XMLHttpRequest';
+                     
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al rechazar el documento'
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Error al rechazar el documento');
         }
     }
 } 

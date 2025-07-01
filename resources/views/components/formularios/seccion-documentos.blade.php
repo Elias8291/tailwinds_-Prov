@@ -81,12 +81,12 @@
                                     </a>
                                 @else
                                     {{-- En otros contextos, usar la ruta normal --}}
-                                    <a href="{{ route('tramites.solicitante.ver-documento', ['tramite' => $tramite->id ?? 0, 'documento' => $documento['id']]) }}" 
-                                       target="_blank"
-                                       class="text-green-600 hover:text-green-800 text-xs underline">
-                                        <i class="fas fa-eye mr-1"></i>
-                                        Ver
-                                    </a>
+                                <a href="{{ route('tramites.solicitante.ver-documento', ['tramite' => $tramite->id ?? 0, 'documento' => $documento['id']]) }}" 
+                                   target="_blank"
+                                   class="text-green-600 hover:text-green-800 text-xs underline">
+                                    <i class="fas fa-eye mr-1"></i>
+                                    Ver
+                                </a>
                                 @endif
                             @endif
                             @if($documento['estado'] === 'Pendiente')
@@ -139,21 +139,21 @@
                             <i class="fas fa-clipboard-check text-[#9d2449] mr-2"></i>
                             Revisión de Documento
                         </h5>
-                        <!-- Opción de Cotejo Presencial -->
+                        <!-- Opción de Documento Cotejado -->
                         <div class="mb-4">
                             <label class="flex items-center space-x-3 cursor-pointer">
                                 <input type="checkbox" 
-                                       name="cotejo_presencial[{{ $documento['id'] }}]" 
-                                       id="cotejo_{{ $documento['id'] }}"
-                                       class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                       {{ (isset($documento['cotejo_presencial']) && $documento['cotejo_presencial']) ? 'checked' : '' }}>
+                                       name="documento_cotejado[{{ $documento['id'] }}]" 
+                                       id="cotejado_{{ $documento['id'] }}"
+                                       class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                       {{ (isset($documento['documento_cotejado']) && $documento['documento_cotejado']) ? 'checked' : '' }}>
                                 <div class="flex items-center">
-                                    <i class="fas fa-user-check text-blue-600 mr-2"></i>
-                                    <span class="text-sm font-medium text-gray-700">Requiere cotejo presencial</span>
+                                    <i class="fas fa-check-double text-green-600 mr-2"></i>
+                                    <span class="text-sm font-medium text-gray-700">Documento cotejado físicamente</span>
                                 </div>
                             </label>
                             <p class="text-xs text-gray-500 ml-7 mt-1">
-                                Marcar si este documento debe ser cotejado de manera presencial
+                                Marcar cuando el documento físico ha sido verificado y cotejado correctamente
                             </p>
                         </div>
                         <!-- Campo de Comentario Individual -->

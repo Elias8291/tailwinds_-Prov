@@ -424,19 +424,13 @@
                         <span>Documentos</span>
                     </div>
                 </button>
-                <!-- Sección de Cotejo Presencial -->
-                <button class="seccion-tab px-4 py-2 rounded-lg text-sm font-medium transition-all border" data-seccion="cotejo-presencial">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
-                        <span>Cotejo Presencial</span>
-                    </div>
-                </button>
-                <!-- Sección de Decisión Final -->
+
+                <!-- Sección de Proceso -->
                 @if(auth()->user()->can('revision-tramites.aprobar'))
                 <button class="seccion-tab px-4 py-2 rounded-lg text-sm font-medium transition-all border" data-seccion="decision-final">
                     <div class="flex items-center space-x-2">
                         <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
-                        <span>Decisión Final</span>
+                        <span>Proceso</span>
                     </div>
                 </button>
                 @endif
@@ -1020,7 +1014,7 @@
                         </div>
                     </div>
                     
-                    <!-- Nueva Sección de Decisión Final -->
+                    <!-- Nueva Sección de Proceso -->
                     @if(auth()->user()->can('revision-tramites.aprobar'))
                     <div id="contenido-decision-final" class="hidden">
                         <div class="space-y-6">
@@ -1030,25 +1024,80 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                 </div>
-                                <h4 class="text-2xl font-bold text-gray-900 mb-2">Decisión Final del Trámite</h4>
-                                <p class="text-gray-600">Complete la revisión y tome una decisión sobre el trámite</p>
+                                <h4 class="text-2xl font-bold text-gray-900 mb-2">Proceso del Trámite</h4>
+                                <p class="text-gray-600">Complete la revisión digital y gestione el siguiente paso del proceso</p>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <!-- Aprobar Trámite -->
+                                <!-- Estado del proceso según revisiones y cita -->
+                                @if(!$todasSeccionesAprobadas)
+                                    <!-- Revisión en progreso -->
+                                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
+                                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                            </svg>
+                                        </div>
+                                        <h5 class="text-lg font-semibold text-blue-900 mb-2">Revisión en Progreso</h5>
+                                        <p class="text-sm text-blue-700 mb-4">Complete la revisión de todas las secciones</p>
+                                        <button disabled class="w-full px-4 py-2 bg-gray-300 text-gray-500 font-medium rounded-lg cursor-not-allowed">
+                                            Pendiente de Revisión
+                                        </button>
+                                    </div>
+                                @elseif(!$citaCotejo)
+                                    <!-- Listo para agendar cita -->
                                 <div class="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
                                     <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                         </svg>
                                     </div>
-                                    <h5 class="text-lg font-semibold text-green-900 mb-2">Aprobar</h5>
-                                    <p class="text-sm text-green-700 mb-4">El trámite cumple con todos los requisitos</p>
+                                        <h5 class="text-lg font-semibold text-green-900 mb-2">Agendar Cita de Cotejo</h5>
+                                        <p class="text-sm text-green-700 mb-4">Todas las secciones aprobadas. Listo para cotejo físico</p>
                                     <button id="btn-aprobar-todo" 
                                             class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all">
-                                        Aprobar Trámite
+                                            Agendar Cita Automática
                                     </button>
                                 </div>
+                                @else
+                                    <!-- Cita ya agendada -->
+                                    <div class="bg-purple-50 border border-purple-200 rounded-xl p-6 text-center">
+                                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                        </div>
+                                        <h5 class="text-lg font-semibold text-purple-900 mb-2">Cita Agendada</h5>
+                                        <p class="text-sm text-purple-700 mb-2">{{ $citaCotejo->fecha_hora->format('d/m/Y H:i') }}</p>
+                                        <p class="text-xs text-purple-600 mb-4">Estado: {{ ucfirst($citaCotejo->estado) }}</p>
+                                        
+                                        @php
+                                            $esMomentoCotejo = $citaCotejo->fecha_hora->isPast() || $citaCotejo->fecha_hora->diffInMinutes(now(), false) <= 15;
+                                        @endphp
+                                        
+                                        @if($esMomentoCotejo && in_array($citaCotejo->estado, ['confirmada', 'pendiente']))
+                                            <!-- Botones de cotejo activos -->
+                                            <div class="space-y-2">
+                                                <button onclick="completarCotejo({{ $citaCotejo->id }}, 'exitoso')" 
+                                                        class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all">
+                                                    ✅ Cotejo Exitoso
+                                                </button>
+                                                <button onclick="completarCotejo({{ $citaCotejo->id }}, 'fallido')" 
+                                                        class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all">
+                                                    ❌ Cotejo Fallido
+                                                </button>
+                                            </div>
+                                        @elseif($citaCotejo->estado === 'completada')
+                                            <button disabled class="w-full px-4 py-2 bg-gray-300 text-gray-500 font-medium rounded-lg cursor-not-allowed">
+                                                Cotejo Completado
+                                            </button>
+                                        @else
+                                            <button disabled class="w-full px-4 py-2 bg-gray-300 text-gray-500 font-medium rounded-lg cursor-not-allowed">
+                                                Esperando Fecha de Cita
+                                            </button>
+                                        @endif
+                                    </div>
+                                @endif
                                 
                                 <!-- Solicitar Correcciones -->
                                 <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
@@ -1103,7 +1152,7 @@
 
             <!-- Panel de Documentos y Revisión (Redimensionable) -->
             <aside class="bg-white rounded-xl shadow-lg border border-gray-100 sticky" style="width: 500px; min-width: 200px; max-width: 1200px; top: 20px; align-self: flex-start;" id="documentos-container">
-                <div class="p-6 border-b border-gray-200">
+                <div class="p-6 border-b border-gray-200" id="material-apoyo-header">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center space-x-3">
                             <div class="bg-gradient-to-br from-[#B4325E] to-[#93264B] rounded-lg p-2">
@@ -1126,47 +1175,20 @@
                     </div>
                 </div>
                 <div class="p-4 overflow-y-auto" style="min-height: 600px; max-height: 85vh;" id="panel-documentos-revision">
-
                     
                     <!-- Documentos de la sección -->
                     <div class="p-4">
                         <div id="documentos-general" class="text-center py-8">
                             <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                 </svg>
                             </div>
-                            <h4 class="text-base font-medium text-gray-900 mb-2">Material de Apoyo</h4>
-                            <p class="text-sm text-gray-500">Seleccione una sección para ver documentos de respaldo</p>
-                            
-                            <!-- Herramientas de Apoyo -->
-                            <div class="mt-4 space-y-3">
+                            <h4 class="text-base font-medium text-gray-900 mb-2">Información General</h4>
+                            <p class="text-sm text-gray-500">Esta sección contiene información general del trámite</p>
+                            <div class="mt-4">
                                 <div class="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                                    <p class="text-xs text-blue-600 font-medium">💡 Use los controles inferiores para revisar cada sección</p>
-                                </div>
-                                
-                                <!-- Acceso rápido al mapa -->
-                                <div class="p-3 bg-green-50 rounded-lg border border-green-100">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-2">
-                                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7"/>
-                                            </svg>
-                                            <span class="text-xs font-medium text-green-700">Verificación Geográfica</span>
-                                        </div>
-                                        <button 
-                                            onclick="abrirMapaDomicilio()"
-                                            class="px-2 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded transition-all flex items-center"
-                                            title="Ver ubicación del domicilio en mapa"
-                                        >
-                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            </svg>
-                                            Mapa
-                                        </button>
-                                    </div>
-                                    <p class="text-xs text-green-600 mt-1">Verifique la ubicación del domicilio registrado</p>
+                                    <p class="text-xs text-blue-600 font-medium">ℹ️ Datos básicos del solicitante y trámite</p>
                                 </div>
                             </div>
                         </div>
@@ -1177,12 +1199,41 @@
                         <div id="panel-accionistas" class="hidden"></div>
                         <div id="panel-apoderado" class="hidden"></div>
                         <div id="panel-personal" class="hidden"></div>
-                        <div id="panel-documentos" class="hidden"></div>
+                        <div id="panel-documentos" class="hidden">
+                            <div class="text-center py-8">
+                                <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <h4 class="text-base font-medium text-gray-900 mb-2">Sección de Documentos</h4>
+                                <p class="text-sm text-gray-500">Revisión de documentos adjuntos al trámite</p>
+                                <div class="mt-4">
+                                    <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+                                        <p class="text-xs text-yellow-600 font-medium">📄 Use los controles de la izquierda para revisar documentos</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div id="panel-decision-final" class="hidden">
-                            <h4 class="text-base font-medium text-gray-900 mb-4">Resumen Final</h4>
-                            <p class="text-sm text-gray-600 mb-4">Revise el estado de todas las secciones antes de tomar la decisión final.</p>
-                            <div id="resumen-estados-secciones" class="space-y-2">
-                                <!-- Se llena dinámicamente -->
+                            <div class="text-center py-8">
+                                <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                                    <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                    </svg>
+                            </div>
+                                <h4 class="text-base font-medium text-gray-900 mb-2">Proceso del Trámite</h4>
+                                <p class="text-sm text-gray-500">Gestión del flujo del trámite y decisiones finales</p>
+                                <div class="mt-4">
+                                    <div class="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                                        <p class="text-xs text-purple-600 font-medium">⚙️ Complete la revisión de cada sección antes de proceder</p>
+                                    </div>
+                                </div>
+                                @if(isset($citaCotejo) && $citaCotejo)
+                                <div class="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                    <p class="text-xs text-blue-600 font-medium">📅 Cita agendada: {{ $citaCotejo->fecha_hora->format('d/m/Y H:i') }}</p>
+                                </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -1288,6 +1339,36 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Rechazar Documento Individual -->
+    <div id="modal-rechazar-documento" class="fixed inset-0 bg-black/50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-xl max-w-lg w-full p-8 shadow-xl">
+                <div class="text-center mb-6">
+                    <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-file-times text-xl text-red-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Rechazar Documento</h3>
+                    <p class="text-sm text-gray-500 mt-2">Especifique el motivo del rechazo del documento</p>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Motivo del rechazo <span class="text-red-500">*</span></label>
+                    <textarea id="comentario-rechazo-documento" rows="5" required
+                              class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500" 
+                              placeholder="Explique el motivo del rechazo del documento..."></textarea>
+                    <p class="text-xs text-gray-500 mt-2">Mínimo 10 caracteres</p>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="cancelarRechazoDocumento()" class="px-5 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button type="button" onclick="procesarRechazoDocumento()" class="px-5 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg">
+                        Rechazar Documento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     @endif
 
     <!-- Meta Tags y JavaScript -->
@@ -1386,9 +1467,15 @@
     </script>
     
     @push('scripts')
+    <!-- Google Maps Manager -->
+    <script src="{{ asset('js/modules/google-maps-manager.js') }}"></script>
+    
     <script>
         window.tramiteId = {{ $tramite->id }};
         window.documentosPorSeccion = @json($documentosPorSeccion ?? []);
+        
+        // Inicializar Google Maps Manager
+        window.googleMapsManager = new GoogleMapsManager();
         
         // Estado global de revisiones por sección
         window.revisionesSecciones = {};
@@ -1466,6 +1553,217 @@
             window.open(documentoUrl, '_blank');
             
             mostrarNotificacion(`🔍 Abriendo documento: ${documento.nombre || 'Documento'}`, 'success');
+        }
+        
+        // Función para aprobar documento individual
+        function aprobarDocumento(documentoId) {
+            if (!documentoId) {
+                mostrarNotificacion('⚠️ ID de documento no válido', 'warning');
+                return;
+            }
+            
+            // Confirmación
+            if (!confirm('¿Está seguro de que desea aprobar este documento?')) {
+                return;
+            }
+            
+            fetch(`/revision/${window.tramiteId}/documento/${documentoId}/aprobar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    comentario: 'Documento aprobado individualmente'
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('La respuesta no es JSON válido');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    mostrarNotificacion('✅ Documento aprobado correctamente', 'success');
+                    // Recargar la página para actualizar el estado
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    mostrarNotificacion('❌ Error: ' + (data.message || 'Error desconocido'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('❌ Error de conexión: ' + error.message, 'error');
+            });
+        }
+        
+        // Función para rechazar documento individual - Abrir modal
+        function rechazarDocumento(documentoId) {
+            if (!documentoId) {
+                mostrarNotificacion('⚠️ ID de documento no válido', 'warning');
+                return;
+            }
+            
+            // Guardar ID del documento en una variable global
+            window.documentoARechazar = documentoId;
+            
+            // Abrir modal de rechazo
+            const modal = document.getElementById('modal-rechazar-documento');
+            if (modal) {
+                modal.classList.remove('hidden');
+                // Limpiar el campo de comentario
+                const textarea = document.getElementById('comentario-rechazo-documento');
+                if (textarea) {
+                    textarea.value = '';
+                    textarea.focus();
+                }
+            }
+        }
+        
+        // Función para procesar el rechazo con el comentario del modal
+        function procesarRechazoDocumento() {
+            const documentoId = window.documentoARechazar;
+            const comentario = document.getElementById('comentario-rechazo-documento').value.trim();
+            
+            if (!comentario) {
+                mostrarNotificacion('⚠️ Debe proporcionar un comentario para rechazar el documento', 'warning');
+                return;
+            }
+            
+            if (comentario.length < 10) {
+                mostrarNotificacion('⚠️ El comentario debe tener al menos 10 caracteres', 'warning');
+                return;
+            }
+            
+            // Cerrar modal
+            const modal = document.getElementById('modal-rechazar-documento');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            
+            fetch(`/revision/${window.tramiteId}/documento/${documentoId}/rechazar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    comentario: comentario
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('La respuesta no es JSON válido');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    mostrarNotificacion('❌ Documento rechazado correctamente', 'warning');
+                    // Recargar la página para actualizar el estado
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    mostrarNotificacion('❌ Error: ' + (data.message || 'Error desconocido'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('❌ Error de conexión: ' + error.message, 'error');
+            });
+        }
+        
+        // Función para cancelar el rechazo
+        function cancelarRechazoDocumento() {
+            const modal = document.getElementById('modal-rechazar-documento');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            window.documentoARechazar = null;
+        }
+        
+        // Función para completar cotejo físico
+        function completarCotejo(citaId, resultado) {
+            if (!citaId || !resultado) {
+                mostrarNotificacion('⚠️ Datos incompletos para completar cotejo', 'warning');
+                return;
+            }
+            
+            let observaciones = '';
+            if (resultado === 'fallido') {
+                observaciones = prompt('Ingrese las observaciones del cotejo fallido:', '');
+                if (observaciones === null) {
+                    return; // Usuario canceló
+                }
+            }
+            
+            const confirmMessage = resultado === 'exitoso' 
+                ? '¿Confirmar que el cotejo físico fue EXITOSO? Se creará el proveedor automáticamente.'
+                : '¿Confirmar que el cotejo físico FALLÓ? Se eliminará el trámite.';
+                
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            fetch(`/citas/${citaId}/completar-cotejo`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    resultado: resultado,
+                    observaciones: observaciones
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('La respuesta no es JSON válido');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    if (resultado === 'exitoso') {
+                        mostrarNotificacion('🎉 ' + data.message, 'success');
+                    } else {
+                        mostrarNotificacion('📋 ' + data.message, 'warning');
+                    }
+                    
+                    // Recargar la página después de un momento
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    mostrarNotificacion('❌ Error: ' + (data.message || 'Error desconocido'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('❌ Error de conexión: ' + error.message, 'error');
+            });
         }
         
         document.addEventListener('DOMContentLoaded', function() {
@@ -1549,7 +1847,7 @@
                 }, 300);
             }, duracion);
         }
-        
+
         // Hacer funciones globales para uso en onclick
         window.abrirMapaDomicilio = abrirMapaDomicilio;
         window.cerrarModalMapa = cerrarModalMapa;
@@ -1557,6 +1855,11 @@
         window.mostrarDocumentoEnPanel = mostrarDocumentoEnPanel;
         window.cerrarVisorDocumento = cerrarVisorDocumento;
         window.verDocumento = verDocumento;
+        window.aprobarDocumento = aprobarDocumento;
+        window.rechazarDocumento = rechazarDocumento;
+        window.procesarRechazoDocumento = procesarRechazoDocumento;
+        window.cancelarRechazoDocumento = cancelarRechazoDocumento;
+        window.completarCotejo = completarCotejo;
         window.verDocumentoCompleto = verDocumentoCompleto;
         window.abrirDocumentoNuevaPestana = abrirDocumentoNuevaPestana;
         window.cambiarVistaMapaModal = cambiarVistaMapaModal;
@@ -1568,6 +1871,7 @@
         window.aplicarRevisionDocumento = aplicarRevisionDocumento;
         window.guardarComentarioDocumento = guardarComentarioDocumento;
         window.mostrarNotificacion = mostrarNotificacion;
+        window.mostrarContenidoEspecialSeccion = mostrarContenidoEspecialSeccion;
         
         // Sistema de redimensionamiento
         function initResizeSystem() {
@@ -2551,19 +2855,27 @@
                 }
                 
                 // Inicializar mapa después de un pequeño delay para asegurar que el modal esté visible
-                setTimeout(() => {
-                    if (window.mapHandler) {
-                        console.log('🗺️ Inicializando mapa con MapHandler:', direccion);
-                        window.mapHandler.initializeMap('domicilio', direccion);
-                        // Remover el loading overlay
+                setTimeout(async () => {
+                    try {
+                        console.log('🗺️ Inicializando mapa con GoogleMapsManager:', direccion);
+                        await window.googleMapsManager.createSimpleMap('mapa-domicilio', direccion, {
+                            zoom: 16,
+                            mapTypeId: 'roadmap',
+                            mapTypeControl: true,
+                            streetViewControl: true,
+                            fullscreenControl: true,
+                            zoomControl: true
+                        });
+                        
+                        // Remover el loading overlay después de cargar
                         setTimeout(() => {
                             const loadingOverlay = mapContainer.querySelector('.absolute.inset-0');
                             if (loadingOverlay) {
                                 loadingOverlay.style.display = 'none';
                             }
-                        }, 3000); // Incrementé el tiempo para permitir la geocodificación
-                    } else {
-                        console.warn('⚠️ MapHandler no disponible, usando fallback');
+                        }, 1000);
+                    } catch (error) {
+                        console.error('❌ Error inicializando mapa:', error);
                         // Fallback mejorado si no hay map handler
                         const loadingOverlay = mapContainer.querySelector('.absolute.inset-0');
                         if (loadingOverlay) {
@@ -2963,21 +3275,53 @@
             }, 5000);
         }
 
+        // Mostrar contenido especial para secciones sin material de apoyo
+        function mostrarContenidoEspecialSeccion(seccion) {
+            const panelDocumentos = document.getElementById('panel-documentos-revision');
+            
+            // Ocultar todos los paneles primero
+            panelDocumentos.querySelectorAll('div[id^="panel-"], div[id^="documentos-"]').forEach(div => {
+                div.classList.add('hidden');
+            });
+            
+            // Mostrar panel específico
+            const panelEspecifico = document.getElementById(`panel-${seccion}`);
+            if (panelEspecifico) {
+                panelEspecifico.classList.remove('hidden');
+            } else {
+                // Fallback para secciones que usan el formato documentos-{seccion}
+                const documentosEspecificos = document.getElementById(`documentos-${seccion}`);
+                if (documentosEspecificos) {
+                    documentosEspecificos.classList.remove('hidden');
+                }
+            }
+        }
+
         // Cargar documentos de una sección
         function cargarDocumentosSeccion(seccion) {
             const panelDocumentos = document.getElementById('panel-documentos-revision');
+            const materialApoyoHeader = document.getElementById('material-apoyo-header');
             
             if (!panelDocumentos) return;
+            
+            // Ocultar material de apoyo para secciones específicas
+            if (['general', 'documentos', 'decision-final'].includes(seccion)) {
+                if (materialApoyoHeader) {
+                    materialApoyoHeader.style.display = 'none';
+                }
+                // Mostrar contenido específico para cada sección
+                mostrarContenidoEspecialSeccion(seccion);
+                return;
+            } else {
+                // Mostrar header de material de apoyo para otras secciones
+                if (materialApoyoHeader) {
+                    materialApoyoHeader.style.display = 'block';
+                }
+            }
             
             // Si es la sección de domicilio, mostrar mapa en lugar de documentos
             if (seccion === 'domicilio') {
                 mostrarMapaEnPanel();
-                return;
-            }
-            
-            // Si es la sección de documentos, ocultar el panel de Material de Apoyo
-            if (seccion === 'documentos') {
-                ocultarMaterialApoyo();
                 return;
             }
             

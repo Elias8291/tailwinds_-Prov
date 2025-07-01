@@ -112,10 +112,18 @@ class TramiteSolicitanteController extends Controller
         $proximoAVencer = $proveedor->fecha_vencimiento <= Carbon::now()->addDays(7);
         $yaVencido = $proveedor->fecha_vencimiento < Carbon::now();
         
+        // ✅ NUEVA VALIDACIÓN: Verificar que tenga al menos 7 meses activo para renovación
+        $fechaRegistro = Carbon::parse($proveedor->fecha_registro);
+        $mesesActivo = $fechaRegistro->diffInMonths(Carbon::now());
+        $tieneSeisOMasMeses = $mesesActivo >= 7;
+        
         Log::info('📅 Análisis de fechas:', [
             'fecha_actual' => Carbon::now()->format('Y-m-d'),
+            'fecha_registro' => $fechaRegistro->format('Y-m-d'),
             'fecha_vencimiento' => $proveedor->fecha_vencimiento->format('Y-m-d'),
             'fecha_limite_renovacion' => Carbon::now()->addDays(7)->format('Y-m-d'),
+            'meses_activo' => $mesesActivo,
+            'tiene_7_meses_activo' => $tieneSeisOMasMeses ? 'SI' : 'NO',
             'ya_vencido' => $yaVencido ? 'SI' : 'NO',
             'proximo_a_vencer' => $proximoAVencer ? 'SI' : 'NO'
         ]);
@@ -130,14 +138,26 @@ class TramiteSolicitanteController extends Controller
             ];
         }
         
-        // Si está próximo a vencer (7 días): SOLO RENOVACIÓN
+        // Si está próximo a vencer (7 días): Verificar tiempo mínimo activo
         if ($proximoAVencer) {
-            Log::info('✅ Resultado: SOLO RENOVACIÓN (próximo a vencer)');
+            if ($tieneSeisOMasMeses) {
+                Log::info('✅ Resultado: SOLO RENOVACIÓN (próximo a vencer y tiene 7+ meses activo)');
             return [
                 'inscripcion' => false,
                 'renovacion' => true,
                 'actualizacion' => false
             ];
+            } else {
+                Log::info('⚠️ Resultado: NINGÚN TRÁMITE DISPONIBLE (próximo a vencer pero NO tiene 7 meses activo)', [
+                    'meses_faltantes' => 7 - $mesesActivo
+                ]);
+                return [
+                    'inscripcion' => false,
+                    'renovacion' => false,
+                    'actualizacion' => false,
+                    'mensaje_bloqueo' => "Para poder renovar su registro como proveedor, debe haber estado activo por al menos 7 meses. Actualmente lleva {$mesesActivo} " . ($mesesActivo == 1 ? 'mes' : 'meses') . " activo. Podrá renovar cuando complete los 7 meses requeridos."
+                ];
+            }
         }
         
         // Si es proveedor activo y vigente: SOLO ACTUALIZACIÓN

@@ -446,6 +446,12 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
     // Ruta específica para ver documentos en revisión
     Route::get('/{tramite}/ver-documento/{documento}', [RevisionController::class, 'verDocumento'])
         ->name('ver-documento');
+    
+    // Rutas para aprobar/rechazar documentos individuales
+    Route::post('/{tramite}/documento/{documento}/aprobar', [RevisionController::class, 'aprobarDocumento'])
+        ->name('documento.aprobar');
+    Route::post('/{tramite}/documento/{documento}/rechazar', [RevisionController::class, 'rechazarDocumento'])
+        ->name('documento.rechazar');
 });
 
 // ============================================================================
@@ -502,6 +508,11 @@ Route::middleware(['auth', 'can:citas.ver'])->prefix('citas')->group(function ()
     Route::get('/calendario', [CalendarioController::class, 'index'])->middleware('can:citas.calendario')->name('citas.calendario');
     Route::post('/agendar', [CitaController::class, 'agendar'])->middleware('can:citas.agendar')->name('citas.agendar');
     Route::post('/{cita}/cancelar', [CitaController::class, 'cancelar'])->middleware('can:citas.cancelar')->name('citas.cancelar');
+    
+    // RUTAS DE COTEJO FÍSICO
+    Route::get('/cotejo', [CitaController::class, 'citasCotejo'])->middleware('can:revision-tramites.ver')->name('citas.cotejo');
+Route::post('/citas/{cita}/completar-cotejo', [CitaController::class, 'completarCotejo'])->middleware('can:revision-tramites.aprobar')->name('citas.completar-cotejo');
+      Route::get('/cotejo/dashboard', [CitaController::class, 'dashboardCotejo'])->middleware('can:revision-tramites.ver')->name('citas.cotejo.dashboard');
 });
 
 // GESTIÓN DE DÍAS INHÁBILES
