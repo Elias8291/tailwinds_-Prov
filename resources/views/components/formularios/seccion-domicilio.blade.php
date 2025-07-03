@@ -90,22 +90,42 @@
                     </div>
     @endif
 </div>
-@push('scripts')
-<script src="{{ asset('js/validators/domicilio-validator.js') }}"></script>
-@endpush
+
     @else
         <!-- Formulario editable normal -->
+        <!-- Container para alertas de error -->
+        <div id="domicilio-error-container" class="mb-6 hidden">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Error al guardar los datos</h3>
+                        <div id="domicilio-error-message" class="mt-2 text-sm text-red-700"></div>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <div class="-mx-1.5 -my-1.5">
+                            <button type="button" onclick="document.getElementById('domicilio-error-container').classList.add('hidden')" class="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <form class="space-y-8" @submit.prevent="guardarDomicilio" x-ref="domicilioForm" data-validate="true">
             <input type="hidden" name="action" value="next">
             <input type="hidden" name="seccion" value="2">
             <input type="hidden" name="tramite_id" value="{{ $datosDomicilio['tramite_id'] ?? ($tramite->id ?? '') }}">
+            
             <!-- Código Postal y Ubicación -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Código Postal -->
                 <div class="form-group">
                     <label for="codigo_postal" class="block text-sm font-medium text-gray-700 mb-2">
                         Código Postal
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="text" id="codigo_postal" name="codigo_postal"
@@ -114,16 +134,15 @@
                                pattern="[0-9]{4,5}"
                                maxlength="5"
                                x-model="cp"
-                               aria-label="Código postal"
-                               required>
+                               aria-label="Código postal">
                     </div>
                     <p class="mt-1 text-sm text-gray-500">Al ingresar el código postal se llenarán automáticamente algunos campos</p>
                 </div>
+
                 <!-- Estado -->
                 <div class="form-group">
                     <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">
                         Estado
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="text" id="estado" name="estado"
@@ -131,15 +150,14 @@
                                placeholder="Ej: Jalisco"
                                x-model="estado"
                                aria-label="Estado"
-                               readonly
-                               required>
+                               readonly>
                     </div>
                 </div>
+
                 <!-- Municipio -->
                 <div class="form-group">
                     <label for="municipio" class="block text-sm font-medium text-gray-700 mb-2">
                         Municipio
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="text" id="municipio" name="municipio"
@@ -147,21 +165,19 @@
                                placeholder="Ej: Guadalajara"
                                x-model="municipio"
                                aria-label="Municipio"
-                               readonly
-                               required>
+                               readonly>
                     </div>
                 </div>
+
                 <!-- Colonia -->
                 <div class="form-group">
                     <label for="colonia" class="block text-sm font-medium text-gray-700 mb-2">
                         Asentamiento
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <select id="colonia" name="colonia"
                                 class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                                 x-model="colonia"
-                                required
                                 aria-label="Seleccionar asentamiento">
                             <option value="">Seleccione un Asentamiento</option>
                             <template x-for="asentamiento in asentamientos" :key="asentamiento.id">
@@ -174,13 +190,13 @@
                     </div>
                 </div>
             </div>
+
             <!-- Dirección -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Calle -->
                 <div class="form-group md:col-span-2">
                     <label for="calle" class="block text-sm font-medium text-gray-700 mb-2">
                         Calle
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="text" id="calle" name="calle"
@@ -188,15 +204,14 @@
                                placeholder="Ej: Av. Principal"
                                maxlength="100"
                                x-model="nombreVialidad"
-                               aria-label="Calle"
-                               required>
+                               aria-label="Calle">
                     </div>
                 </div>
+
                 <!-- Número Exterior -->
                 <div class="form-group">
                     <label for="numero_exterior" class="block text-sm font-medium text-gray-700 mb-2">
                         Número Exterior
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="text" id="numero_exterior" name="numero_exterior"
@@ -205,10 +220,10 @@
                                pattern="[A-Za-z0-9\/]+"
                                maxlength="10"
                                x-model="numeroExterior"
-                               aria-label="Número exterior"
-                               required>
+                               aria-label="Número exterior">
                     </div>
                 </div>
+
                 <!-- Número Interior -->
                 <div class="form-group">
                     <label for="numero_interior" class="block text-sm font-medium text-gray-700 mb-2">
@@ -224,11 +239,11 @@
                                aria-label="Número interior">
                     </div>
                 </div>
+
                 <!-- Entre Calles -->
                 <div class="form-group">
                     <label for="entre_calle_1" class="block text-sm font-medium text-gray-700 mb-2">
                         Entre Calle
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="text" id="entre_calle_1" name="entre_calle_1"
@@ -236,14 +251,12 @@
                                placeholder="Ej: Calle Independencia"
                                pattern="[A-Za-z0-9\s]+"
                                maxlength="100"
-                               aria-label="Entre calle"
-                               required>
+                               aria-label="Entre calle">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="entre_calle_2" class="block text-sm font-medium text-gray-700 mb-2">
                         Y Calle
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="text" id="entre_calle_2" name="entre_calle_2"
@@ -251,11 +264,11 @@
                                placeholder="Ej: Calle Morelos"
                                pattern="[A-Za-z0-9\s]+"
                                maxlength="100"
-                               aria-label="Y calle"
-                               required>
+                               aria-label="Y calle">
                     </div>
                 </div>
             </div>
+
             <!-- Botones de navegación -->
             <div class="flex justify-between pt-6 border-t border-gray-100">
                 <button type="button" 
@@ -482,21 +495,200 @@ function domicilioData() {
                     }
                 });
                 const responseText = await response.text();
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
                 const result = JSON.parse(responseText);
-                if (result.success) {
+                
+                if (response.ok && result.success) {
+                    // Limpiar errores anteriores
+                    this.limpiarErroresDomicilio();
                     return true;
                 } else {
-                    const errorMsg = result.message || (result.errors ? Object.values(result.errors).flat().join(', ') : 'Error desconocido');
-                    alert('Error al guardar: ' + errorMsg);
+                    // Manejar errores 422 (Unprocessable Content) específicamente
+                    if (response.status === 422 && result.errors) {
+                        // Errores de validación del servidor
+                        this.mostrarErroresValidacionDomicilio(result.errors, result.message);
+                    } else if (result.errors) {
+                        // Otros errores con detalles de validación
+                        this.mostrarErroresValidacionDomicilio(result.errors, result.message);
+                    } else {
+                        // Error general sin errores específicos
+                        this.mostrarErrorGeneralDomicilio(result.message || 'Error al guardar los datos de domicilio');
+                    }
                     return false;
                 }
             } catch (error) {
-                alert('Error al guardar los datos: ' + error.message);
+                console.error('❌ Error en AJAX domicilio:', error);
+                this.mostrarErrorGeneralDomicilio('Error de conexión. Por favor, intente nuevamente.');
                 return false;
             }
+        },
+        
+        // Método para limpiar errores anteriores
+        limpiarErroresDomicilio() {
+            document.querySelectorAll('.error-message-domicilio').forEach(el => el.remove());
+            document.querySelectorAll('.alerta-error-general-domicilio').forEach(el => el.remove());
+            document.querySelectorAll('.border-red-500').forEach(el => {
+                el.classList.remove('border-red-500', 'bg-red-50');
+                el.classList.add('border-gray-200');
+            });
+            
+            // Ocultar contenedor de errores elegante
+            const errorContainer = document.getElementById('domicilio-error-container');
+            if (errorContainer) {
+                errorContainer.classList.add('hidden');
+            }
+        },
+        
+        // Mostrar error en el contenedor elegante
+        mostrarErrorDomicilio(mensaje) {
+            const errorContainer = document.getElementById('domicilio-error-container');
+            const errorMessage = document.getElementById('domicilio-error-message');
+            
+            if (errorContainer && errorMessage) {
+                errorMessage.textContent = mensaje;
+                errorContainer.classList.remove('hidden');
+                
+                // Auto-ocultar después de 10 segundos
+                setTimeout(() => {
+                    errorContainer.classList.add('hidden');
+                }, 10000);
+                
+                // Scroll al error
+                errorContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        },
+        
+        // Método para mostrar errores de validación del servidor
+        mostrarErroresValidacionDomicilio(errores, mensajeGeneral = null) {
+            // Limpiar errores anteriores
+            this.limpiarErroresDomicilio();
+            
+            // Mostrar mensaje general en el contenedor elegante si existe
+            if (mensajeGeneral) {
+                this.mostrarErrorDomicilio(mensajeGeneral);
+            }
+            
+            let erroresNoMapeados = [];
+            
+            // Mostrar errores específicos por campo
+            for (const [campo, mensajes] of Object.entries(errores)) {
+                const mensaje = Array.isArray(mensajes) ? mensajes[0] : mensajes;
+                
+                // Mapear nombres de campos del servidor al frontend
+                const campoMapeado = this.mapearCampoServidorDomicilio(campo);
+                const elemento = document.getElementById(campoMapeado) || 
+                               document.querySelector(`[name="${campoMapeado}"]`) ||
+                               document.querySelector(`[name="${campo}"]`);
+                
+                if (elemento) {
+                    // Estilo de error elegante
+                    elemento.classList.remove('border-gray-200');
+                    elemento.classList.add('border-red-500', 'bg-red-50');
+                    
+                    // Crear mensaje de error elegante
+                    const contenedor = elemento.closest('.form-group') || elemento.parentElement;
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'error-message-domicilio mt-2 p-3 bg-red-50 border border-red-200 rounded-lg';
+                    errorMsg.innerHTML = `
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-circle mr-2 text-red-500 mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm text-red-700">${mensaje}</span>
+                        </div>
+                    `;
+                    contenedor.appendChild(errorMsg);
+                } else {
+                    // Guardar errores que no se pudieron mapear
+                    erroresNoMapeados.push(mensaje);
+                }
+            }
+            
+            // Si no hay errores específicos pero hay errores, mostrar en contenedor elegante
+            if (erroresNoMapeados.length > 0) {
+                const todosLosErrores = Object.values(errores).flat().join(' ');
+                this.mostrarErrorDomicilio(todosLosErrores);
+            }
+            
+            // Scroll al primer error
+            const primerError = document.querySelector('.border-red-500, #domicilio-error-container:not(.hidden)');
+            if (primerError) {
+                primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        },
+        
+        // Método para mapear nombres de campos del servidor al frontend
+        mapearCampoServidorDomicilio(campo) {
+            const mapeo = {
+                'codigo_postal': 'codigo_postal',
+                'colonia': 'colonia',
+                'calle': 'calle',
+                'numero_exterior': 'numero_exterior',
+                'numero_interior': 'numero_interior',
+                'entre_calle_1': 'entre_calle_1',
+                'entre_calle_2': 'entre_calle_2'
+            };
+            return mapeo[campo] || campo;
+        },
+        
+        // Método para mostrar error general sin errores específicos
+        mostrarErrorGeneralDomicilio(mensaje) {
+            this.mostrarErrorDomicilio(mensaje);
+        },
+        
+        // Método para mostrar alerta general (error, warning, info)
+        mostrarAlertaGeneralDomicilio(mensaje, tipo = 'error') {
+            // Limpiar alertas anteriores
+            document.querySelectorAll('.alerta-error-general-domicilio').forEach(el => el.remove());
+            
+            const formulario = this.$refs.domicilioForm;
+            const alerta = document.createElement('div');
+            
+            // Configurar estilos según el tipo
+            let estilos, icono, titulo, colorTexto, colorBoton;
+            switch(tipo) {
+                case 'warning':
+                    estilos = 'bg-yellow-50 border-l-4 border-yellow-500';
+                    icono = 'fas fa-exclamation-triangle text-yellow-500';
+                    titulo = 'Atención';
+                    colorTexto = 'text-yellow-800';
+                    colorBoton = 'text-yellow-400 hover:text-yellow-600';
+                    break;
+                case 'info':
+                    estilos = 'bg-blue-50 border-l-4 border-blue-500';
+                    icono = 'fas fa-info-circle text-blue-500';
+                    titulo = 'Información';
+                    colorTexto = 'text-blue-800';
+                    colorBoton = 'text-blue-400 hover:text-blue-600';
+                    break;
+                default: // error
+                    estilos = 'bg-red-50 border-l-4 border-red-500';
+                    icono = 'fas fa-exclamation-triangle text-red-500';
+                    titulo = 'Error';
+                    colorTexto = 'text-red-800';
+                    colorBoton = 'text-red-400 hover:text-red-600';
+            }
+            
+            alerta.className = `alerta-error-general-domicilio mb-6 p-4 ${estilos} rounded-r-lg shadow-sm`;
+            alerta.innerHTML = `
+                <div class="flex items-start">
+                    <i class="${icono} mr-3 mt-1 flex-shrink-0"></i>
+                    <div class="flex-1">
+                        <h4 class="${colorTexto} font-medium mb-2">${titulo}</h4>
+                        <p class="text-sm ${colorTexto.replace('800', '700')}">${mensaje}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            class="ml-2 ${colorBoton} focus:outline-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            formulario.insertBefore(alerta, formulario.firstChild);
+            
+            // Auto-remover después de 10 segundos
+            setTimeout(() => {
+                if (alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 10000);
         }
     }
 }

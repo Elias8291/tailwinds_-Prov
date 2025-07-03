@@ -460,25 +460,12 @@ function accionistasData() {
             };
         },
         guardarNuevoAccionista() {
-            // Validar que los campos obligatorios estén llenos
-            if (!this.nuevoAccionista.nombre.trim()) {
-                this.mostrarError('El nombre es obligatorio');
-                return;
-            }
-            if (!this.nuevoAccionista.apellido_paterno.trim()) {
-                this.mostrarError('El apellido paterno es obligatorio');
-                return;
-            }
-            if (!this.nuevoAccionista.porcentaje || this.nuevoAccionista.porcentaje <= 0) {
-                this.mostrarError('El porcentaje debe ser mayor a 0');
-                return;
-            }
             // Agregar al array de accionistas
             this.accionistas.push({
                 nombre: this.nuevoAccionista.nombre.trim(),
                 apellido_paterno: this.nuevoAccionista.apellido_paterno.trim(),
                 apellido_materno: this.nuevoAccionista.apellido_materno.trim(),
-                porcentaje: parseFloat(this.nuevoAccionista.porcentaje),
+                porcentaje: parseFloat(this.nuevoAccionista.porcentaje) || 0,
                 expanded: false
             });
             // Cerrar modal y limpiar temporal
@@ -523,37 +510,135 @@ function accionistasData() {
                 this.showSuccess = false;
             }, 3000);
         },
+        // Método para limpiar errores anteriores
+        limpiarErroresAccionistas() {
+            document.querySelectorAll('.error-message-accionistas').forEach(el => el.remove());
+            document.querySelectorAll('.alerta-error-general-accionistas').forEach(el => el.remove());
+            this.showError = false;
+        },
+        
+        // Método para mostrar errores de validación del servidor
+        mostrarErroresValidacionAccionistas(errores, mensajeGeneral = null) {
+            // Limpiar errores anteriores
+            this.limpiarErroresAccionistas();
+            
+            // Mostrar mensaje general primero si existe
+            if (mensajeGeneral) {
+                this.mostrarAlertaGeneralAccionistas(mensajeGeneral, 'warning');
+            }
+            
+            let erroresNoMapeados = [];
+            
+            // Mostrar errores específicos - para accionistas no hay campos específicos en el DOM
+            // así que todos van a errores generales
+            for (const [campo, mensajes] of Object.entries(errores)) {
+                const mensaje = Array.isArray(mensajes) ? mensajes[0] : mensajes;
+                erroresNoMapeados.push(mensaje);
+            }
+            
+            // Mostrar errores generales si los hay
+            if (erroresNoMapeados.length > 0) {
+                this.mostrarErroresGeneralesAccionistas(erroresNoMapeados);
+            }
+            
+            // Scroll al primer error
+            const primerError = document.querySelector('.alerta-error-general-accionistas');
+            if (primerError) {
+                primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        },
+        
+        // Método para mostrar errores generales
+        mostrarErroresGeneralesAccionistas(errores) {
+            const container = document.querySelector('[x-data*="accionistasData"]');
+            if (!container) return;
+            
+            const alerta = document.createElement('div');
+            alerta.className = 'alerta-error-general-accionistas mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm';
+            
+            let contenidoErrores = errores.map(error => 
+                `<li class="text-sm text-red-700">${error}</li>`
+            ).join('');
+            
+            alerta.innerHTML = `
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-triangle mr-3 text-red-500 mt-1 flex-shrink-0"></i>
+                    <div class="flex-1">
+                        <h4 class="text-red-800 font-medium mb-2">Errores de validación</h4>
+                        <ul class="space-y-1">${contenidoErrores}</ul>
+                    </div>
+                </div>
+            `;
+            
+            container.insertBefore(alerta, container.firstChild);
+        },
+        
+        // Método para mostrar error general sin errores específicos
+        mostrarErrorGeneralAccionistas(mensaje) {
+            this.mostrarAlertaGeneralAccionistas(mensaje, 'error');
+        },
+        
+        // Método para mostrar alerta general (error, warning, info)
+        mostrarAlertaGeneralAccionistas(mensaje, tipo = 'error') {
+            // Limpiar alertas anteriores
+            document.querySelectorAll('.alerta-error-general-accionistas').forEach(el => el.remove());
+            
+            const container = document.querySelector('[x-data*="accionistasData"]');
+            if (!container) return;
+            
+            const alerta = document.createElement('div');
+            
+            // Configurar estilos según el tipo
+            let estilos, icono, titulo, colorTexto, colorBoton;
+            switch(tipo) {
+                case 'warning':
+                    estilos = 'bg-yellow-50 border-l-4 border-yellow-500';
+                    icono = 'fas fa-exclamation-triangle text-yellow-500';
+                    titulo = 'Atención';
+                    colorTexto = 'text-yellow-800';
+                    colorBoton = 'text-yellow-400 hover:text-yellow-600';
+                    break;
+                case 'info':
+                    estilos = 'bg-blue-50 border-l-4 border-blue-500';
+                    icono = 'fas fa-info-circle text-blue-500';
+                    titulo = 'Información';
+                    colorTexto = 'text-blue-800';
+                    colorBoton = 'text-blue-400 hover:text-blue-600';
+                    break;
+                default: // error
+                    estilos = 'bg-red-50 border-l-4 border-red-500';
+                    icono = 'fas fa-exclamation-triangle text-red-500';
+                    titulo = 'Error';
+                    colorTexto = 'text-red-800';
+                    colorBoton = 'text-red-400 hover:text-red-600';
+                }
+            
+            alerta.className = `alerta-error-general-accionistas mb-6 p-4 ${estilos} rounded-r-lg shadow-sm`;
+            alerta.innerHTML = `
+                <div class="flex items-start">
+                    <i class="${icono} mr-3 mt-1 flex-shrink-0"></i>
+                    <div class="flex-1">
+                        <h4 class="${colorTexto} font-medium mb-2">${titulo}</h4>
+                        <p class="text-sm ${colorTexto.replace('800', '700')}">${mensaje}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            class="ml-2 ${colorBoton} focus:outline-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.insertBefore(alerta, container.firstChild);
+            
+            // Auto-remover después de 10 segundos
+            setTimeout(() => {
+                if (alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 10000);
+        },
         async guardarAccionistas() {
             if (this.loading) return;
-            // Validaciones
-            if (!this.tramiteId) {
-                this.mostrarError('No se pudo identificar el trámite');
-                return;
-            }
-            if (this.accionistas.length === 0) {
-                this.mostrarError('Debe agregar al menos un accionista');
-                return;
-            }
-            // Validar que todos los campos estén llenos
-            for (let i = 0; i < this.accionistas.length; i++) {
-                const accionista = this.accionistas[i];
-                if (!accionista.nombre.trim()) {
-                    this.mostrarError(`El nombre del accionista ${i + 1} es obligatorio`);
-                    return;
-                }
-                if (!accionista.apellido_paterno.trim()) {
-                    this.mostrarError(`El apellido paterno del accionista ${i + 1} es obligatorio`);
-                    return;
-                }
-                if (!accionista.porcentaje || accionista.porcentaje <= 0) {
-                    this.mostrarError(`El porcentaje del accionista ${i + 1} debe ser mayor a 0`);
-                    return;
-                }
-            }
-            if (Math.abs(this.totalPorcentaje - 100) > 0.01) {
-                this.mostrarError('El total de participación debe sumar exactamente 100%');
-                return;
-            }
             this.loading = true;
             try {
                 const formData = new FormData();
@@ -579,19 +664,31 @@ function accionistasData() {
                     }
                 });
                 const data = await response.json();
-                if (data.success) {
+                
+                if (response.ok && data.success) {
+                    // Limpiar errores anteriores
+                    this.limpiarErroresAccionistas();
                     this.mostrarExito('Accionistas guardados correctamente');
                     // Disparar evento para navegar al siguiente paso
                     setTimeout(() => {
                         this.$dispatch('next-step');
                     }, 1000);
                 } else {
-                    this.mostrarError(data.message || 'Error al guardar los accionistas');
-                    if (data.errors) {
+                    // Manejar errores 422 (Unprocessable Content) específicamente
+                    if (response.status === 422 && data.errors) {
+                        // Errores de validación del servidor
+                        this.mostrarErroresValidacionAccionistas(data.errors, data.message);
+                    } else if (data.errors) {
+                        // Otros errores con detalles de validación
+                        this.mostrarErroresValidacionAccionistas(data.errors, data.message);
+                    } else {
+                        // Error general sin errores específicos
+                        this.mostrarErrorGeneralAccionistas(data.message || 'Error al guardar los accionistas');
                     }
                 }
             } catch (error) {
-                this.mostrarError('Error de conexión. Por favor, intente nuevamente.');
+                console.error('❌ Error en AJAX accionistas:', error);
+                this.mostrarErrorGeneralAccionistas('Error de conexión. Por favor, intente nuevamente.');
             } finally {
                 this.loading = false;
             }
@@ -688,5 +785,4 @@ input:focus {
 }
 </style>
 @endpush
-@push('scripts')
-@endpush
+

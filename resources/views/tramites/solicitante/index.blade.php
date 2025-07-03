@@ -1116,9 +1116,9 @@
         try {
             // Solo configurar PDF.js si será necesario (cuando se usen scripts SAT)
             window.configurePDFJS = function() {
-                if (typeof pdfjsLib !== 'undefined') {
-                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
-                }
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
+        }
             };
         } catch (error) {
             // Error silencioso

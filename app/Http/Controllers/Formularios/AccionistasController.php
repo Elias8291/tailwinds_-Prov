@@ -22,7 +22,7 @@ class AccionistasController extends Controller
      */
     public function guardar(Request $request, Tramite $tramite)
     {
-        $this->validateRequest($request);
+        $this->validateFormularioData($request);
 
         DB::transaction(function () use ($request, $tramite) {
             $accionistasData = $this->parseAccionistasData($request);
@@ -51,15 +51,8 @@ class AccionistasController extends Controller
                 'request_data' => $request->all()
             ]);
 
-            // Validar los datos del formulario
-            $validated = $request->validate([
-                'tramite_id' => 'required|integer',
-                'accionistas' => 'required|array|min:1',
-                'accionistas.*.nombre' => 'required|string|max:100',
-                'accionistas.*.apellido_paterno' => 'required|string|max:100',
-                'accionistas.*.apellido_materno' => 'nullable|string|max:100',
-                'accionistas.*.porcentaje' => 'required|numeric|min:0|max:100',
-            ]);
+            // Validar los datos del formulario usando validaciones en español
+            $validated = $this->validateFormularioData($request);
 
             // Buscar el trámite
             $tramite = Tramite::find($validated['tramite_id']);
@@ -113,60 +106,128 @@ class AccionistasController extends Controller
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::warning('❌ Errores de validación en accionistas:', $e->errors());
+            Log::warning('❌ Errores de validación en accionistas:', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Errores de validación',
-                'errors' => $e->errors()
+                'message' => 'Por favor corrija los errores en la información de los accionistas.',
+                'errors' => $e->errors(),
+                'debug_info' => [
+                    'seccion' => 'accionistas',
+                    'timestamp' => now()->toISOString(),
+                    'total_errores' => count($e->errors())
+                ]
             ], 422);
 
         } catch (\Exception $e) {
-            Log::error('❌ EXCEPCIÓN en guardarFormulario accionistas:', [
-                'mensaje' => $e->getMessage(),
-                'archivo' => $e->getFile(),
-                'linea' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+            Log::error('❌ Error al guardar datos de accionistas:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error interno del servidor: ' . $e->getMessage()
+                'message' => 'Error interno del servidor al guardar los datos de accionistas. Por favor, intente nuevamente.',
+                'debug_info' => [
+                    'seccion' => 'accionistas',
+                    'timestamp' => now()->toISOString(),
+                    'error_type' => get_class($e)
+                ]
             ], 500);
         }
     }
 
     /**
-     * Valida los datos de la solicitud de accionistas
+     * Valida los datos del formulario de accionistas usando validaciones en español
      *
      * @param Request $request La solicitud a validar
-     * @return void
+     * @return array Los datos validados
      * @throws \Illuminate\Validation\ValidationException
      */
-    private function validateRequest(Request $request)
+    private function validateFormularioData(Request $request)
     {
         $rules = [
-            'accionistas' => 'required',
-            'accionistas.*.nombre' => 'required|string|max:100|regex:/^[A-Za-zÀ-ÖØ-öø-ÿ\s\.]+$/',
-            'accionistas.*.apellido_paterno' => 'required|string|max:100|regex:/^[A-Za-zÀ-ÖØ-öø-ÿ\s\.]+$/',
-            'accionistas.*.apellido_materno' => 'nullable|string|max:100|regex:/^[A-Za-zÀ-ÖØ-öø-ÿ\s\.]+$/',
-            'accionistas.*.porcentaje' => 'required|numeric|min:0|max:100',
+            'tramite_id' => [
+                'required',
+                'integer',
+                'exists:tramite,id'
+            ],
+            'accionistas' => [
+                'required',
+                'array',
+                'min:1',
+                'max:20' // Límite razonable de accionistas
+            ],
+            'accionistas.*.nombre' => [
+                'required',
+                'string',
+                'min:2',
+                'max:50',
+                'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'\.]+$/'
+            ],
+            'accionistas.*.apellido_paterno' => [
+                'required',
+                'string',
+                'min:2',
+                'max:50',
+                'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'\.]+$/'
+            ],
+            'accionistas.*.apellido_materno' => [
+                'nullable',
+                'string',
+                'min:2',
+                'max:50',
+                'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'\.]*$/'
+            ],
+            'accionistas.*.porcentaje' => [
+                'required',
+                'numeric',
+                'min:0.01',
+                'max:100',
+                'regex:/^\d{1,2}(\.\d{1,2})?$/' // Permite hasta 2 decimales
+            ]
         ];
 
+        // Usar los mensajes de validación en español del framework
         $messages = [
-            'accionistas.required' => 'Los datos de los accionistas son obligatorios.',
-            'accionistas.*.nombre.required' => 'El nombre del accionista es obligatorio.',
-            'accionistas.*.nombre.regex' => 'El nombre del accionista debe contener solo letras, espacios y puntos.',
-            'accionistas.*.apellido_paterno.required' => 'El apellido paterno del accionista es obligatorio.',
-            'accionistas.*.apellido_paterno.regex' => 'El apellido paterno debe contener solo letras, espacios y puntos.',
-            'accionistas.*.apellido_materno.regex' => 'El apellido materno debe contener solo letras, espacios y puntos.',
-            'accionistas.*.porcentaje.required' => 'El porcentaje de participación es obligatorio.',
-            'accionistas.*.porcentaje.numeric' => 'El porcentaje debe ser un valor numérico.',
-            'accionistas.*.porcentaje.min' => 'El porcentaje no puede ser negativo.',
-            'accionistas.*.porcentaje.max' => 'El porcentaje no puede exceder el 100%.',
+            'tramite_id.required' => 'No se pudo identificar el trámite asociado',
+            'tramite_id.integer' => 'El identificador del trámite debe ser un número válido',
+            'tramite_id.exists' => 'El trámite especificado no existe o no es válido',
+            
+            'accionistas.required' => 'Debe agregar al menos un accionista',
+            'accionistas.array' => 'Los datos de accionistas no tienen el formato correcto',
+            'accionistas.min' => 'Debe especificar al menos un accionista',
+            'accionistas.max' => 'No puede especificar más de 20 accionistas',
+            
+            'accionistas.*.nombre.required' => 'El nombre del accionista es obligatorio',
+            'accionistas.*.nombre.min' => 'El nombre debe tener al menos 2 caracteres',
+            'accionistas.*.nombre.max' => 'El nombre no puede exceder 50 caracteres',
+            'accionistas.*.nombre.regex' => 'El nombre solo puede contener letras, espacios y apostrofes',
+            
+            'accionistas.*.apellido_paterno.required' => 'El apellido paterno es obligatorio',
+            'accionistas.*.apellido_paterno.min' => 'El apellido paterno debe tener al menos 2 caracteres',
+            'accionistas.*.apellido_paterno.max' => 'El apellido paterno no puede exceder 50 caracteres',
+            'accionistas.*.apellido_paterno.regex' => 'El apellido paterno solo puede contener letras, espacios y apostrofes',
+            
+            'accionistas.*.apellido_materno.min' => 'El apellido materno debe tener al menos 2 caracteres',
+            'accionistas.*.apellido_materno.max' => 'El apellido materno no puede exceder 50 caracteres',
+            'accionistas.*.apellido_materno.regex' => 'El apellido materno solo puede contener letras, espacios y apostrofes',
+            
+            'accionistas.*.porcentaje.required' => 'El porcentaje de participación es obligatorio',
+            'accionistas.*.porcentaje.numeric' => 'El porcentaje debe ser un valor numérico válido',
+            'accionistas.*.porcentaje.min' => 'El porcentaje debe ser mayor a 0%',
+            'accionistas.*.porcentaje.max' => 'El porcentaje no puede exceder 100%',
+            'accionistas.*.porcentaje.regex' => 'El porcentaje debe tener máximo 2 decimales (ej: 25.50)'
         ];
 
-        $request->validate($rules, $messages);
+        return $request->validate($rules, $messages);
     }
+
+
 
     /**
      * Procesa y normaliza los datos de los accionistas recibidos

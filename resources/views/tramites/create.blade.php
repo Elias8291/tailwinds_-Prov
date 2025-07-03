@@ -35,7 +35,7 @@
             terminosAceptados: false,
             tipoTramite: 'inscripcion',
             steps: [
-                {number: '00', label: 'Términos y Condiciones'},
+                {number: '📋', label: 'Términos y Condiciones'},
                 {number: '01', label: 'Datos Generales'},
                 {number: '02', label: 'Domicilio'},
                 {number: '03', label: 'Documentos'}
@@ -91,13 +91,13 @@
                     
                     this.steps = this.isPersonaFisica ? 
                         [
-                            {number: '00', label: 'Términos y Condiciones'},
+                            {number: '📋', label: 'Términos y Condiciones'},
                             {number: '01', label: 'Datos Generales'},
                             {number: '02', label: 'Domicilio'},
                             {number: '03', label: 'Documentos'}
                         ] : 
                         [
-                            {number: '00', label: 'Términos y Condiciones'},
+                            {number: '📋', label: 'Términos y Condiciones'},
                             {number: '01', label: 'Datos Generales'},
                             {number: '02', label: 'Domicilio'},
                             {number: '03', label: 'Constitución'},
@@ -545,407 +545,152 @@
                      x-transition:leave-start="opacity-100 translate-y-0"
                      x-transition:leave-end="opacity-0 -translate-y-2">
                     
-                    <div class="space-y-8" x-data="{ terminos: obtenerTerminosEspecificos() }">
+                    <div class="max-w-4xl mx-auto space-y-6">
                         
-                        <!-- Encabezado Compacto y Elegante -->
-                        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                            <div class="bg-gradient-to-r from-[#9d2449] to-[#7a1d37] px-6 py-4">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-4">
-                                            <i class="fas fa-file-contract text-lg text-white"></i>
+                        <!-- Encabezado Simple -->
+                        <div class="text-center mb-8">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#9d2449] to-[#7a1d37] rounded-full mb-4 shadow-lg">
+                                <i class="fas fa-file-contract text-2xl text-white"></i>
                                         </div>
-                                        <div>
-                                            <h1 class="text-xl font-bold text-white">
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">
                                                 Términos y Condiciones
                                             </h1>
-                                            <p class="text-white/80 text-sm" x-text="terminos.descripcion">
-                                                Condiciones específicas para su trámite
+                            <p class="text-gray-600">
+                                Por favor lea y acepte los siguientes términos para continuar
                                             </p>
                                         </div>
+
+                        <!-- Información del Trámite -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 shadow-sm">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-3 shadow-md">
+                                        <i class="fas fa-clipboard-list text-white"></i>
                                     </div>
+                                    <p class="text-sm text-gray-600 mb-1">Trámite</p>
+                                    <p class="font-semibold text-blue-700 capitalize" x-text="tipoTramite">Inscripción</p>
                                 </div>
+                                <div class="flex flex-col items-center" x-show="rfc">
+                                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-3 shadow-md">
+                                        <i class="fas fa-hashtag text-white"></i>
                             </div>
-                            
-                            <!-- Información del Trámite Compacta -->
-                            <div class="px-6 py-4 bg-gray-50">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="flex items-center bg-white rounded-lg p-3 shadow-sm">
-                                        <div class="w-8 h-8 bg-[#9d2449] rounded-md flex items-center justify-center mr-3">
-                                            <i class="fas fa-clipboard-list text-white text-xs"></i>
+                                    <p class="text-sm text-gray-600 mb-1">RFC</p>
+                                    <p class="font-semibold text-green-700 font-mono" x-text="rfc">---</p>
                                         </div>
-                                        <div>
-                                            <p class="text-xs text-gray-500 font-medium">Tipo de Trámite</p>
-                                            <p class="text-sm font-bold text-gray-800 capitalize" x-text="tipoTramite">Inscripción</p>
+                                <div class="flex flex-col items-center">
+                                    <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mb-3 shadow-md">
+                                        <i class="fas fa-user text-white"></i>
+                                        </div>
+                                    <p class="text-sm text-gray-600 mb-1">Tipo</p>
+                                    <p class="font-semibold text-purple-700" x-text="tipoPersona">Física</p>
+                                    </div>
                                         </div>
                                     </div>
                                     
-                                    <div class="flex items-center bg-white rounded-lg p-3 shadow-sm" x-show="rfc">
-                                        <div class="w-8 h-8 bg-[#9d2449] rounded-md flex items-center justify-center mr-3">
-                                            <i class="fas fa-hashtag text-white text-xs"></i>
+                        <!-- Términos Principales -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-list-check text-[#9d2449]"></i>
                                         </div>
-                                        <div>
-                                            <p class="text-xs text-gray-500 font-medium">RFC</p>
-                                            <p class="text-sm font-bold text-gray-800 font-mono" x-text="rfc">---</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex items-center bg-white rounded-lg p-3 shadow-sm">
-                                        <div class="w-8 h-8 bg-[#9d2449] rounded-md flex items-center justify-center mr-3">
-                                            <i class="fas fa-user text-white text-xs"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-xs text-gray-500 font-medium">Tipo de Persona</p>
-                                            <p class="text-sm font-bold text-gray-800" x-text="tipoPersona">Física</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                <h2 class="text-xl font-bold text-gray-800">Condiciones del Trámite</h2>
                         </div>
 
-                        <!-- Términos Específicos -->
-                        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                            <div class="px-8 py-6 border-b border-gray-200">
-                                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
-                                    <i class="fas fa-list-alt text-[#9d2449] mr-3"></i>
-                                    Condiciones Específicas
-                                </h2>
+                            <div class="space-y-4 text-gray-700">
+                                <div class="flex items-start p-3 bg-gray-50 rounded-lg">
+                                    <div class="w-6 h-6 bg-[#9d2449] rounded-full flex items-center justify-center mr-4 mt-0.5">
+                                        <i class="fas fa-check text-white text-xs"></i>
                             </div>
-                            <div class="p-8 space-y-6">
+                                    <p>Toda la información proporcionada debe ser <strong>veraz y actualizada</strong>.</p>
+                                        </div>
                                 
-                                <!-- Condiciones Dinámicas -->
-                                <template x-for="(condicion, index) in terminos.condiciones" :key="index">
-                                    <div class="border-l-4 border-[#9d2449] pl-6 py-4 bg-gray-50 rounded-r-lg">
-                                        <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
-                                            <i :class="condicion.icono + ' text-[#9d2449] mr-3'"></i>
-                                            <span x-text="condicion.titulo"></span>
-                                        </h3>
-                                        <p class="text-gray-700 mb-4 leading-relaxed" x-text="condicion.contenido"></p>
-                                        
-                                        <div class="bg-white rounded-lg p-4 border border-gray-200">
-                                            <h4 class="font-semibold text-gray-800 mb-3">Requisitos:</h4>
-                                            <ul class="space-y-2">
-                                                <template x-for="punto in condicion.puntos" :key="punto">
-                                                    <li class="flex items-start">
-                                                        <span class="w-2 h-2 bg-[#9d2449] rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                                                        <span class="text-gray-600 text-sm" x-text="punto"></span>
-                                                    </li>
-                                                </template>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </template>
-
-                                <!-- Disposiciones Generales -->
-                                <div class="border-t border-gray-200 pt-6">
-                                    <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center">
-                                        <i class="fas fa-info-circle text-[#9d2449] mr-3"></i>
-                                        Disposiciones Generales
-                                    </h3>
-                                    
-                                    <!-- Diseño Formal Gubernamental -->
-                                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
-                                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="flex items-start p-3 bg-gray-50 rounded-lg">
+                                    <div class="w-6 h-6 bg-[#9d2449] rounded-full flex items-center justify-center mr-4 mt-0.5">
+                                        <i class="fas fa-check text-white text-xs"></i>
+                                                        </div>
+                                    <p>Debe cumplir con todos los <strong>requisitos establecidos</strong> para el tipo de trámite.</p>
+                                            </div>
                                             
-                                            <!-- Protección de Datos -->
-                                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-                                                <div class="p-4">
-                                                    <div class="flex items-start">
-                                                        <div class="w-10 h-10 bg-[#9d2449] rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                                                            <i class="fas fa-shield-alt text-white text-sm"></i>
+                                <div class="flex items-start p-3 bg-gray-50 rounded-lg">
+                                    <div class="w-6 h-6 bg-[#9d2449] rounded-full flex items-center justify-center mr-4 mt-0.5">
+                                        <i class="fas fa-clock text-white text-xs"></i>
                                                         </div>
-                                                        <div>
-                                                            <h4 class="font-semibold text-gray-800 mb-2 text-sm">
-                                                                Protección de Datos
-                                                            </h4>
-                                                            <p class="text-xs text-gray-600 leading-relaxed">Sus datos serán tratados conforme a la normativa de protección de datos personales.</p>
+                                    <p>El proceso de revisión puede tomar entre <strong>15 a 20 días hábiles</strong>.</p>
+                                            </div>
+                                            
+                                <div class="flex items-start p-3 bg-gray-50 rounded-lg">
+                                    <div class="w-6 h-6 bg-[#9d2449] rounded-full flex items-center justify-center mr-4 mt-0.5">
+                                        <i class="fas fa-calendar-check text-white text-xs"></i>
                                                         </div>
+                                    <p>Debe asistir a un <strong>cotejo presencial</strong> una vez aprobado el trámite.</p>
+                                            </div>
+                                            
+                                <div class="flex items-start p-3 bg-gray-50 rounded-lg">
+                                    <div class="w-6 h-6 bg-[#9d2449] rounded-full flex items-center justify-center mr-4 mt-0.5">
+                                        <i class="fas fa-shield-alt text-white text-xs"></i>
+                                                        </div>
+                                    <p>Sus datos serán protegidos conforme a la <strong>normativa vigente</strong>.</p>
                                                     </div>
                                                 </div>
                                             </div>
                                             
-                                            <!-- Veracidad de Información -->
-                                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-                                                <div class="p-4">
+                        <!-- Advertencias Importantes -->
+                        <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200 p-6 shadow-sm">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                                    <i class="fas fa-exclamation-triangle text-white"></i>
+                                                        </div>
+                                <h3 class="text-lg font-semibold text-amber-800">Importante</h3>
+                                                        </div>
+                            <div class="space-y-3 text-amber-800">
                                                     <div class="flex items-start">
-                                                        <div class="w-10 h-10 bg-[#9d2449] rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                                                            <i class="fas fa-check-circle text-white text-sm"></i>
+                                    <span class="text-amber-600 mr-3 mt-1">•</span>
+                                    <p>Si no asiste al cotejo presencial, el trámite se reiniciará.</p>
                                                         </div>
-                                                        <div>
-                                                            <h4 class="font-semibold text-gray-800 mb-2 text-sm">
-                                                                Veracidad de Información
-                                                            </h4>
-                                                            <p class="text-xs text-gray-600 leading-relaxed">Usted es responsable de la veracidad de toda la información proporcionada.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Tiempos de Respuesta -->
-                                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-                                                <div class="p-4">
-                                                    <div class="flex items-start">
-                                                        <div class="w-10 h-10 bg-[#9d2449] rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                                                            <i class="fas fa-clock text-white text-sm"></i>
-                                                        </div>
-                                                        <div>
-                                                            <h4 class="font-semibold text-gray-800 mb-2 text-sm">
-                                                                Tiempos de Respuesta
-                                                            </h4>
-                                                            <p class="text-xs text-gray-600 leading-relaxed">Los tiempos son estimados y pueden variar según la complejidad del caso.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Notificaciones -->
-                                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-                                                <div class="p-4">
-                                                    <div class="flex items-start">
-                                                        <div class="w-10 h-10 bg-[#9d2449] rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                                                            <i class="fas fa-envelope text-white text-sm"></i>
-                                                        </div>
-                                                        <div>
-                                                            <h4 class="font-semibold text-gray-800 mb-2 text-sm">
-                                                                Notificaciones
-                                                            </h4>
-                                                            <p class="text-xs text-gray-600 leading-relaxed">Las comunicaciones oficiales se enviarán a su correo electrónico registrado.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Cotejo Presencial - Destacado -->
-                                            <div class="bg-gradient-to-br from-[#9d2449] to-[#8a203f] rounded-lg shadow-md border-2 border-[#9d2449] hover:shadow-lg transition-shadow duration-300">
-                                                <div class="p-4">
-                                                    <div class="flex items-start">
-                                                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                                                            <i class="fas fa-calendar-check text-white text-sm"></i>
-                                                        </div>
-                                                        <div>
-                                                            <h4 class="font-semibold text-white mb-2 text-sm">
-                                                                Cotejo Presencial
-                                                            </h4>
-                                                            <p class="text-xs text-white/90 leading-relaxed">Debe asistir a un cotejo presencial una vez aprobado su trámite para su culminación final.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Inasistencia - Advertencia -->
-                                            <div class="bg-gray-800 rounded-lg shadow-md border border-gray-700 hover:shadow-lg transition-shadow duration-300">
-                                                <div class="p-4">
-                                                    <div class="flex items-start">
-                                                        <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                                                            <i class="fas fa-exclamation-triangle text-white text-sm"></i>
-                                                        </div>
-                                                        <div>
-                                                            <h4 class="font-semibold text-white mb-2 text-sm">
-                                                                Advertencia de Inasistencia
-                                                            </h4>
-                                                            <p class="text-xs text-gray-300 leading-relaxed">Si no asiste al cotejo presencial, el trámite no culminará y se reiniciará de nuevo.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                        </div>
-                                        
-                                        <!-- Nota Importante -->
-                                        <div class="mt-6 p-4 bg-white rounded-lg border-l-4 border-[#9d2449] shadow-sm">
                                             <div class="flex items-start">
-                                                <div class="w-8 h-8 bg-[#9d2449] rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                                                    <i class="fas fa-info text-white text-xs"></i>
+                                    <span class="text-amber-600 mr-3 mt-1">•</span>
+                                    <p>La información falsa puede resultar en la cancelación del proceso.</p>
                                                 </div>
-                                                <div>
-                                                    <h5 class="font-semibold text-gray-800 text-sm mb-1">Nota Importante</h5>
-                                                    <p class="text-xs text-gray-600">
-                                                        El cumplimiento de todos estos términos es obligatorio para la correcta tramitación de su solicitud. 
-                                                        La falta de cumplimiento de alguno de estos requisitos puede resultar en la cancelación o reinicio del proceso.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Aceptación Formal de Términos y Condiciones -->
-                        <div class="bg-white rounded-xl shadow-xl border-2 border-gray-300 overflow-hidden relative">
-                            <!-- Marco decorativo oficial -->
-                            <div class="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 opacity-50"></div>
-                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#9d2449] via-amber-500 to-[#9d2449]"></div>
-                            
-                            <!-- Encabezado oficial -->
-                            <div class="relative bg-gradient-to-r from-gray-100 to-gray-50 border-b-2 border-gray-200 px-8 py-6">
-                                <div class="flex items-center justify-center">
-                                    <div class="w-16 h-16 bg-gradient-to-br from-[#9d2449] to-[#7a1d37] rounded-full flex items-center justify-center shadow-lg mr-6">
-                                        <i class="fas fa-balance-scale text-white text-2xl"></i>
-                                    </div>
-                                    <div class="text-center">
-                                        <h2 class="text-2xl font-bold text-gray-800 tracking-wide">
-                                            DECLARACIÓN LEGAL
-                                        </h2>
-                                        <p class="text-sm text-gray-600 font-medium mt-1">
-                                            Aceptación de Términos y Condiciones
-                                        </p>
-                                    </div>
-                                    <div class="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center shadow-lg ml-6">
-                                        <i class="fas fa-certificate text-white text-xl"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Contenido principal -->
-                            <div class="relative p-8">
-                                <!-- Sello de agua decorativo -->
-                                <div class="absolute top-4 right-4 opacity-5">
-                                    <i class="fas fa-stamp text-[#9d2449] text-8xl transform rotate-12"></i>
-                                </div>
-                                
-                                <!-- Marco decorativo interno -->
-                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gradient-to-br from-gray-50 to-white">
-                                    
-                                    <!-- Contenido de la declaración -->
-                                    <div class="space-y-6">
-                                        
-                                        <!-- Preámbulo formal -->
-                                        <div class="text-center border-b border-gray-200 pb-4">
-                                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                                                DECLARACIÓN BAJO PROTESTA DE DECIR VERDAD
-                                            </p>
-                                        </div>
-                                        
-                                        <!-- Texto legal principal -->
-                                        <div class="space-y-4 text-justify leading-relaxed">
-                                            <p class="text-gray-800 font-medium">
-                                                <span class="text-lg font-bold text-[#9d2449]">YO, EL SUSCRITO,</span> 
-                                                declaro bajo protesta de decir verdad que:
-                                            </p>
-                                            
-                                            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
-                                                <ul class="space-y-3 text-gray-700">
-                                                    <li class="flex items-start">
-                                                        <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">1</span>
-                                                        <span>He <strong>leído íntegramente</strong> y <strong>comprendido</strong> todos los términos y condiciones establecidos para el trámite de <strong class="text-[#9d2449] capitalize" x-text="tipoTramite">inscripción</strong> al Padrón de Proveedores.</span>
-                                                    </li>
-                                                    <li class="flex items-start">
-                                                        <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">2</span>
-                                                        <span><strong>Acepto y me comprometo</strong> a cumplir con todas las disposiciones, requisitos y obligaciones establecidas en la normativa aplicable.</span>
-                                                    </li>
-                                                    <li class="flex items-start">
-                                                        <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">3</span>
-                                                        <span><strong>Confirmo que toda la información</strong> que proporcionaré es <strong>veraz, actual y completa</strong>, y me hago responsable de su autenticidad.</span>
-                                                    </li>
-                                                    <li class="flex items-start">
-                                                        <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">4</span>
-                                                        <span>Estoy <strong>consciente de las implicaciones legales</strong> de proporcionar información falsa o incompleta, así como del incumplimiento de las obligaciones contraídas.</span>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                            
-                                            <!-- Advertencia legal -->
-                                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
                                                 <div class="flex items-start">
-                                                    <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                                                        <i class="fas fa-exclamation-triangle text-white text-sm"></i>
-                                                    </div>
-                                                    <div>
-                                                        <h4 class="font-bold text-amber-800 mb-2">ADVERTENCIA LEGAL</h4>
-                                                        <p class="text-sm text-amber-700 leading-relaxed">
-                                                            El incumplimiento de las disposiciones aquí aceptadas, así como la falsedad en las declaraciones realizadas, 
-                                                            podrán dar lugar a las sanciones administrativas y penales que correspondan conforme a la legislación aplicable.
-                                                        </p>
-                                                    </div>
+                                    <span class="text-amber-600 mr-3 mt-1">•</span>
+                                    <p>Las notificaciones se enviarán a su correo electrónico.</p>
                                                 </div>
                                             </div>
                                         </div>
                                         
-                                        <!-- Checkbox de aceptación formal -->
-                                        <div class="border-2 border-[#9d2449] rounded-lg p-6 bg-gradient-to-r from-red-50 to-pink-50">
+                        <!-- Aceptación -->
+                        <div class="bg-white rounded-xl border-2 border-[#9d2449] p-6 shadow-lg">
                                 <div class="flex items-start space-x-4">
-                                                <div class="flex-shrink-0 mt-2">
                                         <input type="checkbox" 
                                                x-model="terminosAceptados"
                                                id="aceptar-terminos"
-                                                           class="w-6 h-6 text-[#9d2449] border-3 border-[#9d2449] rounded-md focus:ring-[#9d2449] focus:ring-3 transition-all duration-300 shadow-lg">
-                                    </div>
+                                       class="w-5 h-5 text-[#9d2449] border-2 border-[#9d2449] rounded focus:ring-[#9d2449] mt-1">
                                     <div class="flex-1">
                                         <label for="aceptar-terminos" class="cursor-pointer">
-                                                        <h3 class="text-xl font-bold text-[#9d2449] mb-3 tracking-wide">
-                                                            ✓ ACEPTO LOS TÉRMINOS Y CONDICIONES
+                                        <h3 class="text-lg font-bold text-[#9d2449] mb-2 flex items-center">
+                                            <i class="fas fa-file-signature mr-2"></i>
+                                            Acepto los términos y condiciones
                                             </h3>
-                                                        <p class="text-gray-700 leading-relaxed font-medium">
-                                                            <strong>Manifiesto mi conformidad</strong> con todos los puntos anteriores y 
-                                                            <strong>otorgo mi consentimiento expreso</strong> para dar inicio al proceso de trámite 
-                                                            correspondiente, comprometiéndome a proporcionar información verídica y a cumplir 
-                                                            con todos los requisitos establecidos.
+                                        <p class="text-gray-700">
+                                            Declaro haber leído y aceptado todas las condiciones mencionadas. 
+                                            Confirmo que la información que proporcionaré es veraz y completa.
                                             </p>
                                         </label>
-                                                </div>
                                     </div>
                                 </div>
                                 
-                                        <!-- Información de fecha y hora -->
-                                        <div class="text-center text-xs text-gray-500 bg-gray-100 rounded-lg p-3">
-                                            <p>
-                                                <i class="fas fa-calendar-alt mr-2"></i>
-                                                <strong>Fecha y hora de aceptación:</strong> 
-                                                <span id="fecha-aceptacion"></span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Botón formal para continuar -->
-                                <div class="mt-8 text-center">
+                            <div class="mt-6 text-center">
                                     <button @click="aceptarTerminos()" 
                                             :disabled="!terminosAceptados"
                                             :class="terminosAceptados ? 
-                                                'bg-gradient-to-r from-[#9d2449] via-red-600 to-[#7a1d37] hover:from-[#8a203f] hover:via-red-700 hover:to-[#6b1a30] text-white shadow-2xl hover:shadow-3xl transform hover:scale-105 border-2 border-[#9d2449]' : 
-                                                'bg-gray-300 text-gray-500 cursor-not-allowed border-2 border-gray-300'"
-                                            class="px-12 py-5 rounded-xl font-bold text-lg transition-all duration-300 flex items-center space-x-4 mx-auto relative overflow-hidden">
-                                        
-                                        <!-- Efecto de brillo -->
-                                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -skew-x-12 group-hover:animate-pulse"></div>
-                                        
-                                        <i class="fas fa-file-signature text-xl relative z-10"></i>
-                                        <span class="relative z-10 tracking-wide">CONTINUAR CON EL TRÁMITE OFICIAL</span>
-                                        <i class="fas fa-arrow-right text-xl relative z-10"></i>
+                                            'bg-gradient-to-r from-[#9d2449] to-[#7a1d37] hover:from-[#8a203f] hover:to-[#6b1a30] text-white shadow-lg hover:shadow-xl transform hover:scale-105' : 
+                                            'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                                        class="px-8 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center mx-auto space-x-2">
+                                    <i class="fas fa-arrow-right"></i>
+                                    <span>Continuar con el Trámite</span>
                                     </button>
-                                    
-                                    <p class="mt-4 text-xs text-gray-500 italic">
-                                        Al hacer clic, se registrará su aceptación con fecha y hora oficial
-                                    </p>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <script>
-                            // Actualizar fecha y hora en tiempo real
-                            function actualizarFechaHora() {
-                                const ahora = new Date();
-                                const opciones = { 
-                                    year: 'numeric', 
-                                    month: 'long', 
-                                    day: 'numeric', 
-                                    hour: '2-digit', 
-                                    minute: '2-digit', 
-                                    second: '2-digit',
-                                    timeZoneName: 'short'
-                                };
-                                const fechaFormateada = ahora.toLocaleDateString('es-MX', opciones);
-                                const elemento = document.getElementById('fecha-aceptacion');
-                                if (elemento) {
-                                    elemento.textContent = fechaFormateada;
-                                }
-                            }
-                            
-                            // Actualizar cada segundo
-                            setInterval(actualizarFechaHora, 1000);
-                            actualizarFechaHora(); // Llamada inicial
-                        </script>
                     </div>
                 </div>
 

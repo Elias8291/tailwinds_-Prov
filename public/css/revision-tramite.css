@@ -1,0 +1,309 @@
+/**
+ * Estilos para el Sistema de Revisión de Trámites
+ * Organizado y limpio
+ */
+
+/* Variables CSS para consistencia */
+:root {
+    --primary-color: #B4325E;
+    --primary-dark: #93264B;
+    --secondary-color: #f3f4f6;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+    --border-radius: 0.75rem;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* Estilos para navegación de secciones */
+.seccion-tab {
+    transition: all 0.2s ease;
+}
+
+.seccion-tab:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.seccion-tab.active {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #60a5fa;
+    color: #1d4ed8;
+}
+
+/* Contenido de secciones */
+.section-content {
+    min-height: 400px;
+    transition: opacity 0.3s ease;
+}
+
+.section-content.hidden {
+    display: none;
+}
+
+/* Controles de revisión */
+.revision-controls {
+    border: 2px dashed #e5e7eb;
+    transition: border-color 0.3s ease;
+}
+
+.revision-controls:hover {
+    border-color: var(--primary-color);
+}
+
+/* Panel lateral de documentos */
+#documentos-container {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow: hidden;
+    min-width: 200px;
+    max-width: 1200px;
+}
+
+/* Lista de documentos */
+#lista-documentos {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.documento-item {
+    transition: all 0.2s ease;
+}
+
+.documento-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+}
+
+/* Visor de documentos embebido */
+#visor-documento {
+    min-height: 400px;
+    height: auto;
+    max-height: calc(100vh - 200px);
+    overflow: hidden;
+}
+
+#iframe-documento {
+    min-height: 350px;
+    max-height: calc(100vh - 250px);
+}
+
+/* Botones del visor */
+#btn-ver-completo, #btn-nueva-pestana {
+    transition: all 0.2s ease;
+}
+
+#btn-ver-completo:hover, #btn-nueva-pestana:hover {
+    transform: scale(1.1);
+}
+
+/* Modal de documentos */
+#documento-modal {
+    backdrop-filter: blur(4px);
+}
+
+#documento-modal .relative {
+    box-shadow: var(--shadow-lg);
+}
+
+/* Panel de revisión de documentos */
+#documento-modal .w-80 {
+    background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+}
+
+/* Botones de revisión */
+.btn-revision {
+    transition: all 0.2s ease;
+}
+
+.btn-revision:hover {
+    transform: translateY(-1px);
+}
+
+#btn-aprobar-documento:hover {
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+}
+
+#btn-rechazar-documento:hover {
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+#btn-correccion-documento:hover {
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+#btn-guardar-comentario-doc:hover {
+    box-shadow: 0 4px 12px rgba(75, 85, 99, 0.4);
+}
+
+/* Radio buttons personalizados */
+input[type="radio"]:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Textarea y select con focus personalizado */
+textarea:focus, select:focus {
+    box-shadow: 0 0 0 3px rgba(180, 50, 94, 0.1);
+}
+
+/* Mapa del panel lateral */
+#mapa-panel-lateral {
+    min-height: 250px;
+    max-height: 300px;
+    width: 100%;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 2px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+#mapa-panel-lateral .gm-style {
+    border-radius: var(--border-radius);
+    font-family: inherit;
+}
+
+/* Modal del mapa */
+#mapa-modal .relative {
+    margin: 1rem;
+}
+
+/* Animaciones */
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.loading-animation {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+/* Estados de carga en botones */
+button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Historial de revisiones */
+.historial-item {
+    animation: slideInFromTop 0.3s ease-out;
+    border-left: 3px solid var(--primary-color);
+    padding-left: 1rem;
+}
+
+/* Responsividad */
+@media (max-width: 1024px) {
+    #documentos-container {
+        position: relative;
+        max-height: none;
+        width: 100%;
+    }
+    
+    #documento-modal .relative {
+        max-width: calc(100vw - 2rem);
+    }
+    
+    #documento-modal .w-80 {
+        width: 300px;
+    }
+    
+    #mapa-panel-lateral {
+        min-height: 200px;
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    #documento-modal .flex {
+        flex-direction: column;
+    }
+    
+    #documento-modal .w-80 {
+        width: 100%;
+        max-height: 40vh;
+    }
+    
+    #documento-modal .h-\[85vh\] {
+        height: auto;
+        max-height: 80vh;
+    }
+    
+    #mapa-modal .relative {
+        margin: 0.5rem;
+        max-width: calc(100vw - 1rem);
+        max-height: calc(100vh - 1rem);
+    }
+    
+    #mapa-panel-lateral {
+        min-height: 180px;
+        max-height: 220px;
+        border-radius: 0.5rem;
+    }
+    
+    .seccion-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Utilidades adicionales */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+}
+
+/* Estados de hover específicos */
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.hover-scale:hover {
+    transform: scale(1.02);
+}
+
+/* Estilos para elementos de estado */
+.estado-pendiente {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.estado-aprobado {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.estado-rechazado {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.estado-correccion {
+    background-color: #fef3c7;
+    color: #92400e;
+} 

@@ -567,17 +567,6 @@ function documentosData() {
         async handleFileSelect(event, documento) {
             const file = event.target.files[0];
             if (!file) return;
-            // Validaciones
-            if (file.size > 10 * 1024 * 1024) {
-                this.mostrarError('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
-                event.target.value = '';
-                return;
-            }
-            if (!file.type.includes('pdf')) {
-                this.mostrarError('Solo se permiten archivos PDF.');
-                event.target.value = '';
-                return;
-            }
             // Actualizar estado del documento
             documento.archivo_seleccionado = true;
             documento.nombre_archivo = file.name;
@@ -585,6 +574,15 @@ function documentosData() {
             await this.subirDocumento(documento, file);
         },
         async subirDocumento(documento, file) {
+            // Validaciones del lado del cliente primero
+            const erroresValidacion = this.validateArchivo(file);
+            if (erroresValidacion.length > 0) {
+                this.mostrarError(erroresValidacion.join('. '));
+                documento.archivo_seleccionado = false;
+                documento.nombre_archivo = '';
+                return false;
+            }
+            
             try {
                 const formData = new FormData();
                 formData.append('archivo', file);
@@ -610,7 +608,13 @@ function documentosData() {
                     documento.observaciones = null;
                     this.mostrarExito(data.mensaje || 'Documento subido correctamente');
                 } else {
-                    this.mostrarError(data.mensaje || 'Error al subir el documento');
+                    // Manejar errores de validación del servidor
+                    if (data.errors) {
+                        this.procesarErroresServidor(data.errors);
+                        this.mostrarErroresValidacion(data.errors);
+                    } else {
+                        this.mostrarError(data.message || data.mensaje || 'Error al subir el documento');
+                    }
                     documento.archivo_seleccionado = false;
                     documento.nombre_archivo = '';
                 }
@@ -666,17 +670,58 @@ function documentosData() {
                 this.showSuccess = false;
             }, 3000);
         },
+        mostrarErroresValidacion(errores) {
+            // Limpiar errores anteriores
+            document.querySelectorAll('.error-message-documentos').forEach(el => el.remove());
+            
+            let mensajesError = [];
+            
+            // Procesar errores del servidor
+            for (const [campo, mensajes] of Object.entries(errores)) {
+                const mensaje = Array.isArray(mensajes) ? mensajes[0] : mensajes;
+                mensajesError.push(mensaje);
+            }
+            
+            // Mostrar errores en una alerta elegante
+            if (mensajesError.length > 0) {
+                this.mostrarAlertaErrores(mensajesError);
+            }
+        },
+        mostrarAlertaErrores(errores) {
+            const container = document.querySelector('[x-data*="documentosData"]');
+            if (!container) return;
+            
+            const alerta = document.createElement('div');
+            alerta.className = 'error-message-documentos mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm';
+            
+            let contenidoErrores = errores.map(error => 
+                `<li class="text-sm text-red-700">${error}</li>`
+            ).join('');
+            
+            alerta.innerHTML = `
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-triangle mr-3 text-red-500 mt-1 flex-shrink-0"></i>
+                    <div class="flex-1">
+                        <h4 class="text-red-800 font-medium mb-2">Errores de validación</h4>
+                        <ul class="space-y-1">${contenidoErrores}</ul>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            class="ml-2 text-red-400 hover:text-red-600 focus:outline-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.insertBefore(alerta, container.firstChild);
+            
+            // Auto-remover después de 8 segundos
+            setTimeout(() => {
+                if (alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 8000);
+        },
         async finalizarTramite() {
-            if (!this.todosDocumentosEnviados) {
-                this.mostrarError('Debe subir todos los documentos requeridos antes de finalizar el trámite');
-                return;
-            }
-            // Verificar si hay documentos rechazados
-            const documentosRechazados = this.documentos.filter(doc => doc.estado === 'Rechazado');
-            if (documentosRechazados.length > 0) {
-                this.mostrarError('Hay documentos rechazados que deben ser corregidos antes de finalizar el trámite');
-                return;
-            }
             this.finalizando = true;
             try {
                 const formData = new FormData();
@@ -848,6 +893,119 @@ function documentosData() {
                 'security_red': '🛡️ Seguridad'
             };
             return schemes[colorScheme] || '⚫ Estándar';
+        },
+        // Validaciones del lado del cliente para documentos
+        validateArchivo(archivo) {
+            const errores = [];
+            
+            if (!archivo) {
+                errores.push('Debe seleccionar un archivo para subir');
+                return errores;
+            }
+            
+            // Verificar tipo de archivo
+            if (archivo.type !== 'application/pdf') {
+                errores.push('Solo se permiten archivos en formato PDF');
+            }
+            
+            // Verificar tamaño (máximo 10MB)
+            const maxSize = 10 * 1024 * 1024; // 10MB en bytes
+            if (archivo.size > maxSize) {
+                errores.push('El archivo no puede ser mayor a 10 MB');
+            }
+            
+            // Verificar tamaño mínimo (al menos 1KB)
+            if (archivo.size < 1024) {
+                errores.push('El archivo es demasiado pequeño. Debe tener al menos 1 KB');
+            }
+            
+            // Verificar nombre del archivo
+            if (archivo.name.length > 255) {
+                errores.push('El nombre del archivo es demasiado largo. Máximo 255 caracteres');
+            }
+            
+            // Verificar caracteres del nombre
+            if (!/^[a-zA-Z0-9\s\.\-_\(\)]+\.pdf$/i.test(archivo.name)) {
+                errores.push('El nombre del archivo contiene caracteres no permitidos. Use solo letras, números, espacios, guiones y paréntesis');
+            }
+            
+            return errores;
+        },
+        
+        validateComentarioRechazo(comentario) {
+            const errores = [];
+            
+            if (!comentario || comentario.trim().length < 10) {
+                errores.push('El comentario debe tener al menos 10 caracteres');
+            }
+            
+            if (comentario && comentario.length > 1000) {
+                errores.push('El comentario no puede exceder 1000 caracteres');
+            }
+            
+            return errores; 
+        },
+        
+        // Validar archivo antes de subir
+        async validarYSubirArchivo(archivo, documentoId) {
+            // Validaciones del lado del cliente primero
+            const erroresValidacion = this.validateArchivo(archivo);
+            
+            if (erroresValidacion.length > 0) {
+                this.mostrarError(erroresValidacion.join('. '));
+                return false;
+            }
+            
+            // Si pasa las validaciones del cliente, proceder con la subida
+            return await this.subirDocumento(archivo, documentoId);
+        },
+        
+        // Mostrar errores de validación específicos
+        mostrarErrorValidacion(campo, mensaje) {
+            // Buscar el campo específico
+            const campoElement = document.querySelector(`[name="${campo}"], #${campo}`);
+            if (campoElement) {
+                // Agregar clase de error
+                campoElement.classList.add('border-red-500', 'bg-red-50');
+                
+                // Buscar o crear contenedor de error
+                let errorContainer = campoElement.parentElement.querySelector('.validation-error');
+                if (!errorContainer) {
+                    errorContainer = document.createElement('div');
+                    errorContainer.className = 'validation-error mt-2 p-3 bg-red-50 border border-red-200 rounded-lg';
+                    campoElement.parentElement.appendChild(errorContainer);
+                }
+                
+                errorContainer.innerHTML = `
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-circle mr-2 text-red-500 mt-0.5 flex-shrink-0"></i>
+                        <span class="text-sm text-red-700">${mensaje}</span>
+                    </div>
+                `;
+            }
+        },
+        
+        // Limpiar errores de validación
+        limpiarErroresValidacion() {
+            // Remover clases de error
+            const camposConError = document.querySelectorAll('.border-red-500');
+            camposConError.forEach(campo => {
+                campo.classList.remove('border-red-500', 'bg-red-50');
+            });
+            
+            // Remover contenedores de error
+            const contenedoresError = document.querySelectorAll('.validation-error');
+            contenedoresError.forEach(contenedor => contenedor.remove());
+        },
+        
+        // Procesar errores del servidor
+        procesarErroresServidor(errores) {
+            if (typeof errores === 'object') {
+                Object.keys(errores).forEach(campo => {
+                    const mensajes = Array.isArray(errores[campo]) ? errores[campo] : [errores[campo]];
+                    this.mostrarErrorValidacion(campo, mensajes[0]);
+                });
+            }
         }
     }
 }

@@ -13,6 +13,7 @@
             </div>
         </div>
     </div>
+
     @if($readonly)
         <!-- Vista de solo lectura para revisión -->
         <div class="space-y-6">
@@ -109,21 +110,40 @@
                         </div>
     @endif
 </div>
-@push('scripts')
-<script src="{{ asset('js/validators/constitucion-validator.js') }}"></script>
-@endpush
     @else
-        <!-- Vista editable normal (código existente) -->
+        <!-- Vista editable normal -->
+        <!-- Container para alertas de error -->
+        <div id="constitucion-error-container" class="mb-6 hidden">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Error al guardar los datos</h3>
+                        <div id="constitucion-error-message" class="mt-2 text-sm text-red-700"></div>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <div class="-mx-1.5 -my-1.5">
+                            <button type="button" onclick="document.getElementById('constitucion-error-container').classList.add('hidden')" class="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <form class="space-y-8" @submit.prevent="guardarConstitucion" x-ref="constitucionForm">
             <input type="hidden" name="action" value="next">
             <input type="hidden" name="seccion" value="3">
             <input type="hidden" name="tramite_id" value="{{ $datosConstitucion['tramite_id'] ?? ($tramite->id ?? '') }}">
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Número de Escritura -->
                 <div class="form-group">
                     <label for="numero_escritura" class="block text-sm font-medium text-gray-700 mb-2">
                         Número de Escritura
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="text" id="numero_escritura" name="numero_escritura"
@@ -131,29 +151,27 @@
                                placeholder="Ej: 1234 o 1234/2024"
                                maxlength="15"
                                x-model="numeroEscritura"
-                               aria-label="Número de escritura"
-                               required>
+                               aria-label="Número de escritura">
                     </div>
                 </div>
+
                 <!-- Fecha de Constitución -->
                 <div class="form-group">
                     <label for="fecha_constitucion" class="block text-sm font-medium text-gray-700 mb-2">
                         Fecha de Constitución
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="date" id="fecha_constitucion" name="fecha_constitucion"
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                                x-model="fechaConstitucion"
-                               aria-label="Fecha de constitución"
-                               required>
+                               aria-label="Fecha de constitución">
                     </div>
                 </div>
+
                 <!-- Nombre del Notario -->
                 <div class="form-group md:col-span-2">
                     <label for="nombre_notario" class="block text-sm font-medium text-gray-700 mb-2">
                         Nombre del Notario
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="text" id="nombre_notario" name="nombre_notario"
@@ -161,22 +179,20 @@
                                placeholder="Ej: Lic. Juan Pérez González"
                                maxlength="100"
                                x-model="nombreNotario"
-                               aria-label="Nombre del notario"
-                               required>
+                               aria-label="Nombre del notario">
                     </div>
                 </div>
+
                 <!-- Entidad Federativa -->
                 <div class="form-group">
                     <label for="entidad_federativa" class="block text-sm font-medium text-gray-700 mb-2">
                         Entidad Federativa
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <select id="entidad_federativa" name="entidad_federativa"
                                 class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                                 x-model="entidadFederativa"
-                                aria-label="Seleccionar entidad federativa"
-                                required>
+                                aria-label="Seleccionar entidad federativa">
                             <option value="">Seleccione un estado</option>
                             @php
                             $estados = [
@@ -201,11 +217,11 @@
                         </div>
                     </div>
                 </div>
+
                 <!-- Número de Notario -->
                 <div class="form-group">
                     <label for="numero_notario" class="block text-sm font-medium text-gray-700 mb-2">
                         Número de Notario
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="text" id="numero_notario" name="numero_notario"
@@ -213,15 +229,14 @@
                                placeholder="Ej: 123"
                                maxlength="10"
                                x-model="numeroNotario"
-                               aria-label="Número de notario"
-                               required>
+                               aria-label="Número de notario">
                     </div>
                 </div>
+
                 <!-- Número de Registro -->
                 <div class="form-group">
                     <label for="numero_registro" class="block text-sm font-medium text-gray-700 mb-2">
                         Número de Registro
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="text" id="numero_registro" name="numero_registro"
@@ -229,25 +244,24 @@
                                placeholder="Ej: 0123456789 o FME123456789"
                                maxlength="14"
                                x-model="numeroRegistro"
-                               aria-label="Número de registro"
-                               required>
+                               aria-label="Número de registro">
                     </div>
                 </div>
+
                 <!-- Fecha de Inscripción -->
                 <div class="form-group">
                     <label for="fecha_inscripcion" class="block text-sm font-medium text-gray-700 mb-2">
                         Fecha de Inscripción
-                        <span class="text-[#9d2449]">*</span>
                     </label>
                     <div class="relative group">
                         <input type="date" id="fecha_inscripcion" name="fecha_inscripcion"
                                class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all group-hover:border-[#4F46E5]/50"
                                x-model="fechaInscripcion"
-                               aria-label="Fecha de inscripción"
-                               required>
+                               aria-label="Fecha de inscripción">
                     </div>
                 </div>
             </div>
+
             <!-- Botones de navegación -->
             <div class="flex justify-between pt-6 border-t border-gray-100">
                 <button type="button" 
@@ -276,6 +290,7 @@
         </form>
     @endif
 </div>
+
 @if(!$readonly)
 <script>
 function constitucionData() {
@@ -287,16 +302,19 @@ function constitucionData() {
         numeroNotario: '',
         numeroRegistro: '',
         fechaInscripcion: '',
+
         async init() {
             // Cargar datos existentes si los hay
             const datosConstitucion = @json($datosConstitucion ?? []);
             const tramite = @json($tramite ?? null);
+            
             if (datosConstitucion && Object.keys(datosConstitucion).length > 0) {
                 await this.cargarDatosDesdeObjeto(datosConstitucion);
             } else if (tramite && tramite.id) {
                 await this.cargarDatosDesdeTramite(tramite.id);
             }
         },
+
         // Cargar datos desde un objeto
         async cargarDatosDesdeObjeto(datosConstitucion) {
             try {
@@ -308,8 +326,10 @@ function constitucionData() {
                 this.numeroRegistro = datosConstitucion.numero_registro || '';
                 this.fechaInscripcion = datosConstitucion.fecha_inscripcion || '';
             } catch (error) {
+                // Error silencioso
             }
         },
+
         // Cargar datos desde el trámite
         async cargarDatosDesdeTramite(tramiteId) {
             try {
@@ -321,8 +341,10 @@ function constitucionData() {
                     }
                 }
             } catch (error) {
+                // Error silencioso
             }
         },
+
         // Guardar constitución
         async guardarConstitucion() {
             try {
@@ -330,15 +352,18 @@ function constitucionData() {
                 const tramite = @json($tramite ?? null);
                 const datosConstitucion = @json($datosConstitucion ?? []);
                 let tramiteId = null;
+                
                 if (tramite && tramite.id) {
                     tramiteId = tramite.id;
                 } else if (datosConstitucion && datosConstitucion.tramite_id) {
                     tramiteId = datosConstitucion.tramite_id;
                 }
+                
                 if (!tramiteId) {
-                    alert('Error: No se pudo obtener el ID del trámite');
+                    this.mostrarError('No se pudo obtener el ID del trámite');
                     return false;
                 }
+
                 const formData = new FormData();
                 formData.append('tramite_id', tramiteId);
                 formData.append('numero_escritura', this.numeroEscritura);
@@ -349,6 +374,7 @@ function constitucionData() {
                 formData.append('numero_registro', this.numeroRegistro);
                 formData.append('fecha_inscripcion', this.fechaInscripcion);
                 formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
                 const response = await fetch('{{ route('tramites.guardar-constitucion-formulario') }}', {
                     method: 'POST',
                     body: formData,
@@ -357,22 +383,103 @@ function constitucionData() {
                         'Accept': 'application/json'
                     }
                 });
-                const responseText = await response.text();
-                const result = JSON.parse(responseText);
-                if (result.success) {
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    this.limpiarErrores();
                     return true;
                 } else {
-                    const errorMsg = result.message || (result.errors ? Object.values(result.errors).flat().join(', ') : 'Error desconocido');
-                    alert('Error al guardar: ' + errorMsg);
+                    // Manejo específico para error 422 (validación)
+                    if (response.status === 422 && result.errors) {
+                        this.manejarErroresValidacion(result.errors);
+                    } else {
+                        const errorMsg = result.message || 'Error al guardar los datos';
+                        this.mostrarError(errorMsg);
+                    }
                     return false;
                 }
             } catch (error) {
-                alert('Error al guardar los datos: ' + error.message);
+                this.mostrarError('Error de conexión: ' + error.message);
                 return false;
+            }
+        },
+
+        // Mostrar errores de validación del servidor
+        manejarErroresValidacion(errors) {
+            // Mapeo de campos para mostrar errores específicos
+            const fieldMapping = {
+                'numero_escritura': 'numero_escritura',
+                'fecha_constitucion': 'fecha_constitucion', 
+                'nombre_notario': 'nombre_notario',
+                'entidad_federativa': 'entidad_federativa',
+                'numero_notario': 'numero_notario',
+                'numero_registro': 'numero_registro',
+                'fecha_inscripcion': 'fecha_inscripcion'
+            };
+
+            let hasFieldErrors = false;
+
+            // Limpiar errores previos
+            this.limpiarErrores();
+
+            // Procesar cada campo con error
+            Object.keys(errors).forEach(field => {
+                if (fieldMapping[field]) {
+                    const input = document.getElementById(fieldMapping[field]);
+                    if (input) {
+                        input.classList.add('border-red-500');
+                        hasFieldErrors = true;
+                        
+                        // Scroll al primer campo con error
+                        if (!document.querySelector('.border-red-500:not(#' + fieldMapping[field] + ')')) {
+                            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                }
+            });
+
+            // Mostrar mensaje general de error
+            const allErrors = Object.values(errors).flat().join(' ');
+            this.mostrarError(allErrors || 'Por favor, corrige los errores en el formulario.');
+        },
+
+        // Mostrar error general
+        mostrarError(mensaje) {
+            const errorContainer = document.getElementById('constitucion-error-container');
+            const errorMessage = document.getElementById('constitucion-error-message');
+            
+            if (errorContainer && errorMessage) {
+                errorMessage.textContent = mensaje;
+                errorContainer.classList.remove('hidden');
+                
+                // Auto-ocultar después de 10 segundos
+                setTimeout(() => {
+                    errorContainer.classList.add('hidden');
+                }, 10000);
+                
+                // Scroll al error
+                errorContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        },
+
+        // Limpiar todos los errores visuales
+        limpiarErrores() {
+            // Remover bordes rojos de todos los campos
+            const fieldsWithErrors = document.querySelectorAll('#numero_escritura, #fecha_constitucion, #nombre_notario, #entidad_federativa, #numero_notario, #numero_registro, #fecha_inscripcion');
+            fieldsWithErrors.forEach(field => {
+                field.classList.remove('border-red-500');
+            });
+
+            // Ocultar contenedor de errores
+            const errorContainer = document.getElementById('constitucion-error-container');
+            if (errorContainer) {
+                errorContainer.classList.add('hidden');
             }
         }
     }
 }
+
 // Función para navegar al paso anterior desde constitución
 function navegarAnteriorConstitucion() {
     // Método 1: Función global navegarAnterior
@@ -380,6 +487,7 @@ function navegarAnteriorConstitucion() {
         window.navegarAnterior();
         return;
     }
+    
     // Método 2: Buscar contenedor Alpine.js y retroceder
     const alpineContainer = document.querySelector('[x-data*="currentStep"]');
     if (alpineContainer && typeof Alpine !== 'undefined') {
@@ -395,16 +503,19 @@ function navegarAnteriorConstitucion() {
             // Error silencioso
         }
     }
+    
     // Método 3: Disparar evento personalizado
     if (alpineContainer) {
         alpineContainer.dispatchEvent(new CustomEvent('prev-step'));
         return;
     }
 }
+
 // Función para guardar constitución y navegar al siguiente paso
 async function guardarConstitucionYSiguiente() {
     // Mostrar estado de carga
     mostrarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
+    
     try {
         // 1. Buscar el componente Alpine.js de constitución
         const constitucionContainer = document.querySelector('[x-data*="constitucionData"]');
@@ -420,6 +531,7 @@ async function guardarConstitucionYSiguiente() {
                 return;
             }
         }
+        
         // Fallback: intentar navegar sin guardar
         navegarSiguienteDesdeConstitucion();
     } catch (error) {
@@ -427,6 +539,7 @@ async function guardarConstitucionYSiguiente() {
         navegarSiguienteDesdeConstitucion();
     }
 }
+
 // Función para navegar al siguiente paso desde constitución
 function navegarSiguienteDesdeConstitucion() {
     // Método 1: Función global navegarSiguiente
@@ -434,6 +547,7 @@ function navegarSiguienteDesdeConstitucion() {
         window.navegarSiguiente();
         return;
     }
+    
     // Método 2: Buscar contenedor Alpine.js y avanzar
     const alpineContainer = document.querySelector('[x-data*="currentStep"]');
     if (alpineContainer && typeof Alpine !== 'undefined') {
@@ -449,6 +563,7 @@ function navegarSiguienteDesdeConstitucion() {
             // Error silencioso
         }
     }
+    
     // Método 3: Disparar evento personalizado
     if (alpineContainer) {
         alpineContainer.dispatchEvent(new CustomEvent('next-step'));
@@ -457,6 +572,7 @@ function navegarSiguienteDesdeConstitucion() {
 }
 </script>
 @endif
+
 <style>
 .h-12 {
     @apply bg-gradient-to-br from-[#9d2449] to-[#8a203f];

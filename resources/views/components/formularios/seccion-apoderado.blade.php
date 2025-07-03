@@ -130,9 +130,6 @@
                         </div>
     @endif
 </div>
-@push('scripts')
-<script src="{{ asset('js/validators/apoderado-validator.js') }}"></script>
-@endpush
     @else
         <!-- Vista editable normal (código existente) -->
         <!-- Alert de Errores -->
@@ -447,14 +444,6 @@ function apoderadoData() {
                 return false;
             }
         },
-        mostrarError(mensaje) {
-            this.errorMessage = mensaje;
-            this.showError = true;
-            this.showSuccess = false;
-            setTimeout(() => {
-                this.showError = false;
-            }, 5000);
-        },
         mostrarExito(mensaje) {
             this.successMessage = mensaje;
             this.showSuccess = true;
@@ -463,45 +452,180 @@ function apoderadoData() {
                 this.showSuccess = false;
             }, 3000);
         },
+        
+        // Método para limpiar errores anteriores
+        limpiarErroresApoderado() {
+            document.querySelectorAll('.error-message-apoderado').forEach(el => el.remove());
+            document.querySelectorAll('.alerta-error-general-apoderado').forEach(el => el.remove());
+            document.querySelectorAll('.border-red-500').forEach(el => {
+                el.classList.remove('border-red-500', 'bg-red-50');
+                el.classList.add('border-gray-200');
+            });
+            this.showError = false;
+        },
+        
+        // Método para mostrar errores de validación del servidor
+        mostrarErroresValidacionApoderado(errores, mensajeGeneral = null) {
+            // Limpiar errores anteriores
+            this.limpiarErroresApoderado();
+            
+            // Mostrar mensaje general primero si existe
+            if (mensajeGeneral) {
+                this.mostrarAlertaGeneralApoderado(mensajeGeneral, 'warning');
+            }
+            
+            let erroresNoMapeados = [];
+            
+            // Mostrar errores específicos por campo
+            for (const [campo, mensajes] of Object.entries(errores)) {
+                const mensaje = Array.isArray(mensajes) ? mensajes[0] : mensajes;
+                
+                // Mapear nombres de campos del servidor al frontend
+                const campoMapeado = this.mapearCampoServidorApoderado(campo);
+                const elemento = document.getElementById(campoMapeado) || 
+                               document.querySelector(`[name="${campoMapeado}"]`) ||
+                               document.querySelector(`[name="${campo}"]`);
+                
+                if (elemento) {
+                    // Estilo de error elegante
+                    elemento.classList.remove('border-gray-200');
+                    elemento.classList.add('border-red-500', 'bg-red-50');
+                    
+                    // Crear mensaje de error elegante
+                    const contenedor = elemento.closest('.form-group') || elemento.parentElement;
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'error-message-apoderado mt-2 p-3 bg-red-50 border border-red-200 rounded-lg';
+                    errorMsg.innerHTML = `
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-circle mr-2 text-red-500 mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm text-red-700">${mensaje}</span>
+                        </div>
+                    `;
+                    contenedor.appendChild(errorMsg);
+                } else {
+                    // Guardar errores que no se pudieron mapear
+                    erroresNoMapeados.push(mensaje);
+                }
+            }
+            
+            // Mostrar errores generales si los hay
+            if (erroresNoMapeados.length > 0) {
+                this.mostrarErroresGeneralesApoderado(erroresNoMapeados);
+            }
+            
+            // Scroll al primer error
+            const primerError = document.querySelector('.border-red-500, .alerta-error-general-apoderado');
+            if (primerError) {
+                primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        },
+        
+        // Método para mapear nombres de campos del servidor al frontend
+        mapearCampoServidorApoderado(campo) {
+            const mapeo = {
+                'nombre_apoderado': 'nombre_apoderado',
+                'numero_escritura': 'numero_escritura',
+                'nombre_notario': 'nombre_notario',
+                'numero_notario': 'numero_notario',
+                'entidad_federativa': 'entidad_federativa',
+                'fecha_escritura': 'fecha_escritura',
+                'numero_registro': 'numero_registro',
+                'fecha_inscripcion': 'fecha_inscripcion'
+            };
+            return mapeo[campo] || campo;
+        },
+        
+        // Método para mostrar errores generales
+        mostrarErroresGeneralesApoderado(errores) {
+            const container = document.querySelector('[x-data*="apoderadoData"]');
+            if (!container) return;
+            
+            const alerta = document.createElement('div');
+            alerta.className = 'alerta-error-general-apoderado mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm';
+            
+            let contenidoErrores = errores.map(error => 
+                `<li class="text-sm text-red-700">${error}</li>`
+            ).join('');
+            
+            alerta.innerHTML = `
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-triangle mr-3 text-red-500 mt-1 flex-shrink-0"></i>
+                    <div class="flex-1">
+                        <h4 class="text-red-800 font-medium mb-2">Errores de validación</h4>
+                        <ul class="space-y-1">${contenidoErrores}</ul>
+                    </div>
+                </div>
+            `;
+            
+            container.insertBefore(alerta, container.firstChild);
+        },
+        
+        // Método para mostrar error general sin errores específicos
+        mostrarErrorGeneralApoderado(mensaje) {
+            this.mostrarAlertaGeneralApoderado(mensaje, 'error');
+        },
+        
+        // Método para mostrar alerta general (error, warning, info)
+        mostrarAlertaGeneralApoderado(mensaje, tipo = 'error') {
+            // Limpiar alertas anteriores
+            document.querySelectorAll('.alerta-error-general-apoderado').forEach(el => el.remove());
+            
+            const container = document.querySelector('[x-data*="apoderadoData"]');
+            if (!container) return;
+            
+            const alerta = document.createElement('div');
+            
+            // Configurar estilos según el tipo
+            let estilos, icono, titulo, colorTexto, colorBoton;
+            switch(tipo) {
+                case 'warning':
+                    estilos = 'bg-yellow-50 border-l-4 border-yellow-500';
+                    icono = 'fas fa-exclamation-triangle text-yellow-500';
+                    titulo = 'Atención';
+                    colorTexto = 'text-yellow-800';
+                    colorBoton = 'text-yellow-400 hover:text-yellow-600';
+                    break;
+                case 'info':
+                    estilos = 'bg-blue-50 border-l-4 border-blue-500';
+                    icono = 'fas fa-info-circle text-blue-500';
+                    titulo = 'Información';
+                    colorTexto = 'text-blue-800';
+                    colorBoton = 'text-blue-400 hover:text-blue-600';
+                    break;
+                default: // error
+                    estilos = 'bg-red-50 border-l-4 border-red-500';
+                    icono = 'fas fa-exclamation-triangle text-red-500';
+                    titulo = 'Error';
+                    colorTexto = 'text-red-800';
+                    colorBoton = 'text-red-400 hover:text-red-600';
+            }
+            
+            alerta.className = `alerta-error-general-apoderado mb-6 p-4 ${estilos} rounded-r-lg shadow-sm`;
+            alerta.innerHTML = `
+                <div class="flex items-start">
+                    <i class="${icono} mr-3 mt-1 flex-shrink-0"></i>
+                    <div class="flex-1">
+                        <h4 class="${colorTexto} font-medium mb-2">${titulo}</h4>
+                        <p class="text-sm ${colorTexto.replace('800', '700')}">${mensaje}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            class="ml-2 ${colorBoton} focus:outline-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.insertBefore(alerta, container.firstChild);
+            
+            // Auto-remover después de 10 segundos
+            setTimeout(() => {
+                if (alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 10000);
+        },
         async guardarApoderado() {
             if (this.loading) return;
-            // Validaciones
-            if (!this.tramiteId) {
-                this.mostrarError('No se pudo identificar el trámite');
-                return;
-            }
-            if (!this.nombreApoderado.trim()) {
-                this.mostrarError('El nombre del apoderado es obligatorio');
-                return;
-            }
-            if (!this.numeroEscritura.trim()) {
-                this.mostrarError('El número de escritura es obligatorio');
-                return;
-            }
-            if (!this.nombreNotario.trim()) {
-                this.mostrarError('El nombre del notario es obligatorio');
-                return;
-            }
-            if (!this.numeroNotario.trim()) {
-                this.mostrarError('El número del notario es obligatorio');
-                return;
-            }
-            if (!this.entidadFederativa) {
-                this.mostrarError('La entidad federativa es obligatoria');
-                return;
-            }
-            if (!this.fechaEscritura) {
-                this.mostrarError('La fecha de escritura es obligatoria');
-                return;
-            }
-            if (!this.numeroRegistro.trim()) {
-                this.mostrarError('El número de registro es obligatorio');
-                return;
-            }
-            if (!this.fechaInscripcion) {
-                this.mostrarError('La fecha de inscripción es obligatoria');
-                return;
-            }
             this.loading = true;
             try {
                 const formData = new FormData();
@@ -528,19 +652,31 @@ function apoderadoData() {
                     }
                 });
                 const data = await response.json();
-                if (data.success) {
+                
+                if (response.ok && data.success) {
+                    // Limpiar errores anteriores
+                    this.limpiarErroresApoderado();
                     this.mostrarExito('Datos del apoderado legal guardados correctamente');
                     // Disparar evento para navegar al siguiente paso
                     setTimeout(() => {
                         this.$dispatch('next-step');
                     }, 1000);
                 } else {
-                    this.mostrarError(data.message || 'Error al guardar los datos del apoderado legal');
-                    if (data.errors) {
+                    // Manejar errores 422 (Unprocessable Content) específicamente
+                    if (response.status === 422 && data.errors) {
+                        // Errores de validación del servidor
+                        this.mostrarErroresValidacionApoderado(data.errors, data.message);
+                    } else if (data.errors) {
+                        // Otros errores con detalles de validación
+                        this.mostrarErroresValidacionApoderado(data.errors, data.message);
+                    } else {
+                        // Error general sin errores específicos
+                        this.mostrarErrorGeneralApoderado(data.message || 'Error al guardar los datos del apoderado legal');
                     }
                 }
             } catch (error) {
-                this.mostrarError('Error de conexión. Por favor, intente nuevamente.');
+                console.error('❌ Error en AJAX apoderado:', error);
+                this.mostrarErrorGeneralApoderado('Error de conexión. Por favor, intente nuevamente.');
             } finally {
                 this.loading = false;
             }
@@ -605,6 +741,212 @@ function navegarAnteriorApoderado() {
         }
     }
 }
+
+// Validaciones del lado del cliente para el formulario de apoderado
+function validarCampoApoderado(campo, valor) {
+    const errores = [];
+    
+    switch(campo) {
+        case 'nombre_apoderado':
+            if (!valor || valor.trim().length < 2) {
+                errores.push('El nombre del apoderado debe tener al menos 2 caracteres');
+            }
+            if (valor && valor.length > 100) {
+                errores.push('El nombre del apoderado no puede exceder 100 caracteres');
+            }
+            if (valor && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'\.]+$/.test(valor)) {
+                errores.push('El nombre del apoderado solo puede contener letras, espacios, apostrofes y puntos');
+            }
+            break;
+            
+        case 'numero_escritura':
+            if (!valor || valor.trim().length < 1) {
+                errores.push('El número de escritura pública es obligatorio');
+            }
+            if (valor && valor.length > 20) {
+                errores.push('El número de escritura no puede exceder 20 caracteres');
+            }
+            if (valor && !/^[0-9\-\/A-Z]+$/.test(valor)) {
+                errores.push('El número de escritura solo puede contener números, letras mayúsculas, guiones y diagonales');
+            }
+            break;
+            
+        case 'nombre_notario':
+            if (!valor || valor.trim().length < 2) {
+                errores.push('El nombre del notario debe tener al menos 2 caracteres');
+            }
+            if (valor && valor.length > 100) {
+                errores.push('El nombre del notario no puede exceder 100 caracteres');
+            }
+            if (valor && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'\.]+$/.test(valor)) {
+                errores.push('El nombre del notario solo puede contener letras, espacios, apostrofes y puntos');
+            }
+            break;
+            
+        case 'numero_notario':
+            if (!valor || valor.trim().length < 1) {
+                errores.push('El número del notario público es obligatorio');
+            }
+            if (valor && valor.length > 10) {
+                errores.push('El número del notario no puede exceder 10 dígitos');
+            }
+            if (valor && !/^[0-9]+$/.test(valor)) {
+                errores.push('El número del notario solo puede contener dígitos numéricos');
+            }
+            break;
+            
+        case 'fecha_escritura':
+            if (!valor) {
+                errores.push('La fecha de la escritura pública es obligatoria');
+            }
+            if (valor) {
+                const fechaObj = new Date(valor);
+                const hoy = new Date();
+                const fecha1900 = new Date('1900-01-01');
+                
+                if (isNaN(fechaObj.getTime())) {
+                    errores.push('La fecha de escritura debe ser una fecha válida');
+                } else {
+                    if (fechaObj > hoy) {
+                        errores.push('La fecha de escritura no puede ser posterior a hoy');
+                    }
+                    if (fechaObj < fecha1900) {
+                        errores.push('La fecha de escritura debe ser posterior al año 1900');
+                    }
+                }
+            }
+            break;
+            
+        case 'fecha_inscripcion':
+            if (!valor) {
+                errores.push('La fecha de inscripción en el registro público es obligatoria');
+            }
+            break;
+            
+        case 'numero_registro':
+            if (!valor || valor.trim().length < 1) {
+                errores.push('El número de registro público mercantil es obligatorio');
+            }
+            if (valor && valor.length > 30) {
+                errores.push('El número de registro no puede exceder 30 caracteres');
+            }
+            if (valor && !/^[0-9A-Z\-\/\s]+$/.test(valor)) {
+                errores.push('El número de registro solo puede contener números, letras mayúsculas, guiones, diagonales y espacios');
+            }
+            break;
+    }
+    
+    return errores;
+}
+
+// Función para mostrar errores de validación en tiempo real
+function mostrarErrorCampoApoderado(nombreCampo, errores) {
+    const campo = document.getElementById(nombreCampo);
+    const formGroup = campo ? campo.closest('.form-group') : null;
+    
+    if (!formGroup) return;
+    
+    // Limpiar errores anteriores
+    limpiarErrorCampoApoderado(nombreCampo);
+    
+    if (errores.length > 0) {
+        // Agregar clase de error al campo
+        campo.classList.add('border-red-500', 'bg-red-50');
+        
+        // Crear contenedor de error
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'mt-2 p-3 bg-red-50 border border-red-200 rounded-lg apoderado-field-error';
+        errorDiv.innerHTML = `
+            <div class="flex items-start">
+                <i class="fas fa-exclamation-circle mr-2 text-red-500 mt-0.5 flex-shrink-0"></i>
+                <span class="text-sm text-red-700">${errores[0]}</span>
+            </div>
+        `;
+        
+        // Insertar después del campo
+        formGroup.appendChild(errorDiv);
+    }
+}
+
+// Función para limpiar errores de un campo específico
+function limpiarErrorCampoApoderado(nombreCampo) {
+    const campo = document.getElementById(nombreCampo);
+    const formGroup = campo ? campo.closest('.form-group') : null;
+    
+    if (!formGroup) return;
+    
+    // Remover clases de error del campo
+    campo.classList.remove('border-red-500', 'bg-red-50');
+    
+    // Remover contenedores de error
+    const errorDivs = formGroup.querySelectorAll('.apoderado-field-error');
+    errorDivs.forEach(div => div.remove());
+}
+
+// Validar fechas relacionadas
+function validarFechasApoderado(fechaEscritura, fechaInscripcion) {
+    const errores = [];
+    
+    if (fechaEscritura && fechaInscripcion) {
+        const fechaEscObj = new Date(fechaEscritura);
+        const fechaInscObj = new Date(fechaInscripcion);
+        
+        if (!isNaN(fechaEscObj.getTime()) && !isNaN(fechaInscObj.getTime())) {
+            if (fechaInscObj < fechaEscObj) {
+                errores.push('La fecha de inscripción no puede ser anterior a la fecha de escritura');
+            }
+            
+            // Verificar que no sea muy posterior (más de 5 años)
+            const cincoAnosDespues = new Date(fechaEscObj);
+            cincoAnosDespues.setFullYear(cincoAnosDespues.getFullYear() + 5);
+            
+            if (fechaInscObj > cincoAnosDespues) {
+                errores.push('La fecha de inscripción no puede ser más de 5 años posterior a la fecha de escritura');
+            }
+        }
+    }
+    
+    return errores;
+}
+
+// Agregar event listeners para validación en tiempo real
+document.addEventListener('DOMContentLoaded', function() {
+    const camposApoderado = [
+        'nombre_apoderado',
+        'numero_escritura', 
+        'nombre_notario',
+        'numero_notario',
+        'fecha_escritura',
+        'fecha_inscripcion',
+        'numero_registro'
+    ];
+    
+    camposApoderado.forEach(campo => {
+        const elemento = document.getElementById(campo);
+        if (elemento) {
+            elemento.addEventListener('blur', function() {
+                const errores = validarCampoApoderado(campo, this.value);
+                mostrarErrorCampoApoderado(campo, errores);
+                
+                // Validación especial para fechas
+                if (campo === 'fecha_inscripcion') {
+                    const fechaEscritura = document.getElementById('fecha_escritura')?.value;
+                    const erroresFechas = validarFechasApoderado(fechaEscritura, this.value);
+                    if (erroresFechas.length > 0) {
+                        mostrarErrorCampoApoderado(campo, erroresFechas);
+                    }
+                }
+            });
+            
+            // Limpiar errores mientras escribe
+            elemento.addEventListener('input', function() {
+                if (this.classList.contains('border-red-500')) {
+                    limpiarErrorCampoApoderado(campo);
+                }
+            });
+        }
+    });
+});
 </script>
 <style>
 /* Estilos base */

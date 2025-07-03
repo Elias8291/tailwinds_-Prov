@@ -24,56 +24,204 @@ class DocumentosController extends Controller
      */
     public function subir(Request $request)
     {
-        $this->validateRequest($request, 'subir');
-
-        $solicitante = Auth::user()->solicitante;
-        
-        Log::info('Intentando subir documento', [
-            'user_id' => Auth::id(),
-            'solicitante_id' => $solicitante->id,
-            'documento_id' => $request->input('documento_id')
-        ]);
-        
-        $tramite = $this->getTramitePendiente($solicitante->id);
-        
-        if ($tramite) {
-            Log::info('Trámite encontrado', [
-                'tramite_id' => $tramite->id,
-                'estado' => $tramite->estado,
-                'progreso' => $tramite->progreso_tramite
+        try {
+            Log::info('=== INICIO subir documento ===', [
+                'user_id' => Auth::id(),
+                'request_data' => $request->except(['archivo']) // No logear el archivo completo
             ]);
-        } else {
-            Log::warning('No se encontró trámite activo', [
-                'solicitante_id' => $solicitante->id
-            ]);
-        }
 
-        if (!$tramite) {
+            // Validar la solicitud con validaciones robustas
+            $validated = $this->validateSubirDocumento($request);
+
+            $solicitante = Auth::user()->solicitante;
+            
+            Log::info('Intentando subir documento', [
+                'user_id' => Auth::id(),
+                'solicitante_id' => $solicitante->id,
+                'documento_id' => $validated['documento_id']
+            ]);
+            
+            $tramite = $this->getTramitePendiente($solicitante->id);
+            
+            if ($tramite) {
+                Log::info('Trámite encontrado', [
+                    'tramite_id' => $tramite->id,
+                    'estado' => $tramite->estado,
+                    'progreso' => $tramite->progreso_tramite
+                ]);
+            } else {
+                Log::warning('No se encontró trámite activo', [
+                    'solicitante_id' => $solicitante->id
+                ]);
+            }
+
+            if (!$tramite) {
+                return response()->json([
+                    'success' => false,
+                    'mensaje' => 'No se encontró un trámite activo. Solo se pueden subir documentos a trámites en estado Pendiente o En Revisión.'
+                ], 400);
+            }
+
+            return DB::transaction(function () use ($validated, $tramite) {
+                $documento = Documento::find($validated['documento_id']);
+                $ruta = $this->storeArchivo($validated['archivo'], $tramite->id, $documento->id);
+                $docSolicitante = $this->guardarDocumentoSolicitante($tramite->id, $documento->id, $ruta);
+
+                // Verificar si se han subido todos los documentos requeridos
+                $this->verificarYActualizarProgreso($tramite);
+
+                Log::info('✅ Documento subido exitosamente:', [
+                    'tramite_id' => $tramite->id,
+                    'documento_id' => $documento->id,
+                    'documento_solicitante_id' => $docSolicitante->id
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'ruta' => asset('storage/' . $ruta),
+                    'docSolicitanteId' => $docSolicitante->id,
+                    'mensaje' => 'Documento subido correctamente',
+                ]);
+            });
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('❌ Errores de validación en subida de documento:', [
+                'errors' => $e->errors(),
+                'request_data' => $request->except(['archivo'])
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'mensaje' => 'No se encontró un trámite activo. Solo se pueden subir documentos a trámites en estado Pendiente o En Revisión.'
-            ], 400);
-        }
+                'message' => 'Por favor corrija los errores en el documento.',
+                'errors' => $e->errors(),
+                'debug_info' => [
+                    'seccion' => 'documentos',
+                    'timestamp' => now()->toISOString(),
+                    'total_errores' => count($e->errors())
+                ]
+            ], 422);
 
-        return DB::transaction(function () use ($request, $tramite) {
-            $documento = Documento::find($request->input('documento_id'));
-            $ruta = $this->storeArchivo($request->file('archivo'), $tramite->id, $documento->id);
-            $docSolicitante = $this->guardarDocumentoSolicitante($tramite->id, $documento->id, $ruta);
-
-            // Verificar si se han subido todos los documentos requeridos
-            $this->verificarYActualizarProgreso($tramite);
+        } catch (\Exception $e) {
+            Log::error('❌ Error al subir documento:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->except(['archivo'])
+            ]);
 
             return response()->json([
-                'success' => true,
-                'ruta' => asset('storage/' . $ruta),
-                'docSolicitanteId' => $docSolicitante->id,
-                'mensaje' => 'Documento subido correctamente',
-            ]);
-        });
+                'success' => false,
+                'message' => 'Error interno del servidor al subir el documento. Por favor, intente nuevamente.',
+                'debug_info' => [
+                    'seccion' => 'documentos',
+                    'timestamp' => now()->toISOString(),
+                    'error_type' => get_class($e)
+                ]
+            ], 500);
+        }
     }
 
     /**
-     * Obtiene los documentos asociados a un trámite
+     * Valida los datos para subir un documento con validaciones robustas
+     *
+     * @param Request $request La solicitud a validar
+     * @return array Los datos validados
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function validateSubirDocumento(Request $request)
+    {
+        $rules = [
+            'documento_id' => [
+                'required',
+                'integer',
+                'exists:documento,id'
+            ],
+            'archivo' => [
+                'required',
+                'file',
+                'mimes:pdf',
+                'max:10240', // 10MB
+                'min:1'
+            ]
+        ];
+
+        $messages = [
+            'documento_id.required' => 'Debe especificar el tipo de documento a subir',
+            'documento_id.integer' => 'El tipo de documento debe ser un número válido',
+            'documento_id.exists' => 'El tipo de documento especificado no es válido',
+            
+            'archivo.required' => 'Debe seleccionar un archivo para subir',
+            'archivo.file' => 'El archivo seleccionado no es válido',
+            'archivo.mimes' => 'Solo se permiten archivos en formato PDF',
+            'archivo.max' => 'El archivo no puede ser mayor a 10 MB',
+            'archivo.min' => 'El archivo está vacío o dañado'
+        ];
+
+        $validated = $request->validate($rules, $messages);
+
+        // Validaciones adicionales del archivo
+        $this->validateArchivoAdicional($validated['archivo']);
+
+        return $validated;
+    }
+
+    /**
+     * Validaciones adicionales del archivo subido
+     *
+     * @param \Illuminate\Http\UploadedFile $archivo
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function validateArchivoAdicional($archivo)
+    {
+        // Verificar que el archivo es realmente un PDF
+        $mimeType = $archivo->getMimeType();
+        $allowedMimes = ['application/pdf'];
+        
+        if (!in_array($mimeType, $allowedMimes)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'archivo' => 'El archivo debe ser un PDF válido'
+            ]);
+        }
+
+        // Verificar extensión del archivo
+        $extension = strtolower($archivo->getClientOriginalExtension());
+        if ($extension !== 'pdf') {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'archivo' => 'El archivo debe tener extensión .pdf'
+            ]);
+        }
+
+        // Verificar que el archivo no esté corrupto
+        if (!$archivo->isValid()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'archivo' => 'El archivo está dañado o corrupto. Por favor, seleccione otro archivo.'
+            ]);
+        }
+
+        // Verificar tamaño mínimo (al menos 1 KB)
+        if ($archivo->getSize() < 1024) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'archivo' => 'El archivo es demasiado pequeño. Debe tener al menos 1 KB.'
+            ]);
+        }
+
+        // Verificar nombre del archivo
+        $originalName = $archivo->getClientOriginalName();
+        if (strlen($originalName) > 255) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'archivo' => 'El nombre del archivo es demasiado largo. Máximo 255 caracteres.'
+            ]);
+        }
+
+        // Verificar que el nombre del archivo no contenga caracteres peligrosos
+        if (!preg_match('/^[a-zA-Z0-9\s\.\-_\(\)]+\.pdf$/i', $originalName)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'archivo' => 'El nombre del archivo contiene caracteres no permitidos. Use solo letras, números, espacios, guiones y paréntesis.'
+            ]);
+        }
+    }
+
+    /**
+     * Obtiene los documentos asociados a un trámite con validaciones
      *
      * @param Request $request La solicitud HTTP
      * @param int $tramiteId El ID del trámite
@@ -81,34 +229,103 @@ class DocumentosController extends Controller
      */
     public function get(Request $request, $tramiteId)
     {
-        $this->validateRequest($request, 'get', $tramiteId);
+        try {
+            Log::info('=== INICIO obtener documentos ===', [
+                'user_id' => Auth::id(),
+                'tramite_id' => $tramiteId
+            ]);
 
-        $documentos = DocumentoSolicitante::where('tramite_id', $tramiteId)
-            ->with('documento')
-            ->get()
-            ->map(fn($doc) => [
-                'id' => $doc->id,
-                'documento_id' => $doc->documento_id,
-                'nombre' => $doc->documento->nombre,
-                'tipo' => $doc->documento->tipo,
-                'fecha_entrega' => $doc->fecha_entrega
-                    ? \Carbon\Carbon::parse($doc->fecha_entrega)->toIso8601String()
-                    : null,
-                'estado' => $doc->estado,
-                'version_documento' => $doc->version_documento,
-                'ruta_archivo' => asset('storage/' . Crypt::decryptString($doc->ruta_archivo)),
-            ])
-            ->toArray();
+            // Validar la solicitud
+            $this->validateObtenerDocumentos($request, $tramiteId);
 
-        return response()->json([
-            'success' => true,
-            'documentos' => $documentos,
-            'mensaje' => 'Documentos obtenidos correctamente.',
-        ]);
+            $documentos = DocumentoSolicitante::where('tramite_id', $tramiteId)
+                ->with('documento')
+                ->get()
+                ->map(fn($doc) => [
+                    'id' => $doc->id,
+                    'documento_id' => $doc->documento_id,
+                    'nombre' => $doc->documento->nombre,
+                    'tipo' => $doc->documento->tipo,
+                    'fecha_entrega' => $doc->fecha_entrega
+                        ? \Carbon\Carbon::parse($doc->fecha_entrega)->toIso8601String()
+                        : null,
+                    'estado' => $doc->estado,
+                    'version_documento' => $doc->version_documento,
+                    'ruta_archivo' => asset('storage/' . Crypt::decryptString($doc->ruta_archivo)),
+                ])
+                ->toArray();
+
+            Log::info('✅ Documentos obtenidos exitosamente:', [
+                'tramite_id' => $tramiteId,
+                'total_documentos' => count($documentos)
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'documentos' => $documentos,
+                'mensaje' => 'Documentos obtenidos correctamente.',
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('❌ Errores de validación al obtener documentos:', [
+                'errors' => $e->errors(),
+                'tramite_id' => $tramiteId
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en los parámetros de la solicitud.',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error al obtener documentos:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'tramite_id' => $tramiteId
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor al obtener los documentos.',
+                'debug_info' => [
+                    'timestamp' => now()->toISOString(),
+                    'error_type' => get_class($e)
+                ]
+            ], 500);
+        }
     }
 
     /**
-     * Valida los datos de la solicitud
+     * Valida la solicitud para obtener documentos
+     *
+     * @param Request $request
+     * @param int $tramiteId
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function validateObtenerDocumentos(Request $request, $tramiteId)
+    {
+        $rules = [
+            'tramiteId' => [
+                'required',
+                'integer',
+                'exists:tramite,id'
+            ]
+        ];
+
+        $messages = [
+            'tramiteId.required' => 'Debe especificar el ID del trámite',
+            'tramiteId.integer' => 'El ID del trámite debe ser un número válido',
+            'tramiteId.exists' => 'El trámite especificado no existe'
+        ];
+
+        // Agregar el tramiteId al request para validación
+        $request->merge(['tramiteId' => $tramiteId]);
+        $request->validate($rules, $messages);
+    }
+
+    /**
+     * Valida los datos de la solicitud con validaciones robustas
      *
      * @param Request $request La solicitud a validar
      * @param string $method El método que se está ejecutando (subir o get)
@@ -118,22 +335,68 @@ class DocumentosController extends Controller
      */
     private function validateRequest(Request $request, string $method, $tramiteId = null)
     {
-        $rules = $method === 'subir'
-            ? [
-                'documento_id' => 'required|exists:documento,id',
-                'archivo' => 'required|file|mimes:pdf|max:10240',
-            ]
-            : [
-                'tramiteId' => 'required|exists:tramite,id',
-            ];
-
-        if ($method === 'update') {
-            $rules['tramiteId'] = 'required|exists:tramite,id';
-            $rules['documento_id'] = 'required|exists:documento,id';
+        if ($method === 'subir') {
+            // Para subir, usar la validación robusta
+            $this->validateSubirDocumento($request);
+        } elseif ($method === 'get') {
+            // Para obtener, validar el tramiteId
+            $this->validateObtenerDocumentos($request, $tramiteId);
+        } elseif ($method === 'update') {
+            $this->validateActualizarEstado($request, $tramiteId);
         }
+    }
+
+    /**
+     * Valida la actualización del estado de un documento
+     *
+     * @param Request $request
+     * @param int $tramiteId
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function validateActualizarEstado(Request $request, $tramiteId)
+    {
+        $rules = [
+            'tramiteId' => [
+                'required',
+                'integer',
+                'exists:tramite,id'
+            ],
+            'documento_id' => [
+                'required',
+                'integer',
+                'exists:documento,id'
+            ],
+            'approval' => [
+                'required',
+                'in:approved,not-approved'
+            ],
+            'comment' => [
+                'nullable',
+                'string',
+                'max:1000',
+                'min:3'
+            ]
+        ];
+
+        $messages = [
+            'tramiteId.required' => 'Debe especificar el ID del trámite',
+            'tramiteId.integer' => 'El ID del trámite debe ser un número válido',
+            'tramiteId.exists' => 'El trámite especificado no existe',
+            
+            'documento_id.required' => 'Debe especificar el ID del documento',
+            'documento_id.integer' => 'El ID del documento debe ser un número válido',
+            'documento_id.exists' => 'El documento especificado no existe',
+            
+            'approval.required' => 'Debe especificar si el documento se aprueba o rechaza',
+            'approval.in' => 'El estado de aprobación debe ser "approved" o "not-approved"',
+            
+            'comment.string' => 'El comentario debe ser texto válido',
+            'comment.max' => 'El comentario no puede exceder 1000 caracteres',
+            'comment.min' => 'El comentario debe tener al menos 3 caracteres'
+        ];
 
         $request->merge(['tramiteId' => $tramiteId]);
-        $request->validate($rules);
+        $request->validate($rules, $messages);
     }
 
     /**
@@ -193,109 +456,93 @@ class DocumentosController extends Controller
 
     public function updateDocumentStatus(Request $request, $tramiteId, $documentoId)
     {
-        $request->validate([
-            'approval' => 'required|in:approved,not-approved',
-            'comment' => 'nullable|string|max:1000',
-        ]);
-
         try {
-            Log::info('Updating document status:', [
+            Log::info('=== INICIO actualizar estado documento ===', [
                 'tramiteId' => $tramiteId,
                 'documentoId' => $documentoId,
-                'approval' => $request->input('approval'),
-                'comment' => $request->input('comment')
+                'user_id' => Auth::id(),
+                'request_data' => $request->all()
             ]);
+
+            // Validar la solicitud
+            $this->validateActualizarEstado($request, $tramiteId);
 
             $docSolicitante = DocumentoSolicitante::where('tramite_id', $tramiteId)
                 ->where('documento_id', $documentoId)
                 ->firstOrFail();
-            $docSolicitante->estado = $request->input('approval') === 'approved' ? 'Aprobado' : 'Rechazado';
+            
+            $estadoAnterior = $docSolicitante->estado;
+            $nuevoEstado = $request->input('approval') === 'approved' ? 'Aprobado' : 'Rechazado';
+            
+            $docSolicitante->estado = $nuevoEstado;
             $docSolicitante->observaciones = $request->input('comment');
             $docSolicitante->save();
+
+            Log::info('✅ Estado de documento actualizado exitosamente:', [
+                'tramiteId' => $tramiteId,
+                'documentoId' => $documentoId,
+                'estado_anterior' => $estadoAnterior,
+                'nuevo_estado' => $nuevoEstado,
+                'observaciones' => $request->input('comment')
+            ]);
 
             return response()->json([
                 'success' => true,
                 'mensaje' => 'Documento actualizado correctamente.',
             ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('❌ Errores de validación al actualizar documento:', [
+                'errors' => $e->errors(),
+                'tramiteId' => $tramiteId,
+                'documentoId' => $documentoId
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Por favor corrija los errores en la solicitud.',
+                'errors' => $e->errors()
+            ], 422);
+
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Document not found:', ['tramiteId' => $tramiteId, 'documentoId' => $documentoId]);
+            Log::error('❌ Documento no encontrado:', [
+                'tramiteId' => $tramiteId, 
+                'documentoId' => $documentoId
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'mensaje' => 'Documento no encontrado.',
             ], 404);
+
         } catch (\Illuminate\Database\QueryException $e) {
-            Log::error('Database error updating document status:', [
+            Log::error('❌ Error de base de datos al actualizar documento:', [
                 'message' => $e->getMessage(),
                 'tramiteId' => $tramiteId,
-                'documentoId' => $documentoId,
-                'approval' => $request->input('approval')
+                'documentoId' => $documentoId
             ]);
+            
             return response()->json([
                 'success' => false,
-                'mensaje' => 'Error al actualizar el documento: ' . $e->getMessage(),
+                'mensaje' => 'Error de base de datos al actualizar el documento.',
             ], 500);
+
         } catch (\Exception $e) {
-            Log::error('Unexpected error updating document status:', [
+            Log::error('❌ Error inesperado al actualizar documento:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'tramiteId' => $tramiteId,
-                'documentoId' => $documentoId,
-                'approval' => $request->input('approval')
+                'documentoId' => $documentoId
             ]);
+            
             return response()->json([
                 'success' => false,
-                'mensaje' => 'Error inesperado al actualizar el documento: ' . $e->getMessage(),
+                'mensaje' => 'Error inesperado al actualizar el documento.',
+                'debug_info' => [
+                    'timestamp' => now()->toISOString(),
+                    'error_type' => get_class($e)
+                ]
             ], 500);
-        }
-    }
-
-    /**
-     * Verifica si se han subido todos los documentos requeridos y actualiza el progreso
-     *
-     * @param Tramite $tramite El trámite asociado
-     * @return void
-     */
-    private function verificarYActualizarProgreso(Tramite $tramite)
-    {
-        $tipoPersona = $tramite->solicitante->tipo_persona;
-        
-        // Obtener total de documentos requeridos para el tipo de persona
-        $totalDocumentosRequeridos = Documento::where(function($query) use ($tipoPersona) {
-            $query->where('tipo_persona', $tipoPersona)
-                  ->orWhere('tipo_persona', 'Ambas');
-        })
-        ->where('es_visible', true)
-        ->count();
-        
-        // Obtener documentos ya subidos para este trámite del tipo de persona
-        $documentosSubidos = DocumentoSolicitante::where('tramite_id', $tramite->id)
-            ->whereHas('documento', function($query) use ($tipoPersona) {
-                $query->where('es_visible', true)
-                      ->where(function($subQuery) use ($tipoPersona) {
-                          $subQuery->where('tipo_persona', $tipoPersona)
-                                   ->orWhere('tipo_persona', 'Ambas');
-                      });
-            })
-            ->count();
-
-        Log::info('Verificando progreso de documentos:', [
-            'tramite_id' => $tramite->id,
-            'tipo_persona' => $tipoPersona,
-            'documentos_requeridos' => $totalDocumentosRequeridos,
-            'documentos_subidos' => $documentosSubidos
-        ]);
-
-        // Si se han subido todos los documentos requeridos, actualizar progreso
-        if ($documentosSubidos >= $totalDocumentosRequeridos) {
-            // Actualizar progreso según el tipo de persona
-            $progresoFinal = $tipoPersona === 'Física' ? 3 : 6;
-            $tramite->actualizarProgresoSeccion($progresoFinal);
-            
-            Log::info('✅ Progreso actualizado - Documentos completados', [
-                'tramite_id' => $tramite->id,
-                'tipo_persona' => $tipoPersona,
-                'progreso_final' => $progresoFinal
-            ]);
         }
     }
 
@@ -308,11 +555,15 @@ class DocumentosController extends Controller
     public function finalizarTramite(Request $request)
     {
         try {
-            $request->validate([
-                'tramite_id' => 'required|integer|exists:tramite,id'
+            Log::info('=== INICIO finalizar trámite ===', [
+                'user_id' => Auth::id(),
+                'request_data' => $request->all()
             ]);
 
-            $tramite = Tramite::with('solicitante')->find($request->tramite_id);
+            // Validar la solicitud
+            $validated = $this->validateFinalizarTramite($request);
+
+            $tramite = Tramite::with('solicitante')->find($validated['tramite_id']);
             
             if (!$tramite) {
                 return response()->json([
@@ -383,16 +634,109 @@ class DocumentosController extends Controller
                 'redirect_url' => route('tramites.solicitante.estado', $tramite->id)
             ]);
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('❌ Errores de validación al finalizar trámite:', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Por favor corrija los errores en la solicitud.',
+                'errors' => $e->errors()
+            ], 422);
+
         } catch (\Exception $e) {
             Log::error('❌ Error al finalizar trámite:', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al finalizar el trámite: ' . $e->getMessage()
+                'message' => 'Error al finalizar el trámite.',
+                'debug_info' => [
+                    'timestamp' => now()->toISOString(),
+                    'error_type' => get_class($e)
+                ]
             ], 500);
+        }
+    }
+
+    /**
+     * Valida la solicitud para finalizar el trámite
+     *
+     * @param Request $request
+     * @return array
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function validateFinalizarTramite(Request $request)
+    {
+        $rules = [
+            'tramite_id' => [
+                'required',
+                'integer',
+                'exists:tramite,id'
+            ]
+        ];
+
+        $messages = [
+            'tramite_id.required' => 'Debe especificar el ID del trámite',
+            'tramite_id.integer' => 'El ID del trámite debe ser un número válido',
+            'tramite_id.exists' => 'El trámite especificado no existe'
+        ];
+
+        return $request->validate($rules, $messages);
+    }
+
+    /**
+     * Verifica si se han subido todos los documentos requeridos y actualiza el progreso
+     *
+     * @param Tramite $tramite El trámite asociado
+     * @return void
+     */
+    private function verificarYActualizarProgreso(Tramite $tramite)
+    {
+        $tipoPersona = $tramite->solicitante->tipo_persona;
+        
+        // Obtener total de documentos requeridos para el tipo de persona
+        $totalDocumentosRequeridos = Documento::where(function($query) use ($tipoPersona) {
+            $query->where('tipo_persona', $tipoPersona)
+                  ->orWhere('tipo_persona', 'Ambas');
+        })
+        ->where('es_visible', true)
+        ->count();
+        
+        // Obtener documentos ya subidos para este trámite del tipo de persona
+        $documentosSubidos = DocumentoSolicitante::where('tramite_id', $tramite->id)
+            ->whereHas('documento', function($query) use ($tipoPersona) {
+                $query->where('es_visible', true)
+                      ->where(function($subQuery) use ($tipoPersona) {
+                          $subQuery->where('tipo_persona', $tipoPersona)
+                                   ->orWhere('tipo_persona', 'Ambas');
+                      });
+            })
+            ->count();
+
+        Log::info('Verificando progreso de documentos:', [
+            'tramite_id' => $tramite->id,
+            'tipo_persona' => $tipoPersona,
+            'documentos_requeridos' => $totalDocumentosRequeridos,
+            'documentos_subidos' => $documentosSubidos
+        ]);
+
+        // Si se han subido todos los documentos requeridos, actualizar progreso
+        if ($documentosSubidos >= $totalDocumentosRequeridos) {
+            // Actualizar progreso según el tipo de persona
+            $progresoFinal = $tipoPersona === 'Física' ? 3 : 6;
+            $tramite->actualizarProgresoSeccion($progresoFinal);
+            
+            Log::info('✅ Progreso actualizado - Documentos completados', [
+                'tramite_id' => $tramite->id,
+                'tipo_persona' => $tipoPersona,
+                'progreso_final' => $progresoFinal
+            ]);
         }
     }
 

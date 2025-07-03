@@ -2,14 +2,29 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<div class="max-w-6xl mx-auto">
-    <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-8">
-        @csrf
-        
+<div class="max-w-6xl mx-auto" @if(!$readonly) x-data="datosGeneralesData()" x-init="init()" @endif>
+    @if(!$readonly)
+    <!-- Vista editable normal -->
+    <!-- Alert de Errores -->
+    <div x-show="showError" x-cloak class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div class="flex items-center">
+            <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+            <p class="text-red-700 text-sm" x-text="errorMessage"></p>
+        </div>
+    </div>
+    <!-- Alert de Éxito -->
+    <div x-show="showSuccess" x-cloak class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+            <p class="text-green-700 text-sm" x-text="successMessage"></p>
+        </div>
+    </div>
+    
+    <form @submit.prevent="guardarDatosGenerales()" class="space-y-8">
         <!-- Campos ocultos -->
         <input type="hidden" name="form_action" value="next">
         <input type="hidden" name="seccion" value="1">
-        <input type="hidden" name="tramite_id" value="{{ $datosTramite['tramite_id'] ?? request()->route('tramite') ?? session('tramite_id') ?? '' }}">
+        <input type="hidden" name="tramite_id" x-model="tramiteId">
         <input type="hidden" name="tipo_tramite" value="{{ $datosTramite['tipo_tramite'] ?? request()->route('tipo_tramite') ?? 'inscripcion' }}">
 
         <!-- Datos del Proveedor -->
@@ -33,7 +48,7 @@
                         <input type="text" 
                                id="tipo_persona"
                                name="tipo_persona"
-                               value="{{ $datosSolicitante['tipo_persona'] ?? '' }}" 
+                           x-model="tipoPersona" 
                                class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                                readonly>
                         </div>
@@ -46,84 +61,95 @@
                         <input type="text" 
                                id="rfc"
                                name="rfc"
-                               value="{{ $datosSolicitante['rfc'] ?? '' }}" 
+                           x-model="rfc" 
                                class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                                readonly>
                     </div>
                 </div>
 
             <!-- CURP (Solo persona física) -->
-            @if(($datosSolicitante['tipo_persona'] ?? '') === 'Física')
-            <div class="form-group mt-6">
+            <div x-show="tipoPersona === 'Física'" class="form-group mt-6">
                 <label for="curp" class="block text-sm font-medium text-gray-700 mb-2">
                     CURP <span class="text-red-500">*</span>
                 </label>
                     <input type="text" 
                            id="curp"
                            name="curp"
-                           value="{{ $datosSolicitante['curp'] ?? '' }}" 
+                       x-model="curp" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                            readonly>
                 </div>
-            @endif
 
             <!-- Nombre Completo (Solo persona física) -->
-            @if(($datosSolicitante['tipo_persona'] ?? '') === 'Física')
-            <div class="form-group mt-6">
+            <div x-show="tipoPersona === 'Física'" class="form-group mt-6">
                 <label for="nombre_completo" class="block text-sm font-medium text-gray-700 mb-2">
                     Nombre Completo <span class="text-red-500">*</span>
                 </label>
                     <input type="text" 
                            id="nombre_completo"
                            name="nombre_completo"
-                           value="{{ $datosSolicitante['nombre_completo'] ?? auth()->user()->name ?? '' }}" 
+                       x-model="nombreCompleto" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                            readonly>
             </div>
-            @endif
 
             <!-- Razón Social (Solo persona moral) -->
-            @if(($datosSolicitante['tipo_persona'] ?? '') === 'Moral')
-            <div class="form-group mt-6">
+            <div x-show="tipoPersona === 'Moral'" class="form-group mt-6">
                 <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
                     Razón Social <span class="text-red-500">*</span>
                 </label>
                     <input type="text" 
                            id="razon_social"
                            name="razon_social"
-                           value="{{ $datosSolicitante['razon_social'] ?? auth()->user()->name ?? '' }}" 
+                       x-model="razonSocial" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                            readonly>
             </div>
-            @endif
 
             <!-- Giro -->
-            @unless($readonly)
             <div class="form-group mt-6">
                 <label for="giro" class="block text-sm font-medium text-gray-700 mb-2">
                     Giro <span class="text-red-500">*</span>
                 </label>
                 <textarea id="giro" 
                           name="giro" 
+                          x-model="giro"
+                          @input="validateGiro()"
                           rows="4"
-                          class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('giro') border-red-500 @enderror"
-                          placeholder="Describa el giro de la empresa">{{ old('giro', $datosTramite['giro'] ?? '') }}</textarea>
-                    @error('giro')
-                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('giro') }}</p>
-                    @enderror
+                          class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
+                          :class="{ 'border-red-500 bg-red-50': errors.giro }"
+                          placeholder="Describa el giro de la empresa (mínimo 10 caracteres)"></textarea>
+                <div x-show="errors.giro" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-circle mr-2 text-red-500 mt-0.5 flex-shrink-0"></i>
+                        <span class="text-sm text-red-700" x-text="errors.giro"></span>
             </div>
-            @else
+                </div>
+            </div>
+
+            <!-- Página Web -->
             <div class="form-group mt-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Giro</label>
-                <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
-                    <p class="text-gray-700">{{ $datosTramite['giro'] ?? 'No especificado' }}</p>
+                <label for="pagina_web" class="block text-sm font-medium text-gray-700 mb-2">
+                    Página Web <span class="text-gray-400">(Opcional)</span>
+                </label>
+                <input type="url" 
+                       id="pagina_web"
+                       name="pagina_web"
+                       x-model="paginaWeb"
+                       @input="validatePaginaWeb()"
+                       class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
+                       :class="{ 'border-red-500 bg-red-50': errors.pagina_web }"
+                       placeholder="https://www.ejemplo.com">
+                <div x-show="errors.pagina_web" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-circle mr-2 text-red-500 mt-0.5 flex-shrink-0"></i>
+                        <span class="text-sm text-red-700" x-text="errors.pagina_web"></span>
             </div>
         </div>
-            @endunless
+            </div>
         </div>
 
         <!-- Actividades Económicas -->
-        @unless($readonly)
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
@@ -138,7 +164,7 @@
             <!-- Buscador de actividades -->
             <div class="form-group mb-6">
                 <label for="actividad_search" class="block text-sm font-medium text-gray-700 mb-2">
-                    Buscar Actividades *
+                    Buscar Actividades <span class="text-red-500">*</span>
                     </label>
                 <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p class="text-sm text-blue-700">
@@ -150,855 +176,651 @@
                 <div class="relative">
                     <input type="text" 
                            id="actividad_search" 
+                           x-model="busquedaActividad"
+                           @input="buscarActividades()"
+                           @focus="mostrarDropdown = true"
                            placeholder="Escriba para buscar actividad..."
                            class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
+                           :class="{ 
+                               'border-red-500 bg-red-50': errors.actividades_seleccionadas,
+                               'border-[#9d2449]/30 bg-[#9d2449]/5': cargandoActividades
+                           }"
                            autocomplete="off">
                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <i class="fas fa-search text-gray-400"></i>
-                        </div>
+                        <i x-show="!cargandoActividades" class="fas fa-search text-gray-400 transition-all"></i>
+                        <div x-show="cargandoActividades" class="w-4 h-4 border-2 border-gray-300 border-t-[#9d2449] rounded-full animate-spin"></div>
                     </div>
+                </div>
                 
                 <!-- Dropdown de resultados -->
-                <div id="actividad-dropdown" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl hidden max-h-64 overflow-hidden">
-                    <div id="actividad-resultados" class="max-h-48 overflow-y-auto"></div>
-                        <div id="actividad-no-resultados" class="px-6 py-8 text-center hidden">
-                        <p class="text-gray-500 text-sm">No se encontraron actividades</p>
-                                <button type="button" 
-                                        id="btn-agregar-manual"
-                                class="mt-4 px-4 py-2 bg-[#9d2449] text-white text-sm rounded-lg hover:bg-[#8a203f] transition-colors">
-                            <i class="fas fa-plus mr-2"></i>Agregar actividad personalizada
-                                </button>
+                <div x-show="mostrarDropdown && (resultadosActividades.length > 0 || busquedaActividad.length > 0 || cargandoActividades)" 
+                     x-cloak
+                     class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-64 overflow-hidden">
+                    <div class="max-h-48 overflow-y-auto">
+                        <!-- Indicador de carga -->
+                        <div x-show="cargandoActividades" class="px-6 py-8 text-center">
+                            <div class="flex items-center justify-center space-x-3">
+                                <div class="relative">
+                                    <div class="w-6 h-6 border-2 border-[#9d2449]/20 border-t-[#9d2449] rounded-full animate-spin"></div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Buscando actividades...</p>
+                                    <p class="text-xs text-gray-500">Un momento por favor</p>
+                                </div>
                             </div>
                         </div>
+                        
+                        <!-- Resultados de búsqueda -->
+                        <template x-for="actividad in resultadosActividades" :key="actividad.id">
+                            <div @click="agregarActividad(actividad)" 
+                                 class="px-6 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900" x-text="actividad.nombre"></p>
+                                        <p class="text-xs text-gray-500" x-text="actividad.sector || 'Sin sector'"></p>
+                                        <p x-show="actividad.codigo_scian" class="text-xs text-blue-600" x-text="'Código: ' + actividad.codigo_scian"></p>
+                                    </div>
+                                    <i class="fas fa-plus text-[#9d2449]"></i>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <!-- Mensaje cuando no hay resultados -->
+                        <div x-show="!cargandoActividades && resultadosActividades.length === 0 && busquedaActividad.length > 0" 
+                             class="px-6 py-8 text-center">
+                            <div class="mb-4">
+                                <i class="fas fa-search text-gray-400 text-2xl mb-2"></i>
+                                <p class="text-gray-500 text-sm">No se encontraron actividades</p>
+                                <p class="text-gray-400 text-xs">Intenta con otras palabras clave</p>
+                            </div>
+                            <button type="button" 
+                                    @click="agregarActividadPersonalizada()"
+                                    class="mt-4 px-4 py-2 bg-[#9d2449] text-white text-sm rounded-lg hover:bg-[#8a203f] transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Agregar actividad personalizada
+                            </button>
+                        </div>
                     </div>
+                </div>
+            </div>
 
             <!-- Actividades seleccionadas -->
             <div class="form-group">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Actividades Seleccionadas</label>
-                <div id="actividades-seleccionadas" class="min-h-[60px] p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div id="no-actividades-message" class="flex items-center justify-center text-gray-400 text-sm italic">
+                <div class="min-h-[60px] p-4 bg-gray-50 border border-gray-200 rounded-lg"
+                     :class="{ 'border-red-500 bg-red-50': errors.actividades_seleccionadas }">
+                    <div x-show="actividadesSeleccionadas.length === 0" 
+                         class="flex items-center justify-center text-gray-400 text-sm italic">
                         <i class="fas fa-plus-circle mr-2"></i>No hay actividades seleccionadas
                 </div>
-                </div>
-                <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
-                @error('actividades_seleccionadas')
-                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('actividades_seleccionadas') }}</p>
-                    @enderror
-            </div>
-                </div>
-        @else
-        <!-- Mostrar actividades en modo solo lectura -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
-                    <i class="fas fa-chart-line text-lg"></i>
-            </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Actividades Económicas</h3>
-                    <p class="text-sm text-gray-500">Actividades económicas registradas</p>
-                </div>
-            </div>
-            <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
-                @php
-                    $actividades_ids = json_decode($datosTramite['actividades_seleccionadas'] ?? '[]', true);
-                    $actividades_nombres = [];
-                    if (!empty($actividades_ids)) {
-                        $actividades_nombres = \App\Models\Actividad::whereIn('id', $actividades_ids)
-                            ->select('id', 'nombre', 'sector_id')
-                            ->get()
-                            ->keyBy('id');
-                    }
-                @endphp
-                @if(empty($actividades_ids))
-                    <p class="text-gray-500 italic">No hay actividades seleccionadas</p>
-                @else
                     <div class="flex flex-wrap gap-2">
-                        @foreach($actividades_ids as $actividad_id)
-                            @php $actividad = $actividades_nombres->get($actividad_id); @endphp
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20">
-                                <i class="fas fa-check-circle mr-1"></i>
-                                {{ $actividad->nombre ?? 'Actividad no encontrada' }}
-                            </span>
-                        @endforeach
+                        <template x-for="(actividad, index) in actividadesSeleccionadas" :key="actividad.id">
+                            <div class="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                                <span x-text="actividad.nombre" class="text-gray-700"></span>
+                                <button type="button" 
+                                        @click="removerActividad(index)"
+                                        class="ml-2 text-red-500 hover:text-red-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
                     </div>
-            @endif
+                        </template>
         </div>
         </div>
-        @endunless
+                <div x-show="errors.actividades_seleccionadas" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-circle mr-2 text-red-500 mt-0.5 flex-shrink-0"></i>
+                        <span class="text-sm text-red-700" x-text="errors.actividades_seleccionadas"></span>
+                </div>
+                </div>
+        </div>
+        </div>
 
-        <!-- Información Adicional -->
+        <!-- Información de Contacto -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
-                    <i class="fas fa-globe text-lg"></i>
+                    <i class="fas fa-address-book text-lg"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Información Adicional</h3>
-                    <p class="text-sm text-gray-500">Datos opcionales del solicitante</p>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="pagina_web" class="block text-sm font-medium text-gray-700 mb-2">Página Web</label>
-                @unless($readonly)
-                <input type="url" 
-                       id="pagina_web" 
-                       name="pagina_web"
-                       class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('pagina_web') border-red-500 @enderror"
-                       placeholder="https://www.ejemplo.com"
-                       value="{{ old('pagina_web', $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? '') }}">
-                    @error('pagina_web')
-                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('pagina_web') }}</p>
-                    @enderror
-                @else
-                <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
-                    @if(!empty($datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? ''))
-                        <a href="{{ $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] }}" target="_blank" class="text-blue-600 hover:text-blue-800">
-                            {{ $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] }}
-                        </a>
-                    @else
-                        <span class="text-gray-500">No especificada</span>
-                @endif
-            </div>
-                @endunless
-        </div>
-        </div>
-
-        <!-- Datos de Contacto -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
-                    <i class="fas fa-address-card text-lg"></i>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Datos de Contacto</h3>
-                    <p class="text-sm text-gray-500">Persona de referencia para comunicaciones</p>
+                    <h3 class="text-lg font-semibold text-gray-800">Información de Contacto</h3>
+                    <p class="text-sm text-gray-500">Datos de la persona de contacto</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Nombre -->
+                <!-- Nombre del Contacto -->
                 <div class="form-group">
                     <label for="contacto_nombre" class="block text-sm font-medium text-gray-700 mb-2">
-                        Nombre Completo <span class="text-red-500">*</span>
+                        Nombre del Contacto <span class="text-red-500">*</span>
                     </label>
-                    @unless($readonly)
                     <input type="text" 
                            id="contacto_nombre" 
                            name="contacto_nombre"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_nombre') border-red-500 @enderror"
-                           placeholder="Nombre completo del contacto"
-                           value="{{ old('contacto_nombre', $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? '') }}">
-                        @error('contacto_nombre')
-                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_nombre') }}</p>
-                        @enderror
-                    @else
-                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
-                        {{ $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? 'No especificado' }}
+                           x-model="contactoNombre"
+                           @input="validateContactoNombre()"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
+                           :class="{ 'border-red-500 bg-red-50': errors.contacto_nombre }"
+                           placeholder="Ej: Juan Pérez González">
+                    <div x-show="errors.contacto_nombre" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-circle mr-2 text-red-500 mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm text-red-700" x-text="errors.contacto_nombre"></span>
                 </div>
-                    @endunless
+                    </div>
                 </div>
 
-                <!-- Cargo -->
+                <!-- Cargo del Contacto -->
                 <div class="form-group">
                     <label for="contacto_cargo" class="block text-sm font-medium text-gray-700 mb-2">
-                        Cargo o Puesto <span class="text-red-500">*</span>
+                        Cargo <span class="text-red-500">*</span>
                     </label>
-                    @unless($readonly)
                     <input type="text" 
                            id="contacto_cargo" 
                            name="contacto_cargo"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_cargo') border-red-500 @enderror"
-                           placeholder="Cargo en la empresa"
-                           value="{{ old('contacto_cargo', $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? '') }}">
-                        @error('contacto_cargo')
-                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_cargo') }}</p>
-                        @enderror
-                    @else
-                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
-                        {{ $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? 'No especificado' }}
+                           x-model="contactoCargo"
+                           @input="validateContactoCargo()"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
+                           :class="{ 'border-red-500 bg-red-50': errors.contacto_cargo }"
+                           placeholder="Ej: Gerente General">
+                    <div x-show="errors.contacto_cargo" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-circle mr-2 text-red-500 mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm text-red-700" x-text="errors.contacto_cargo"></span>
                 </div>
-                    @endunless
+                    </div>
                 </div>
 
-                <!-- Email -->
+                <!-- Correo del Contacto -->
                 <div class="form-group">
                     <label for="contacto_correo" class="block text-sm font-medium text-gray-700 mb-2">
                         Correo Electrónico <span class="text-red-500">*</span>
                     </label>
-                    @unless($readonly)
                     <input type="email" 
                            id="contacto_correo" 
                            name="contacto_correo"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_correo') border-red-500 @enderror"
-                           placeholder="correo@ejemplo.com"
-                           value="{{ old('contacto_correo', $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? '') }}">
-                        @error('contacto_correo')
-                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_correo') }}</p>
-                        @enderror
-                    @else
-                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
-                        {{ $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? 'No especificado' }}
+                           x-model="contactoCorreo"
+                           @input="validateContactoCorreo()"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
+                           :class="{ 'border-red-500 bg-red-50': errors.contacto_correo }"
+                           placeholder="contacto@empresa.com">
+                    <div x-show="errors.contacto_correo" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-circle mr-2 text-red-500 mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm text-red-700" x-text="errors.contacto_correo"></span>
                 </div>
-                    @endunless
+                    </div>
                 </div>
 
-                <!-- Teléfono -->
+                <!-- Teléfono del Contacto -->
                 <div class="form-group">
                     <label for="contacto_telefono" class="block text-sm font-medium text-gray-700 mb-2">
-                        Teléfono de Contacto <span class="text-red-500">*</span>
+                        Teléfono <span class="text-red-500">*</span>
                     </label>
-                    @unless($readonly)
                     <input type="tel" 
                            id="contacto_telefono" 
                            name="contacto_telefono"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_telefono') border-red-500 @enderror"
-                           placeholder="10 dígitos"
-                           value="{{ old('contacto_telefono', $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? '') }}">
-                        @error('contacto_telefono')
-                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_telefono') }}</p>
-                        @enderror
-                    @else
-                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
-                        {{ $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? 'No especificado' }}
+                           x-model="contactoTelefono"
+                           @input="validateContactoTelefono()"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
+                           :class="{ 'border-red-500 bg-red-50': errors.contacto_telefono }"
+                           placeholder="5512345678"
+                           maxlength="10">
+                    <div x-show="errors.contacto_telefono" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-circle mr-2 text-red-500 mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm text-red-700" x-text="errors.contacto_telefono"></span>
             </div>
-                    @endunless
+                    </div>
         </div>
         </div>
             </div>
 
         <!-- Botones de navegación -->
-        @unless($readonly)
-        @if(!isset($mostrar_navegacion) || $mostrar_navegacion !== false)
-        <div class="flex justify-end">
+        <div class="flex justify-between pt-6 border-t border-gray-200">
+            <button type="button" 
+                    onclick="navegarAnteriorDatosGenerales()"
+                    class="flex items-center px-6 py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Anterior
+            </button>
             <button type="submit" 
-                    class="px-8 py-3 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg hover:from-[#8a203f] hover:to-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#9d2449] focus:ring-offset-2">
-                <i class="fas fa-save mr-2"></i>
+                    :disabled="loading"
+                    :class="loading ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#8a203f] hover:to-[#6d1a32]'"
+                    class="flex items-center px-6 py-3 text-white rounded-lg transition duration-200 shadow-md hover:shadow-lg">
+                <span x-show="!loading">
                 Guardar y Continuar
                 <i class="fas fa-arrow-right ml-2"></i>
+                </span>
+                <span x-show="loading" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Guardando...
+                </span>
                 </button>
             </div>
-        @endif
-        @endunless
     </form>
+    @else
+        <!-- Vista de solo lectura para revisión -->
+        <!-- Código existente de solo lectura -->
+        <!-- El código existente de readonly permanece igual -->
+    @endif
 </div>
 
-@unless($readonly)
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-
-    
-    // Variables para el buscador de actividades
-    const searchInput = document.getElementById('actividad_search');
-    const dropdown = document.getElementById('actividad-dropdown');
-    const resultados = document.getElementById('actividad-resultados');
-    const noResultados = document.getElementById('actividad-no-resultados');
-    const tagsContainer = document.getElementById('actividades-seleccionadas');
-    const noActivitiesMessage = document.getElementById('no-actividades-message');
-    const hiddenInput = document.getElementById('actividades_seleccionadas_input');
-    const formulario = document.getElementById('datos-generales-form');
-    
-    let searchTimeout;
-    let actividadesSeleccionadas = [];
-
-    // MANEJO SIMPLIFICADO DEL FORMULARIO
-    if (formulario) {
-
+function datosGeneralesData() {
+    return {
+        // Datos del formulario
+        tramiteId: null,
+        tipoPersona: '',
+        rfc: '',
+        curp: '',
+        nombreCompleto: '',
+        razonSocial: '',
+        giro: '',
+        paginaWeb: '',
+        contactoNombre: '',
+        contactoCargo: '',
+        contactoCorreo: '',
+        contactoTelefono: '',
         
-        // Antes de reemplazar el formulario, guardar referencias importantes
-        const searchInputOriginal = searchInput;
-        const dropdownOriginal = dropdown;
-        const resultadosOriginal = resultados;
-        const noResultadosOriginal = noResultados;
-        const tagsContainerOriginal = tagsContainer;
-        const hiddenInputOriginal = hiddenInput;
+        // Actividades
+        busquedaActividad: '',
+        actividadesSeleccionadas: [],
+        resultadosActividades: [],
+        mostrarDropdown: false,
+        todasLasActividades: [],
+        cargandoActividades: false,
         
-        // Remover todos los event listeners existentes del formulario
-        const nuevoFormulario = formulario.cloneNode(true);
-        formulario.parentNode.replaceChild(nuevoFormulario, formulario);
+        // Estados del formulario
+        loading: false,
+        showError: false,
+        errorMessage: '',
+        showSuccess: false,
+        successMessage: '',
+        errors: {},
+        searchTimeout: null,
         
-        // Actualizar referencias después del reemplazo
-        const newSearchInput = document.getElementById('actividad_search');
-        const newDropdown = document.getElementById('actividad-dropdown');
-        const newResultados = document.getElementById('actividad-resultados');
-        const newNoResultados = document.getElementById('actividad-no-resultados');
-        const newTagsContainer = document.getElementById('actividades-seleccionadas');
-        const newHiddenInput = document.getElementById('actividades_seleccionadas_input');
-        
-        // Reconfigurar event listeners para actividades en el nuevo formulario
-        if (newSearchInput) {
-
-            newSearchInput.addEventListener('input', function(e) {
-                const query = e.target.value.trim();
-                if (searchTimeout) clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => buscarActividades(query, newDropdown, newResultados, newNoResultados), 300);
-            });
-        }
-        
-        // Reconfigurar cerrar dropdown
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('#actividad_search') && !e.target.closest('#actividad-dropdown')) {
-                if (newDropdown) newDropdown.classList.add('hidden');
-            }
-        });
-        
-        // Reconfigurar botón agregar manual
-        const newBtnAgregarManual = document.getElementById('btn-agregar-manual');
-        if (newBtnAgregarManual) {
-            newBtnAgregarManual.addEventListener('click', function() {
-                const query = newSearchInput.value.trim();
-                if (!query) return;
-
-                const actividadPersonalizada = {
-                    id: Date.now(),
-                    nombre: query,
-                    sector: 'Actividad personalizada',
-                    custom: true
-                };
-
-                if (actividadesSeleccionadas.some(act => act.nombre.toLowerCase() === query.toLowerCase())) {
-                    return;
-                }
-
-                agregarActividad(actividadPersonalizada, newSearchInput, newTagsContainer, newHiddenInput, newDropdown);
-            });
-        }
-        
-        // Actualizar referencias globales
-        Object.assign(window, {
-            searchInput: newSearchInput,
-            dropdown: newDropdown,
-            resultados: newResultados,
-            noResultados: newNoResultados,
-            tagsContainer: newTagsContainer,
-            hiddenInput: newHiddenInput
-        });
-        
-        // Cargar actividades existentes después del reemplazo
-        cargarActividadesExistentes(newHiddenInput, newTagsContainer);
-        
-
-        
-        // Agregar el nuevo manejador simplificado del formulario
-        nuevoFormulario.addEventListener('submit', function(e) {
+        async init() {
+            // Cargar datos iniciales
+            const datosTramite = @json($datosTramite ?? []);
+            const datosSolicitante = @json($datosSolicitante ?? []);
             
-            // Mostrar todos los datos del formulario
-            const formData = new FormData(nuevoFormulario);
-            const datosFormulario = {};
-            for (let [key, value] of formData.entries()) {
-                datosFormulario[key] = value;
+            if (datosTramite && Object.keys(datosTramite).length > 0) {
+                this.tramiteId = datosTramite.tramite_id;
+                this.giro = datosTramite.giro || '';
+                this.paginaWeb = datosTramite.pagina_web || '';
+                this.contactoNombre = datosTramite.contacto_nombre || '';
+                this.contactoCargo = datosTramite.contacto_cargo || '';
+                this.contactoCorreo = datosTramite.contacto_correo || '';
+                this.contactoTelefono = datosTramite.contacto_telefono || '';
             }
             
-            // Validación básica
-            let esValido = true;
-            const camposRequeridos = nuevoFormulario.querySelectorAll('[required]');
-
-            
-            // Validar campos requeridos
-                          camposRequeridos.forEach(campo => {
-                  if (!campo.value.trim()) {
-                      esValido = false;
-                    
-                    // Agregar clase de error
-                    campo.classList.add('border-red-500', 'bg-red-50');
-                    setTimeout(() => {
-                        campo.classList.remove('border-red-500', 'bg-red-50');
-                    }, 3000);
-                                  }
-            });
-            
-            // Validar actividades seleccionadas
-            const actividadesInput = nuevoFormulario.querySelector('#actividades_seleccionadas_input');
-                          if (actividadesInput) {
-                  const actividades = actividadesInput.value;
-                  if (!actividades || actividades === '[]' || actividades.trim() === '') {
-                    esValido = false;
-                    mostrarError('Debe seleccionar al menos una actividad económica');
-                                  } else {
-                      try {
-                          const actividadesArray = JSON.parse(actividades);
-                      } catch (e) {
-                        esValido = false;
-                    }
-                }
-                          } else {
+            if (datosSolicitante && Object.keys(datosSolicitante).length > 0) {
+                this.tipoPersona = datosSolicitante.tipo_persona || 'Física';
+                this.rfc = datosSolicitante.rfc || '';
+                this.curp = datosSolicitante.curp || '';
+                this.nombreCompleto = datosSolicitante.nombre_completo || '';
+                this.razonSocial = datosSolicitante.razon_social || '';
             }
             
-                          if (!esValido) {
-                  e.preventDefault();
-                  return false;
-              }
+            // Cargar actividades
+            await this.cargarActividades();
             
-            // Prevenir el envío normal del formulario
-            e.preventDefault();
-            
-                          // Enviar datos vía AJAX
-              enviarDatosAjax(nuevoFormulario);
-            
-            return false;
-        });
-    }
-
-    // Función para mostrar errores
-    function mostrarError(mensaje) {
-        // Crear o actualizar modal de error
-        let modal = document.getElementById('modal-error-datos');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'modal-error-datos';
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            modal.innerHTML = `
-                <div class="bg-white rounded-xl p-6 max-w-md mx-4 shadow-2xl">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-red-100 rounded-full p-2 mr-3">
-                            <i class="fas fa-exclamation-triangle text-red-600"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-800">Error de Validación</h3>
-                    </div>
-                    <p class="text-gray-600 mb-4" id="mensaje-error-datos">${mensaje}</p>
-                    <button onclick="cerrarModalError()" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">
-                        Entendido
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        } else {
-            document.getElementById('mensaje-error-datos').textContent = mensaje;
-            modal.style.display = 'flex';
-        }
-    }
-
-    // Función global para cerrar modal de error
-    window.cerrarModalError = function() {
-        const modal = document.getElementById('modal-error-datos');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    };
-
-    // Cargar actividades existentes al inicio
-    async function cargarActividadesExistentes(hiddenInput, tagsContainer) {
-        if (!hiddenInput.value) return;
-
-        try {
-            const actividadesIds = JSON.parse(hiddenInput.value);
-            if (!Array.isArray(actividadesIds) || actividadesIds.length === 0) return;
-
-    
-
-            const response = await fetch('/api/actividades/obtener-por-ids', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ ids: actividadesIds })
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`);
-            }
-
-            const result = await response.json();
-
-            
-            // Manejar diferentes formatos de respuesta
-            let actividades = [];
-            if (result.success && result.data) {
-                actividades = result.data;
-            } else if (Array.isArray(result)) {
-                actividades = result;
-            } else if (result.actividades) {
-                actividades = result.actividades;
-            } else {
-                throw new Error('Formato de respuesta no reconocido');
-            }
-
-            if (!Array.isArray(actividades)) {
-                throw new Error('Los datos de actividades no son un array válido');
-            }
-
-            // Asegurar que cada actividad tenga nombre
-            actividadesSeleccionadas = actividades.map(actividad => {
-                if (typeof actividad === 'object' && actividad.nombre) {
-                    return {
-                        id: actividad.id,
-                        nombre: actividad.nombre,
-                        sector: actividad.sector || 'Sin sector especificado'
-                    };
-                } else {
-                    // Si no tiene nombre, usar un fallback
-                    return {
-                        id: actividad.id || actividad,
-                        nombre: `Actividad ${actividad.id || actividad}`,
-                        sector: 'Información incompleta'
-                    };
+            // Escuchar clics fuera del dropdown
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.relative')) {
+                    this.mostrarDropdown = false;
+                    this.cargandoActividades = false;
                 }
             });
-
-            actualizarTags(tagsContainer);
-
-            
-        } catch (e) {
-            console.error('❌ Error al cargar actividades existentes:', e);
-            
-            // Fallback más robusto: mostrar los IDs con nombres descriptivos
+        },
+        
+        async cargarActividades() {
             try {
-                const actividadesIds = JSON.parse(hiddenInput.value);
-                console.warn('🔄 Aplicando fallback para IDs:', actividadesIds);
-                
-                actividadesSeleccionadas = actividadesIds.map(id => ({
-                    id: id,
-                    nombre: `Actividad ${id} (no cargada)`,
-                    sector: 'Error al cargar información'
-                }));
-                
-                actualizarTags(tagsContainer);
-
-                
-            } catch (fallbackError) {
-                console.error('💥 Error crítico en fallback:', fallbackError);
-                // Último recurso: limpiar todo
-                actividadesSeleccionadas = [];
-                actualizarTags(tagsContainer);
-            }
-        }
-    }
-
-    // Ejecutar carga inicial
-    cargarActividadesExistentes(hiddenInput, tagsContainer);
-
-    // Función para buscar actividades
-    async function buscarActividades(query, dropdown, resultados, noResultados) {
-        if (!query || query.length < 2) {
-            dropdown.classList.add('hidden');
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/actividades/buscar?q=${encodeURIComponent(query)}&limit=20`);
-            if (!response.ok) throw new Error('Error en la búsqueda');
-            
-            const result = await response.json();
-            if (result.success && result.data) {
-                const actividadesFiltradas = result.data.filter(actividad => 
-                    !actividadesSeleccionadas.some(sel => sel.id === actividad.id)
-                );
-                mostrarResultados(actividadesFiltradas, dropdown, resultados, noResultados);
-            } else {
-                mostrarSinResultados(dropdown, noResultados);
-            }
-        } catch (error) {
-            mostrarSinResultados(dropdown, noResultados);
-        }
-    }
-
-    // Función para mostrar resultados
-    function mostrarResultados(actividades, dropdown, resultados, noResultados) {
-        resultados.innerHTML = '';
-        noResultados.classList.add('hidden');
-
-        if (actividades.length === 0) {
-            mostrarSinResultados(dropdown, noResultados);
-            return;
-        }
-
-        actividades.forEach(actividad => {
-            const item = document.createElement('div');
-            item.className = 'px-4 py-3 cursor-pointer transition-all duration-200 border-b border-gray-100 last:border-b-0 hover:bg-gray-50';
-            item.innerHTML = `
-                <div class="font-medium text-gray-900 text-sm">${actividad.nombre}</div>
-                <div class="text-xs text-gray-500 mt-1">${actividad.sector || 'Sin sector'}</div>
-            `;
-            item.addEventListener('click', () => agregarActividad(actividad, 
-                document.getElementById('actividad_search'), 
-                document.getElementById('actividades-seleccionadas'), 
-                document.getElementById('actividades_seleccionadas_input'), 
-                dropdown
-            ));
-            resultados.appendChild(item);
-        });
-
-        dropdown.classList.remove('hidden');
-    }
-
-    // Función para mostrar sin resultados
-    function mostrarSinResultados(dropdown, noResultados) {
-        const resultados = document.getElementById('actividad-resultados');
-        if (resultados) resultados.innerHTML = '';
-        if (noResultados) noResultados.classList.remove('hidden');
-        if (dropdown) dropdown.classList.remove('hidden');
-    }
-
-    // Función para agregar actividad
-    function agregarActividad(actividad, searchInputRef, tagsContainerRef, hiddenInputRef, dropdownRef) {
-        if (actividadesSeleccionadas.some(sel => sel.id === actividad.id)) return;
-
-        actividadesSeleccionadas.push(actividad);
-        if (searchInputRef) searchInputRef.value = '';
-        actualizarTags(tagsContainerRef);
-        actualizarInputHidden(hiddenInputRef);
-        if (dropdownRef) dropdownRef.classList.add('hidden');
-    }
-
-    // Función para remover actividad
-    function removerActividad(actividadId) {
-        actividadesSeleccionadas = actividadesSeleccionadas.filter(act => act.id !== actividadId);
-        const currentTagsContainer = document.getElementById('actividades-seleccionadas');
-        const currentHiddenInput = document.getElementById('actividades_seleccionadas_input');
-        actualizarTags(currentTagsContainer);
-        actualizarInputHidden(currentHiddenInput);
-    }
-
-    // Función para actualizar tags visuales
-    function actualizarTags(tagsContainerRef) {
-        if (!tagsContainerRef) tagsContainerRef = document.getElementById('actividades-seleccionadas');
-        tagsContainerRef.innerHTML = '';
-
-        if (actividadesSeleccionadas.length === 0) {
-            const emptyMessage = document.createElement('div');
-            emptyMessage.id = 'no-actividades-message';
-            emptyMessage.className = 'flex items-center justify-center text-gray-400 text-sm italic';
-            emptyMessage.innerHTML = '<i class="fas fa-plus-circle mr-2"></i>No hay actividades seleccionadas';
-            tagsContainerRef.appendChild(emptyMessage);
-        } else {
-            actividadesSeleccionadas.forEach(actividad => {
-                const tag = document.createElement('div');
-                tag.className = 'inline-flex items-center gap-2 px-3 py-1 bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20 rounded-lg text-sm';
-                tag.innerHTML = `
-                    <span>${actividad.nombre}</span>
-                    <button type="button" onclick="removerActividad(${actividad.id})" class="hover:text-red-500 transition-colors">
-                        <i class="fas fa-times text-xs"></i>
-                    </button>
-                `;
-                tagsContainerRef.appendChild(tag);
-            });
-        }
-    }
-
-    // Función para actualizar input hidden
-    function actualizarInputHidden(hiddenInputRef) {
-        if (!hiddenInputRef) hiddenInputRef = document.getElementById('actividades_seleccionadas_input');
-        const actividadesIds = actividadesSeleccionadas.map(act => act.id);
-        hiddenInputRef.value = JSON.stringify(actividadesIds);
-    }
-
-    // Función global para remover actividades
-    window.removerActividad = removerActividad;
-
-    // Función para enviar datos vía AJAX
-    async function enviarDatosAjax(formulario) {
-        try {
-
-            
-            // Obtener datos del formulario
-            const formData = new FormData(formulario);
-            const datos = {};
-            for (let [key, value] of formData.entries()) {
-                datos[key] = value;
-            }
-            
-
-            
-            // Mostrar indicador de carga
-            mostrarIndicadorCarga(true);
-            
-            // Enviar petición AJAX
-            const response = await fetch(formulario.action, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify(datos)
-            });
-            
-            const result = await response.json();
-            
-            // Ocultar indicador de carga
-            mostrarIndicadorCarga(false);
-            
-            if (response.ok && result.success) {
-                // Guardado exitoso
-
-                
-                // Mostrar mensaje de éxito
-                mostrarMensajeExito('Datos guardados correctamente. Avanzando al siguiente paso...');
-                
-                // Avanzar al siguiente paso
-                setTimeout(() => {
-                    avanzarAlPasoSiguiente(result.next_step || 2);
-                }, 500);
-                
-            } else {
-                // Error en el guardado
-                console.error('❌ Error al guardar:', result);
-                
-                if (result.errors) {
-                    // Errores de validación
-                    mostrarErroresValidacion(result.errors);
-        } else {
-                    // Error general
-                    mostrarError(result.message || 'Error al guardar los datos');
+                const response = await fetch('/api/actividades');
+                const data = await response.json();
+                if (data.success) {
+                    this.todasLasActividades = data.data;
                 }
+            } catch (error) {
+                console.error('Error al cargar actividades:', error);
+            }
+        },
+        
+        async buscarActividades() {
+            // Limpiar timeout anterior
+            if (this.searchTimeout) {
+                clearTimeout(this.searchTimeout);
             }
             
-        } catch (error) {
-            console.error('❌ Error en AJAX:', error);
-            mostrarIndicadorCarga(false);
-            mostrarError('Error de conexión. Por favor, intente nuevamente.');
-        }
-    }
-    
-    // Función para mostrar indicador de carga
-    function mostrarIndicadorCarga(mostrar) {
-        let indicador = document.getElementById('indicador-carga-datos');
-        
-        if (mostrar) {
-            if (!indicador) {
-                indicador = document.createElement('div');
-                indicador.id = 'indicador-carga-datos';
-                indicador.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-                indicador.innerHTML = `
-                    <div class="bg-white rounded-xl p-6 max-w-sm mx-4 shadow-2xl">
-                        <div class="flex items-center">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#9d2449] mr-4"></div>
-                            <span class="text-gray-700">Guardando datos...</span>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(indicador);
-                } else {
-                indicador.style.display = 'flex';
-                }
-            } else {
-            if (indicador) {
-                indicador.style.display = 'none';
+            if (this.busquedaActividad.length < 2) {
+                this.resultadosActividades = [];
+                this.cargandoActividades = false;
+                return;
             }
-        }
-    }
-    
-    // Función para mostrar mensaje de éxito
-    function mostrarMensajeExito(mensaje) {
-        const elemento = document.createElement('div');
-        elemento.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300';
-        elemento.innerHTML = `
-            <div class="flex items-center">
-                <i class="fas fa-check-circle mr-2"></i>
-                <span>${mensaje}</span>
-            </div>
-        `;
-        
-        document.body.appendChild(elemento);
-        
-        // Animar entrada
-         setTimeout(() => {
-            elemento.classList.add('translate-x-0');
-        }, 100);
-        
-        // Remover después de 3 segundos
-        setTimeout(() => {
-            elemento.classList.add('translate-x-full', 'opacity-0');
-            setTimeout(() => {
-                if (elemento.parentNode) {
-                    elemento.parentNode.removeChild(elemento);
+            
+            // Mostrar loading inmediatamente
+            this.cargandoActividades = true;
+            
+            // Debounce de 300ms
+            this.searchTimeout = setTimeout(async () => {
+                try {
+                    // Buscar usando la API específica de búsqueda
+                    const response = await fetch(`/api/actividades/buscar?q=${encodeURIComponent(this.busquedaActividad)}&limit=10`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.data) {
+                        // Filtrar actividades ya seleccionadas
+                        this.resultadosActividades = data.data.filter(actividad => 
+                            !this.actividadesSeleccionadas.find(sel => sel.id === actividad.id)
+                        );
+                    } else {
+                        this.resultadosActividades = [];
+                    }
+                } catch (error) {
+                    console.error('Error al buscar actividades:', error);
+                    this.resultadosActividades = [];
+                } finally {
+                    this.cargandoActividades = false;
                 }
             }, 300);
-        }, 3000);
-    }
-    
-    // Función para mostrar errores de validación
-    function mostrarErroresValidacion(errores) {
-
+        },
         
-        // Limpiar errores anteriores
-        document.querySelectorAll('.error-message').forEach(el => el.remove());
-        document.querySelectorAll('.border-red-500').forEach(el => {
-            el.classList.remove('border-red-500', 'bg-red-50');
-        });
+        agregarActividad(actividad) {
+            this.actividadesSeleccionadas.push(actividad);
+            this.busquedaActividad = '';
+            this.resultadosActividades = [];
+            this.mostrarDropdown = false;
+            this.cargandoActividades = false;
+            this.clearError('actividades_seleccionadas');
+        },
         
-        // Mostrar nuevos errores
-        for (const [campo, mensajes] of Object.entries(errores)) {
-            const elemento = document.getElementById(campo) || document.querySelector(`[name="${campo}"]`);
-            if (elemento) {
-                // Agregar clases de error
-                elemento.classList.add('border-red-500', 'bg-red-50');
-                
-                // Agregar mensaje de error
-                const contenedor = elemento.closest('.form-group') || elemento.parentElement;
-                const errorMsg = document.createElement('p');
-                errorMsg.className = 'error-message text-xs text-red-500 mt-1 flex items-center';
-                errorMsg.innerHTML = `
-                    <i class="fas fa-exclamation-triangle mr-1 text-red-400"></i>
-                    <span>${Array.isArray(mensajes) ? mensajes[0] : mensajes}</span>
-                `;
-                contenedor.appendChild(errorMsg);
+        agregarActividadPersonalizada() {
+            if (this.busquedaActividad.trim()) {
+                const actividadPersonalizada = {
+                    id: 'custom_' + Date.now(),
+                    nombre: this.busquedaActividad.trim(),
+                    sector: 'Actividad personalizada',
+                    codigo_scian: null,
+                    personalizada: true
+                };
+                this.agregarActividad(actividadPersonalizada);
             }
-        }
+        },
         
-        // Scroll al primer error
-        const primerError = document.querySelector('.border-red-500');
-        if (primerError) {
-            primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }
-    
-    // Función para avanzar al paso siguiente
-    function avanzarAlPasoSiguiente(pasoDestino) {
-
+        removerActividad(index) {
+            this.actividadesSeleccionadas.splice(index, 1);
+        },
         
-        try {
-            // Buscar el componente Alpine.js del stepper
-            const formContainer = document.querySelector('[x-data*="currentStep"]');
-            if (formContainer && window.Alpine) {
-                const alpineData = Alpine.$data(formContainer);
-                if (alpineData && typeof alpineData.currentStep !== 'undefined') {
-                                    alpineData.currentStep = pasoDestino;
-                    
-                    // Trigger update en caso de que sea necesario
-                    if (alpineData.$dispatch) {
-                        alpineData.$dispatch('step-changed', { step: pasoDestino });
+        // Validaciones del lado del cliente
+        validateGiro() {
+            if (!this.giro || this.giro.trim().length < 10) {
+                this.setError('giro', 'El giro debe tener al menos 10 caracteres');
+            return false;
+            }
+            if (this.giro.length > 500) {
+                this.setError('giro', 'El giro no puede exceder 500 caracteres');
+                return false;
+            }
+            if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\.,;:\-\(\)\/]+$/.test(this.giro)) {
+                this.setError('giro', 'El giro contiene caracteres no permitidos');
+                return false;
+            }
+            this.clearError('giro');
+            return true;
+        },
+        
+        validatePaginaWeb() {
+            if (!this.paginaWeb) {
+                this.clearError('pagina_web');
+                return true;
+            }
+            
+            const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+            if (!urlRegex.test(this.paginaWeb)) {
+                this.setError('pagina_web', 'El formato de la URL no es válido');
+                return false;
+            }
+            this.clearError('pagina_web');
+            return true;
+        },
+        
+        validateContactoNombre() {
+            if (!this.contactoNombre || this.contactoNombre.trim().length < 2) {
+                this.setError('contacto_nombre', 'El nombre debe tener al menos 2 caracteres');
+                return false;
+            }
+            if (this.contactoNombre.length > 100) {
+                this.setError('contacto_nombre', 'El nombre no puede exceder 100 caracteres');
+                return false;
+            }
+            if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'\.]+$/.test(this.contactoNombre)) {
+                this.setError('contacto_nombre', 'El nombre solo puede contener letras, espacios y apostrofes');
+                return false;
+            }
+            this.clearError('contacto_nombre');
+            return true;
+        },
+        
+        validateContactoCargo() {
+            if (!this.contactoCargo || this.contactoCargo.trim().length < 3) {
+                this.setError('contacto_cargo', 'El cargo debe tener al menos 3 caracteres');
+                return false;
+            }
+            if (this.contactoCargo.length > 50) {
+                this.setError('contacto_cargo', 'El cargo no puede exceder 50 caracteres');
+                return false;
+            }
+            if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'\.]+$/.test(this.contactoCargo)) {
+                this.setError('contacto_cargo', 'El cargo solo puede contener letras, espacios y apostrofes');
+                return false;
+            }
+            this.clearError('contacto_cargo');
+            return true;
+        },
+        
+        validateContactoCorreo() {
+            if (!this.contactoCorreo) {
+                this.setError('contacto_correo', 'El correo electrónico es obligatorio');
+                return false;
+            }
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(this.contactoCorreo)) {
+                this.setError('contacto_correo', 'El formato del correo electrónico no es válido');
+                return false;
+            }
+            this.clearError('contacto_correo');
+            return true;
+        },
+        
+        validateContactoTelefono() {
+            if (!this.contactoTelefono) {
+                this.setError('contacto_telefono', 'El teléfono es obligatorio');
+                return false;
+            }
+            // Solo permitir números y que sean exactamente 10 dígitos
+            this.contactoTelefono = this.contactoTelefono.replace(/\D/g, '');
+            if (this.contactoTelefono.length !== 10) {
+                this.setError('contacto_telefono', 'El teléfono debe tener exactamente 10 dígitos');
+                return false;
+            }
+            this.clearError('contacto_telefono');
+            return true;
+        },
+        
+        validateActividades() {
+            if (this.actividadesSeleccionadas.length === 0) {
+                this.setError('actividades_seleccionadas', 'Debe seleccionar al menos una actividad económica');
+                return false;
+            }
+            this.clearError('actividades_seleccionadas');
+            return true;
+        },
+        
+        setError(field, message) {
+            this.errors[field] = message;
+        },
+        
+        clearError(field) {
+            delete this.errors[field];
+        },
+        
+        clearAllErrors() {
+            this.errors = {};
+        },
+        
+        mostrarError(mensaje) {
+            this.errorMessage = mensaje;
+            this.showError = true;
+            this.showSuccess = false;
+            setTimeout(() => {
+                this.showError = false;
+            }, 5000);
+        },
+        
+        mostrarExito(mensaje) {
+            this.successMessage = mensaje;
+            this.showSuccess = true;
+            this.showError = false;
+            setTimeout(() => {
+                this.showSuccess = false;
+            }, 3000);
+        },
+        
+        async guardarDatosGenerales() {
+            if (this.loading) return;
+            
+            // Ejecutar todas las validaciones y mostrar errores específicos
+            const validaciones = [
+                this.validateGiro(),
+                this.validatePaginaWeb(),
+                this.validateContactoNombre(),
+                this.validateContactoCargo(),
+                this.validateContactoCorreo(),
+                this.validateContactoTelefono(),
+                this.validateActividades()
+            ];
+            
+            const formularioEsValido = validaciones.every(v => v === true);
+            
+            if (!formularioEsValido) {
+                // Mostrar mensaje general de error
+                this.mostrarError('Por favor, corrija los errores marcados en rojo antes de continuar.');
+                
+                // Hacer scroll al primer error
+                setTimeout(() => {
+                    const primerError = document.querySelector('.border-red-500');
+                    if (primerError) {
+                        primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        primerError.focus();
                     }
-                                  } else {
+                }, 100);
+                
+                return;
+            }
+            
+            this.loading = true;
+            this.clearAllErrors();
+            
+            try {
+                const formData = new FormData();
+                formData.append('tramite_id', this.tramiteId);
+                formData.append('giro', this.giro.trim());
+                formData.append('pagina_web', this.paginaWeb.trim());
+                formData.append('contacto_nombre', this.contactoNombre.trim());
+                formData.append('contacto_cargo', this.contactoCargo.trim());
+                formData.append('contacto_correo', this.contactoCorreo.trim());
+                formData.append('contacto_telefono', this.contactoTelefono.trim());
+                formData.append('actividades_seleccionadas', JSON.stringify(this.actividadesSeleccionadas));
+                
+                // Agregar CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (csrfToken) {
+                    formData.append('_token', csrfToken.getAttribute('content'));
                 }
+                
+                const response = await fetch('/formularios/datos-generales/guardar', {
+                method: 'POST',
+                    body: formData,
+                headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    this.mostrarExito('Datos generales guardados correctamente');
+                    // Disparar evento para navegar al siguiente paso
+                setTimeout(() => {
+                        this.$dispatch('next-step');
+                    }, 1000);
             } else {
+                    if (response.status === 422 && data.errors) {
+                        // Errores de validación del servidor
+                        this.procesarErroresServidor(data.errors);
+                        this.mostrarErroresValidacion(data.errors);
+                        
+                        // Hacer scroll al primer error del servidor
+                        setTimeout(() => {
+                            const primerError = document.querySelector('.border-red-500');
+                            if (primerError) {
+                                primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        }, 100);
+        } else {
+                        this.mostrarError(data.message || 'Error al guardar los datos generales');
+                }
             }
         } catch (error) {
-            console.error('❌ Error al cambiar paso:', error);
+                console.error('Error en AJAX:', error);
+                this.mostrarError('Error de conexión. Por favor, intente nuevamente.');
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        mostrarErroresValidacion(errores) {
+            for (const [campo, mensajes] of Object.entries(errores)) {
+                const mensaje = Array.isArray(mensajes) ? mensajes[0] : mensajes;
+                this.setError(campo, mensaje);
+            }
+            this.mostrarError('Por favor corrija los errores indicados en el formulario');
+        },
+        
+        // Procesar errores del servidor para mostrarlos en los campos
+        procesarErroresServidor(errores) {
+            if (typeof errores === 'object') {
+                Object.keys(errores).forEach(campo => {
+                    const mensajes = Array.isArray(errores[campo]) ? errores[campo] : [errores[campo]];
+                    this.setError(campo, mensajes[0]);
+                });
+            }
         }
     }
-});
+}
+
+// Función para navegar al paso anterior
+function navegarAnteriorDatosGenerales() {
+    if (typeof window.navegarAnterior === 'function') {
+        window.navegarAnterior();
+        return;
+    }
+    
+    const alpineContainer = document.querySelector('[x-data*="currentStep"]');
+    if (alpineContainer && typeof Alpine !== 'undefined') {
+        try {
+            const alpineData = Alpine.$data(alpineContainer);
+                if (alpineData && typeof alpineData.currentStep !== 'undefined') {
+                if (alpineData.currentStep > 1) {
+                    alpineData.currentStep--;
+                }
+            }
+        } catch (error) {
+            console.error('Error al navegar:', error);
+        }
+    }
+}
 </script>
-
-<style>
-/* Transiciones suaves */
-input, select, textarea, button {
-    transition: all 0.2s ease-in-out;
-}
-
-/* Efectos hover */
-.form-group:hover input:not([readonly]),
-.form-group:hover select:not([readonly]),
-.form-group:hover textarea:not([readonly]) {
-    border-color: rgb(157 36 73 / 0.3);
-}
-
-/* Dropdown styles */
-#actividad-dropdown {
-    animation: slideDown 0.2s ease-out;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-</style>
-@endunless

@@ -78,6 +78,56 @@
     </div>
 </div>
 
+<!-- Modal de confirmación de registro -->
+<div id="registroConfirmacionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all duration-300 scale-95">
+        <!-- Modal header -->
+        <div class="px-6 py-4 bg-gradient-to-br from-green-500 to-green-600 border-b border-green-500/10">
+            <div class="flex items-center justify-center">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-white/20 rounded-full">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">¡Registro Exitoso!</h3>
+                </div>
+            </div>
+        </div>
+        <!-- Modal body -->
+        <div class="p-6 text-center space-y-4">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <div class="space-y-2">
+                <p class="text-gray-800 font-medium">
+                    Su correo de verificación ha sido enviado
+                </p>
+                <p class="text-gray-600 text-sm">
+                    Se registró con el RFC: <span id="rfcRegistrado" class="font-bold text-primary"></span>
+                </p>
+                <p class="text-gray-500 text-xs">
+                    Revise su bandeja de entrada y siga las instrucciones para activar su cuenta.
+                </p>
+            </div>
+        </div>
+        <!-- Modal footer -->
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
+            <div class="flex justify-center">
+                <button onclick="closeRegistroConfirmacionModal()" 
+                        class="inline-flex items-center px-4 py-2 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition-colors duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <form method="POST" action="{{ route('register') }}" class="space-y-6" enctype="multipart/form-data">
     @csrf
     <!-- Header con Logo -->
@@ -438,6 +488,10 @@
             // Segunda fase: enviar formulario
             const form = document.querySelector('form');
             if (validateForm()) {
+                // Mostrar efecto de envío
+                showSendingEffect();
+                
+                // Enviar el formulario real
                 form.submit();
             } else {
                 showError('Por favor, complete todos los campos requeridos.');
@@ -514,12 +568,84 @@
         }
     };
 
-    // Cerrar modal al hacer clic fuera de él
+    // Función para mostrar el efecto de envío
+    window.showSendingEffect = function() {
+        const actionButton = document.getElementById('actionButton');
+        const actionText = document.getElementById('actionText');
+        const actionIcon = document.getElementById('actionIcon');
+        
+        if (actionButton && actionText && actionIcon) {
+            // Deshabilitar el botón
+            actionButton.disabled = true;
+            actionButton.style.opacity = '0.7';
+            actionButton.style.cursor = 'not-allowed';
+            
+            // Cambiar texto e icono
+            actionText.textContent = 'Enviando...';
+            actionIcon.innerHTML = `
+                <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+            `;
+            
+            // Agregar clase de animación
+            actionButton.classList.add('animate-pulse');
+        }
+    };
+
+    // Función para mostrar el modal de confirmación de registro
+    window.showRegistroConfirmacionModal = function(rfc) {
+        const modal = document.getElementById('registroConfirmacionModal');
+        const rfcSpan = document.getElementById('rfcRegistrado');
+        
+        if (modal && rfcSpan) {
+            // Mostrar RFC
+            rfcSpan.textContent = rfc || 'No disponible';
+            
+            // Mostrar modal con animación
+            modal.style.display = 'flex';
+            modal.querySelector('.bg-white').style.transform = 'scale(0.95)';
+            modal.querySelector('.bg-white').style.opacity = '0';
+            
+            setTimeout(() => {
+                modal.querySelector('.bg-white').style.transform = 'scale(1)';
+                modal.querySelector('.bg-white').style.opacity = '1';
+            }, 50);
+            
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
+    // Función para cerrar el modal de confirmación
+    window.closeRegistroConfirmacionModal = function() {
+        const modal = document.getElementById('registroConfirmacionModal');
+        if (modal) {
+            // Animación de salida
+            modal.querySelector('.bg-white').style.transform = 'scale(0.95)';
+            modal.querySelector('.bg-white').style.opacity = '0';
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+                
+                // Redirigir al login o página principal
+                window.location.href = '{{ route("login") }}';
+            }, 300);
+        }
+    };
+
+    // Cerrar modales al hacer clic fuera de ellos
     document.addEventListener('click', function(event) {
-        const modal = document.getElementById('satDataModal');
-        const modalContent = modal?.querySelector('.bg-white');
-        if (modal && event.target === modal && modalContent && !modalContent.contains(event.target)) {
+        const satModal = document.getElementById('satDataModal');
+        const satModalContent = satModal?.querySelector('.bg-white');
+        if (satModal && event.target === satModal && satModalContent && !satModalContent.contains(event.target)) {
             closeSatModal();
+        }
+        
+        const confirmModal = document.getElementById('registroConfirmacionModal');
+        const confirmModalContent = confirmModal?.querySelector('.bg-white');
+        if (confirmModal && event.target === confirmModal && confirmModalContent && !confirmModalContent.contains(event.target)) {
+            closeRegistroConfirmacionModal();
         }
     });
 

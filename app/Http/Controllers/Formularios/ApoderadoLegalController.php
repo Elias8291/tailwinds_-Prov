@@ -57,18 +57,8 @@ class ApoderadoLegalController extends Controller
                 'request_data' => $request->all()
             ]);
 
-            // Validar los datos del formulario con validaciones más flexibles para AJAX
-            $validated = $request->validate([
-                'tramite_id' => 'required|integer',
-                'nombre_apoderado' => 'required|string|max:100',
-                'numero_escritura' => 'required|string|max:15',
-                'nombre_notario' => 'required|string|max:100',
-                'numero_notario' => 'required|string|max:10',
-                'entidad_federativa' => 'required|integer|min:1|max:32',
-                'fecha_escritura' => 'required|date|before_or_equal:today',
-                'numero_registro' => 'required|string|max:20',
-                'fecha_inscripcion' => 'required|date|before_or_equal:today',
-            ]);
+            // Validar los datos del formulario usando validaciones en español
+            $validated = $this->validateFormularioData($request);
 
             // Buscar el trámite
             $tramite = Tramite::find($validated['tramite_id']);
@@ -108,30 +98,207 @@ class ApoderadoLegalController extends Controller
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::warning('❌ Errores de validación en apoderado legal:', $e->errors());
+            Log::warning('❌ Errores de validación en apoderado legal:', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Errores de validación',
-                'errors' => $e->errors()
+                'message' => 'Por favor corrija los errores en la información del apoderado legal.',
+                'errors' => $e->errors(),
+                'debug_info' => [
+                    'seccion' => 'apoderado_legal',
+                    'timestamp' => now()->toISOString(),
+                    'total_errores' => count($e->errors())
+                ]
             ], 422);
 
         } catch (\Exception $e) {
-            Log::error('❌ EXCEPCIÓN en guardarFormulario apoderado legal:', [
-                'mensaje' => $e->getMessage(),
-                'archivo' => $e->getFile(),
-                'linea' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+            Log::error('❌ Error al guardar datos del apoderado legal:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error interno del servidor: ' . $e->getMessage()
+                'message' => 'Error interno del servidor al guardar los datos del apoderado legal. Por favor, intente nuevamente.',
+                'debug_info' => [
+                    'seccion' => 'apoderado_legal',
+                    'timestamp' => now()->toISOString(),
+                    'error_type' => get_class($e)
+                ]
             ], 500);
         }
     }
 
     /**
-     * Valida los datos recibidos en la solicitud
+     * Valida los datos del formulario de apoderado legal usando validaciones robustas en español
+     *
+     * @param Request $request La solicitud a validar
+     * @return array Los datos validados
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function validateFormularioData(Request $request)
+    {
+        $rules = [
+            'tramite_id' => [
+                'required',
+                'integer',
+                'exists:tramite,id'
+            ],
+            'nombre_apoderado' => [
+                'required',
+                'string',
+                'min:2',
+                'max:100',
+                'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'\.]+$/'
+            ],
+            'numero_escritura' => [
+                'required',
+                'string',
+                'min:1',
+                'max:20',
+                'regex:/^[0-9\-\/A-Z]+$/'
+            ],
+            'nombre_notario' => [
+                'required',
+                'string',
+                'min:2',
+                'max:100',
+                'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'\.]+$/'
+            ],
+            'numero_notario' => [
+                'required',
+                'string',
+                'min:1',
+                'max:10',
+                'regex:/^[0-9]+$/'
+            ],
+            'entidad_federativa' => [
+                'required',
+                'integer',
+                'between:1,32',
+                'exists:estado,id'
+            ],
+            'fecha_escritura' => [
+                'required',
+                'date',
+                'before_or_equal:today',
+                'after:1900-01-01'
+            ],
+            'numero_registro' => [
+                'required',
+                'string',
+                'min:1',
+                'max:30',
+                'regex:/^[0-9A-Z\-\/\s]+$/'
+            ],
+            'fecha_inscripcion' => [
+                'required',
+                'date',
+                'before_or_equal:today',
+                'after_or_equal:fecha_escritura'
+            ]
+        ];
+
+        $messages = [
+            'tramite_id.required' => 'No se pudo identificar el trámite asociado',
+            'tramite_id.integer' => 'El identificador del trámite debe ser un número válido',
+            'tramite_id.exists' => 'El trámite especificado no existe o no es válido',
+            
+            'nombre_apoderado.required' => 'El nombre del apoderado legal es obligatorio',
+            'nombre_apoderado.min' => 'El nombre del apoderado debe tener al menos 2 caracteres',
+            'nombre_apoderado.max' => 'El nombre del apoderado no puede exceder 100 caracteres',
+            'nombre_apoderado.regex' => 'El nombre del apoderado solo puede contener letras, espacios, apostrofes y puntos',
+            
+            'numero_escritura.required' => 'El número de escritura pública es obligatorio',
+            'numero_escritura.min' => 'El número de escritura es obligatorio',
+            'numero_escritura.max' => 'El número de escritura no puede exceder 20 caracteres',
+            'numero_escritura.regex' => 'El número de escritura solo puede contener números, letras mayúsculas, guiones y diagonales',
+            
+            'nombre_notario.required' => 'El nombre del notario público es obligatorio',
+            'nombre_notario.min' => 'El nombre del notario debe tener al menos 2 caracteres',
+            'nombre_notario.max' => 'El nombre del notario no puede exceder 100 caracteres',
+            'nombre_notario.regex' => 'El nombre del notario solo puede contener letras, espacios, apostrofes y puntos',
+            
+            'numero_notario.required' => 'El número del notario público es obligatorio',
+            'numero_notario.min' => 'El número del notario es obligatorio',
+            'numero_notario.max' => 'El número del notario no puede exceder 10 dígitos',
+            'numero_notario.regex' => 'El número del notario solo puede contener dígitos numéricos',
+            
+            'entidad_federativa.required' => 'Debe seleccionar una entidad federativa',
+            'entidad_federativa.integer' => 'Debe seleccionar una entidad federativa válida',
+            'entidad_federativa.between' => 'La entidad federativa seleccionada no es válida',
+            'entidad_federativa.exists' => 'La entidad federativa seleccionada no existe',
+            
+            'fecha_escritura.required' => 'La fecha de la escritura pública es obligatoria',
+            'fecha_escritura.date' => 'La fecha de escritura debe ser una fecha válida',
+            'fecha_escritura.before_or_equal' => 'La fecha de escritura no puede ser posterior a hoy',
+            'fecha_escritura.after' => 'La fecha de escritura debe ser posterior al año 1900',
+            
+            'numero_registro.required' => 'El número de registro público mercantil es obligatorio',
+            'numero_registro.min' => 'El número de registro es obligatorio',
+            'numero_registro.max' => 'El número de registro no puede exceder 30 caracteres',
+            'numero_registro.regex' => 'El número de registro solo puede contener números, letras mayúsculas, guiones, diagonales y espacios',
+            
+            'fecha_inscripcion.required' => 'La fecha de inscripción en el registro público es obligatoria',
+            'fecha_inscripcion.date' => 'La fecha de inscripción debe ser una fecha válida',
+            'fecha_inscripcion.before_or_equal' => 'La fecha de inscripción no puede ser posterior a hoy',
+            'fecha_inscripcion.after_or_equal' => 'La fecha de inscripción no puede ser anterior a la fecha de escritura'
+        ];
+
+        $validated = $request->validate($rules, $messages);
+
+        // Validaciones adicionales personalizadas
+        $this->validateFechasAdicionales($validated);
+
+        return $validated;
+    }
+
+    /**
+     * Validaciones adicionales para fechas y lógica de negocio
+     *
+     * @param array $validated
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function validateFechasAdicionales(array $validated)
+    {
+        $fechaEscritura = \Carbon\Carbon::parse($validated['fecha_escritura']);
+        $fechaInscripcion = \Carbon\Carbon::parse($validated['fecha_inscripcion']);
+        
+        // Verificar que la fecha de inscripción no sea muy anterior a la fecha de escritura
+        if ($fechaInscripcion->lt($fechaEscritura->subDays(365))) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'fecha_inscripcion' => 'La fecha de inscripción no puede ser más de un año anterior a la fecha de escritura'
+            ]);
+        }
+
+        // Verificar que la fecha de inscripción no sea muy posterior a la fecha de escritura (más de 5 años)
+        if ($fechaInscripcion->gt($fechaEscritura->addYears(5))) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'fecha_inscripcion' => 'La fecha de inscripción no puede ser más de 5 años posterior a la fecha de escritura'
+            ]);
+        }
+
+        // Verificar que las fechas no sean futuras
+        $hoy = \Carbon\Carbon::now();
+        if ($fechaEscritura->isFuture()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'fecha_escritura' => 'La fecha de escritura no puede ser una fecha futura'
+            ]);
+        }
+
+        if ($fechaInscripcion->isFuture()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'fecha_inscripcion' => 'La fecha de inscripción no puede ser una fecha futura'
+            ]);
+        }
+    }
+
+    /**
+     * Método legacy para mantener compatibilidad con el método guardar principal
      *
      * @param Request $request La solicitud a validar
      * @return void
@@ -139,39 +306,22 @@ class ApoderadoLegalController extends Controller
      */
     private function validateRequest(Request $request)
     {
-        $rules = [
-            'nombre-apoderado' => 'required|string|max:100|regex:/^[A-Za-zÀ-ÖØ-öø-ÿ\s\.]+$/',
-            'numero-escritura' => 'required|numeric|max:9999999999',
-            'nombre-notario' => 'required|string|max:100|regex:/^[A-Za-zÀ-ÖØ-öø-ÿ\s\.]+$/',
-            'numero-notario' => 'required|numeric|max:9999999999',
-            'entidad-federativa' => 'required|exists:estado,id',
-            'fecha-escritura' => 'required|date|before_or_equal:today',
-            'numero-registro' => 'required|string|max:20',
-            'fecha-inscripcion' => 'required|date|after_or_equal:fecha-escritura|before_or_equal:today',
+        // Convertir campos con guiones a guiones bajos para compatibilidad
+        $data = $request->all();
+        $mappedData = [
+            'tramite_id' => $data['tramite_id'] ?? 0,
+            'nombre_apoderado' => $data['nombre-apoderado'] ?? '',
+            'numero_escritura' => $data['numero-escritura'] ?? '',
+            'nombre_notario' => $data['nombre-notario'] ?? '',
+            'numero_notario' => $data['numero-notario'] ?? '',
+            'entidad_federativa' => $data['entidad-federativa'] ?? 0,
+            'fecha_escritura' => $data['fecha-escritura'] ?? '',
+            'numero_registro' => $data['numero-registro'] ?? '',
+            'fecha_inscripcion' => $data['fecha-inscripcion'] ?? '',
         ];
-
-        $messages = [
-            'nombre-apoderado.required' => 'El nombre del apoderado legal es obligatorio.',
-            'nombre-apoderado.regex' => 'El nombre del apoderado debe contener solo letras, espacios y puntos.',
-            'numero-escritura.required' => 'El número de escritura es obligatorio.',
-            'numero-escritura.numeric' => 'El número de escritura debe ser numérico.',
-            'nombre-notario.required' => 'El nombre del notario es obligatorio.',
-            'nombre-notario.regex' => 'El nombre del notario debe contener solo letras, espacios y puntos.',
-            'entidad-federativa.required' => 'La entidad federativa es obligatoria.',
-            'entidad-federativa.exists' => 'La entidad federativa seleccionada no es válida.',
-            'fecha-escritura.required' => 'La fecha de escritura es obligatoria.',
-            'fecha-escritura.date' => 'La fecha de escritura debe ser una fecha válida.',
-            'fecha-escritura.before_or_equal' => 'La fecha de escritura no puede ser futura.',
-            'numero-notario.required' => 'El número de notario es obligatorio.',
-            'numero-notario.numeric' => 'El número de notario debe ser numérico.',
-            'numero-registro.required' => 'El número de registro es obligatorio.',
-            'fecha-inscripcion.required' => 'La fecha de inscripción es obligatoria.',
-            'fecha-inscripcion.date' => 'La fecha de inscripción debe ser una fecha válida.',
-            'fecha-inscripcion.after_or_equal' => 'La fecha de inscripción no puede ser anterior a la fecha de escritura.',
-            'fecha-inscripcion.before_or_equal' => 'La fecha de inscripción no puede ser futura.',
-        ];
-
-        $request->validate($rules, $messages);
+        
+        $newRequest = new Request($mappedData);
+        $this->validateFormularioData($newRequest);
     }
 
     /**
