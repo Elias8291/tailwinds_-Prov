@@ -2,8 +2,8 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<div class="max-w-6xl mx-auto">
-    <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-8">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-6">
         @csrf
         
         <!-- Campos ocultos -->
@@ -12,372 +12,375 @@
         <input type="hidden" name="tramite_id" value="{{ $datosTramite['tramite_id'] ?? request()->route('tramite') ?? session('tramite_id') ?? '' }}">
         <input type="hidden" name="tipo_tramite" value="{{ $datosTramite['tipo_tramite'] ?? request()->route('tipo_tramite') ?? 'inscripcion' }}">
 
-        <!-- Datos del Proveedor -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
-                    <i class="fas fa-building text-lg"></i>
+        <!-- Contenedor principal con padding consistente -->
+        <div class="p-6 space-y-8">
+            <!-- Datos del Proveedor -->
+            <div class="space-y-6 p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
+                        <i class="fas fa-building text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Datos del Proveedor</h3>
+                        <p class="text-sm text-gray-500">Información general del solicitante</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Datos del Proveedor</h3>
-                    <p class="text-sm text-gray-500">Información general del solicitante</p>
-                </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Tipo de Proveedor -->
-                <div class="form-group">
-                    <label for="tipo_persona" class="block text-sm font-medium text-gray-700 mb-2">
-                        Tipo de Proveedor <span class="text-red-500">*</span>
-                    </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Tipo de Proveedor -->
+                    <div class="form-group">
+                        <label for="tipo_persona" class="block text-sm font-medium text-gray-700 mb-2">
+                            Tipo de Proveedor <span class="text-red-500">*</span>
+                        </label>
                         <input type="text" 
                                id="tipo_persona"
                                name="tipo_persona"
-                               value="{{ $datosSolicitante['tipo_persona'] ?? '' }}" 
+                               value="{{ $datosTramite['tipo_persona'] ?? $datosSolicitante['tipo_persona'] ?? '' }}" 
                                class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                                readonly>
-                        </div>
+                    </div>
 
-                <!-- RFC -->
-                <div class="form-group">
-                    <label for="rfc" class="block text-sm font-medium text-gray-700 mb-2">
-                        RFC <span class="text-red-500">*</span>
-                    </label>
+                    <!-- RFC -->
+                    <div class="form-group">
+                        <label for="rfc" class="block text-sm font-medium text-gray-700 mb-2">
+                            RFC <span class="text-red-500">*</span>
+                        </label>
                         <input type="text" 
                                id="rfc"
                                name="rfc"
-                               value="{{ $datosSolicitante['rfc'] ?? '' }}" 
+                               value="{{ $datosTramite['rfc'] ?? $datosSolicitante['rfc'] ?? '' }}" 
                                class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                                readonly>
                     </div>
                 </div>
 
-            <!-- CURP (Solo persona física) -->
-            @if(($datosSolicitante['tipo_persona'] ?? '') === 'Física')
-            <div class="form-group mt-6">
-                <label for="curp" class="block text-sm font-medium text-gray-700 mb-2">
-                    CURP <span class="text-red-500">*</span>
-                </label>
+                <!-- CURP (Solo persona física) -->
+                @if(($datosTramite['tipo_persona'] ?? $datosSolicitante['tipo_persona'] ?? '') === 'Física')
+                <div class="form-group">
+                    <label for="curp" class="block text-sm font-medium text-gray-700 mb-2">
+                        CURP <span class="text-red-500">*</span>
+                    </label>
                     <input type="text" 
                            id="curp"
                            name="curp"
-                           value="{{ $datosSolicitante['curp'] ?? '' }}" 
+                           value="{{ $datosTramite['curp'] ?? $datosSolicitante['curp'] ?? '' }}" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                            readonly>
                 </div>
-            @endif
+                @endif
 
-            <!-- Nombre Completo (Solo persona física) -->
-            @if(($datosSolicitante['tipo_persona'] ?? '') === 'Física')
-            <div class="form-group mt-6">
-                <label for="nombre_completo" class="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre Completo <span class="text-red-500">*</span>
-                </label>
+                <!-- Nombre Completo (Solo persona física) -->
+                @if(($datosTramite['tipo_persona'] ?? $datosSolicitante['tipo_persona'] ?? '') === 'Física')
+                <div class="form-group">
+                    <label for="nombre_completo" class="block text-sm font-medium text-gray-700 mb-2">
+                        Nombre Completo <span class="text-red-500">*</span>
+                    </label>
                     <input type="text" 
                            id="nombre_completo"
                            name="nombre_completo"
-                           value="{{ $datosSolicitante['nombre_completo'] ?? auth()->user()->name ?? '' }}" 
+                           value="{{ $datosTramite['nombre_completo'] ?? $datosSolicitante['nombre_completo'] ?? '' }}" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                            readonly>
-            </div>
-            @endif
+                </div>
+                @endif
 
-            <!-- Razón Social (Solo persona moral) -->
-            @if(($datosSolicitante['tipo_persona'] ?? '') === 'Moral')
-            <div class="form-group mt-6">
-                <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
-                    Razón Social <span class="text-red-500">*</span>
-                </label>
+                <!-- Razón Social (Solo persona moral) -->
+                @if(($datosTramite['tipo_persona'] ?? $datosSolicitante['tipo_persona'] ?? '') === 'Moral')
+                <div class="form-group">
+                    <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
+                        Razón Social <span class="text-red-500">*</span>
+                    </label>
                     <input type="text" 
                            id="razon_social"
                            name="razon_social"
-                           value="{{ $datosSolicitante['razon_social'] ?? auth()->user()->name ?? '' }}" 
+                           value="{{ $datosTramite['razon_social'] ?? $datosSolicitante['razon_social'] ?? '' }}" 
                            class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                            readonly>
-            </div>
-            @endif
+                </div>
+                @endif
 
-            <!-- Giro -->
-            @unless($readonly)
-            <div class="form-group mt-6">
-                <label for="giro" class="block text-sm font-medium text-gray-700 mb-2">
-                    Giro <span class="text-red-500">*</span>
-                </label>
-                <textarea id="giro" 
-                          name="giro" 
-                          rows="4"
-                          class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('giro') border-red-500 @enderror"
-                          placeholder="Describa el giro de la empresa">{{ old('giro', $datosTramite['giro'] ?? '') }}</textarea>
+                <!-- Giro -->
+                @unless($readonly)
+                <div class="form-group">
+                    <label for="giro" class="block text-sm font-medium text-gray-700 mb-2">
+                        Giro <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="giro" 
+                              name="giro" 
+                              rows="4"
+                              class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('giro') border-red-500 @enderror"
+                              placeholder="Describa el giro de la empresa">{{ old('giro', $datosTramite['giro'] ?? '') }}</textarea>
                     @error('giro')
                         <p class="mt-1 text-sm text-red-600">{{ $errors->first('giro') }}</p>
                     @enderror
-            </div>
-            @else
-            <div class="form-group mt-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Giro</label>
-                <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
-                    <p class="text-gray-700">{{ $datosTramite['giro'] ?? 'No especificado' }}</p>
-            </div>
-        </div>
-            @endunless
-        </div>
-
-        <!-- Actividades Económicas -->
-        @unless($readonly)
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
-                    <i class="fas fa-chart-line text-lg"></i>
                 </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Actividades Económicas</h3>
-                    <p class="text-sm text-gray-500">Selecciona las actividades económicas que realizas</p>
-                </div>
-            </div>
-
-            <!-- Buscador de actividades -->
-            <div class="form-group mb-6">
-                <label for="actividad_search" class="block text-sm font-medium text-gray-700 mb-2">
-                    Buscar Actividades *
-                    </label>
-                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p class="text-sm text-blue-700">
-                        <i class="fas fa-lightbulb mr-2"></i>
-                        Agrega las actividades económicas tal como aparecen en tu constancia de situación fiscal.
-                            </p>
+                @else
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Giro</label>
+                    <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
+                        <p class="text-gray-700">{{ $datosTramite['giro'] ?? 'No especificado' }}</p>
                     </div>
-                
-                <div class="relative">
-                    <input type="text" 
-                           id="actividad_search" 
-                           placeholder="Escriba para buscar actividad..."
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
-                           autocomplete="off">
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <i class="fas fa-search text-gray-400"></i>
+                </div>
+                @endunless
+            </div>
+
+            <!-- Actividades Económicas -->
+            @unless($readonly)
+            <div class="space-y-6 p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
+                        <i class="fas fa-chart-line text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Actividades Económicas</h3>
+                        <p class="text-sm text-gray-500">Selecciona las actividades económicas que realizas</p>
+                    </div>
+                </div>
+
+                <!-- Buscador de actividades -->
+                <div class="form-group mb-6">
+                    <label for="actividad_search" class="block text-sm font-medium text-gray-700 mb-2">
+                        Buscar Actividades *
+                        </label>
+                    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p class="text-sm text-blue-700">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            Agrega las actividades económicas tal como aparecen en tu constancia de situación fiscal.
+                                </p>
                         </div>
-                    </div>
-                
-                <!-- Dropdown de resultados -->
-                <div id="actividad-dropdown" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl hidden max-h-64 overflow-hidden">
-                    <div id="actividad-resultados" class="max-h-48 overflow-y-auto"></div>
-                        <div id="actividad-no-resultados" class="px-6 py-8 text-center hidden">
-                        <p class="text-gray-500 text-sm">No se encontraron actividades</p>
-                                <button type="button" 
-                                        id="btn-agregar-manual"
-                                class="mt-4 px-4 py-2 bg-[#9d2449] text-white text-sm rounded-lg hover:bg-[#8a203f] transition-colors">
-                            <i class="fas fa-plus mr-2"></i>Agregar actividad personalizada
-                                </button>
+                    
+                    <div class="relative">
+                        <input type="text" 
+                               id="actividad_search" 
+                               placeholder="Escriba para buscar actividad..."
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
+                               autocomplete="off">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
                             </div>
                         </div>
+                    
+                    <!-- Dropdown de resultados -->
+                    <div id="actividad-dropdown" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl hidden max-h-64 overflow-hidden">
+                        <div id="actividad-resultados" class="max-h-48 overflow-y-auto"></div>
+                            <div id="actividad-no-resultados" class="px-6 py-8 text-center hidden">
+                            <p class="text-gray-500 text-sm">No se encontraron actividades</p>
+                                    <button type="button" 
+                                            id="btn-agregar-manual"
+                                    class="mt-4 px-4 py-2 bg-[#9d2449] text-white text-sm rounded-lg hover:bg-[#8a203f] transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Agregar actividad personalizada
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                <!-- Actividades seleccionadas -->
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Actividades Seleccionadas</label>
+                    <div id="actividades-seleccionadas" class="min-h-[60px] p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                        <div id="no-actividades-message" class="flex items-center justify-center text-gray-400 text-sm italic">
+                            <i class="fas fa-plus-circle mr-2"></i>No hay actividades seleccionadas
+                    </div>
+                    </div>
+                    <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
+                    @error('actividades_seleccionadas')
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('actividades_seleccionadas') }}</p>
+                        @enderror
+                </div>
+                    </div>
+            @else
+            <!-- Mostrar actividades en modo solo lectura -->
+            <div class="space-y-6 p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
+                        <i class="fas fa-chart-line text-lg"></i>
+                </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Actividades Económicas</h3>
+                        <p class="text-sm text-gray-500">Actividades económicas registradas</p>
+                    </div>
+                </div>
+                <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
+                    @php
+                        $actividades_ids = json_decode($datosTramite['actividades_seleccionadas'] ?? '[]', true);
+                        $actividades_nombres = [];
+                        if (!empty($actividades_ids)) {
+                            $actividades_nombres = \App\Models\Actividad::whereIn('id', $actividades_ids)
+                                ->select('id', 'nombre', 'sector_id')
+                                ->get()
+                                ->keyBy('id');
+                        }
+                    @endphp
+                    @if(empty($actividades_ids))
+                        <p class="text-gray-500 italic">No hay actividades seleccionadas</p>
+                    @else
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($actividades_ids as $actividad_id)
+                                @php $actividad = $actividades_nombres->get($actividad_id); @endphp
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    {{ $actividad->nombre ?? 'Actividad no encontrada' }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+            @endunless
+
+            <!-- Información Adicional -->
+            <div class="space-y-6 p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
+                        <i class="fas fa-globe text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Información Adicional</h3>
+                        <p class="text-sm text-gray-500">Datos opcionales del solicitante</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="pagina_web" class="block text-sm font-medium text-gray-700 mb-2">Página Web</label>
+                    @unless($readonly)
+                    <input type="url" 
+                           id="pagina_web" 
+                           name="pagina_web"
+                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('pagina_web') border-red-500 @enderror"
+                           placeholder="https://www.ejemplo.com"
+                           value="{{ old('pagina_web', $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? '') }}">
+                        @error('pagina_web')
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('pagina_web') }}</p>
+                        @enderror
+                    @else
+                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                        @if(!empty($datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? ''))
+                            <a href="{{ $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                {{ $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] }}
+                            </a>
+                        @else
+                            <span class="text-gray-500">No especificada</span>
+                        @endif
+                    </div>
+                    @endunless
+                </div>
+            </div>
+
+            <!-- Datos de Contacto -->
+            <div class="space-y-6 p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
+                        <i class="fas fa-address-card text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Datos de Contacto</h3>
+                        <p class="text-sm text-gray-500">Persona de referencia para comunicaciones</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Nombre -->
+                    <div class="form-group">
+                        <label for="contacto_nombre" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nombre Completo <span class="text-red-500">*</span>
+                        </label>
+                        @unless($readonly)
+                        <input type="text" 
+                               id="contacto_nombre" 
+                               name="contacto_nombre"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_nombre') border-red-500 @enderror"
+                               placeholder="Nombre completo del contacto"
+                               value="{{ old('contacto_nombre', $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? '') }}">
+                            @error('contacto_nombre')
+                                <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_nombre') }}</p>
+                            @enderror
+                        @else
+                        <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                            {{ $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? 'No especificado' }}
+                    </div>
+                        @endunless
                     </div>
 
-            <!-- Actividades seleccionadas -->
-            <div class="form-group">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Actividades Seleccionadas</label>
-                <div id="actividades-seleccionadas" class="min-h-[60px] p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div id="no-actividades-message" class="flex items-center justify-center text-gray-400 text-sm italic">
-                        <i class="fas fa-plus-circle mr-2"></i>No hay actividades seleccionadas
-                </div>
-                </div>
-                <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
-                @error('actividades_seleccionadas')
-                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('actividades_seleccionadas') }}</p>
-                    @enderror
-            </div>
-                </div>
-        @else
-        <!-- Mostrar actividades en modo solo lectura -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
-                    <i class="fas fa-chart-line text-lg"></i>
-            </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Actividades Económicas</h3>
-                    <p class="text-sm text-gray-500">Actividades económicas registradas</p>
-                </div>
-            </div>
-            <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
-                @php
-                    $actividades_ids = json_decode($datosTramite['actividades_seleccionadas'] ?? '[]', true);
-                    $actividades_nombres = [];
-                    if (!empty($actividades_ids)) {
-                        $actividades_nombres = \App\Models\Actividad::whereIn('id', $actividades_ids)
-                            ->select('id', 'nombre', 'sector_id')
-                            ->get()
-                            ->keyBy('id');
-                    }
-                @endphp
-                @if(empty($actividades_ids))
-                    <p class="text-gray-500 italic">No hay actividades seleccionadas</p>
-                @else
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($actividades_ids as $actividad_id)
-                            @php $actividad = $actividades_nombres->get($actividad_id); @endphp
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#9d2449]/10 text-[#9d2449] border border-[#9d2449]/20">
-                                <i class="fas fa-check-circle mr-1"></i>
-                                {{ $actividad->nombre ?? 'Actividad no encontrada' }}
-                            </span>
-                        @endforeach
+                    <!-- Cargo -->
+                    <div class="form-group">
+                        <label for="contacto_cargo" class="block text-sm font-medium text-gray-700 mb-2">
+                            Cargo o Puesto <span class="text-red-500">*</span>
+                        </label>
+                        @unless($readonly)
+                        <input type="text" 
+                               id="contacto_cargo" 
+                               name="contacto_cargo"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_cargo') border-red-500 @enderror"
+                               placeholder="Cargo en la empresa"
+                               value="{{ old('contacto_cargo', $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? '') }}">
+                            @error('contacto_cargo')
+                                <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_cargo') }}</p>
+                            @enderror
+                        @else
+                        <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                            {{ $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? 'No especificado' }}
                     </div>
-            @endif
-        </div>
-        </div>
-        @endunless
+                        @endunless
+                    </div>
 
-        <!-- Información Adicional -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
-                    <i class="fas fa-globe text-lg"></i>
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="contacto_correo" class="block text-sm font-medium text-gray-700 mb-2">
+                            Correo Electrónico <span class="text-red-500">*</span>
+                        </label>
+                        @unless($readonly)
+                        <input type="email" 
+                               id="contacto_correo" 
+                               name="contacto_correo"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_correo') border-red-500 @enderror"
+                               placeholder="correo@ejemplo.com"
+                               value="{{ old('contacto_correo', $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? '') }}">
+                            @error('contacto_correo')
+                                <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_correo') }}</p>
+                            @enderror
+                        @else
+                        <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                            {{ $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? 'No especificado' }}
+                    </div>
+                        @endunless
+                    </div>
+
+                    <!-- Teléfono -->
+                    <div class="form-group">
+                        <label for="contacto_telefono" class="block text-sm font-medium text-gray-700 mb-2">
+                            Teléfono de Contacto <span class="text-red-500">*</span>
+                        </label>
+                        @unless($readonly)
+                        <input type="tel" 
+                               id="contacto_telefono" 
+                               name="contacto_telefono"
+                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_telefono') border-red-500 @enderror"
+                               placeholder="10 dígitos"
+                               value="{{ old('contacto_telefono', $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? '') }}">
+                            @error('contacto_telefono')
+                                <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_telefono') }}</p>
+                            @enderror
+                        @else
+                        <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                            {{ $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? 'No especificado' }}
+                    </div>
+                        @endunless
                 </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Información Adicional</h3>
-                    <p class="text-sm text-gray-500">Datos opcionales del solicitante</p>
                 </div>
             </div>
-
-            <div class="form-group">
-                <label for="pagina_web" class="block text-sm font-medium text-gray-700 mb-2">Página Web</label>
-                @unless($readonly)
-                <input type="url" 
-                       id="pagina_web" 
-                       name="pagina_web"
-                       class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('pagina_web') border-red-500 @enderror"
-                       placeholder="https://www.ejemplo.com"
-                       value="{{ old('pagina_web', $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? '') }}">
-                    @error('pagina_web')
-                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('pagina_web') }}</p>
-                    @enderror
-                @else
-                <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
-                    @if(!empty($datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? ''))
-                        <a href="{{ $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] }}" target="_blank" class="text-blue-600 hover:text-blue-800">
-                            {{ $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] }}
-                        </a>
-                    @else
-                        <span class="text-gray-500">No especificada</span>
-                @endif
-            </div>
-                @endunless
         </div>
-        </div>
-
-        <!-- Datos de Contacto -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
-                    <i class="fas fa-address-card text-lg"></i>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Datos de Contacto</h3>
-                    <p class="text-sm text-gray-500">Persona de referencia para comunicaciones</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Nombre -->
-                <div class="form-group">
-                    <label for="contacto_nombre" class="block text-sm font-medium text-gray-700 mb-2">
-                        Nombre Completo <span class="text-red-500">*</span>
-                    </label>
-                    @unless($readonly)
-                    <input type="text" 
-                           id="contacto_nombre" 
-                           name="contacto_nombre"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_nombre') border-red-500 @enderror"
-                           placeholder="Nombre completo del contacto"
-                           value="{{ old('contacto_nombre', $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? '') }}">
-                        @error('contacto_nombre')
-                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_nombre') }}</p>
-                        @enderror
-                    @else
-                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
-                        {{ $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? 'No especificado' }}
-                </div>
-                    @endunless
-                </div>
-
-                <!-- Cargo -->
-                <div class="form-group">
-                    <label for="contacto_cargo" class="block text-sm font-medium text-gray-700 mb-2">
-                        Cargo o Puesto <span class="text-red-500">*</span>
-                    </label>
-                    @unless($readonly)
-                    <input type="text" 
-                           id="contacto_cargo" 
-                           name="contacto_cargo"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_cargo') border-red-500 @enderror"
-                           placeholder="Cargo en la empresa"
-                           value="{{ old('contacto_cargo', $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? '') }}">
-                        @error('contacto_cargo')
-                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_cargo') }}</p>
-                        @enderror
-                    @else
-                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
-                        {{ $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? 'No especificado' }}
-                </div>
-                    @endunless
-                </div>
-
-                <!-- Email -->
-                <div class="form-group">
-                    <label for="contacto_correo" class="block text-sm font-medium text-gray-700 mb-2">
-                        Correo Electrónico <span class="text-red-500">*</span>
-                    </label>
-                    @unless($readonly)
-                    <input type="email" 
-                           id="contacto_correo" 
-                           name="contacto_correo"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_correo') border-red-500 @enderror"
-                           placeholder="correo@ejemplo.com"
-                           value="{{ old('contacto_correo', $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? '') }}">
-                        @error('contacto_correo')
-                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_correo') }}</p>
-                        @enderror
-                    @else
-                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
-                        {{ $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? 'No especificado' }}
-                </div>
-                    @endunless
-                </div>
-
-                <!-- Teléfono -->
-                <div class="form-group">
-                    <label for="contacto_telefono" class="block text-sm font-medium text-gray-700 mb-2">
-                        Teléfono de Contacto <span class="text-red-500">*</span>
-                    </label>
-                    @unless($readonly)
-                    <input type="tel" 
-                           id="contacto_telefono" 
-                           name="contacto_telefono"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_telefono') border-red-500 @enderror"
-                           placeholder="10 dígitos"
-                           value="{{ old('contacto_telefono', $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? '') }}">
-                        @error('contacto_telefono')
-                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_telefono') }}</p>
-                        @enderror
-                    @else
-                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
-                        {{ $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? 'No especificado' }}
-            </div>
-                    @endunless
-        </div>
-        </div>
-            </div>
 
         <!-- Botones de navegación -->
         @unless($readonly)
         @if(!isset($mostrar_navegacion) || $mostrar_navegacion !== false)
-        <div class="flex justify-end">
+        <div class="flex justify-end p-6 bg-gray-50 border-t border-gray-200">
             <button type="submit" 
                     class="px-8 py-3 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg hover:from-[#8a203f] hover:to-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#9d2449] focus:ring-offset-2">
                 <i class="fas fa-save mr-2"></i>
                 Guardar y Continuar
                 <i class="fas fa-arrow-right ml-2"></i>
-                </button>
-            </div>
+            </button>
+        </div>
         @endif
         @endunless
     </form>
@@ -978,7 +981,17 @@ input, select, textarea, button {
     transition: all 0.2s ease-in-out;
 }
 
-/* Efectos hover */
+/* Efectos hover para las secciones */
+.space-y-6 > div {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.space-y-6 > div:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Efectos hover para campos de formulario */
 .form-group:hover input:not([readonly]),
 .form-group:hover select:not([readonly]),
 .form-group:hover textarea:not([readonly]) {

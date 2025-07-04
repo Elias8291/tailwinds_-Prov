@@ -980,12 +980,73 @@ class RevisionController extends Controller
      */
     protected function registrarHistorial(Tramite $tramite, string $accion, ?string $comentario = null)
     {
-        $tramite->historial()->create([
+        Log::info("Registrando historial de trámite", [
+            'tramite_id' => $tramite->id,
             'accion' => $accion,
-            'comentario' => $comentario,
-            'usuario_id' => Auth::id(),
-            'fecha' => now()
+            'comentario' => $comentario
         ]);
+        
+        return \App\Models\Log::create([
+            'tramite_id' => $tramite->id,
+            'usuario_id' => Auth::id(),
+            'accion' => $accion,
+            'comentario' => $comentario
+        ]);
+    }
+
+    /**
+     * Obtener datos de una sección específica de un trámite
+     */
+    public function obtenerDatosSeccion($tramiteId)
+    {
+        try {
+            Log::info('Obteniendo datos de sección', [
+                'tramite_id' => $tramiteId,
+                'seccion' => request()->segment(5)
+            ]);
+
+            $tramite = Tramite::with([
+                'solicitante',
+                'detalleTramite.contacto',
+                'direccion.municipio',
+                'direccion.estado',
+                'direccion.pais',
+                'datosConstitucion',
+                'representanteLegal',
+                'accionistas',
+                'documentos'
+            ])->findOrFail($tramiteId);
+
+            // Obtener la sección de la URL
+            $seccion = request()->segment(5);
+
+            // Mapear secciones a sus respectivos métodos
+            $datos = match ($seccion) {
+                'datos-generales' => $this->obtenerDatosGenerales($tramite),
+                'domicilio' => $this->obtenerDatosDomicilio($tramite),
+                'constitucion' => $this->obtenerDatosConstitucion($tramite),
+                'apoderado' => $this->obtenerDatosApoderado($tramite),
+                'accionistas' => $this->obtenerDatosAccionistas($tramite),
+                'documentos' => $this->obtenerDocumentos($tramite),
+                default => throw new \Exception("Sección no válida: {$seccion}")
+            };
+
+            return response()->json([
+                'success' => true,
+                'data' => $datos
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("Error al obtener datos de sección para trámite {$tramiteId}: " . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar los datos: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

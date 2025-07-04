@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\RfcSearchController;
 use App\Http\Controllers\HistorialProveedorController;
 use App\Http\Controllers\Api\SectorController;
 use App\Http\Controllers\LocationDataController;
+use App\Http\Controllers\RevisionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,7 @@ Route::get('/actividades', [SectorController::class, 'getAllActividades']);
 // Sector Routes
 Route::get('/sectores/{sector}/actividades', [SectorController::class, 'getActividades']);
 
+// Location Data Routes
 Route::get('/location-data/{codigoPostal}', [LocationDataController::class, 'getLocationData']);
 
 // Tramite Routes

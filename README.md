@@ -249,3 +249,130 @@ Log::info('Documento procesado y almacenado');
 3. Implementar notificaciones por email
 4. Agregar dashboard para el solicitante
 5. Implementar sistema de roles y permisos completo
+
+# Revisión de Trámite - Implementación
+
+Este documento describe la implementación del sistema de revisión de trámites, detallando la estructura y funcionamiento de cada componente.
+
+## Estructura del Proyecto
+
+```
+resources/
+├── views/
+│   ├── revision/
+│   │   └── show.blade.php
+│   └── components/
+│       ├── revision/
+│       │   └── header.blade.php
+│       └── formularios/
+│           ├── seccion-datos-generales.blade.php
+│           ├── seccion-domicilio.blade.php
+│           ├── seccion-constitucion.blade.php
+│           ├── seccion-apoderado.blade.php
+│           ├── seccion-accionistas.blade.php
+│           └── seccion-documentos.blade.php
+public/
+└── js/
+    └── revision/
+        └── form-loader.js
+```
+
+## Componentes Principales
+
+### 1. Vista Principal (show.blade.php)
+- Implementa la estructura base de la página
+- Utiliza un diseño de grid responsive (1 columna en móvil, 2 columnas en XL)
+- Integra el header y las secciones de formularios
+- Maneja estados de carga con animaciones Tailwind
+
+### 2. Header Component (header.blade.php)
+- Componente reutilizable para el encabezado
+- Muestra información del trámite (ID, Tipo, RFC)
+- Utiliza gradientes y diseño moderno
+- Props:
+  - tramiteId
+  - tipoTramite
+  - rfc
+
+### 3. Form Loader (form-loader.js)
+- Clase JavaScript para manejar la carga de datos
+- Características:
+  - Carga asíncrona de datos por sección
+  - Manejo de estados (loading, error, loaded)
+  - Sistema de eventos para actualización de UI
+  - Mapeo automático de controladores a endpoints
+
+## Estados de UI
+
+### Loading State
+```html
+<div class="form-section loading">
+    <div class="loading-indicator">
+        <!-- Animación de carga con Tailwind -->
+    </div>
+</div>
+```
+
+### Error State
+```html
+<div class="form-section error">
+    <!-- Mensaje de error -->
+</div>
+```
+
+### Loaded State
+```html
+<div class="form-section loaded">
+    <!-- Contenido del formulario -->
+</div>
+```
+
+## Rutas API
+
+Las rutas para cargar datos siguen este patrón:
+```
+/formularios/{seccion}/obtener-datos/{tramiteId}
+```
+
+Ejemplo:
+```
+/formularios/datos-generales/obtener-datos/017588
+/formularios/domicilio/obtener-datos/017588
+```
+
+## Implementación Paso a Paso
+
+1. **Preparación de la Vista**
+   - Crear estructura base con grid system
+   - Implementar header component
+   - Configurar secciones de formulario
+
+2. **Componentes de Formulario**
+   - Cada sección es un componente independiente
+   - Props para modo readonly y datos
+   - Estados de carga y error
+
+3. **JavaScript (FormLoader)**
+   - Inicialización y carga de datos
+   - Manejo de estados y errores
+   - Actualización de UI
+
+4. **Estilos**
+   - Uso de Tailwind para diseño responsive
+   - Animaciones y transiciones
+   - Estados visuales (loading, error)
+
+## Próximos Pasos
+
+1. Implementar validación de formularios
+2. Agregar sistema de guardado automático
+3. Mejorar manejo de errores
+4. Implementar caché de datos
+5. Agregar tests automatizados
+
+## Notas de Desarrollo
+
+- Usar `php artisan view:clear` si hay problemas con los componentes
+- Verificar rutas API en `routes/web.php`
+- Asegurar permisos de controladores
+- Mantener consistencia en nombres de endpoints
