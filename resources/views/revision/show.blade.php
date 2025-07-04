@@ -181,124 +181,7 @@
         </div>
     </div>
 
-    <!-- Modal para ver mapa completo -->
-    <div id="mapa-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" onclick="cerrarModalMapa()"></div>
-            
-            <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden border-4 border-green-200">
-                <!-- Header mejorado -->
-                <div class="p-6 border-b bg-gradient-to-r from-green-600 via-teal-600 to-emerald-600">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-2xl font-bold text-white">🗺️ Verificación Geográfica Completa</h3>
-                                <p class="text-green-100 text-sm mt-1">Análisis detallado del domicilio y calles aledañas</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <!-- Controles del mapa -->
-                            <div class="flex items-center space-x-2 bg-white bg-opacity-20 rounded-lg px-3 py-2">
-                                <button onclick="cambiarVistaMapaModal('roadmap')" 
-                                        class="px-2 py-1 bg-white bg-opacity-30 hover:bg-opacity-50 rounded text-white text-xs font-medium transition-all">
-                                    🗺️ Mapa
-                                </button>
-                                <button onclick="cambiarVistaMapaModal('satellite')" 
-                                        class="px-2 py-1 bg-white bg-opacity-30 hover:bg-opacity-50 rounded text-white text-xs font-medium transition-all">
-                                    🛰️ Satélite
-                                </button>
-                                <button onclick="cambiarVistaMapaModal('hybrid')" 
-                                        class="px-2 py-1 bg-white bg-opacity-30 hover:bg-opacity-50 rounded text-white text-xs font-medium transition-all">
-                                    🔗 Híbrido
-                                </button>
-                            </div>
-                            <button type="button" class="text-white hover:text-green-200 transition-colors p-2 hover:bg-white hover:bg-opacity-20 rounded-lg" onclick="cerrarModalMapa()">
-                        <span class="sr-only">Cerrar</span>
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                </div>
-            </div>
-                
-                <!-- Información de la dirección en header -->
-                <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-green-50 border-b border-green-100">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500 font-medium">📍 Dirección Completa:</p>
-                                <p id="direccion-modal-completa" class="text-lg font-semibold text-gray-900">Cargando dirección...</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="copiarDireccion()" 
-                                    class="flex items-center space-x-2 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-all text-sm font-medium">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                </svg>
-                                <span>Copiar</span>
-                            </button>
-                            <button onclick="abrirEnGoogleMaps()" 
-                                    class="flex items-center space-x-2 px-3 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-all text-sm font-medium">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
-                                <span>Google Maps</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Contenedor del mapa principal -->
-                <div class="flex-1 overflow-hidden" style="height: 75vh;">
-                    <div id="mapa-domicilio" class="w-full h-full relative">
-                        <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-50 z-10">
-                            <div class="text-center">
-                                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mb-4"></div>
-                                <p class="text-lg font-medium text-gray-700">Cargando mapa detallado...</p>
-                                <p class="text-sm text-gray-500 mt-2">Preparando vista de calles aledañas</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Footer con información adicional -->
-                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-6 text-sm text-gray-600">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                                <span>Ubicación exacta</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                <span>Calles principales</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                                <span>Puntos de referencia</span>
-                            </div>
-                        </div>
-                        <div class="text-xs text-gray-400">
-                            🗺️ Powered by Google Maps
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Header Principal Mejorado -->
     <div class="max-w-[1800px] mx-auto px-8 py-6">
@@ -1785,7 +1668,12 @@
             // Inicializar scroll sincronizado
             initScrollSincronizado();
             
-            console.log('Sistema de revisión avanzado cargado');
+            // Inicializar manejador de mapas
+            if (window.RevisionMapHandler) {
+                window.revisionMapHandler = new window.RevisionMapHandler();
+            }
+            
+            // Sistema de revisión avanzado cargado
         });
 
         // Función para mostrar notificaciones
@@ -1848,30 +1736,9 @@
             }, duracion);
         }
 
-        // Hacer funciones globales para uso en onclick
-        window.abrirMapaDomicilio = abrirMapaDomicilio;
-        window.cerrarModalMapa = cerrarModalMapa;
+        // Hacer funciones globales para uso en onclick (solo las que están definidas localmente)
         window.obtenerDireccionDomicilio = obtenerDireccionDomicilio;
-        window.mostrarDocumentoEnPanel = mostrarDocumentoEnPanel;
-        window.cerrarVisorDocumento = cerrarVisorDocumento;
-        window.verDocumento = verDocumento;
-        window.aprobarDocumento = aprobarDocumento;
-        window.rechazarDocumento = rechazarDocumento;
-        window.procesarRechazoDocumento = procesarRechazoDocumento;
-        window.cancelarRechazoDocumento = cancelarRechazoDocumento;
-        window.completarCotejo = completarCotejo;
-        window.verDocumentoCompleto = verDocumentoCompleto;
-        window.abrirDocumentoNuevaPestana = abrirDocumentoNuevaPestana;
-        window.cambiarVistaMapaModal = cambiarVistaMapaModal;
-        window.copiarDireccion = copiarDireccion;
-        window.abrirEnGoogleMaps = abrirEnGoogleMaps;
-        window.abrirModalDocumento = abrirModalDocumento;
-        window.cerrarModalDocumento = cerrarModalDocumento;
-        window.abrirModalDocumentoRevision = abrirModalDocumentoRevision;
-        window.aplicarRevisionDocumento = aplicarRevisionDocumento;
-        window.guardarComentarioDocumento = guardarComentarioDocumento;
         window.mostrarNotificacion = mostrarNotificacion;
-        window.mostrarContenidoEspecialSeccion = mostrarContenidoEspecialSeccion;
         
         // Sistema de redimensionamiento
         function initResizeSystem() {
@@ -1945,6 +1812,9 @@
                     
                     // Cargar documentos de la sección
                     cargarDocumentosSeccion(window.seccionActual);
+                    
+                    // Actualizar material de apoyo según la sección
+                    actualizarMaterialApoyoSegunSeccion(window.seccionActual);
                 });
             });
             
@@ -2009,18 +1879,14 @@
 
         // Actualizar visualización del estado de sección
         function actualizarEstadoSeccion(seccion, estado) {
-            console.log('🔄 Actualizando estado de sección:', seccion, 'a:', estado);
-            
             // Buscar el span de estado en la sección actual
             const revisionControl = document.querySelector(`.revision-controls[data-seccion="${seccion}"]`);
             if (!revisionControl) {
-                console.warn('⚠️ No se encontró revision-controls para sección:', seccion);
                 return;
             }
             
             const estadoSpan = revisionControl.querySelector('.estado-seccion');
             if (!estadoSpan) {
-                console.warn('⚠️ No se encontró estado-seccion span para:', seccion);
                 return;
             }
             
@@ -2032,17 +1898,14 @@
                 case 'aprobado':
                     estadoSpan.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-200');
                     estadoSpan.textContent = '✅ Aprobado';
-                    console.log('✅ Estado actualizado a APROBADO');
                     break;
                 case 'rechazado':
                     estadoSpan.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-200');
                     estadoSpan.textContent = '❌ Rechazado';
-                    console.log('❌ Estado actualizado a RECHAZADO');
                     break;
                 default:
                     estadoSpan.classList.add('bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-200');
                     estadoSpan.textContent = '⏳ Pendiente';
-                    console.log('⏳ Estado actualizado a PENDIENTE');
             }
             
             // Actualizar indicador en el tab
@@ -2398,6 +2261,10 @@
             if (panel.style.display === 'none') {
                 panel.style.display = 'block';
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>';
+                
+                // Mostrar contenido según la sección actual
+                const seccionActual = window.seccionActual || 'general';
+                actualizarMaterialApoyoSegunSeccion(seccionActual);
             } else {
                 panel.style.display = 'none';
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>';
@@ -2832,147 +2699,7 @@
             mostrarNotificacion(`🆕 Abriendo en nueva pestaña: ${documentoActualNombre}`, 'success');
         }
 
-        // Funciones para el modal de mapa
-        function abrirMapaDomicilio() {
-            const modal = document.getElementById('mapa-modal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                
-                // Obtener dirección del domicilio usando la función mejorada
-                const direccion = obtenerDireccionDomicilio();
-                console.log('🗺️ Abriendo mapa con dirección:', direccion);
-                
-                // Actualizar dirección en el modal
-                const direccionModalCompleta = document.getElementById('direccion-modal-completa');
-                if (direccionModalCompleta) {
-                    direccionModalCompleta.textContent = direccion;
-                }
-                
-                // Mostrar loading inicial con el nuevo diseño
-                const mapContainer = document.getElementById('mapa-domicilio');
-                if (mapContainer) {
-                    // El loading ya está en el HTML, solo remover cuando esté listo
-                }
-                
-                // Inicializar mapa después de un pequeño delay para asegurar que el modal esté visible
-                setTimeout(async () => {
-                    try {
-                        console.log('🗺️ Inicializando mapa con GoogleMapsManager:', direccion);
-                        await window.googleMapsManager.createSimpleMap('mapa-domicilio', direccion, {
-                            zoom: 16,
-                            mapTypeId: 'roadmap',
-                            mapTypeControl: true,
-                            streetViewControl: true,
-                            fullscreenControl: true,
-                            zoomControl: true
-                        });
-                        
-                        // Remover el loading overlay después de cargar
-                        setTimeout(() => {
-                            const loadingOverlay = mapContainer.querySelector('.absolute.inset-0');
-                            if (loadingOverlay) {
-                                loadingOverlay.style.display = 'none';
-                            }
-                        }, 1000);
-                    } catch (error) {
-                        console.error('❌ Error inicializando mapa:', error);
-                        // Fallback mejorado si no hay map handler
-                        const loadingOverlay = mapContainer.querySelector('.absolute.inset-0');
-                        if (loadingOverlay) {
-                            loadingOverlay.innerHTML = `
-                                <div class="flex items-center justify-center h-full bg-gradient-to-br from-red-50 to-orange-50">
-                                    <div class="text-center text-gray-700 p-8 max-w-md">
-                                        <svg class="w-20 h-20 mx-auto mb-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        </svg>
-                                        <h4 class="text-2xl font-bold text-gray-800 mb-4">🗺️ Google Maps no disponible</h4>
-                                        <p class="text-lg text-gray-600 mb-6">Verifique su conexión a internet o intente recargar la página</p>
-                                        
-                                        <div class="bg-white border border-gray-300 rounded-xl p-4 mb-6 shadow-sm">
-                                            <p class="text-sm text-gray-500 mb-2">📍 Dirección registrada:</p>
-                                            <p class="text-lg font-semibold text-gray-800">${direccion}</p>
-                                        </div>
-                                        
-                                        <div class="space-y-3">
-                                        <button onclick="window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('${direccion}'), '_blank')" 
-                                                    class="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center font-semibold text-lg shadow-lg">
-                                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                            </svg>
-                                            Abrir en Google Maps
-                                        </button>
-                                            
-                                            <button onclick="location.reload()" 
-                                                    class="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors flex items-center justify-center font-medium">
-                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                                </svg>
-                                                Recargar página
-                                        </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                        mostrarNotificacion('⚠️ Google Maps no está disponible', 'warning');
-                    }
-                }, 500);
-                
-                // Mostrar notificación de debugging
-                mostrarNotificacion(`📍 Dirección detectada: ${direccion}`, 'success');
-            }
-        }
 
-        // Funciones para los controles del modal de mapa
-        function cambiarVistaMapaModal(tipoVista) {
-            if (window.mapHandler && window.mapHandler.changeMapType) {
-                window.mapHandler.changeMapType(tipoVista);
-                mostrarNotificacion(`🗺️ Vista cambiada a: ${tipoVista}`, 'success');
-            } else {
-                mostrarNotificacion('⚠️ Control de vista no disponible', 'warning');
-            }
-        }
-
-        function copiarDireccion() {
-            const direccion = obtenerDireccionDomicilio();
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(direccion).then(() => {
-                    mostrarNotificacion('📋 Dirección copiada al portapapeles', 'success');
-                }).catch(err => {
-                    console.error('Error al copiar:', err);
-                    mostrarNotificacion('❌ Error al copiar la dirección', 'error');
-                });
-            } else {
-                // Fallback para navegadores más antiguos
-                const textArea = document.createElement('textarea');
-                textArea.value = direccion;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                mostrarNotificacion('📋 Dirección copiada', 'success');
-            }
-        }
-
-        function abrirEnGoogleMaps() {
-            const direccion = obtenerDireccionDomicilio();
-            const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`;
-            window.open(url, '_blank');
-            mostrarNotificacion('🗺️ Abriendo Google Maps en nueva pestaña', 'success');
-        }
-
-        function cerrarModalMapa() {
-            const modal = document.getElementById('mapa-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-                
-                // Limpiar el mapa
-                if (window.mapHandler) {
-                    window.mapHandler.cleanup();
-                }
-            }
-        }
 
         // Función para obtener la dirección del domicilio desde los datos del formulario
         function obtenerDireccionDomicilio() {
@@ -3519,145 +3246,38 @@
             `;
         }
 
-        // Mostrar mapa en el panel lateral (versión simple)
+        // Mostrar información del domicilio en el panel
         function mostrarMapaEnPanel() {
             const panelDocumentos = document.getElementById('panel-documentos-revision');
             const direccion = obtenerDireccionDomicilio();
-            console.log('🗺️ Panel lateral - Dirección detectada:', direccion);
+            console.log('📍 Panel lateral - Dirección detectada:', direccion);
             
             panelDocumentos.innerHTML = `
                 <div class="h-full flex flex-col">
-                    <!-- Header del mapa simple -->
-                    <div class="flex-shrink-0 mb-4 p-3 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border border-green-200">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-green-700 font-medium">🗺️ Ubicación</p>
-                                    <p class="text-xs text-green-600">Vista rápida</p>
-                                </div>
+                    <!-- Header del panel -->
+                    <div class="flex-shrink-0 mb-4 p-3 bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg border border-primary-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
                             </div>
-                            <button onclick="abrirMapaDomicilio()" 
-                                    class="text-green-600 hover:text-green-800 transition-all duration-200 transform hover:scale-110"
-                                    title="Ver mapa completo con detalles">
-                                <div class="w-7 h-7 bg-green-100 hover:bg-green-600 rounded-lg flex items-center justify-center transition-all duration-200">
-                                    <svg class="w-3 h-3 hover:text-white transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4a1 1 0 011-1h4M20 8V4a1 1 0 00-1-1h-4m4 8v4a1 1 0 01-1 1h-4M4 16v4a1 1 0 001 1h4"/>
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Dirección compacta -->
-                    <div class="flex-shrink-0 mb-3 p-2 bg-white rounded border border-gray-200">
-                        <p class="text-xs text-gray-500 mb-1">📍 Dirección:</p>
-                        <p class="text-sm font-medium text-gray-900 leading-tight">${direccion}</p>
-                    </div>
-                    
-                    <!-- Contenedor del mapa simple -->
-                    <div class="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                        <div class="p-2 border-b border-gray-200 bg-gray-50">
-                            <div class="flex items-center justify-between">
-                                <h5 class="text-sm font-medium text-gray-900">🗺️ Mapa</h5>
-                                <div class="flex items-center space-x-1">
-                                    <div class="w-2 h-2 bg-red-500 rounded-full"></div>
-                                    <span class="text-xs text-gray-500">Ubicación</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="mapa-panel-lateral" class="w-full" style="height: 350px; min-height: 300px;">
-                            <div class="flex items-center justify-center h-full bg-gray-50">
-                                <div class="text-center">
-                                    <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mb-3"></div>
-                                    <p class="text-sm text-gray-600">Cargando mapa...</p>
-                                </div>
+                            <div>
+                                <p class="text-sm text-primary font-medium">Ubicación</p>
+                                <p class="text-xs text-primary-dark">Información del domicilio</p>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Botón para vista completa -->
-                    <div class="flex-shrink-0 mt-3">
-                        <button onclick="abrirMapaDomicilio()" 
-                                class="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:from-green-700 hover:to-teal-700 transition-all text-sm font-medium">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                            <span>Ver Análisis Completo</span>
-                        </button>
+                    <!-- Dirección completa -->
+                    <div class="flex-shrink-0 mb-3 p-4 bg-white rounded-lg border border-primary-200 shadow-sm">
+                        <p class="text-xs text-gray-500 mb-2">📍 Dirección registrada:</p>
+                        <p class="text-sm font-medium text-gray-900 leading-relaxed">${direccion}</p>
                     </div>
                 </div>
             `;
             
-            // Inicializar mapa simple en el panel después de un pequeño delay
-            setTimeout(() => {
-                if (window.mapHandler && window.mapHandler.initializeSimpleMap) {
-                    console.log('🗺️ Inicializando mapa simple en panel lateral:', direccion);
-                    window.mapHandler.initializeSimpleMap('mapa-panel-lateral', direccion);
-                } else {
-                    console.warn('⚠️ MapHandler simple no disponible, usando fallback');
-                    // Fallback si no hay map handler
-                    crearMapaFallbackPanel(direccion);
-                }
-            }, 500);
-        }
-
-        // Función de fallback para mapa simple en panel lateral
-        function crearMapaFallbackPanel(direccion) {
-            const container = document.getElementById('mapa-panel-lateral');
-            if (container) {
-                container.innerHTML = `
-                    <div class="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                        <div class="text-center text-gray-700 p-4 max-w-xs">
-                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 616 0z"/>
-                                </svg>
-                            </div>
-                            
-                            <h4 class="text-sm font-bold text-gray-800 mb-2">🗺️ Vista de Mapa</h4>
-                            <p class="text-xs text-gray-600 mb-4">Use el botón "Ver Análisis Completo" para acceder al mapa interactivo</p>
-                            
-                            <div class="bg-white border border-blue-200 rounded-lg p-3 mb-4 text-left">
-                                <div class="flex items-start space-x-2">
-                                    <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 616 0z"/>
-                                    </svg>
-                                    <div class="flex-1">
-                                        <p class="text-xs text-gray-500 mb-1">Dirección Registrada:</p>
-                                        <p class="text-xs font-medium text-gray-800 leading-tight">${direccion}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="space-y-2">
-                                <button onclick="abrirMapaDomicilio()" 
-                                        class="w-full px-3 py-2 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:from-green-700 hover:to-teal-700 transition-all text-xs font-medium flex items-center justify-center space-x-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                    </svg>
-                                    <span>Ver Análisis Completo</span>
-                                </button>
-                                
-                                <button onclick="window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('${direccion}'), '_blank')" 
-                                        class="w-full px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium flex items-center justify-center space-x-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                    </svg>
-                                    <span>Abrir en Google Maps</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
         }
 
         // Función para ocultar Material de Apoyo en la sección documentos
@@ -3729,6 +3349,314 @@
             return `${iconos[estado] || '📄'} ${estado}`;
         }
         
+        // Función auxiliar para obtener documento actual
+        function obtenerDocumentoActual() {
+            // Simulamos un documento básico para propósitos de la interfaz
+            return {
+                id: 1,
+                nombre: `Documentos de ${window.seccionActual || 'la sección actual'}`,
+                seccion: window.seccionActual || 'general',
+                estado: 'pendiente'
+            };
+        }
+
+        // Función auxiliar para generar lista de documentos de apoyo
+        function generarListaDocumentosApoyo(documentoActual) {
+            const seccion = window.seccionActual || 'general';
+            
+            // Documentos de ejemplo según la sección
+            const documentosPorSeccion = {
+                'datos-generales': [
+                    { nombre: 'Acta Constitutiva', estado: 'pendiente' },
+                    { nombre: 'RFC', estado: 'aprobado' }
+                ],
+                'domicilio': [
+                    { nombre: 'Comprobante de Domicilio', estado: 'pendiente' },
+                    { nombre: 'Contrato de Arrendamiento', estado: 'pendiente' }
+                ],
+                'constitucion': [
+                    { nombre: 'Escritura Pública', estado: 'pendiente' },
+                    { nombre: 'Protocolización', estado: 'pendiente' }
+                ],
+                'apoderado': [
+                    { nombre: 'Poder Notarial', estado: 'pendiente' },
+                    { nombre: 'Identificación', estado: 'pendiente' }
+                ]
+            };
+
+            const documentos = documentosPorSeccion[seccion] || [
+                { nombre: 'Documento General', estado: 'pendiente' }
+            ];
+
+            return documentos.map(doc => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">${doc.nombre}</p>
+                            <p class="text-xs text-gray-500">Sección: ${seccion}</p>
+                        </div>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-medium rounded-full ${getEstadoClases(doc.estado)}">
+                        ${formatearEstado(doc.estado)}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        // Función para mostrar Material de Apoyo
+        function mostrarMaterialApoyo() {
+            const panelDocumentos = document.getElementById('panel-documentos-revision');
+            const seccionActual = window.seccionActual || 'general';
+            
+            // Si estamos en la sección de domicilio, mostrar mapa
+            if (seccionActual === 'domicilio') {
+                mostrarMaterialApoyoConMapa();
+            } else {
+                const documentoActual = obtenerDocumentoActual();
+                mostrarMaterialApoyoGeneral(documentoActual);
+            }
+        }
+
+        // Función para mostrar material de apoyo con mapa (sección domicilio)
+        function mostrarMaterialApoyoConMapa() {
+            const panelDocumentos = document.getElementById('panel-documentos-revision');
+            const direccion = obtenerDireccionDomicilio();
+            
+            if (!direccion || direccion.trim() === '') {
+                console.warn('⚠️ No se pudo obtener la dirección del domicilio');
+                // Mostrar mensaje de que no hay dirección disponible
+                panelDocumentos.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center">
+                        <div class="text-center py-12 px-6 max-w-md">
+                            <div class="w-20 h-20 bg-gradient-to-br from-amber-100 to-amber-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                                <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">📍 Dirección no disponible</h4>
+                            <p class="text-sm text-gray-600 mb-4 leading-relaxed">
+                                No se pudo obtener la información del domicilio para mostrar el mapa.
+                            </p>
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                <p class="text-sm text-amber-700">
+                                    Asegúrate de que los datos del domicilio estén completos en el formulario.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            panelDocumentos.innerHTML = `
+                <div class="h-full flex flex-col">
+                    <!-- Header del material de apoyo -->
+                    <div class="flex-shrink-0 mb-4 p-3 bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg border border-primary-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-primary font-medium">Material de Apoyo - Domicilio</p>
+                                <p class="text-xs text-primary-dark">Ubicación del domicilio registrado</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección de Ubicación -->
+                    <div class="flex-1">
+                        <div class="bg-white rounded-lg border border-primary-200 shadow-sm overflow-hidden h-full">
+                            <div class="p-3 border-b border-primary-100 bg-gradient-to-r from-primary-50 to-primary-100">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        </svg>
+                                        <h3 class="text-sm font-medium text-primary">Ubicación del Domicilio</h3>
+                                    </div>
+                                    <button onclick="window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('${direccion}'), '_blank')" 
+                                            class="text-primary hover:text-primary-dark transition-colors text-sm flex items-center space-x-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                        <span>Abrir en Google Maps</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 h-full flex flex-col">
+                                <div class="mb-4">
+                                    <p class="text-xs text-gray-500 mb-1">📍 Dirección registrada:</p>
+                                    <p class="text-sm font-medium text-gray-900">${direccion}</p>
+                                </div>
+                                
+                                <div id="mapa-material-apoyo" class="flex-1 w-full rounded-lg overflow-hidden" style="min-height: 400px;">
+                                    <!-- Estado de carga inicial -->
+                                    <div class="flex items-center justify-center h-full bg-gradient-to-br from-primary-50 to-primary-100">
+                                        <div class="text-center">
+                                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
+                                            <p class="text-sm text-gray-600">Cargando mapa...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Inicializar el mapa después de un pequeño delay
+            setTimeout(async () => {
+                const mapContainer = document.getElementById('mapa-material-apoyo');
+                if (!mapContainer) return;
+
+                try {
+                    await inicializarMapaMaterialApoyo(mapContainer, direccion);
+                } catch (error) {
+                    console.error('❌ Error al cargar el mapa:', error);
+                    mostrarErrorMapa(mapContainer, direccion);
+                }
+            }, 500);
+        }
+
+        // Función para mostrar material de apoyo general (otras secciones)
+        function mostrarMaterialApoyoGeneral(documentoActual) {
+            const panelDocumentos = document.getElementById('panel-documentos-revision');
+            
+            panelDocumentos.innerHTML = `
+                <div class="h-full flex flex-col">
+                    <!-- Header del material de apoyo -->
+                    <div class="flex-shrink-0 mb-4 p-3 bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg border border-primary-200">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-primary font-medium">Material de Apoyo</p>
+                                <p class="text-xs text-primary-dark">Documentos y recursos adicionales</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista de documentos -->
+                    <div class="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                        <div class="p-4">
+                            <h5 class="text-sm font-medium text-gray-900 mb-4">📄 Documentos Relacionados</h5>
+                            <div class="space-y-3">
+                                ${generarListaDocumentosApoyo(documentoActual)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Función para inicializar mapa usando Google Maps API directamente
+        async function inicializarMapaMaterialApoyo(container, direccion) {
+            // Verificar si Google Maps está disponible
+            if (!window.google || !window.google.maps) {
+                throw new Error('Google Maps API no está disponible');
+            }
+
+            const { Map, Geocoder, Marker } = window.google.maps;
+            
+            try {
+                // Geocodificar la dirección
+                const geocoder = new Geocoder();
+                const results = await new Promise((resolve, reject) => {
+                    geocoder.geocode({ address: direccion }, (results, status) => {
+                        if (status === 'OK' && results && results.length > 0) {
+                            resolve(results);
+                        } else {
+                            reject(new Error(`Geocodificación falló: ${status}`));
+                        }
+                    });
+                });
+
+                // Crear el mapa
+                const map = new Map(container, {
+                    zoom: 15,
+                    center: results[0].geometry.location,
+                    mapTypeId: 'roadmap',
+                    gestureHandling: 'cooperative',
+                    mapTypeControl: true,
+                    streetViewControl: true,
+                    fullscreenControl: true,
+                    zoomControl: true
+                });
+
+                // Agregar marcador
+                new Marker({
+                    position: results[0].geometry.location,
+                    map: map,
+                    title: direccion,
+                    icon: {
+                        path: window.google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: '#9d2449',
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 2
+                    }
+                });
+
+                // Mapa inicializado correctamente
+                
+            } catch (error) {
+                console.error('Error en geocodificación:', error);
+                throw error;
+            }
+        }
+
+        // Función para mostrar error del mapa
+        function mostrarErrorMapa(container, direccion) {
+            container.innerHTML = `
+                <div class="flex items-center justify-center h-full bg-gradient-to-br from-red-50 to-red-100 rounded-lg border border-red-200 p-4">
+                    <div class="text-center max-w-sm">
+                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h4 class="text-sm font-medium text-gray-900 mb-2">No se pudo cargar la ubicación</h4>
+                        <p class="text-xs text-gray-600 mb-4">La dirección proporcionada no pudo ser localizada en el mapa.</p>
+                        <button onclick="window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('${direccion}'), '_blank')"
+                                class="inline-flex items-center px-3 py-2 border border-primary text-xs font-medium rounded-md text-primary hover:bg-primary hover:text-white transition-colors duration-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            Buscar en Google Maps
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Función para actualizar material de apoyo según la sección actual
+        function actualizarMaterialApoyoSegunSeccion(seccion) {
+            // Solo actualizar si el panel está visible
+            const panel = document.getElementById('panel-documentos-revision');
+            if (!panel || panel.style.display === 'none') {
+                return;
+            }
+            
+            if (seccion === 'domicilio') {
+                mostrarMaterialApoyoConMapa();
+            } else {
+                const documentoActual = obtenerDocumentoActual();
+                mostrarMaterialApoyoGeneral(documentoActual);
+            }
+        }
 
     </script>
     @endpush

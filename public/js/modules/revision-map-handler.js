@@ -131,23 +131,23 @@ class RevisionMapHandler {
 
     generateMapFallbackHTML(direccion) {
         return `
-            <div class="flex items-center justify-center h-full bg-gradient-to-br from-red-50 to-orange-50 rounded-lg border border-red-200">
+            <div class="flex items-center justify-center h-full bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg border border-primary-200">
                 <div class="text-center text-gray-700 p-8 max-w-md">
-                    <svg class="w-20 h-20 mx-auto mb-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-20 h-20 mx-auto mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                     <h4 class="text-xl font-bold text-gray-800 mb-3">🗺️ Google Maps no está disponible</h4>
                     <p class="text-sm text-gray-600 mb-4">Verifique su conexión a internet o intente recargar la página</p>
                     
-                    <div class="bg-white border border-gray-300 rounded-lg p-4 mb-6">
+                    <div class="bg-white border border-primary-200 rounded-lg p-4 mb-6 shadow-sm">
                         <p class="text-xs text-gray-500 mb-2">📍 Dirección registrada:</p>
                         <p class="text-sm font-medium text-gray-800">${direccion}</p>
                     </div>
                     
                     <div class="space-y-3">
                         <button onclick="window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('${direccion}'), '_blank')" 
-                                class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center font-medium">
+                                class="w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center font-medium shadow-button hover:shadow-button-hover">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -155,7 +155,7 @@ class RevisionMapHandler {
                         </button>
                         
                         <button onclick="location.reload()" 
-                                class="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center">
+                                class="w-full px-4 py-2 bg-white text-primary border border-primary rounded-lg hover:bg-primary-50 transition-colors flex items-center justify-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                             </svg>
@@ -446,18 +446,18 @@ class RevisionMapHandler {
 
     crearMapaFallbackPanel(container, direccion) {
         container.innerHTML = `
-            <div class="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+            <div class="flex items-center justify-center h-full bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg border border-primary-200">
                 <div class="text-center p-6">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
-                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
                     </div>
                     <h4 class="font-semibold text-gray-800 mb-2">📍 Ubicación del Domicilio</h4>
                     <p class="text-sm text-gray-600 mb-4">${direccion}</p>
-                    <button onclick="revisionMapHandler.abrirMapaDomicilio()" 
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                    <button onclick="window.abrirMapaDomicilio()" 
+                            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm shadow-button hover:shadow-button-hover">
                         Ver en Mapa Completo
                     </button>
                 </div>
@@ -467,10 +467,10 @@ class RevisionMapHandler {
 
     mostrarErrorMapaPanel(container, mensaje) {
         container.innerHTML = `
-            <div class="flex items-center justify-center h-full bg-gradient-to-br from-red-50 to-pink-50 rounded-lg border border-red-200">
+            <div class="flex items-center justify-center h-full bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg border border-primary-200">
                 <div class="text-center p-6">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
@@ -497,10 +497,15 @@ class RevisionMapHandler {
 
     mostrarErrorMapaModal(container) {
         container.innerHTML = `
-            <div class="flex items-center justify-center h-full">
-                <div class="text-center text-gray-600">
-                    <p>Error al cargar el mapa</p>
-                    <button onclick="location.reload()" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded">
+            <div class="flex items-center justify-center h-full bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg">
+                <div class="text-center text-gray-600 p-8">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <p class="mb-4">Error al cargar el mapa</p>
+                    <button onclick="location.reload()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors shadow-button hover:shadow-button-hover">
                         Recargar
                     </button>
                 </div>
@@ -510,12 +515,18 @@ class RevisionMapHandler {
 
     mostrarFallbackMapaModal(container) {
         container.innerHTML = `
-            <div class="flex items-center justify-center h-full bg-gray-100">
+            <div class="flex items-center justify-center h-full bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg">
                 <div class="text-center p-8">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
                     <h3 class="text-lg font-semibold mb-4">Mapa no disponible</h3>
                     <p class="text-gray-600 mb-4">${this.direccionActual}</p>
-                    <button onclick="revisionMapHandler.abrirEnGoogleMaps()" 
-                            class="px-6 py-3 bg-blue-600 text-white rounded-lg">
+                    <button onclick="window.abrirEnGoogleMaps()" 
+                            class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors shadow-button hover:shadow-button-hover">
                         Abrir en Google Maps
                     </button>
                 </div>
