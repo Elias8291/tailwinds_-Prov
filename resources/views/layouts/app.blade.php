@@ -16,9 +16,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Scripts -->
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
-    <!-- Sistema de estados de carga -->
     <script src="{{ asset('js/components/loading-states.js') }}" defer></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -75,6 +72,9 @@
     </style>
 </head>
 <body class="font-sans antialiased">
+    <!-- Alpine.js - Load at the end of body -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <!-- Fondo con logo -->
     <div class="bg-logo-pattern"></div>
 
@@ -111,6 +111,118 @@
     @stack('scripts')
     
     <script>
+        // Ensure Alpine.js is loaded before initializing components
+        document.addEventListener('alpine:init', () => {
+            // Register global Alpine.js components
+            Alpine.data('notificaciones', () => ({
+                open: false,
+                cargando: true,
+                notificaciones: [],
+                contadorNoLeidas: 0,
+
+                init() {
+                    this.cargarNotificaciones();
+                    this.iniciarActualizacionAutomatica();
+                },
+
+                toggleNotificaciones() {
+                    this.open = !this.open;
+                    if (this.open) {
+                        this.cargarNotificaciones();
+                    }
+                },
+
+                async cargarNotificaciones() {
+                    try {
+                        const response = await fetch('/notificaciones/header');
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.notificaciones = data.notificaciones;
+                            this.contadorNoLeidas = data.contador_no_leidas;
+                        } else {
+                            console.error('Error en la respuesta:', data);
+                        }
+                    } catch (error) {
+                        console.error('Error al cargar notificaciones:', error);
+                    } finally {
+                        this.cargando = false;
+                    }
+                },
+
+                iniciarActualizacionAutomatica() {
+                    setInterval(() => {
+                        if (!this.open) {
+                            this.cargarNotificaciones();
+                        }
+                    }, 30000); // Actualizar cada 30 segundos
+                },
+
+                async marcarComoLeida(id) {
+                    try {
+                        const response = await fetch(`/notificaciones/${id}/marcar-leida`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.notificaciones = this.notificaciones.map(notif => {
+                                if (notif.id === id) {
+                                    return { ...notif, leida: true };
+                                }
+                                return notif;
+                            });
+                            
+                            this.contadorNoLeidas = Math.max(0, this.contadorNoLeidas - 1);
+                        }
+                    } catch (error) {
+                        console.error('Error al marcar notificación como leída:', error);
+                    }
+                },
+
+                async marcarTodasComoLeidas() {
+                    try {
+                        const response = await fetch('/notificaciones/marcar-todas-leidas', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.notificaciones = this.notificaciones.map(notif => ({
+                                ...notif,
+                                leida: true
+                            }));
+                            
+                            this.contadorNoLeidas = 0;
+                        }
+                    } catch (error) {
+                        console.error('Error al marcar todas las notificaciones como leídas:', error);
+                    }
+                }
+            }));
+        });
+
         // Prevenir el uso de los botones atrás/adelante del navegador
         (function() {
             // Agregar una entrada al historial del navegador

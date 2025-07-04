@@ -17,7 +17,7 @@
 
             <div class="hidden md:flex items-center space-x-4 pr-4">
                 <div class="relative" x-data="notificaciones()" @click.away="open = false">
-                    <button @click="toggleNotificaciones()" class="relative p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    <button @click="open = !open" class="relative p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                         <span class="sr-only">Ver notificaciones</span>
                         <span x-show="contadorNoLeidas > 0" x-text="contadorNoLeidas" class="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-500 text-white text-xs rounded-full"></span>
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

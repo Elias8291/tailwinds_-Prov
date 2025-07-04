@@ -1,38 +1,66 @@
-@props(['documento', 'formulario', 'titulo'])
+@props(['documento', 'formulario', 'titulo', 'tramiteId'])
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" 
+    x-data="documentViewer('{{ $titulo }}', {{ isset($documento['id']) ? $documento['id'] : 'null' }})"
+    x-init="init()">
     <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
         <h3 class="text-lg font-semibold text-gray-800">{{ $titulo }}</h3>
     </div>
     
-    <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
-        <!-- Panel Izquierdo: Documento -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200" x-ref="container">
+        <!-- Panel Izquierdo: Documento o Mapa -->
         <div class="h-[600px] relative">
             <div class="absolute inset-0 p-4">
                 <div class="bg-gray-50 rounded-lg p-4 mb-4 flex items-center justify-between">
                     <div>
-                        <span class="text-sm font-medium text-gray-700">Documento:</span>
-                        <span class="ml-2 text-sm text-gray-600">{{ $documento['nombre'] ?? 'Sin nombre' }}</span>
+                        @if(strtolower($titulo) === 'domicilio y comprobante')
+                            <span class="text-sm font-medium text-gray-700">Ubicación en Mapa</span>
+                        @else
+                            <span class="text-sm font-medium text-gray-700">Documento:</span>
+                            <span class="ml-2 text-sm text-gray-600">{{ $documento['nombre'] ?? 'Sin nombre' }}</span>
+                        @endif
                     </div>
-                    @if(isset($documento['ruta_archivo']) && $documento['ruta_archivo'])
-                    <button type="button" 
-                            onclick="window.open('{{ $documento['ruta_archivo'] }}', '_blank')"
-                            class="px-3 py-1 bg-[#9d2449] text-white text-sm rounded-md hover:bg-[#8a203f] transition-colors">
-                        <i class="fas fa-external-link-alt mr-1"></i>
-                        Abrir
-                    </button>
-                    @endif
-                </div>
+                    @if(strtolower($titulo) === 'domicilio y comprobante')
+                        <div class="flex items-center space-x-2">
+                            <button type="button" 
+                                    @click="toggleStreetView"
+                                    class="px-3 py-1 bg-[#9d2449] text-white text-sm rounded-md hover:bg-[#8a203f] transition-colors">
+                                <i class="fas fa-street-view mr-1"></i>
+                                Street View
+                            </button>
+                                <button type="button" 
+                                    @click="toggleMapType"
+                                        class="px-3 py-1 bg-[#9d2449] text-white text-sm rounded-md hover:bg-[#8a203f] transition-colors">
+                                <i class="fas fa-map mr-1"></i>
+                                Vista
+                                </button>
+                        </div>
+                                        @endif
+                                    </div>
                 <div class="h-[calc(100%-4rem)] rounded-lg border border-gray-200 overflow-hidden">
-                    @if(isset($documento['ruta_archivo']) && $documento['ruta_archivo'])
-                        <iframe src="{{ $documento['ruta_archivo'] }}" class="w-full h-full"></iframe>
+                    @if(strtolower($titulo) === 'domicilio y comprobante')
+                        <div class="relative h-full">
+                            <div x-ref="map" class="w-full h-full"></div>
+                            <div x-ref="streetView" class="w-full h-full absolute top-0 left-0" style="display: none;"></div>
+                            <div x-ref="mapLoader" class="absolute inset-0 flex items-center justify-center bg-white">
+                                <div class="flex items-center space-x-3">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#9d2449]"></div>
+                                    <span class="text-gray-600">Cargando mapa...</span>
+                                </div>
+                            </div>
+                            <div x-ref="locationInfo" style="display: none;">
+                                <div x-ref="locationDetails"></div>
+                                    </div>
+                        </div>
+                    @elseif(isset($documento['id']))
+                        <iframe src="{{ route('revision.ver-documento', ['tramite' => $tramiteId, 'documento' => $documento['id']]) }}" class="w-full h-full"></iframe>
                     @else
                         <div class="flex flex-col items-center justify-center h-full bg-gray-50 space-y-4">
                             <i class="fas fa-file-alt text-gray-400 text-4xl"></i>
                             <div class="text-center">
                                 <p class="text-gray-500">No hay documento disponible para esta sección.</p>
                                 @if(isset($documento['estado']))
-                                <p class="text-sm text-gray-400 mt-2">Estado: {{ ucfirst($documento['estado']) }}</p>
+                                    <p class="text-sm text-gray-400 mt-2">Estado: {{ ucfirst($documento['estado']) }}</p>
                                 @endif
                             </div>
                         </div>
@@ -47,7 +75,7 @@
                 <div class="bg-gray-50 rounded-lg p-4 mb-4">
                     <span class="text-sm font-medium text-gray-700">Datos del formulario</span>
                 </div>
-                <div class="h-[calc(100%-4rem)] overflow-y-auto rounded-lg border border-gray-200 p-4">
+                <div class="h-[calc(100%-4rem)] overflow-y-auto rounded-lg border border-gray-200 p-4" x-ref="formulario">
                     {!! $formulario !!}
                 </div>
             </div>
@@ -59,27 +87,29 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <button type="button" 
-                        onclick="toggleSyncScroll(this)"
-                        class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449]">
+                        @click="toggleSyncScroll"
+                        class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449]"
+                        :class="{ 'bg-[#9d2449] text-white border-[#9d2449]': syncScroll }">
                     <i class="fas fa-link mr-2"></i>
                     Sincronizar scroll
                 </button>
                 <button type="button"
-                        onclick="toggleSideBySide(this)"
-                        class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449]">
+                        @click="toggleSideBySide"
+                        class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449]"
+                        :class="{ 'bg-[#9d2449] text-white border-[#9d2449]': !sideBySide }">
                     <i class="fas fa-columns mr-2"></i>
                     Vista lado a lado
                 </button>
             </div>
-            @if(isset($documento['ruta_archivo']) && $documento['ruta_archivo'])
-            <div class="flex items-center space-x-2">
+            @if(isset($documento['id']) && strtolower($titulo) !== 'domicilio y comprobante')
+                <div class="flex items-center space-x-2">
                 <button type="button"
-                        onclick="zoomIn()"
+                            @click="zoomIn"
                         class="p-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                     <i class="fas fa-search-plus"></i>
                 </button>
                 <button type="button"
-                        onclick="zoomOut()"
+                            @click="zoomOut"
                         class="p-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                     <i class="fas fa-search-minus"></i>
                 </button>
@@ -89,58 +119,8 @@
     </div>
 </div>
 
+@once
 @push('scripts')
-<script>
-let syncScroll = false;
-let currentZoom = 100;
-
-function toggleSyncScroll(button) {
-    syncScroll = !syncScroll;
-    button.classList.toggle('bg-[#9d2449]');
-    button.classList.toggle('text-white');
-    button.classList.toggle('border-[#9d2449]');
-}
-
-function toggleSideBySide(button) {
-    const container = button.closest('.bg-white').querySelector('.grid');
-    container.classList.toggle('lg:grid-cols-2');
-    container.classList.toggle('lg:grid-cols-1');
-    button.classList.toggle('bg-[#9d2449]');
-    button.classList.toggle('text-white');
-    button.classList.toggle('border-[#9d2449]');
-}
-
-function zoomIn() {
-    currentZoom += 10;
-    updateZoom();
-}
-
-function zoomOut() {
-    currentZoom = Math.max(50, currentZoom - 10);
-    updateZoom();
-}
-
-function updateZoom() {
-    document.querySelectorAll('iframe').forEach(iframe => {
-        iframe.style.transform = `scale(${currentZoom / 100})`;
-        iframe.style.transformOrigin = 'top left';
-    });
-}
-
-// Sincronización de scroll
-document.addEventListener('DOMContentLoaded', () => {
-    const containers = document.querySelectorAll('.overflow-y-auto');
-    containers.forEach(container => {
-        container.addEventListener('scroll', function() {
-            if (!syncScroll) return;
-            const scrollPercentage = this.scrollTop / (this.scrollHeight - this.clientHeight);
-            containers.forEach(otherContainer => {
-                if (otherContainer !== this) {
-                    otherContainer.scrollTop = scrollPercentage * (otherContainer.scrollHeight - otherContainer.clientHeight);
-                }
-            });
-        });
-    });
-});
-</script>
+<script src="{{ asset('js/components/google-maps-viewer.js') }}"></script>
 @endpush 
+@endonce 

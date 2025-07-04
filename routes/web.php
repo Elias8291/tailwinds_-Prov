@@ -680,31 +680,15 @@ if (config('app.debug')) {
 // MÓDULO DE NOTIFICACIONES (SOLO API - SIN INTERFAZ)
 // ============================================================================
 
-Route::middleware(['auth'])->prefix('notificaciones')->name('notificaciones.')->group(function () {
-    
-    // Módulo principal de notificaciones (página completa)
-    Route::get('/', [\App\Http\Controllers\NotificacionController::class, 'index'])->name('index');
-    
-    // API para el header (AJAX)
-    Route::get('/header', [\App\Http\Controllers\NotificacionController::class, 'obtenerParaHeader'])->name('header');
-    
-    // API para el módulo de notificaciones (AJAX) - todas las notificaciones
-    Route::get('/todas', [\App\Http\Controllers\NotificacionController::class, 'obtenerTodas'])->name('todas');
-    
-    // Contador de no leídas
-    Route::get('/contador', [\App\Http\Controllers\NotificacionController::class, 'contadorNoLeidas'])->name('contador');
-    
-    // Marcar como leída una notificación específica
-    Route::post('/{id}/marcar-leida', [\App\Http\Controllers\NotificacionController::class, 'marcarComoLeida'])->name('marcar-leida');
-    
-    // Marcar todas como leídas
-    Route::post('/marcar-todas-leidas', [\App\Http\Controllers\NotificacionController::class, 'marcarTodasComoLeidas'])->name('marcar-todas-leidas');
-    
-    // Eliminar notificación
-    Route::delete('/{id}', [\App\Http\Controllers\NotificacionController::class, 'eliminar'])->name('eliminar');
-    
-    // Crear notificación (para administradores)
-    Route::post('/crear', [\App\Http\Controllers\NotificacionController::class, 'crear'])->name('crear');
+Route::middleware(['auth'])->prefix('notificaciones')->group(function () {
+    Route::get('/', [NotificacionController::class, 'index'])->name('notificaciones.index');
+    Route::get('/header', [NotificacionController::class, 'obtenerParaHeader'])->name('notificaciones.header');
+    Route::get('/obtener-todas', [NotificacionController::class, 'obtenerTodas'])->name('notificaciones.obtener-todas');
+    Route::post('/{id}/marcar-leida', [NotificacionController::class, 'marcarComoLeida'])->name('notificaciones.marcar-leida');
+    Route::post('/marcar-todas-leidas', [NotificacionController::class, 'marcarTodasComoLeidas'])->name('notificaciones.marcar-todas-leidas');
+    Route::delete('/{id}', [NotificacionController::class, 'eliminar'])->name('notificaciones.eliminar');
+    Route::get('/contador', [NotificacionController::class, 'contadorNoLeidas'])->name('notificaciones.contador');
+    Route::post('/crear', [NotificacionController::class, 'crear'])->name('notificaciones.crear');
 });
 
 // Rutas para documentos

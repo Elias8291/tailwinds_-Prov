@@ -29,7 +29,7 @@
                     </div>
                     
                     @php
-                        $documentosDatosGenerales = collect($documentosPorSeccion['datos_generales'] ?? [])->first();
+                        $documentosDatosGenerales = collect($documentosPorSeccion['datos_generales'] ?? [])->toArray();
                         $formularioDatosGenerales = view('components.formularios.seccion-datos-generales', [
                             'datosTramite' => $datosTramite,
                             'readonly' => true
@@ -38,8 +38,9 @@
                     
                     <x-revision.comparador-documento
                         :titulo="'Datos Generales y Documentación'"
-                        :documento="$documentosDatosGenerales ?? []"
+                        :documento="$documentosDatosGenerales[0] ?? []"
                         :formulario="$formularioDatosGenerales"
+                        :tramiteId="$tramite->id"
                     />
 
                     <x-revision.seccion-revision 
@@ -66,7 +67,7 @@
                     </div>
 
                     @php
-                        $documentosDomicilio = collect($documentosPorSeccion['domicilio'] ?? [])->first();
+                        $documentosDomicilio = collect($documentosPorSeccion['domicilio'] ?? [])->toArray();
                         $formularioDomicilio = view('components.formularios.seccion-domicilio', [
                             'datosDomicilio' => $datosDomicilio,
                             'readonly' => true
@@ -75,8 +76,9 @@
 
                     <x-revision.comparador-documento
                         :titulo="'Domicilio y Comprobante'"
-                        :documento="$documentosDomicilio ?? []"
+                        :documento="$documentosDomicilio[0] ?? []"
                         :formulario="$formularioDomicilio"
+                        :tramiteId="$tramite->id"
                     />
 
                     <x-revision.seccion-revision 
@@ -104,7 +106,7 @@
                     </div>
 
                     @php
-                        $documentosConstitucion = collect($documentosPorSeccion['constitucion'] ?? [])->first();
+                        $documentosConstitucion = collect($documentosPorSeccion['constitucion'] ?? [])->toArray();
                         $formularioConstitucion = view('components.formularios.seccion-constitucion', [
                             'datosConstitucion' => $datosConstitucion,
                             'readonly' => true
@@ -113,8 +115,9 @@
 
                     <x-revision.comparador-documento
                         :titulo="'Constitución y Acta Constitutiva'"
-                        :documento="$documentosConstitucion ?? []"
+                        :documento="$documentosConstitucion[0] ?? []"
                         :formulario="$formularioConstitucion"
+                        :tramiteId="$tramite->id"
                     />
 
                     <x-revision.seccion-revision 
@@ -141,7 +144,7 @@
                     </div>
 
                     @php
-                        $documentosAccionistas = collect($documentosPorSeccion['accionistas'] ?? [])->first();
+                        $documentosAccionistas = collect($documentosPorSeccion['accionistas'] ?? [])->toArray();
                         $formularioAccionistas = view('components.formularios.seccion-accionistas', [
                             'accionistas' => $datosAccionistas,
                             'readonly' => true
@@ -150,8 +153,9 @@
 
                     <x-revision.comparador-documento
                         :titulo="'Accionistas y Documentación'"
-                        :documento="$documentosAccionistas ?? []"
+                        :documento="$documentosAccionistas[0] ?? []"
                         :formulario="$formularioAccionistas"
+                        :tramiteId="$tramite->id"
                     />
 
                     <x-revision.seccion-revision 
@@ -178,7 +182,7 @@
                     </div>
 
                     @php
-                        $documentosApoderado = collect($documentosPorSeccion['apoderado'] ?? [])->first();
+                        $documentosApoderado = collect($documentosPorSeccion['apoderado'] ?? [])->toArray();
                         $formularioApoderado = view('components.formularios.seccion-apoderado', [
                             'datosApoderado' => $datosApoderado,
                             'readonly' => true
@@ -187,8 +191,9 @@
 
                     <x-revision.comparador-documento
                         :titulo="'Apoderado Legal y Poder Notarial'"
-                        :documento="$documentosApoderado ?? []"
+                        :documento="$documentosApoderado[0] ?? []"
                         :formulario="$formularioApoderado"
+                        :tramiteId="$tramite->id"
                     />
 
                     <x-revision.seccion-revision 
@@ -214,11 +219,31 @@
                             </span>
                         @endif
                     </div>
-                    <x-formularios.seccion-documentos 
-                        :documentos="$documentos"
-                        :documentosPorSeccion="$documentosPorSeccion"
-                        :readonly="true"
+
+                    @php
+                        $documentosGenerales = collect($documentosPorSeccion['documentos'] ?? [])->toArray();
+                        $formularioDocumentos = view('components.formularios.seccion-documentos', [
+                            'documentos' => $documentos,
+                            'documentosPorSeccion' => $documentosPorSeccion,
+                            'tramite' => $tramite,
+                            'readonly' => true
+                        ])->render();
+                    @endphp
+
+                    @if(!empty($documentosGenerales))
+                    <x-revision.comparador-documento
+                        :titulo="'Documentos Generales'"
+                        :documento="$documentosGenerales[0] ?? []"
+                        :formulario="$formularioDocumentos"
+                        :tramiteId="$tramite->id"
                     />
+                    @else
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-file-alt text-gray-400 text-4xl mb-4"></i>
+                        <p>No hay documentos disponibles en esta sección.</p>
+                    </div>
+                    @endif
+
                     <x-revision.seccion-revision 
                         :seccionId="6"
                         :estado="$revisionesExistentes[6]['estado'] ?? null"
