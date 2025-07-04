@@ -27,10 +27,21 @@
                             </span>
                         @endif
                     </div>
-                    <x-formularios.seccion-datos-generales 
-                        :datosTramite="$datosTramite"
-                        :readonly="true"
+                    
+                    @php
+                        $documentosDatosGenerales = collect($documentosPorSeccion['datos_generales'] ?? [])->first();
+                        $formularioDatosGenerales = view('components.formularios.seccion-datos-generales', [
+                            'datosTramite' => $datosTramite,
+                            'readonly' => true
+                        ])->render();
+                    @endphp
+                    
+                    <x-revision.comparador-documento
+                        :titulo="'Datos Generales y Documentación'"
+                        :documento="$documentosDatosGenerales ?? []"
+                        :formulario="$formularioDatosGenerales"
                     />
+
                     <x-revision.seccion-revision 
                         :seccionId="1"
                         :estado="$revisionesExistentes[1]['estado'] ?? null"
@@ -53,10 +64,21 @@
                             </span>
                         @endif
                     </div>
-                    <x-formularios.seccion-domicilio 
-                        :datosDomicilio="$datosDomicilio"
-                        :readonly="true"
+
+                    @php
+                        $documentosDomicilio = collect($documentosPorSeccion['domicilio'] ?? [])->first();
+                        $formularioDomicilio = view('components.formularios.seccion-domicilio', [
+                            'datosDomicilio' => $datosDomicilio,
+                            'readonly' => true
+                        ])->render();
+                    @endphp
+
+                    <x-revision.comparador-documento
+                        :titulo="'Domicilio y Comprobante'"
+                        :documento="$documentosDomicilio ?? []"
+                        :formulario="$formularioDomicilio"
                     />
+
                     <x-revision.seccion-revision 
                         :seccionId="2"
                         :estado="$revisionesExistentes[2]['estado'] ?? null"
@@ -80,10 +102,21 @@
                             </span>
                         @endif
                     </div>
-                    <x-formularios.seccion-constitucion 
-                        :datosConstitucion="$datosConstitucion"
-                        :readonly="true"
+
+                    @php
+                        $documentosConstitucion = collect($documentosPorSeccion['constitucion'] ?? [])->first();
+                        $formularioConstitucion = view('components.formularios.seccion-constitucion', [
+                            'datosConstitucion' => $datosConstitucion,
+                            'readonly' => true
+                        ])->render();
+                    @endphp
+
+                    <x-revision.comparador-documento
+                        :titulo="'Constitución y Acta Constitutiva'"
+                        :documento="$documentosConstitucion ?? []"
+                        :formulario="$formularioConstitucion"
                     />
+
                     <x-revision.seccion-revision 
                         :seccionId="3"
                         :estado="$revisionesExistentes[3]['estado'] ?? null"
@@ -106,10 +139,21 @@
                             </span>
                         @endif
                     </div>
-                    <x-formularios.seccion-accionistas 
-                        :datosAccionistas="$datosAccionistas"
-                        :readonly="true"
+
+                    @php
+                        $documentosAccionistas = collect($documentosPorSeccion['accionistas'] ?? [])->first();
+                        $formularioAccionistas = view('components.formularios.seccion-accionistas', [
+                            'accionistas' => $datosAccionistas,
+                            'readonly' => true
+                        ])->render();
+                    @endphp
+
+                    <x-revision.comparador-documento
+                        :titulo="'Accionistas y Documentación'"
+                        :documento="$documentosAccionistas ?? []"
+                        :formulario="$formularioAccionistas"
                     />
+
                     <x-revision.seccion-revision 
                         :seccionId="4"
                         :estado="$revisionesExistentes[4]['estado'] ?? null"
@@ -132,10 +176,21 @@
                             </span>
                         @endif
                     </div>
-                    <x-formularios.seccion-apoderado 
-                        :datosApoderado="$datosApoderado"
-                        :readonly="true"
+
+                    @php
+                        $documentosApoderado = collect($documentosPorSeccion['apoderado'] ?? [])->first();
+                        $formularioApoderado = view('components.formularios.seccion-apoderado', [
+                            'datosApoderado' => $datosApoderado,
+                            'readonly' => true
+                        ])->render();
+                    @endphp
+
+                    <x-revision.comparador-documento
+                        :titulo="'Apoderado Legal y Poder Notarial'"
+                        :documento="$documentosApoderado ?? []"
+                        :formulario="$formularioApoderado"
                     />
+
                     <x-revision.seccion-revision 
                         :seccionId="5"
                         :estado="$revisionesExistentes[5]['estado'] ?? null"
