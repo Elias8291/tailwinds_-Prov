@@ -267,15 +267,41 @@
                                    :id="`documento_${documento.id}`"
                                    :aria-label="`Seleccionar archivo para ${documento.nombre}`"
                                    @change="handleFileSelect($event, documento)"
+                                   :disabled="uploading"
                                    required>
                             <label :for="`documento_${documento.id}`" 
-                                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg text-sm font-medium hover:from-[#8a203f] hover:to-[#6d1a32] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] cursor-pointer transition-all duration-300 shadow-md hover:shadow-lg">
+                                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg text-sm font-medium hover:from-[#8a203f] hover:to-[#6d1a32] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] cursor-pointer transition-all duration-300 shadow-md hover:shadow-lg"
+                                   :class="{ 'opacity-50 cursor-not-allowed': uploading }"
+                                   :disabled="uploading">
                                 <div class="flex items-center">
-                                    <i class="fas fa-cloud-upload-alt mr-2"></i>
-                                    <span x-text="documento.estado === 'Rechazado' ? 'Subir Nuevo' : 'Seleccionar archivo'"></span>
+                                    <!-- Spinner de carga -->
+                                    <template x-if="uploading && uploadingDocId === documento.id">
+                                        <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </template>
+                                    <!-- Icono normal -->
+                                    <template x-if="!(uploading && uploadingDocId === documento.id)">
+                                        <i class="fas fa-cloud-upload-alt mr-2"></i>
+                                    </template>
+                                    <span x-text="uploading && uploadingDocId === documento.id ? 'Subiendo...' : (documento.estado === 'Rechazado' ? 'Subir Nuevo' : 'Seleccionar archivo')"></span>
                                 </div>
                             </label>
                         </div>
+
+                        <!-- Overlay de carga sobre el documento -->
+                        <div x-show="uploading && uploadingDocId === documento.id" 
+                             class="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center rounded-xl z-10">
+                            <div class="text-center p-4">
+                                <div class="inline-block animate-bounce">
+                                    <i class="fas fa-file-upload text-[#9d2449] text-3xl"></i>
+                                </div>
+                                <p class="mt-2 text-sm font-medium text-gray-700">Subiendo documento...</p>
+                                <p class="text-xs text-gray-500">Por favor, espere un momento</p>
+                            </div>
+                        </div>
+
                         <!-- Estado para documentos en revisión -->
                         <div x-show="documento.estado === 'Pendiente' && documento.ruta_archivo" class="flex items-center space-x-2">
                             <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
@@ -519,6 +545,8 @@ function documentosData() {
         successMessage: '',
         finalizando: false,
         mostrarNavegacion: @json($mostrar_navegacion ?? true),
+        uploading: false,
+        uploadingDocId: null,
         async init() {
             // Obtener tramite_id
             const tramite = @json($tramite ?? null);
@@ -581,8 +609,14 @@ function documentosData() {
             // Actualizar estado del documento
             documento.archivo_seleccionado = true;
             documento.nombre_archivo = file.name;
+            // Activar estado de carga
+            this.uploading = true;
+            this.uploadingDocId = documento.id;
             // Subir archivo
             await this.subirDocumento(documento, file);
+            // Desactivar estado de carga
+            this.uploading = false;
+            this.uploadingDocId = null;
         },
         async subirDocumento(documento, file) {
             try {
@@ -921,8 +955,44 @@ function navegarAnteriorDocumentos() {
         transform: translateY(-8px);
     }
 }
+
+/* Animación de fade para el overlay */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
 .custom-bounce {
     animation: custom-bounce 1s ease-in-out infinite;
+}
+
+/* Estilos para el overlay de carga */
+.loading-overlay {
+    animation: fade-in 0.3s ease-in-out;
+}
+
+/* Mejora en el efecto de desenfoque */
+.backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* Efecto de pulso para el spinner */
+.pulse-effect {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .5;
+    }
 }
 </style>
 @endpush

@@ -795,13 +795,77 @@ class TramiteController extends Controller
             // Validar los datos del formulario
             $validated = $request->validate([
                 'tramite_id' => 'required|integer|exists:tramite,id',
-                'codigo_postal' => 'required|integer|digits:5',
-                'colonia' => 'required|integer', // asentamiento_id
-                'calle' => 'required|string|max:100',
-                'numero_exterior' => 'required|string|max:10',
-                'numero_interior' => 'nullable|string|max:10',
-                'entre_calle_1' => 'required|string|max:100',
-                'entre_calle_2' => 'required|string|max:100',
+                'codigo_postal' => [
+                    'required',
+                    'string',
+                    'regex:/^[0-9]{5}$/'
+                ],
+                'colonia' => 'required|integer|exists:asentamiento,id',
+                'calle' => [
+                    'required',
+                    'string',
+                    'min:3',
+                    'max:100',
+                    'regex:/^[a-zA-ZÀ-ÿñÑ0-9\s\.\,\-\(\)\/]+$/'
+                ],
+                'numero_exterior' => [
+                    'required',
+                    'string',
+                    'max:10',
+                    'regex:/^[a-zA-Z0-9\s\-\.\/SN]+$/'
+                ],
+                'numero_interior' => [
+                    'nullable',
+                    'string',
+                    'max:10',
+                    'regex:/^[a-zA-Z0-9\s\-\.\/]*$/'
+                ],
+                'entre_calle_1' => [
+                    'required',
+                    'string',
+                    'min:3',
+                    'max:100',
+                    'regex:/^[a-zA-ZÀ-ÿñÑ0-9\s\.\,\-\(\)\/]+$/'
+                ],
+                'entre_calle_2' => [
+                    'required',
+                    'string',
+                    'min:3',
+                    'max:100',
+                    'regex:/^[a-zA-ZÀ-ÿñÑ0-9\s\.\,\-\(\)\/]+$/'
+                ],
+            ], [
+                'tramite_id.required' => 'Error del sistema: ID de trámite requerido',
+                'tramite_id.exists' => 'Error del sistema: Trámite no válido',
+                
+                'codigo_postal.required' => 'El código postal es obligatorio',
+                'codigo_postal.regex' => 'El código postal debe tener exactamente 5 dígitos',
+                
+                'colonia.required' => 'Debe seleccionar un asentamiento',
+                'colonia.integer' => 'El asentamiento seleccionado no es válido',
+                'colonia.exists' => 'El asentamiento seleccionado no existe en nuestro catálogo',
+                
+                'calle.required' => 'La calle es obligatoria',
+                'calle.min' => 'La calle debe tener al menos 3 caracteres',
+                'calle.max' => 'La calle debe tener máximo 100 caracteres',
+                'calle.regex' => 'La calle contiene caracteres no válidos',
+                
+                'numero_exterior.required' => 'El número exterior es obligatorio',
+                'numero_exterior.max' => 'El número exterior debe tener máximo 10 caracteres',
+                'numero_exterior.regex' => 'El número exterior contiene caracteres no válidos',
+                
+                'numero_interior.max' => 'El número interior debe tener máximo 10 caracteres',
+                'numero_interior.regex' => 'El número interior contiene caracteres no válidos',
+                
+                'entre_calle_1.required' => 'La primera calle de referencia es obligatoria',
+                'entre_calle_1.min' => 'La primera calle de referencia debe tener al menos 3 caracteres',
+                'entre_calle_1.max' => 'La primera calle de referencia debe tener máximo 100 caracteres',
+                'entre_calle_1.regex' => 'La primera calle de referencia contiene caracteres no válidos',
+                
+                'entre_calle_2.required' => 'La segunda calle de referencia es obligatoria',
+                'entre_calle_2.min' => 'La segunda calle de referencia debe tener al menos 3 caracteres',
+                'entre_calle_2.max' => 'La segunda calle de referencia debe tener máximo 100 caracteres',
+                'entre_calle_2.regex' => 'La segunda calle de referencia contiene caracteres no válidos'
             ]);
 
             Log::info('Datos validados para guardar domicilio:', ['validated' => $validated]);

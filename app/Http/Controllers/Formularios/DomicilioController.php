@@ -375,7 +375,7 @@ class DomicilioController extends Controller
             'codigo_postal' => [
                 'required',
                 'string',
-                'regex:/^[0-9]{4,5}$/'
+                'regex:/^[0-9]{5}$/'
             ],
             'colonia' => 'required|integer|exists:asentamiento,id',
             'calle' => [
@@ -383,47 +383,68 @@ class DomicilioController extends Controller
                 'string',
                 'min:3',
                 'max:100',
-                'regex:/^.{3,100}$/'
+                'regex:/^[a-zA-ZÀ-ÿñÑ0-9\s\.\,\-\(\)\/]+$/'
             ],
             'numero_exterior' => [
                 'required',
                 'string',
                 'max:10',
-                'regex:/^[a-zA-Z0-9\s\-\.]{1,10}$/'
+                'regex:/^[a-zA-Z0-9\s\-\.\/SN]+$/'
             ],
             'numero_interior' => [
                 'nullable',
                 'string',
                 'max:10',
-                'regex:/^[a-zA-Z0-9\s\-\.]{0,10}$/'
+                'regex:/^[a-zA-Z0-9\s\-\.\/]*$/'
             ],
             'entre_calle_1' => [
-                'nullable',
+                'required',
                 'string',
-                'max:100'
+                'min:3',
+                'max:100',
+                'regex:/^[a-zA-ZÀ-ÿñÑ0-9\s\.\,\-\(\)\/]+$/'
             ],
             'entre_calle_2' => [
-                'nullable',
+                'required',
                 'string',
-                'max:100'
+                'min:3',
+                'max:100',
+                'regex:/^[a-zA-ZÀ-ÿñÑ0-9\s\.\,\-\(\)\/]+$/'
             ]
         ];
 
         $messages = [
+            'tramite_id.required' => 'Error del sistema: ID de trámite requerido',
+            'tramite_id.exists' => 'Error del sistema: Trámite no válido',
+            
             'codigo_postal.required' => 'El código postal es obligatorio',
-            'codigo_postal.regex' => 'El código postal debe tener 4 o 5 dígitos',
+            'codigo_postal.regex' => 'El código postal debe tener exactamente 5 dígitos',
+            
             'colonia.required' => 'Debe seleccionar un asentamiento',
-            'colonia.exists' => 'El asentamiento seleccionado no es válido',
+            'colonia.integer' => 'El asentamiento seleccionado no es válido',
+            'colonia.exists' => 'El asentamiento seleccionado no existe en nuestro catálogo',
+            
             'calle.required' => 'La calle es obligatoria',
             'calle.min' => 'La calle debe tener al menos 3 caracteres',
             'calle.max' => 'La calle debe tener máximo 100 caracteres',
+            'calle.regex' => 'La calle contiene caracteres no válidos',
+            
             'numero_exterior.required' => 'El número exterior es obligatorio',
             'numero_exterior.max' => 'El número exterior debe tener máximo 10 caracteres',
-            'numero_exterior.regex' => 'El número exterior solo puede contener letras, números, espacios, guiones y puntos',
+            'numero_exterior.regex' => 'El número exterior contiene caracteres no válidos (use letras, números, guiones, puntos o S/N)',
+            
             'numero_interior.max' => 'El número interior debe tener máximo 10 caracteres',
-            'numero_interior.regex' => 'El número interior solo puede contener letras, números, espacios, guiones y puntos',
+            'numero_interior.regex' => 'El número interior contiene caracteres no válidos',
+            
+            'entre_calle_1.required' => 'La primera calle de referencia es obligatoria',
+            'entre_calle_1.min' => 'La primera calle de referencia debe tener al menos 3 caracteres',
             'entre_calle_1.max' => 'La primera calle de referencia debe tener máximo 100 caracteres',
-            'entre_calle_2.max' => 'La segunda calle de referencia debe tener máximo 100 caracteres'
+            'entre_calle_1.regex' => 'La primera calle de referencia contiene caracteres no válidos',
+            
+            'entre_calle_2.required' => 'La segunda calle de referencia es obligatoria',
+            'entre_calle_2.min' => 'La segunda calle de referencia debe tener al menos 3 caracteres',
+            'entre_calle_2.max' => 'La segunda calle de referencia debe tener máximo 100 caracteres',
+            'entre_calle_2.regex' => 'La segunda calle de referencia contiene caracteres no válidos'
         ];
 
         return $request->validate($rules, $messages);

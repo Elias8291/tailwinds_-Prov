@@ -366,6 +366,9 @@ function domicilioData() {
                     this.colonia = '';
                 }
             });
+            
+            // 4. Configurar validación en tiempo real
+            this.setupRealTimeValidation();
         },
         // Método para cargar datos desde un objeto de datos
         async cargarDatosDesdeObjeto(datosDomicilio) {
@@ -450,15 +453,192 @@ function domicilioData() {
                 return false;
             }
         },
+        // Función para validar formulario
+        validarFormulario() {
+            let esValido = true;
+            const errores = [];
+            
+            // Validar código postal (exactamente 5 dígitos)
+            const cpPattern = /^[0-9]{5}$/;
+            if (!this.cp || !cpPattern.test(this.cp)) {
+                esValido = false;
+                errores.push('El código postal debe tener exactamente 5 dígitos');
+                this.marcarCampoError('codigo_postal');
+            }
+            
+            // Validar estado
+            if (!this.estado || this.estado.trim() === '') {
+                esValido = false;
+                errores.push('El estado es requerido');
+                this.marcarCampoError('estado');
+            }
+            
+            // Validar municipio
+            if (!this.municipio || this.municipio.trim() === '') {
+                esValido = false;
+                errores.push('El municipio es requerido');
+                this.marcarCampoError('municipio');
+            }
+            
+            // Validar colonia/asentamiento
+            if (!this.colonia || this.colonia.toString().trim() === '' || this.colonia === '0') {
+                esValido = false;
+                errores.push('Debe seleccionar un asentamiento válido');
+                this.marcarCampoError('colonia');
+            }
+            
+            // Validar calle (mínimo 3 caracteres, máximo 100, caracteres válidos)
+            const callePattern = /^[a-zA-ZÀ-ÿñÑ0-9\s\.\,\-\(\)\/]+$/;
+            if (!this.nombreVialidad || this.nombreVialidad.trim().length < 3) {
+                esValido = false;
+                errores.push('La calle debe tener al menos 3 caracteres');
+                this.marcarCampoError('calle');
+            } else if (this.nombreVialidad.trim().length > 100) {
+                esValido = false;
+                errores.push('La calle debe tener máximo 100 caracteres');
+                this.marcarCampoError('calle');
+            } else if (!callePattern.test(this.nombreVialidad.trim())) {
+                esValido = false;
+                errores.push('La calle contiene caracteres no válidos');
+                this.marcarCampoError('calle');
+            }
+            
+            // Validar número exterior (requerido, máximo 10 caracteres, caracteres válidos)
+            const numeroExtPattern = /^[a-zA-Z0-9\s\-\.\/SN]+$/;
+            if (!this.numeroExterior || this.numeroExterior.trim() === '') {
+                esValido = false;
+                errores.push('El número exterior es obligatorio');
+                this.marcarCampoError('numero_exterior');
+            } else if (this.numeroExterior.trim().length > 10) {
+                esValido = false;
+                errores.push('El número exterior debe tener máximo 10 caracteres');
+                this.marcarCampoError('numero_exterior');
+            } else if (!numeroExtPattern.test(this.numeroExterior.trim())) {
+                esValido = false;
+                errores.push('El número exterior contiene caracteres no válidos (use letras, números, guiones, puntos o S/N)');
+                this.marcarCampoError('numero_exterior');
+            }
+            
+            // Validar número interior (opcional, pero si se proporciona debe ser válido)
+            const numeroIntPattern = /^[a-zA-Z0-9\s\-\.\/]*$/;
+            if (this.numeroInterior && this.numeroInterior.trim() !== '') {
+                if (this.numeroInterior.trim().length > 10) {
+                    esValido = false;
+                    errores.push('El número interior debe tener máximo 10 caracteres');
+                    this.marcarCampoError('numero_interior');
+                } else if (!numeroIntPattern.test(this.numeroInterior.trim())) {
+                    esValido = false;
+                    errores.push('El número interior contiene caracteres no válidos');
+                    this.marcarCampoError('numero_interior');
+                }
+            }
+            
+            // Validar entre calles (ambas requeridas, mínimo 3 caracteres, máximo 100)
+            const entreCalle1 = document.getElementById('entre_calle_1')?.value || '';
+            const entreCalle2 = document.getElementById('entre_calle_2')?.value || '';
+            
+            if (!entreCalle1.trim()) {
+                esValido = false;
+                errores.push('La primera calle de referencia es obligatoria');
+                this.marcarCampoError('entre_calle_1');
+            } else if (entreCalle1.trim().length < 3) {
+                esValido = false;
+                errores.push('La primera calle de referencia debe tener al menos 3 caracteres');
+                this.marcarCampoError('entre_calle_1');
+            } else if (entreCalle1.trim().length > 100) {
+                esValido = false;
+                errores.push('La primera calle de referencia debe tener máximo 100 caracteres');
+                this.marcarCampoError('entre_calle_1');
+            } else if (!callePattern.test(entreCalle1.trim())) {
+                esValido = false;
+                errores.push('La primera calle de referencia contiene caracteres no válidos');
+                this.marcarCampoError('entre_calle_1');
+            }
+            
+            if (!entreCalle2.trim()) {
+                esValido = false;
+                errores.push('La segunda calle de referencia es obligatoria');
+                this.marcarCampoError('entre_calle_2');
+            } else if (entreCalle2.trim().length < 3) {
+                esValido = false;
+                errores.push('La segunda calle de referencia debe tener al menos 3 caracteres');
+                this.marcarCampoError('entre_calle_2');
+            } else if (entreCalle2.trim().length > 100) {
+                esValido = false;
+                errores.push('La segunda calle de referencia debe tener máximo 100 caracteres');
+                this.marcarCampoError('entre_calle_2');
+            } else if (!callePattern.test(entreCalle2.trim())) {
+                esValido = false;
+                errores.push('La segunda calle de referencia contiene caracteres no válidos');
+                this.marcarCampoError('entre_calle_2');
+            }
+            
+            if (!esValido) {
+                this.mostrarErrores(errores);
+            }
+            
+            return esValido;
+        },
+        
+        // Función para marcar campo con error
+        marcarCampoError(campoId) {
+            const campo = document.getElementById(campoId);
+            if (campo) {
+                campo.classList.add('border-red-500', 'bg-red-50');
+                setTimeout(() => {
+                    campo.classList.remove('border-red-500', 'bg-red-50');
+                }, 5000);
+            }
+        },
+        
+        // Función para mostrar errores
+        mostrarErrores(errores) {
+            let modal = document.getElementById('modal-error-domicilio');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'modal-error-domicilio';
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                modal.innerHTML = `
+                    <div class="bg-white rounded-xl p-6 max-w-md mx-4 shadow-2xl">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-red-100 rounded-full p-2 mr-3">
+                                <i class="fas fa-exclamation-triangle text-red-600"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800">Error de Validación</h3>
+                        </div>
+                        <div id="lista-errores-domicilio" class="mb-4"></div>
+                        <button onclick="cerrarModalErrorDomicilio()" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">
+                            Entendido
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            const listaErrores = document.getElementById('lista-errores-domicilio');
+            listaErrores.innerHTML = '<ul class="text-sm text-gray-600 space-y-1">' + 
+                errores.map(error => `<li class="flex items-start"><i class="fas fa-times text-red-500 mr-2 mt-0.5 text-xs"></i>${error}</li>`).join('') + 
+                '</ul>';
+                
+            modal.style.display = 'flex';
+        },
+
         async guardarDomicilio() {
+            // Primero validar el formulario
+            if (!this.validarFormulario()) {
+                return false;
+            }
+            
             const form = this.$refs.domicilioForm;
             const formData = new FormData(form);
+            
             // Asegurar que todos los datos estén incluidos
             formData.set('codigo_postal', this.cp);
             formData.set('calle', this.nombreVialidad);
             formData.set('numero_exterior', this.numeroExterior);
             formData.set('numero_interior', this.numeroInterior || '');
             formData.set('colonia', this.colonia);
+            
             // Obtener tramite_id de los datos pasados al componente o del trámite
             const datosDomicilio = @json($datosDomicilio ?? []);
             const tramite = @json($tramite ?? null);
@@ -467,11 +647,13 @@ function domicilioData() {
             } else if (tramite && tramite.id) {
                 formData.set('tramite_id', tramite.id);
             }
+            
             // Agregar CSRF token
             const csrfToken = document.querySelector('meta[name="csrf-token"]');
             if (csrfToken) {
                 formData.set('_token', csrfToken.getAttribute('content'));
             }
+            
             try {
                 const response = await fetch(@json(route("tramites.guardar-domicilio-formulario")), {
                     method: 'POST',
@@ -481,22 +663,145 @@ function domicilioData() {
                         'Accept': 'application/json'
                     }
                 });
-                const responseText = await response.text();
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorData = await response.json();
+                    if (response.status === 422 && errorData.errors) {
+                        // Errores de validación del servidor
+                        this.mostrarErroresValidacion(errorData.errors);
+                        return false;
+                    } else {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                 }
-                const result = JSON.parse(responseText);
+                
+                const result = await response.json();
                 if (result.success) {
+                    this.mostrarMensajeExito('Domicilio guardado correctamente');
                     return true;
                 } else {
-                    const errorMsg = result.message || (result.errors ? Object.values(result.errors).flat().join(', ') : 'Error desconocido');
-                    alert('Error al guardar: ' + errorMsg);
+                    const errorMsg = result.message || 'Error desconocido';
+                    this.mostrarErrores([errorMsg]);
                     return false;
                 }
             } catch (error) {
-                alert('Error al guardar los datos: ' + error.message);
+                console.error('Error al guardar domicilio:', error);
+                this.mostrarErrores(['Error de conexión. Por favor, intente nuevamente.']);
                 return false;
             }
+        },
+        
+        // Función para mostrar errores de validación del servidor
+        mostrarErroresValidacion(errores) {
+            // Limpiar errores anteriores
+            document.querySelectorAll('.error-message-domicilio').forEach(el => el.remove());
+            document.querySelectorAll('.border-red-500').forEach(el => {
+                el.classList.remove('border-red-500', 'bg-red-50');
+            });
+            
+            const erroresArray = [];
+            
+            // Mostrar nuevos errores
+            for (const [campo, mensajes] of Object.entries(errores)) {
+                const elemento = document.getElementById(campo) || document.querySelector(`[name="${campo}"]`);
+                if (elemento) {
+                    // Agregar clases de error
+                    elemento.classList.add('border-red-500', 'bg-red-50');
+                    
+                    // Agregar mensaje de error
+                    const contenedor = elemento.closest('.form-group') || elemento.parentElement;
+                    const errorMsg = document.createElement('p');
+                    errorMsg.className = 'error-message-domicilio text-xs text-red-500 mt-1 flex items-center';
+                    errorMsg.innerHTML = `
+                        <i class="fas fa-exclamation-triangle mr-1 text-red-400"></i>
+                        <span>${Array.isArray(mensajes) ? mensajes[0] : mensajes}</span>
+                    `;
+                    contenedor.appendChild(errorMsg);
+                }
+                
+                // Agregar a la lista de errores para el modal
+                erroresArray.push(Array.isArray(mensajes) ? mensajes[0] : mensajes);
+            }
+            
+            // Mostrar modal con todos los errores
+            if (erroresArray.length > 0) {
+                this.mostrarErrores(erroresArray);
+            }
+            
+            // Scroll al primer error
+            const primerError = document.querySelector('.border-red-500');
+            if (primerError) {
+                primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        },
+        
+        // Función para configurar validación en tiempo real
+        setupRealTimeValidation() {
+            // Limpiar errores cuando el usuario comience a escribir
+            this.$watch('cp', () => this.limpiarErrorCampo('codigo_postal'));
+            this.$watch('nombreVialidad', () => this.limpiarErrorCampo('calle'));
+            this.$watch('numeroExterior', () => this.limpiarErrorCampo('numero_exterior'));
+            this.$watch('numeroInterior', () => this.limpiarErrorCampo('numero_interior'));
+            this.$watch('colonia', () => this.limpiarErrorCampo('colonia'));
+            
+            // Configurar listeners para campos que no están en Alpine
+            this.$nextTick(() => {
+                const entreCalle1 = document.getElementById('entre_calle_1');
+                const entreCalle2 = document.getElementById('entre_calle_2');
+                
+                if (entreCalle1) {
+                    entreCalle1.addEventListener('input', () => this.limpiarErrorCampo('entre_calle_1'));
+                }
+                if (entreCalle2) {
+                    entreCalle2.addEventListener('input', () => this.limpiarErrorCampo('entre_calle_2'));
+                }
+            });
+        },
+        
+        // Función para limpiar error de un campo específico
+        limpiarErrorCampo(campoId) {
+            const campo = document.getElementById(campoId);
+            if (campo) {
+                campo.classList.remove('border-red-500', 'bg-red-50');
+            }
+            
+            // Limpiar mensaje de error asociado
+            const contenedor = campo?.closest('.form-group') || campo?.parentElement;
+            if (contenedor) {
+                const errorMsg = contenedor.querySelector('.error-message-domicilio');
+                if (errorMsg) {
+                    errorMsg.remove();
+                }
+            }
+        },
+        
+        // Función para mostrar mensaje de éxito
+        mostrarMensajeExito(mensaje) {
+            const elemento = document.createElement('div');
+            elemento.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
+            elemento.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>${mensaje}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(elemento);
+            
+            // Animar entrada
+            setTimeout(() => {
+                elemento.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remover después de 3 segundos
+            setTimeout(() => {
+                elemento.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (elemento.parentNode) {
+                        elemento.parentNode.removeChild(elemento);
+                    }
+                }, 300);
+            }, 3000);
         }
     }
 }
@@ -582,6 +887,14 @@ function navegarSiguienteDesdeDomicilio() {
         return;
     }
 }
+
+// Función global para cerrar modal de error de domicilio
+window.cerrarModalErrorDomicilio = function() {
+    const modal = document.getElementById('modal-error-domicilio');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
 </script>
 <style>
 .h-12 {
@@ -655,5 +968,41 @@ textarea:focus {
 .form-group:hover select,
 .form-group:hover textarea {
     @apply border-[#4F46E5]/40;
+}
+
+/* Estilos para campos con error */
+.form-group input.border-red-500,
+.form-group select.border-red-500 {
+    @apply border-red-500 bg-red-50;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-group input.border-red-500:focus,
+.form-group select.border-red-500:focus {
+    @apply border-red-500 ring-2 ring-red-500/20;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+/* Animación para mensaje de error */
+.error-message-domicilio {
+    animation: fadeInError 0.3s ease-out;
+}
+
+@keyframes fadeInError {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilos para campos válidos después de corrección */
+.form-group input:not(.border-red-500):focus,
+.form-group select:not(.border-red-500):focus {
+    @apply border-green-500 ring-2 ring-green-500/20;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
 }
 </style> 
