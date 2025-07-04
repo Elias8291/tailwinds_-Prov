@@ -83,7 +83,11 @@ class RegisterController extends Controller
                 ? 'Se ha actualizado tu información y reenviado el correo de verificación. Revisa tu bandeja de entrada.'
                 : 'Registro completado exitosamente. Se ha enviado un correo de verificación a tu dirección de email. Tienes 72 horas para verificar tu cuenta.';
 
-            return redirect()->route('login')->with('registration_success', $message);
+            return redirect()->route('login')->with([
+                'show_success_modal' => true,
+                'modal_title' => $isResend ? 'Actualización Exitosa' : 'Registro Exitoso',
+                'modal_message' => $message
+            ]);
 
         } catch (\Exception $e) {
             DB::rollback();

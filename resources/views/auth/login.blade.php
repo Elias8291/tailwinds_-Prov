@@ -2,6 +2,38 @@
 
 @section('title', 'Iniciar Sesión - Padrón de Proveedores del Estado de Oaxaca')
 
+@push('styles')
+<style>
+    .success-checkmark {
+        animation: scale-up 0.5s ease-in-out;
+    }
+    
+    @keyframes scale-up {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .modal-overlay {
+        animation: fade-in 0.3s ease-out;
+    }
+    
+    @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .modal-content {
+        animation: slide-up 0.3s ease-out;
+    }
+    
+    @keyframes slide-up {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+</style>
+@endpush
+
 @section('content')
 <form id="loginForm" action="{{ route('login') }}" method="POST" class="space-y-4">
     @csrf
@@ -228,50 +260,38 @@
     </div>
 </form>
 
-<!-- Modal de Éxito de Registro -->
-@if(session('registration_success'))
-<div id="successModal" class="fixed inset-0 z-50 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <!-- Overlay -->
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeSuccessModal()"></div>
-        
-        <!-- Modal Content -->
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="sm:flex sm:items-start">
-                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
-                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">
-                            ¡Registro Exitoso!
-                        </h3>
-                        <div class="mt-2">
-                            <p class="text-sm text-gray-500">
-                                {{ session('registration_success') }}
-                            </p>
-                            <div class="mt-3 p-3 bg-blue-50 rounded-lg">
-                                <p class="text-xs text-blue-600 font-medium">
-                                    📧 Revisa tu bandeja de entrada (y carpeta de spam) para verificar tu cuenta.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+<!-- Modal de Éxito -->
+@if(session('show_success_modal'))
+<div id="successModal" class="fixed inset-0 z-50 overflow-y-auto modal-overlay" style="background-color: rgba(0,0,0,0.5);">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md modal-content">
+            <!-- Icono de éxito -->
+            <div class="p-6 text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                    <svg class="h-10 w-10 text-green-500 success-checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
                 </div>
-            </div>
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button type="button" 
-                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors duration-200"
-                        onclick="closeSuccessModal()">
-                    Continuar
+                
+                <h3 class="text-xl font-bold text-gray-900 mb-2">
+                    {{ session('modal_title') }}
+                </h3>
+                
+                <p class="text-gray-600 mb-6">
+                    {{ session('modal_message') }}
+                </p>
+                
+                <button onclick="closeSuccessModal()" 
+                        class="inline-flex justify-center items-center px-6 py-2.5 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    <span class="mr-2">Aceptar</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
                 </button>
             </div>
         </div>
     </div>
 </div>
-@endif
 
 <script>
 function togglePassword(inputId) {
@@ -295,28 +315,26 @@ function togglePassword(inputId) {
 }
 
 function closeSuccessModal() {
-    document.getElementById('successModal').style.display = 'none';
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
 }
 
-// Auto cerrar modal después de 5 segundos
-@if(session('registration_success'))
-setTimeout(function() {
-    closeSuccessModal();
-}, 5000);
-@endif
-
-// Auto ocultar mensaje de verificación después de 8 segundos
-@if(session('verification_required'))
-setTimeout(function() {
-    const verificationAlert = document.querySelector('.bg-blue-50');
-    if (verificationAlert) {
-        verificationAlert.style.opacity = '0';
-        verificationAlert.style.transition = 'opacity 0.5s ease-out';
-        setTimeout(function() {
-            verificationAlert.style.display = 'none';
-        }, 500);
+// Prevenir que se cierre el modal al hacer clic fuera
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                e.stopPropagation(); // Prevenir que se cierre al hacer clic fuera
+            }
+        });
     }
-}, 8000);
-@endif
+});
 </script>
+@endif
 @endsection 

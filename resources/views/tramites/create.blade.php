@@ -129,7 +129,13 @@
             // Función para aceptar términos y avanzar
             aceptarTerminos() {
                 if (!this.terminosAceptados) {
-                    alert('Debe aceptar los términos y condiciones para continuar.');
+                    Swal.fire({
+                        title: 'Términos y Condiciones',
+                        text: 'Debe aceptar los términos y condiciones para continuar.',
+                        icon: 'warning',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#9d2449'
+                    });
                     return;
                 }
                 
@@ -142,8 +148,27 @@
                     rfc: this.rfc
                 }));
                 
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    title: '¡Términos Aceptados!',
+                    text: 'Continuando con el registro...',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    background: '#fff',
+                    iconColor: '#9d2449',
+                    customClass: {
+                        popup: 'rounded-xl shadow-xl border border-gray-100',
+                        title: 'text-gray-800 font-bold',
+                        htmlContainer: 'text-gray-600'
+                    }
+                });
+                
                 // Avanzar al siguiente paso
-                this.currentStep = 1;
+                setTimeout(() => {
+                    this.currentStep = 1;
+                }, 1500);
             },
             
             // Función para obtener contenido de términos específico
@@ -544,11 +569,11 @@
                      x-transition:leave="transition ease-in duration-200 transform"
                      x-transition:leave-start="opacity-100 translate-y-0"
                      x-transition:leave-end="opacity-0 -translate-y-2">
-                    @include('components.formularios.seccion-terminos', [
-                        'tipoTramite' => $datosTramite['tipo_tramite'] ?? 'inscripcion',
-                        'rfc' => $datosTramite['rfc'] ?? '',
-                        'tipoPersona' => $datosTramite['tipo_persona'] ?? 'Física',
-                    ])
+                    <x-formularios.seccion-terminos 
+                        :tipoTramite="$datosTramite['tipo_tramite'] ?? 'inscripcion'"
+                        :rfc="$datosTramite['rfc'] ?? ''"
+                        :tipoPersona="$datosTramite['tipo_persona'] ?? 'Física'"
+                    />
                 </div>
 
                 <!-- Datos Generales -->
@@ -847,6 +872,171 @@
             
         </div>
     </div>
+
+    <!-- Botones de navegación -->
+    <div class="flex justify-between items-center mt-8">
+        <!-- Botón Anterior -->
+        <button type="button" 
+                x-show="currentStep > 0"
+                @click="currentStep--"
+                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449]/50 transition-all duration-200 ease-in-out">
+            <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Anterior
+        </button>
+
+        <!-- Botón Siguiente/Finalizar -->
+        <button type="button"
+                x-show="currentStep < (isPersonaFisica ? 3 : 6)"
+                @click="currentStep++"
+                class="inline-flex items-center px-6 py-3 border border-transparent rounded-lg text-base font-medium text-white bg-[#9d2449] hover:bg-[#7a1d37] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] transition-all duration-200 ease-in-out transform hover:scale-105">
+            <span>Siguiente</span>
+            <svg class="w-5 h-5 ml-2 -mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+        </button>
+
+        <!-- Botón Finalizar -->
+        <button type="button"
+                x-show="currentStep === (isPersonaFisica ? 3 : 6)"
+                @click="finalizarTramite()"
+                class="inline-flex items-center px-6 py-3 border border-transparent rounded-lg text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 ease-in-out transform hover:scale-105">
+            <span>Finalizar Trámite</span>
+            <svg class="w-5 h-5 ml-2 -mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Modal de Finalización -->
+    <div x-show="showFinalizacionModal"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         style="display: none;">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
+            <div class="inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                <div class="text-center">
+                    <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-green-100">
+                        <svg class="w-8 h-8 text-green-600 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="mb-2 text-lg font-medium text-gray-900" x-text="mensajeFinalizacion.titulo">
+                        Enviando Trámite...
+                    </h3>
+                    <p class="mb-4 text-sm text-gray-500" x-text="mensajeFinalizacion.mensaje">
+                        Por favor espere mientras procesamos su información.
+                    </p>
+                    <div class="w-full h-2 mb-4 bg-gray-200 rounded-full">
+                        <div class="h-2 bg-green-500 rounded-full animate-[progress_2s_ease-in-out_infinite]"
+                             :style="{ width: progresoEnvio + '%' }"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setupTramite() {
+            return {
+                // ... existing data ...
+                showFinalizacionModal: false,
+                progresoEnvio: 0,
+                mensajeFinalizacion: {
+                    titulo: '',
+                    mensaje: ''
+                },
+
+                async finalizarTramite() {
+                    this.showFinalizacionModal = true;
+                    this.progresoEnvio = 0;
+                    this.mensajeFinalizacion = {
+                        titulo: 'Enviando Trámite...',
+                        mensaje: 'Por favor espere mientras procesamos su información.'
+                    };
+
+                    // Simular progreso
+                    const intervalo = setInterval(() => {
+                        if (this.progresoEnvio < 90) {
+                            this.progresoEnvio += 10;
+                        }
+                    }, 200);
+
+                    try {
+                        // Enviar el formulario
+                        const form = document.querySelector('form');
+                        const formData = new FormData(form);
+
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+
+                        clearInterval(intervalo);
+                        this.progresoEnvio = 100;
+
+                        if (response.ok) {
+                            this.mensajeFinalizacion = {
+                                titulo: '¡Trámite Enviado!',
+                                mensaje: 'Su trámite ha sido enviado exitosamente.'
+                            };
+
+                            // Mostrar mensaje de éxito
+                            setTimeout(() => {
+                                Swal.fire({
+                                    title: '¡Trámite Completado!',
+                                    text: 'Su trámite ha sido enviado exitosamente.',
+                                    icon: 'success',
+                                    confirmButtonText: 'Entendido',
+                                    confirmButtonColor: '#9d2449'
+                                }).then(() => {
+                                    window.location.href = '/tramites-solicitante';
+                                });
+                            }, 1000);
+                        } else {
+                            throw new Error('Error al enviar el trámite');
+                        }
+                    } catch (error) {
+                        clearInterval(intervalo);
+                        this.progresoEnvio = 100;
+                        this.mensajeFinalizacion = {
+                            titulo: 'Error',
+                            mensaje: 'Hubo un error al enviar el trámite. Por favor, intente nuevamente.'
+                        };
+
+                        // Mostrar mensaje de error
+                        setTimeout(() => {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Hubo un problema al enviar el trámite. Por favor, intente nuevamente.',
+                                icon: 'error',
+                                confirmButtonText: 'Entendido',
+                                confirmButtonColor: '#9d2449'
+                            });
+                            this.showFinalizacionModal = false;
+                        }, 1000);
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes progress {
+            0% { width: var(--progress-width, 0%); }
+            100% { width: min(100%, calc(var(--progress-width, 0%) + 30%)); }
+        }
+    </style>
 </div>
 
 @push('styles')
