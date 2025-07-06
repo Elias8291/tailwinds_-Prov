@@ -17,7 +17,7 @@ php artisan cache:clear
 
 # Iniciar servidor con configuración PHP personalizada
 Write-Host "✅ Iniciando servidor con configuración PHP optimizada para archivos grandes..." -ForegroundColor Green
-Write-Host "📁 Límites: upload_max_filesize=100M, post_max_size=100M" -ForegroundColor Cyan
+Write-Host "📁 Límites: upload_max_filesize=50M, post_max_size=60M" -ForegroundColor Cyan
 Write-Host "🌐 Servidor disponible en: http://127.0.0.1:8000" -ForegroundColor Cyan
 Write-Host "⚠️  Para detener el servidor presiona Ctrl+C" -ForegroundColor Yellow
 Write-Host ""

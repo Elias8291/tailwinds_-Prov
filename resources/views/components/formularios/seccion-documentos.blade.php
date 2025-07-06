@@ -201,38 +201,20 @@
         </div>
     @else
         <!-- Vista editable normal -->
-            <!-- Información de límites del servidor -->
-    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div class="flex items-start">
-            <i class="fas fa-info-circle text-blue-500 mr-3 mt-0.5"></i>
-            <div class="text-blue-700 text-sm">
-                <p class="font-medium mb-1">📊 Límites del servidor:</p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
-                    <div>💾 Subida: <span class="font-mono">{{ ini_get('upload_max_filesize') }}</span></div>
-                    <div>📦 POST: <span class="font-mono">{{ ini_get('post_max_size') }}</span></div>
-                    <div>🧠 Memoria: <span class="font-mono">{{ ini_get('memory_limit') }}</span></div>
-                </div>
-                <p class="mt-2 text-xs">
-                    💡 <strong>Recomendación:</strong> Para archivos grandes (&gt;10MB), use archivos comprimidos o divídelos en partes más pequeñas.
-                </p>
+        <!-- Alert de Errores -->
+        <div x-show="showError" x-cloak class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                <p class="text-red-700 text-sm" x-text="errorMessage"></p>
             </div>
         </div>
-    </div>
-
-    <!-- Alert de Errores -->
-    <div x-show="showError" x-cloak class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-        <div class="flex items-center">
-            <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
-            <p class="text-red-700 text-sm" x-text="errorMessage"></p>
+        <!-- Alert de Éxito -->
+        <div x-show="showSuccess" x-cloak class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-start">
+                <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5"></i>
+                <div class="text-green-700 text-sm" x-html="successMessage"></div>
+            </div>
         </div>
-    </div>
-    <!-- Alert de Éxito -->
-    <div x-show="showSuccess" x-cloak class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-        <div class="flex items-start">
-            <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5"></i>
-            <div class="text-green-700 text-sm" x-html="successMessage"></div>
-        </div>
-    </div>
         <!-- Lista de Documentos -->
         <div class="space-y-4">
             <template x-for="documento in documentos" :key="documento.id">
@@ -615,239 +597,77 @@ function documentosData() {
         async handleFileSelect(event, documento) {
             const file = event.target.files[0];
             if (!file) return;
-            
-            const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-            
-            console.log('📄 Archivo seleccionado:', {
-                nombre: file.name,
-                tamaño_bytes: file.size,
-                tamaño_mb: fileSizeMB,
-                tipo: file.type
-            });
-            
-            // Validar tipo de archivo
-            if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+            // Validaciones
+            if (file.size > 50 * 1024 * 1024) {
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                this.mostrarError(`El archivo es demasiado grande (${sizeMB}MB). El tamaño máximo permitido es 50MB.`);
+                event.target.value = '';
+                return;
+            }
+            if (!file.type.includes('pdf')) {
                 this.mostrarError('Solo se permiten archivos PDF.');
                 event.target.value = '';
                 return;
             }
-            
-            // Validar tamaño - ser más estricto con los límites
-            const maxSizeMB = 50; // Reducir a 50MB para mayor compatibilidad
-            if (file.size > maxSizeMB * 1024 * 1024) {
-                this.mostrarError(`El archivo es demasiado grande (${fileSizeMB}MB). El tamaño máximo recomendado es ${maxSizeMB}MB.`);
-                event.target.value = '';
-                return;
-            }
-            
-            // Advertencia para archivos grandes pero permitidos
-            if (file.size > 10 * 1024 * 1024) {
-                console.warn(`⚠️ Archivo grande detectado: ${fileSizeMB}MB`);
-            }
-            
             // Actualizar estado del documento
             documento.archivo_seleccionado = true;
             documento.nombre_archivo = file.name;
-            documento.archivo_tamaño_mb = fileSizeMB;
-            
             // Activar estado de carga
             this.uploading = true;
             this.uploadingDocId = documento.id;
-            
             // Subir archivo
             await this.subirDocumento(documento, file);
-            
             // Desactivar estado de carga
             this.uploading = false;
             this.uploadingDocId = null;
         },
         async subirDocumento(documento, file) {
             try {
-                console.log('🚀 Iniciando subida de documento:', {
-                    documento_id: documento.id,
-                    archivo: file.name,
-                    tamaño_mb: documento.archivo_tamaño_mb
-                });
-
                 const formData = new FormData();
                 formData.append('archivo', file);
                 formData.append('documento_id', documento.id);
-                
                 // Agregar CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]');
                 if (csrfToken) {
                     formData.append('_token', csrfToken.getAttribute('content'));
                 }
-                
-                console.log('📤 Enviando petición al servidor...');
-                
                 const response = await fetch('/tramites-solicitante/upload-documento-local', {
                     method: 'POST',
                     body: formData,
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
                 });
-                
-                console.log('📥 Respuesta recibida:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    ok: response.ok
-                });
-                
-                // Intentar obtener el JSON de la respuesta
-                let data;
-                try {
-                    data = await response.json();
-                    console.log('📋 Datos de respuesta:', data);
-                } catch (jsonError) {
-                    console.error('❌ Error al parsear JSON:', jsonError);
-                    throw new Error(`Error del servidor (${response.status}): No se pudo procesar la respuesta`);
+
+                // Manejo específico del error 413
+                if (response.status === 413) {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                    this.mostrarError(`El archivo es demasiado grande (${sizeMB}MB). El servidor no permite archivos mayores a 50MB. Comprima el PDF o use una versión más pequeña.`);
+                    documento.archivo_seleccionado = false;
+                    documento.nombre_archivo = '';
+                    return;
                 }
-                
-                if (response.ok && data.success) {
-                    console.log('✅ Subida exitosa');
+
+                const data = await response.json();
+                if (data.success) {
                     documento.estado = 'Pendiente';
                     documento.ruta_archivo = data.ruta;
                     documento.docSolicitanteId = data.docSolicitanteId;
                     documento.observaciones = null;
-                    
-                    let mensaje = data.mensaje || 'Documento subido correctamente';
-                    if (data.info && data.info.tamaño_mb) {
-                        mensaje += ` (${data.info.tamaño_mb}MB)`;
-                    }
-                    
-                    this.mostrarExito(mensaje);
+                    this.mostrarExito(data.mensaje || 'Documento subido correctamente');
                 } else {
-                    console.error('❌ Error en la subida:', data);
-                    
-                    // Enviar información detallada del error al servidor para logging
-                    this.enviarErrorALogs(response.status, data, file, documento);
-                    
-                    let mensajeError = data.mensaje || data.message || 'Error al subir el documento';
-                    
-                    // Agregar información adicional según el tipo de error
-                    if (response.status === 422) {
-                        mensajeError += ' (Error de validación)';
-                        if (data.debug_info) {
-                            console.log('🔍 Información de debug:', data.debug_info);
-                            if (data.debug_info.tamaño_archivo_mb) {
-                                mensajeError += ` - Tamaño: ${data.debug_info.tamaño_archivo_mb}MB`;
-                            }
-                        }
-                    } else if (response.status === 413) {
-                        mensajeError = '🚨 Archivo demasiado grande para el servidor';
-                        if (data.error_details) {
-                            console.log('📊 Detalles del error 413:', data.error_details);
-                            if (data.error_details.content_length_mb) {
-                                mensajeError += ` (${data.error_details.content_length_mb}MB detectado)`;
-                            }
-                            if (data.error_details.max_allowed_mb) {
-                                mensajeError += ` - Máximo: ${data.error_details.max_allowed_mb}MB`;
-                            }
-                        } else if (data.tamaño_detectado) {
-                            mensajeError += ` - Detectado: ${data.tamaño_detectado}`;
-                        }
-                        
-                        // Información adicional para error 413
-                        mensajeError += '\n💡 Sugerencias:';
-                        mensajeError += '\n• Comprima el archivo PDF';
-                        mensajeError += '\n• Use herramientas online para reducir el tamaño';
-                        mensajeError += '\n• Divida documentos grandes en partes más pequeñas';
-                    }
-                    
-                    this.mostrarError(mensajeError);
-                    this.limpiarArchivoSeleccionado(documento);
+                    this.mostrarError(data.mensaje || 'Error al subir el documento');
+                    documento.archivo_seleccionado = false;
+                    documento.nombre_archivo = '';
                 }
             } catch (error) {
-                console.error('❌ Error de conexión:', error);
-                
-                // Enviar error de conexión a logs también
-                this.enviarErrorALogs('CONNECTION_ERROR', {
-                    error_message: error.message,
-                    error_name: error.name,
-                    error_stack: error.stack
-                }, file, documento);
-                
-                let mensajeError = 'Error de conexión al subir el documento';
-                if (error.message) {
-                    mensajeError += ': ' + error.message;
-                }
-                
-                this.mostrarError(mensajeError);
-                this.limpiarArchivoSeleccionado(documento);
+                console.error('Error uploading document:', error);
+                this.mostrarError('Error de conexión al subir el documento. Verifique su conexión e intente nuevamente.');
+                documento.archivo_seleccionado = false;
+                documento.nombre_archivo = '';
             }
-        },
-        
-        // Función auxiliar para limpiar el estado del archivo
-        limpiarArchivoSeleccionado(documento) {
-            documento.archivo_seleccionado = false;
-            documento.nombre_archivo = '';
-            documento.archivo_tamaño_mb = null;
-            
-            // Limpiar el input file
-            const input = document.getElementById(`documento_${documento.id}`);
-            if (input) {
-                input.value = '';
-            }
-        },
-        
-        // Función para enviar errores al servidor para logging
-        async enviarErrorALogs(statusCode, errorData, file, documento) {
-            try {
-                const logData = {
-                    error_type: 'UPLOAD_ERROR_FRONTEND',
-                    status_code: statusCode,
-                    file_info: {
-                        name: file ? file.name : 'unknown',
-                        size: file ? file.size : 0,
-                        size_mb: file ? (file.size / 1024 / 1024).toFixed(2) : 0,
-                        type: file ? file.type : 'unknown'
-                    },
-                    documento_info: {
-                        id: documento.id,
-                        nombre: documento.nombre,
-                        estado: documento.estado
-                    },
-                    server_response: errorData,
-                    timestamp: new Date().toISOString(),
-                    user_agent: navigator.userAgent,
-                    url: window.location.href,
-                    browser_limits: this.obtenerLimitesBrowser(),
-                    tramite_id: this.tramiteId
-                };
-                
-                console.log('📤 Enviando error a logs del servidor:', logData);
-                
-                // Enviar al endpoint de logging
-                await fetch('/tramites-solicitante/log-upload-error', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify(logData)
-                });
-                
-                console.log('✅ Error enviado a logs correctamente');
-            } catch (logError) {
-                console.error('❌ Error al enviar logs al servidor:', logError);
-                // No mostrar error al usuario por fallos de logging
-            }
-        },
-        
-        // Función para obtener límites del browser
-        obtenerLimitesBrowser() {
-            return {
-                max_form_data: 'unknown', // Difícil de detectar desde JS
-                memory_available: navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'unknown',
-                connection_type: navigator.connection ? navigator.connection.effectiveType : 'unknown',
-                platform: navigator.platform,
-                language: navigator.language
-            };
         },
         reemplazarDocumento(documento) {
             // Solo permitir reemplazar si NO está aprobado

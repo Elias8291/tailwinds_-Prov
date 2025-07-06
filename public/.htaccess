@@ -5,17 +5,15 @@
 
     RewriteEngine On
 
-    # Configuraciones para archivos grandes
-    # Límite de Apache para el tamaño del cuerpo de la petición (110MB)
-    LimitRequestBody 115343360
-    
-    # Configuraciones PHP
-    php_value upload_max_filesize 100M
-    php_value post_max_size 110M
+    # Configuraciones para archivos grandes (50MB + buffer)
+    php_value upload_max_filesize 50M
+    php_value post_max_size 60M
     php_value max_execution_time 300
     php_value max_input_time 300
     php_value memory_limit 512M
-    php_value max_file_uploads 20
+    
+    # Límite de Apache para archivos grandes (60MB en bytes para dar margen con headers)
+    LimitRequestBody 62914560
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .

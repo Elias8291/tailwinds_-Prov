@@ -367,14 +367,10 @@ Route::middleware(['auth', 'can:tramites-solicitante.ver'])->prefix('tramites-so
     Route::get('/documentos-local', [\App\Http\Controllers\LocalDocumentoController::class, 'obtenerDocumentos'])
         ->name('tramites.solicitante.documentos-local');
     Route::post('/upload-documento-local', [\App\Http\Controllers\LocalDocumentoController::class, 'subirDocumento'])
-        ->middleware(['can:tramites-solicitante.subir-documentos', \App\Http\Middleware\HandleLargeUploads::class])
+        ->middleware('can:tramites-solicitante.subir-documentos')
         ->name('tramites.solicitante.upload-documento-local');
     Route::get('/ver-documento-local/{tramite}/{documento}', [\App\Http\Controllers\LocalDocumentoController::class, 'verDocumento'])
         ->name('tramites.solicitante.ver-documento-local');
-    
-    // RUTA PARA LOGGING DE ERRORES DE UPLOAD
-    Route::post('/log-upload-error', [\App\Http\Controllers\LocalDocumentoController::class, 'logUploadError'])
-        ->name('tramites.solicitante.log-upload-error');
     
     // RUTAS ORIGINALES (mantener compatibilidad)
             Route::post('/upload-documento', [TramiteSolicitanteController::class, 'subirDocumento'])
@@ -748,10 +744,5 @@ if (config('app.debug')) {
         
         return view('php-config', compact('config'));
     })->name('php.config');
-    
-    // Página de prueba para uploads
-    Route::get('/test-upload', function() {
-        return view('test-upload');
-    })->middleware('auth')->name('test.upload');
 }
 
