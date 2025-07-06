@@ -32,6 +32,39 @@
     .border-3 {
         border-width: 3px;
     }
+    
+    /* Animaciones para el progreso de registro */
+    @keyframes progressPulse {
+        0%, 100% { 
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% { 
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+    }
+    
+    .progress-pulse {
+        animation: progressPulse 2s ease-in-out infinite;
+    }
+    
+    /* Animación para la barra de progreso */
+    @keyframes progressGlow {
+        0% { box-shadow: 0 0 5px rgba(139, 69, 19, 0.3); }
+        50% { box-shadow: 0 0 20px rgba(139, 69, 19, 0.6); }
+        100% { box-shadow: 0 0 5px rgba(139, 69, 19, 0.3); }
+    }
+    
+    .progress-glow {
+        animation: progressGlow 2s ease-in-out infinite;
+    }
+    
+    /* Suavizar transiciones del formulario */
+    .form-disabled {
+        transition: all 0.3s ease-out;
+        filter: grayscale(0.3);
+    }
 </style>
 @endpush
 
@@ -270,6 +303,11 @@
             <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative flex items-center justify-center space-x-2">
+                <!-- Spinner de carga (oculto por defecto) -->
+                <div id="loadingSpinner" class="hidden">
+                    <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin shadow-sm"></div>
+                </div>
+                <!-- Icono normal -->
                 <svg id="actionIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -277,6 +315,51 @@
                 <div class="absolute -right-2 w-2 h-2 bg-white/30 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping"></div>
             </div>
         </button>
+        
+        <!-- Indicador de progreso de registro (oculto por defecto) -->
+        <div id="registrationProgress" class="hidden">
+            <div class="p-4 bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg border border-primary/20">
+                <div class="flex items-center space-x-3">
+                                         <!-- Spinner de registro -->
+                     <div class="relative flex-shrink-0 progress-pulse">
+                         <div class="w-8 h-8 border-3 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                         <div class="absolute inset-0 flex items-center justify-center">
+                             <svg class="w-4 h-4 text-primary animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                             </svg>
+                         </div>
+                     </div>
+                    
+                    <!-- Texto de progreso -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <h3 class="text-sm font-semibold text-primary">Registrando Usuario</h3>
+                            <div class="flex space-x-1">
+                                <div class="w-1 h-1 bg-primary rounded-full animate-pulse"></div>
+                                <div class="w-1 h-1 bg-primary rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                                <div class="w-1 h-1 bg-primary rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                            </div>
+                        </div>
+                        
+                        <p class="text-xs text-gray-600 mb-2">
+                            <span id="progressText">Creando cuenta y enviando correo de verificación...</span>
+                        </p>
+                        
+                        <!-- Barra de progreso -->
+                        <div class="w-full">
+                            <div class="bg-gray-200 rounded-full h-2 overflow-hidden shadow-inner">
+                                <div id="progressBar" class="bg-gradient-to-r from-primary to-blue-500 h-full rounded-full transition-all duration-1000 ease-out progress-glow" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mensaje adicional -->
+                        <p class="text-xs text-gray-500 mt-2">
+                            <strong>Por favor, no cierre esta ventana.</strong> El proceso puede tardar unos momentos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <a href="{{ url('/') }}" class="group w-full bg-white hover:bg-gray-50 text-primary hover:text-primary-dark font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 border-2 border-primary/20 hover:border-primary/40 relative overflow-hidden inline-flex items-center justify-center text-sm">
             <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary-dark/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -423,8 +506,17 @@
         }
     });
 
+    // Variable para prevenir doble envío
+    let isRegistering = false;
+
     // Función para manejar el botón de acción
     window.handleActionButton = function() {
+        // Prevenir doble clic durante el registro
+        if (isRegistering) {
+            console.log('Registro ya en proceso, ignorando clic...');
+            return;
+        }
+
         if (!documentProcessed) {
             // Primera fase: procesar documento
             const fileInput = document.getElementById('document');
@@ -438,7 +530,13 @@
             // Segunda fase: enviar formulario
             const form = document.querySelector('form');
             if (validateForm()) {
-                form.submit();
+                isRegistering = true;
+                startRegistrationProcess();
+                
+                // Pequeño delay para que se vea la animación antes del envío
+                setTimeout(() => {
+                    form.submit();
+                }, 200);
             } else {
                 showError('Por favor, complete todos los campos requeridos.');
             }
@@ -581,6 +679,189 @@
                     }
                 }
             }
+        }
+    });
+
+    // ===== FUNCIONES DE REGISTRO =====
+
+    // Función para iniciar el proceso de registro
+    function startRegistrationProcess() {
+        console.log('Iniciando proceso de registro...');
+        
+        // Ocultar el botón normal y mostrar estado de carga
+        showRegistrationLoading(true);
+        
+        // Deshabilitar toda la interfaz
+        disableForm(true);
+        
+        // Simular progreso de registro
+        simulateRegistrationProgress();
+    }
+
+    // Función para mostrar/ocultar el estado de carga del registro
+    function showRegistrationLoading(show = true) {
+        const actionButton = document.getElementById('actionButton');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const actionIcon = document.getElementById('actionIcon');
+        const actionText = document.getElementById('actionText');
+        const registrationProgress = document.getElementById('registrationProgress');
+        
+        if (show) {
+            // Actualizar botón
+            if (actionButton) {
+                actionButton.classList.add('opacity-75', 'cursor-not-allowed');
+                actionButton.disabled = true;
+            }
+            
+            // Mostrar spinner en el botón
+            if (loadingSpinner) {
+                loadingSpinner.classList.remove('hidden');
+            }
+            if (actionIcon) {
+                actionIcon.classList.add('hidden');
+            }
+            if (actionText) {
+                actionText.textContent = 'Registrando...';
+            }
+            
+            // Mostrar indicador de progreso
+            if (registrationProgress) {
+                registrationProgress.classList.remove('hidden');
+                setTimeout(() => {
+                    registrationProgress.style.opacity = '0';
+                    registrationProgress.style.transform = 'translateY(-10px)';
+                    registrationProgress.style.transition = 'all 0.3s ease-out';
+                    
+                    setTimeout(() => {
+                        registrationProgress.style.opacity = '1';
+                        registrationProgress.style.transform = 'translateY(0)';
+                    }, 10);
+                }, 100);
+            }
+        } else {
+            // Restaurar estado normal
+            if (actionButton) {
+                actionButton.classList.remove('opacity-75', 'cursor-not-allowed');
+                actionButton.disabled = false;
+            }
+            
+            if (loadingSpinner) {
+                loadingSpinner.classList.add('hidden');
+            }
+            if (actionIcon) {
+                actionIcon.classList.remove('hidden');
+            }
+            if (actionText) {
+                actionText.textContent = 'REGISTRARSE';
+            }
+            
+            if (registrationProgress) {
+                registrationProgress.classList.add('hidden');
+            }
+        }
+    }
+
+    // Función para deshabilitar/habilitar el formulario
+    function disableForm(disable = true) {
+        const form = document.querySelector('form');
+        if (!form) return;
+        
+        if (disable) {
+            form.classList.add('form-disabled');
+        } else {
+            form.classList.remove('form-disabled');
+        }
+        
+        const inputs = form.querySelectorAll('input:not(#document), button:not(#actionButton), select, textarea');
+        inputs.forEach(input => {
+            if (disable) {
+                input.disabled = true;
+                input.style.opacity = '0.5';
+                input.style.pointerEvents = 'none';
+                input.style.cursor = 'not-allowed';
+            } else {
+                input.disabled = false;
+                input.style.opacity = '1';
+                input.style.pointerEvents = 'auto';
+                input.style.cursor = 'auto';
+            }
+        });
+        
+        // Deshabilitar enlaces también
+        const links = form.querySelectorAll('a');
+        links.forEach(link => {
+            if (disable) {
+                link.style.pointerEvents = 'none';
+                link.style.opacity = '0.5';
+            } else {
+                link.style.pointerEvents = 'auto';
+                link.style.opacity = '1';
+            }
+        });
+    }
+
+    // Función para simular el progreso de registro
+    function simulateRegistrationProgress() {
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        
+        if (!progressBar || !progressText) return;
+        
+        const steps = [
+            { progress: 20, text: 'Validando información del SAT...', delay: 500 },
+            { progress: 40, text: 'Verificando datos de usuario...', delay: 800 },
+            { progress: 60, text: 'Creando cuenta de usuario...', delay: 1000 },
+            { progress: 80, text: 'Configurando permisos...', delay: 1200 },
+            { progress: 95, text: 'Enviando correo de verificación...', delay: 1500 },
+            { progress: 100, text: 'Registro completado exitosamente', delay: 2000 }
+        ];
+        
+        let currentStep = 0;
+        
+        function updateProgress() {
+            if (currentStep < steps.length) {
+                const step = steps[currentStep];
+                
+                // Actualizar barra de progreso
+                progressBar.style.width = step.progress + '%';
+                
+                // Actualizar texto
+                progressText.textContent = step.text;
+                
+                // Programar siguiente paso
+                setTimeout(() => {
+                    currentStep++;
+                    updateProgress();
+                }, step.delay);
+            }
+        }
+        
+        // Iniciar progreso
+        updateProgress();
+    }
+
+    // Interceptar el envío del formulario para manejar errores
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Si el formulario ya está en proceso de envío, no hacer nada
+        if (this.dataset.submitting === 'true') {
+            return;
+        }
+        
+        // Marcar como enviando
+        this.dataset.submitting = 'true';
+        
+        // El progreso ya se inició en handleActionButton
+        console.log('Formulario enviado - procesando...');
+    });
+
+    // Manejar errores de red o fallos en el envío
+    window.addEventListener('beforeunload', function(e) {
+        // Si hay un proceso de registro en curso, advertir al usuario
+        const registrationProgress = document.getElementById('registrationProgress');
+        if (registrationProgress && !registrationProgress.classList.contains('hidden')) {
+            const message = 'El registro está en proceso. ¿Está seguro de que desea salir?';
+            e.returnValue = message;
+            return message;
         }
     });
 </script>

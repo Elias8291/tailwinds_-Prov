@@ -14,6 +14,7 @@ use App\Models\Proveedor;
 use App\Models\DocumentoSolicitante;
 use App\Models\Documento;
 use App\Models\Notificacion;
+use App\Models\Cita;
 use App\Http\Controllers\Formularios\DatosGeneralesController;
 use App\Http\Controllers\Formularios\DomicilioController;
 use App\Http\Controllers\Formularios\ConstitucionController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\Formularios\DocumentosController;
 use App\Http\Controllers\TramiteSolicitanteController;
 use Illuminate\Http\JsonResponse;
 use App\Events\SolicitudCorreccionesEvent;
+use App\Models\Seccion;
 
 class RevisionController extends Controller
 {
@@ -93,14 +95,19 @@ class RevisionController extends Controller
     /**
      * Mostrar la vista de revisión de un trámite específico
      */
-    public function show(Tramite $tramite)
+    public function show(Request $request, Tramite $tramite)
     {
+        // Obtener el tipo de revisión desde la request (por defecto 'digital')
+        $tipo_revision = $request->get('tipo_revision', 'digital');
+        
         try {
+            
             Log::info('=== INICIO REVISIÓN DE TRÁMITE ===', [
                 'tramite_id' => $tramite->id,
                 'tipo_tramite' => $tramite->tipo_tramite,
                 'estado' => $tramite->estado,
-                'progreso' => $tramite->progreso_tramite
+                'progreso' => $tramite->progreso_tramite,
+                'tipo_revision' => $tipo_revision
             ]);
 
             // Cargar relaciones necesarias
@@ -199,7 +206,8 @@ class RevisionController extends Controller
                 'revisionesExistentes',
                 'comentariosGenerales',
                 'citaCotejo',
-                'todasSeccionesAprobadas'
+                'todasSeccionesAprobadas',
+                'tipo_revision'
             ));
 
         } catch (\Exception $e) {
@@ -224,8 +232,152 @@ class RevisionController extends Controller
                 'datosConstitucion' => null,
                 'revisionesExistentes' => [],
                 'comentariosGenerales' => [],
+                'tipo_revision' => $tipo_revision,
                 'error' => 'Error al cargar los datos del trámite'
             ]);
+        }
+    }
+
+    /**
+     * Mostrar la vista de revisión digital
+     */
+    public function revisionDigital(Tramite $tramite)
+    {
+        try {
+            Log::info('=== INICIO REVISIÓN DIGITAL ===', [
+                'tramite_id' => $tramite->id,
+                'tipo_tramite' => $tramite->tipo_tramite,
+                'estado' => $tramite->estado
+            ]);
+
+            // Cargar relaciones necesarias
+            $tramite->load(['solicitante', 'revisor', 'detalleTramite', 'seccionesRevision.seccion']);
+            
+            // Obtener todos los datos necesarios usando los métodos existentes
+            $datosTramite = $this->obtenerDatosGenerales($tramite);
+            $datosSolicitante = [
+                'tipo_persona' => $tramite->solicitante->tipo_persona ?? '',
+                'rfc' => $tramite->solicitante->rfc ?? '',
+                'curp' => $tramite->solicitante->curp ?? '',
+                'nombre_completo' => $tramite->solicitante->nombre_completo ?? '',
+                'razon_social' => $tramite->solicitante->razon_social ?? ''
+            ];
+            $datosDomicilio = $this->obtenerDatosDomicilio($tramite);
+            $datosSAT = $this->obtenerDatosSAT($tramite);
+            $documentos = $this->obtenerDocumentos($tramite);
+            $documentosPorSeccion = $this->obtenerDocumentosPorSeccion($tramite);
+            
+            // Para persona moral: obtener datos adicionales
+            $datosConstitucion = null;
+            $datosAccionistas = [];
+            $accionistas = [];
+            $datosApoderado = null;
+            
+            if ($tramite->solicitante && strtolower($tramite->solicitante->tipo_persona) === 'moral') {
+                $datosConstitucion = $this->obtenerDatosConstitucion($tramite);
+                $accionistasData = $this->obtenerDatosAccionistas($tramite);
+                $datosAccionistas = $accionistasData;
+                $accionistas = $accionistasData;
+                $datosApoderado = $this->obtenerDatosApoderado($tramite);
+            }
+
+            // Obtener revisiones existentes
+            $revisionesExistentes = $tramite->seccionesRevision->mapWithKeys(function ($revision) {
+                return [$revision->seccion_id => [
+                    'estado' => $revision->estado,
+                    'comentario' => $revision->comentario,
+                    'revisor' => $revision->revisor->name ?? 'N/A',
+                    'fecha' => $revision->updated_at->format('d/m/Y H:i')
+                ]];
+            });
+
+            $comentariosGenerales = $this->obtenerComentariosGenerales($tramite);
+            $citaCotejo = \App\Models\Cita::where('tramite_id', $tramite->id)
+                ->where('motivo', 'like', '%Cotejo físico%')
+                ->first();
+
+            $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
+            $seccionesRequeridas = $tipoPersona === 'Moral' ? [1, 2, 3, 4, 5, 6] : [1, 2, 3];
+            
+            $seccionesAprobadas = $tramite->seccionesRevision()
+                ->whereIn('seccion_id', $seccionesRequeridas)
+                ->where('estado', 'aprobado')
+                ->count();
+            
+            $todasSeccionesAprobadas = $seccionesAprobadas === count($seccionesRequeridas);
+
+            return view('revision.revision-digital', compact(
+                'tramite',
+                'datosTramite',
+                'datosSolicitante',
+                'datosDomicilio', 
+                'datosSAT',
+                'documentos',
+                'documentosPorSeccion',
+                'accionistas',
+                'datosAccionistas',
+                'datosApoderado',
+                'datosConstitucion',
+                'revisionesExistentes',
+                'comentariosGenerales',
+                'citaCotejo',
+                'todasSeccionesAprobadas'
+            ));
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error al cargar revisión digital:', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('revision.show', $tramite)
+                ->with('error', 'Error al cargar la revisión digital');
+        }
+    }
+
+    /**
+     * Mostrar la vista de cotejo presencial
+     */
+    public function revisionPresencial(Tramite $tramite)
+    {
+        try {
+            Log::info('=== INICIO COTEJO PRESENCIAL ===', [
+                'tramite_id' => $tramite->id,
+                'tipo_tramite' => $tramite->tipo_tramite,
+                'estado' => $tramite->estado
+            ]);
+
+            // Cargar relaciones necesarias
+            $tramite->load(['solicitante', 'revisor', 'detalleTramite', 'seccionesRevision.seccion']);
+            
+            // Obtener documentos para cotejo
+            $documentos = $this->obtenerDocumentos($tramite);
+            
+            // Obtener revisiones existentes (especialmente para sección 6 - cotejo)
+            $revisionesExistentes = $tramite->seccionesRevision->mapWithKeys(function ($revision) {
+                return [$revision->seccion_id => [
+                    'estado' => $revision->estado,
+                    'comentario' => $revision->comentario,
+                    'observaciones' => $revision->observaciones ?? '',
+                    'revisor' => $revision->revisor->name ?? 'N/A',
+                    'fecha' => $revision->updated_at->format('d/m/Y H:i')
+                ]];
+            });
+
+            return view('revision.cotejo-presencial', compact(
+                'tramite',
+                'documentos',
+                'revisionesExistentes'
+            ));
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error al cargar cotejo presencial:', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('revision.show', $tramite)
+                ->with('error', 'Error al cargar el cotejo presencial');
         }
     }
 
@@ -343,7 +495,8 @@ class RevisionController extends Controller
                         'estado' => $doc->estado ?? 'Pendiente',
                         'version_documento' => $doc->version_documento ?? 1,
                         'ruta_archivo' => $rutaArchivo,
-                        'observaciones' => $doc->observaciones
+                        'observaciones' => $doc->observaciones,
+                        'documento_cotejado' => $doc->documento_cotejado ?? false
                     ];
                 })
                 ->toArray();
@@ -584,18 +737,10 @@ class RevisionController extends Controller
     {
         // Verificar permisos siempre
         if (!Gate::allows('revision-tramites.aprobar')) {
-            // Detectar si es petición AJAX
-            $isAjax = $request->expectsJson() || 
-                     $request->header('Accept') === 'application/json' || 
-                     $request->header('X-Requested-With') === 'XMLHttpRequest';
-                     
-            if ($isAjax) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No tienes permisos para aprobar secciones'
-                ], 403);
-            }
-            abort(403, 'No tienes permisos para aprobar secciones');
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes permisos para aprobar secciones'
+            ], 403);
         }
 
         $request->validate([
@@ -603,7 +748,10 @@ class RevisionController extends Controller
         ]);
 
         try {
-            SeccionRevision::updateOrCreate(
+            DB::beginTransaction();
+
+            // Actualizar la revisión de la sección
+            $seccionRevision = SeccionRevision::updateOrCreate(
                 [
                     'tramite_id' => $tramite->id,
                     'seccion_id' => $seccionId,
@@ -611,45 +759,51 @@ class RevisionController extends Controller
                 [
                     'estado' => 'aprobado',
                     'comentario' => $request->comentario,
-                    'revisor_id' => Auth::id(),
+                    'revisado_por' => Auth::id(),
                     'fecha_revision' => now()
                 ]
             );
 
-            // Determinar si es petición AJAX
-            $isAjax = $request->expectsJson() || 
-                     $request->header('Accept') === 'application/json' || 
-                     $request->header('X-Requested-With') === 'XMLHttpRequest';
-                     
-            if ($isAjax) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Sección aprobada correctamente',
-                    'estado' => 'aprobado'
+            // Actualizar el progreso del trámite
+            $progresoTramite = $tramite->progresoSecciones()->where('seccion_id', $seccionId)->first();
+            
+            if ($progresoTramite) {
+                $progresoTramite->update([
+                    'estado' => 'aprobado',
+                    'observaciones' => $request->comentario,
+                    'fecha_completado' => now()
+                ]);
+            } else {
+                $tramite->progresoSecciones()->create([
+                    'seccion_id' => $seccionId,
+                    'estado' => 'aprobado',
+                    'observaciones' => $request->comentario,
+                    'fecha_inicio' => now(),
+                    'fecha_completado' => now()
                 ]);
             }
 
-            return redirect()->back()->with('success', 'Sección aprobada correctamente');
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sección aprobada correctamente',
+                'estado' => 'aprobado'
+            ]);
+
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Error al aprobar sección:', [
                 'tramite_id' => $tramite->id,
                 'seccion_id' => $seccionId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
-            // Determinar si es petición AJAX
-            $isAjax = $request->expectsJson() || 
-                     $request->header('Accept') === 'application/json' || 
-                     $request->header('X-Requested-With') === 'XMLHttpRequest';
-                     
-            if ($isAjax) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error al aprobar la sección'
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Error al aprobar la sección');
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al aprobar la sección: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -660,18 +814,10 @@ class RevisionController extends Controller
     {
         // Verificar permisos siempre
         if (!Gate::allows('revision-tramites.rechazar')) {
-            // Detectar si es petición AJAX
-            $isAjax = $request->expectsJson() || 
-                     $request->header('Accept') === 'application/json' || 
-                     $request->header('X-Requested-With') === 'XMLHttpRequest';
-                     
-            if ($isAjax) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No tienes permisos para rechazar secciones'
-                ], 403);
-            }
-            abort(403, 'No tienes permisos para rechazar secciones');
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes permisos para rechazar secciones'
+            ], 403);
         }
 
         $request->validate([
@@ -681,7 +827,10 @@ class RevisionController extends Controller
         ]);
 
         try {
-            SeccionRevision::updateOrCreate(
+            DB::beginTransaction();
+
+            // Actualizar la revisión de la sección
+            $seccionRevision = SeccionRevision::updateOrCreate(
                 [
                     'tramite_id' => $tramite->id,
                     'seccion_id' => $seccionId,
@@ -689,45 +838,51 @@ class RevisionController extends Controller
                 [
                     'estado' => 'rechazado',
                     'comentario' => $request->comentario,
-                    'revisor_id' => Auth::id(),
+                    'revisado_por' => Auth::id(),
                     'fecha_revision' => now()
                 ]
             );
 
-            // Determinar si es petición AJAX
-            $isAjax = $request->expectsJson() || 
-                     $request->header('Accept') === 'application/json' || 
-                     $request->header('X-Requested-With') === 'XMLHttpRequest';
-                     
-            if ($isAjax) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Sección rechazada correctamente',
-                    'estado' => 'rechazado'
+            // Actualizar el progreso del trámite
+            $progresoTramite = $tramite->progresoSecciones()->where('seccion_id', $seccionId)->first();
+            
+            if ($progresoTramite) {
+                $progresoTramite->update([
+                    'estado' => 'rechazado',
+                    'observaciones' => $request->comentario,
+                    'fecha_completado' => now()
+                ]);
+            } else {
+                $tramite->progresoSecciones()->create([
+                    'seccion_id' => $seccionId,
+                    'estado' => 'rechazado',
+                    'observaciones' => $request->comentario,
+                    'fecha_inicio' => now(),
+                    'fecha_completado' => now()
                 ]);
             }
 
-            return redirect()->back()->with('success', 'Sección rechazada correctamente');
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sección rechazada correctamente',
+                'estado' => 'rechazado'
+            ]);
+
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Error al rechazar sección:', [
                 'tramite_id' => $tramite->id,
                 'seccion_id' => $seccionId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
-            // Determinar si es petición AJAX
-            $isAjax = $request->expectsJson() || 
-                     $request->header('Accept') === 'application/json' || 
-                     $request->header('X-Requested-With') === 'XMLHttpRequest';
-                     
-            if ($isAjax) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error al rechazar la sección'
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Error al rechazar la sección');
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al rechazar la sección: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -986,11 +1141,22 @@ class RevisionController extends Controller
             'comentario' => $comentario
         ]);
         
+        // Registrar en el log del sistema con el formato correcto
         return \App\Models\Log::create([
-            'tramite_id' => $tramite->id,
-            'usuario_id' => Auth::id(),
-            'accion' => $accion,
-            'comentario' => $comentario
+            'level' => 'info',
+            'message' => "Trámite {$tramite->id}: {$accion}",
+            'context' => [
+                'tramite_id' => $tramite->id,
+                'usuario_id' => Auth::id(),
+                'accion' => $accion,
+                'comentario' => $comentario
+            ],
+            'channel' => 'tramites',
+            'user_id' => Auth::id(),
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->header('User-Agent'),
+            'url' => request()->url(),
+            'method' => request()->method(),
         ]);
     }
 
@@ -1489,7 +1655,8 @@ class RevisionController extends Controller
             // Actualizar estado del documento
             $documentoSolicitante->update([
                 'estado' => 'Aprobado',
-                'observaciones' => $request->input('comentario', 'Documento aprobado')
+                'observaciones' => $request->input('comentario', 'Documento aprobado'),
+                'documento_cotejado' => $request->input('documento_cotejado', false)
             ]);
 
             Log::info('Documento aprobado individualmente', [
@@ -1617,6 +1784,117 @@ class RevisionController extends Controller
             }
 
             return redirect()->back()->with('error', 'Error al rechazar el documento');
+        }
+    }
+
+    /**
+     * Agendar cita de cotejo presencial general desde revisión digital
+     */
+    public function agendarCitaRevision(Request $request, Tramite $tramite)
+    {
+        $request->validate([
+            'fecha_hora' => 'required|date|after:now',
+            'motivo' => 'required|string|max:255',
+            'notas' => 'nullable|string',
+            'general' => 'boolean',
+        ]);
+
+        try {
+            // Cargar la relación del solicitante
+            $tramite->load('solicitante');
+            
+            // Verificar que el trámite tenga un solicitante válido
+            if (!$tramite->solicitante || !$tramite->solicitante->usuario_id) {
+                return response()->json([
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'No se pudo encontrar información del solicitante para este trámite'
+                ], 200);
+            }
+            
+            // Verificar que no exista ya una cita para este trámite
+            $citaExistente = Cita::where('tramite_id', $tramite->id)
+                ->whereIn('estado', ['pendiente', 'confirmada'])
+                ->first();
+
+            if ($citaExistente) {
+                return response()->json([
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Ya existe una cita programada para este trámite. Fecha: ' . 
+                               $citaExistente->fecha_hora->format('d/m/Y H:i')
+                ], 200); // Código 200 para evitar logs en consola
+            }
+
+            // Verificar que la fecha no sea fin de semana
+            $fechaCita = \Carbon\Carbon::parse($request->fecha_hora);
+            if ($fechaCita->isWeekend()) {
+                return response()->json([
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'No se pueden agendar citas en fines de semana'
+                ], 200);
+            }
+
+            // Verificar que no haya conflicto de horario (máximo 4 citas por hora)
+            $citasEnHorario = Cita::where('fecha_hora', $request->fecha_hora)
+                ->where('estado', '!=', 'cancelada')
+                ->count();
+
+            if ($citasEnHorario >= 4) {
+                return response()->json([
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'No hay disponibilidad en ese horario. Máximo 4 citas por hora. Por favor, seleccione otro horario.'
+                ], 200);
+            }
+
+            // Crear la cita asignada al solicitante del trámite
+            $cita = Cita::create([
+                'user_id' => $tramite->solicitante->usuario_id,
+                'tramite_id' => $tramite->id,
+                'fecha_hora' => $request->fecha_hora,
+                'motivo' => $request->motivo,
+                'notas' => $request->notas,
+                'estado' => 'pendiente',
+            ]);
+
+            // Registrar en el historial
+            $this->registrarHistorial($tramite, 'cita_agendada', 
+                "Cita general agendada para cotejo presencial - Fecha: {$fechaCita->format('d/m/Y H:i')}");
+
+            // Log de la acción
+            Log::info('🗓️ CITA GENERAL AGENDADA desde revisión', [
+                'tramite_id' => $tramite->id,
+                'cita_id' => $cita->id,
+                'fecha_hora' => $request->fecha_hora,
+                'motivo' => $request->motivo,
+                'usuario_id' => Auth::id(),
+                'tipo' => 'general'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cita agendada correctamente para el cotejo presencial del trámite completo',
+                'cita' => [
+                    'id' => $cita->id,
+                    'fecha_hora' => $fechaCita->format('d/m/Y H:i'),
+                    'motivo' => $cita->motivo,
+                    'estado' => $cita->estado
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ ERROR al agendar cita general desde revisión', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor al agendar la cita'
+            ], 500);
         }
     }
 } 

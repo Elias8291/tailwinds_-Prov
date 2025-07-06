@@ -170,7 +170,7 @@
                                         Seleccionar archivo
                                     </h4>
                                     <p class="text-xs text-gray-500 mt-1">
-                                        PDF, PNG, JPG (Máx. 10MB)
+                                                                                    PDF, PNG, JPG (Máx. 50MB)
                                     </p>
                                 </div>
                             </div>
@@ -419,10 +419,10 @@
                 throw new Error('El archivo debe ser un PDF o una imagen (JPG, PNG).');
             }
 
-            // Validar el tamaño del archivo (10MB)
-            const maxSize = 10 * 1024 * 1024;
-            if (file.size > maxSize) {
-                throw new Error('El archivo no debe exceder los 10MB.');
+                                    // Validar el tamaño del archivo (50MB)
+                        const maxSize = 50 * 1024 * 1024;
+                        if (file.size > maxSize) {
+                            throw new Error('El archivo no debe exceder los 50MB.');
             }
 
             // Actualizar nombre de archivo procesado

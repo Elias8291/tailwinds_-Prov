@@ -30,7 +30,7 @@
 
         <!-- Main Content -->
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <form id="appointmentForm" action="{{ route('citas.store.agendar') }}" method="POST" class="space-y-0">
+            <form id="appointmentForm" action="{{ route('citas.agendar') }}" method="POST" class="space-y-0">
                 @csrf
                 <input type="hidden" name="motivo" value="Cotejo presencial de documentos - Trámite #{{ $tramite->id }}">
                 <input type="hidden" name="tramite_id" value="{{ $tramite->id }}">

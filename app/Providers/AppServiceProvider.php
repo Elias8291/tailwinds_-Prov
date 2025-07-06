@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
+use App\View\Components\Formularios\SeccionDocumentos;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,7 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Registrar componentes de formularios
+        // Registrar componentes Blade
         Blade::componentNamespace('App\\View\\Components\\Formularios', 'formularios');
+        
+        // Registrar componentes de formularios
+        Blade::component('formularios.seccion-documentos', SeccionDocumentos::class);
     }
 }

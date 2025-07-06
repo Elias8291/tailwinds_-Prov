@@ -170,7 +170,7 @@
                                                 <p class="text-sm text-gray-600">
                                                     <span class="font-medium text-[#B4325E]">Click para subir</span> o arrastrar y soltar
                                                 </p>
-                                                <p class="text-xs text-gray-500 mt-1">PDF, DOC, DOCX (MAX. 10MB)</p>
+                                                <p class="text-xs text-gray-500 mt-1">PDF, DOC, DOCX (MAX. 50MB)</p>
                                             </div>
                                         </div>
                                     </label>

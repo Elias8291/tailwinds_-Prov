@@ -121,7 +121,7 @@ class DocumentosController extends Controller
         $rules = $method === 'subir'
             ? [
                 'documento_id' => 'required|exists:documento,id',
-                'archivo' => 'required|file|mimes:pdf|max:10240',
+                'archivo' => 'required|file|mimes:pdf|max:102400',
             ]
             : [
                 'tramiteId' => 'required|exists:tramite,id',

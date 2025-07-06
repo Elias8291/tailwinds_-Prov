@@ -23,7 +23,8 @@ class DocumentoSolicitante extends Model
         'observaciones',
         'ruta_archivo',
         'archivo',
-        'comentarios'
+        'comentarios',
+        'documento_cotejado'
     ];
 
     protected $attributes = [
@@ -33,6 +34,7 @@ class DocumentoSolicitante extends Model
 
     protected $casts = [
         'fecha_entrega' => 'date',
+        'documento_cotejado' => 'boolean',
     ];
 
     /**

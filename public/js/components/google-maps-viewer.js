@@ -387,7 +387,7 @@ class GoogleMapsViewer {
             this.addressValidation = validation;
 
             this.locationInfoRef.style.display = 'block';
-            this.locationInfoRef.className = 'absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg w-[400px] max-h-[calc(100%-2rem)] overflow-y-auto';
+            this.locationInfoRef.className = 'absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg w-[350px] transition-all duration-300 ease-in-out';
             
             const validationStatusHtml = this.showValidationStatus(validation);
             
@@ -402,61 +402,80 @@ class GoogleMapsViewer {
             const postalCode = addressParts.find(part => part.types.includes('postal_code'))?.long_name || '';
 
             this.locationDetailsRef.innerHTML = `
-                <div class="text-sm space-y-4">
-                    <!-- Sección de Dirección -->
-                    <div class="space-y-2">
-                        <div class="flex items-center space-x-2 text-[#9d2449]">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <h3 class="font-semibold">Dirección Encontrada</h3>
+                <div x-data="{ isExpanded: true }" class="text-sm">
+                    <!-- Encabezado con botón para minimizar -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-t-lg border-b cursor-pointer"
+                         @click="isExpanded = !isExpanded">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-map-marker-alt text-[#9d2449]"></i>
+                            <h3 class="font-semibold text-gray-700">Detalles de Ubicación</h3>
                         </div>
-                        <div class="pl-6 space-y-1">
+                        <button class="text-gray-400 hover:text-gray-600 focus:outline-none transform transition-transform duration-200"
+                                :class="{ 'rotate-180': !isExpanded }">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                    </div>
+
+                    <!-- Contenido colapsable -->
+                    <div x-show="isExpanded"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 transform -translate-y-2"
+                         x-transition:enter-end="opacity-100 transform translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 transform translate-y-0"
+                         x-transition:leave-end="opacity-0 transform -translate-y-2"
+                         class="p-3 space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto">
+                        
+                        <!-- Dirección -->
+                        <div class="space-y-1">
+                            <div class="font-medium text-[#9d2449] text-xs uppercase tracking-wide">Dirección</div>
                             ${route ? `
                                 <div class="font-medium">${route} ${streetNumber}</div>
                             ` : ''}
                             ${sublocality ? `
-                                <div class="text-gray-600">Col. ${sublocality}</div>
+                                <div class="text-gray-600 text-sm">Col. ${sublocality}</div>
                             ` : ''}
-                            <div class="text-gray-600">
+                            <div class="text-gray-600 text-sm">
                                 ${locality}${area2 ? `, ${area2}` : ''}
                             </div>
-                            <div class="text-gray-600">
+                            <div class="text-gray-600 text-sm">
                                 ${area1}${postalCode ? `, CP ${postalCode}` : ''}
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Sección de Coordenadas -->
-                    <div class="space-y-2">
-                        <div class="flex items-center space-x-2 text-[#9d2449]">
-                            <i class="fas fa-compass"></i>
-                            <h3 class="font-semibold">Ubicación</h3>
-                        </div>
-                        <div class="pl-6 space-y-1">
-                            <div class="text-gray-600">
-                                <span class="font-medium">Tipo:</span> 
-                                <span class="capitalize">${placeType}</span>
-                            </div>
-                            <div class="text-gray-600">
-                                <span class="font-medium">Coordenadas:</span>
-                                <span class="font-mono text-xs">${coordinates}</span>
+                        <!-- Coordenadas -->
+                        <div class="space-y-1 border-t pt-2">
+                            <div class="font-medium text-[#9d2449] text-xs uppercase tracking-wide">Ubicación</div>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div class="text-gray-600">
+                                    <span class="font-medium">Tipo:</span><br/>
+                                    <span class="capitalize">${placeType}</span>
+                                </div>
+                                <div class="text-gray-600">
+                                    <span class="font-medium">Coordenadas:</span><br/>
+                                    <span class="font-mono text-xs">${coordinates}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    ${validationStatusHtml}
+                        <!-- Estado de validación -->
+                        <div class="border-t pt-2">
+                            ${validationStatusHtml}
+                        </div>
+                    </div>
                 </div>
             `;
 
             // Mostrar mensajes de validación si hay errores
             if (!validation.isValid) {
                 const errorContainer = document.createElement('div');
-                errorContainer.className = 'mt-4 p-3 bg-red-50 rounded-md border border-red-200';
+                errorContainer.className = 'p-3 bg-red-50 rounded-b-lg border-t border-red-200';
                 errorContainer.innerHTML = `
                     <div class="flex items-center space-x-2 text-red-600 mb-2">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3 class="font-semibold text-sm">Advertencias</h3>
+                        <i class="fas fa-exclamation-triangle text-sm"></i>
+                        <h3 class="font-medium text-sm">Advertencias</h3>
                     </div>
-                    <ul class="pl-6 space-y-1">
+                    <ul class="space-y-1 pl-6">
                         ${validation.messages.map(msg => `
                             <li class="text-xs text-red-600 flex items-start space-x-2">
                                 <span class="mt-1">•</span>

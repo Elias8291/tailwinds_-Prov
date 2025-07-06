@@ -125,7 +125,7 @@
                         </p>
                         <ul class="list-disc list-inside ml-4 space-y-2 text-sm">
                             <li>Formatos aceptados: PDF, JPG, PNG</li>
-                            <li>Tamaño máximo por archivo: 10MB</li>
+                                                                <li>Tamaño máximo por archivo: 50MB</li>
                             <li>Los documentos falsos o alterados pueden resultar en la cancelación del trámite</li>
                         </ul>
                     </section>

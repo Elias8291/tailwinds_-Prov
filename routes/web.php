@@ -362,9 +362,31 @@ Route::middleware(['auth', 'can:tramites-solicitante.ver'])->prefix('tramites-so
     // GESTIÓN DE DOCUMENTOS
     Route::get('/documentos', [TramiteSolicitanteController::class, 'obtenerDocumentos'])
         ->name('tramites.solicitante.documentos');
-    Route::post('/upload-documento', [TramiteSolicitanteController::class, 'subirDocumento'])
-        ->middleware('can:tramites-solicitante.subir-documentos')
-        ->name('tramites.solicitante.upload-documento');
+    
+    // RUTAS LOCALES SIMPLIFICADAS (nuevas)
+    Route::get('/documentos-local', [\App\Http\Controllers\LocalDocumentoController::class, 'obtenerDocumentos'])
+        ->name('tramites.solicitante.documentos-local');
+    Route::post('/upload-documento-local', [\App\Http\Controllers\LocalDocumentoController::class, 'subirDocumento'])
+        ->middleware(['can:tramites-solicitante.subir-documentos', \App\Http\Middleware\HandleLargeUploads::class])
+        ->name('tramites.solicitante.upload-documento-local');
+    Route::get('/ver-documento-local/{tramite}/{documento}', [\App\Http\Controllers\LocalDocumentoController::class, 'verDocumento'])
+        ->name('tramites.solicitante.ver-documento-local');
+    
+    // RUTA PARA LOGGING DE ERRORES DE UPLOAD
+    Route::post('/log-upload-error', [\App\Http\Controllers\LocalDocumentoController::class, 'logUploadError'])
+        ->name('tramites.solicitante.log-upload-error');
+    
+    // RUTAS ORIGINALES (mantener compatibilidad)
+            Route::post('/upload-documento', [TramiteSolicitanteController::class, 'subirDocumento'])
+            ->middleware('can:tramites-solicitante.subir-documentos')
+            ->name('tramites.solicitante.upload-documento');
+        
+        Route::post('/reemplazar-documento', [TramiteSolicitanteController::class, 'reemplazarDocumento'])
+            ->middleware('can:tramites-solicitante.subir-documentos')
+            ->name('tramites.solicitante.reemplazar-documento');
+        
+        Route::get('/estado-actualizado/{tramiteId}', [TramiteSolicitanteController::class, 'obtenerEstadoActualizado'])
+            ->name('tramites.solicitante.estado-actualizado');
     Route::get('/ver-documento/{tramite}/{documento}', [DocumentosController::class, 'verDocumento'])
         ->name('tramites.solicitante.ver-documento');
     
@@ -404,17 +426,21 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
     Route::get('/', [RevisionController::class, 'index'])->name('index');
     Route::get('/{tramite}', [RevisionController::class, 'show'])->name('show');
     
+    // Rutas específicas para tipos de revisión
+    Route::get('/{tramite}/digital', [RevisionController::class, 'revisionDigital'])->name('digital');
+    Route::get('/{tramite}/presencial', [RevisionController::class, 'revisionPresencial'])->name('presencial');
+    
     // Rutas de acciones de revisión
     Route::post('/{tramite}/aprobar', [RevisionController::class, 'aprobarTodo'])
         ->middleware('can:revision-tramites.aprobar')
-        ->name('aprobar');
+        ->name('aprobar-todo');
     
     Route::post('/{tramite}/rechazar', [RevisionController::class, 'rechazarTodo'])
         ->middleware('can:revision-tramites.rechazar')
-        ->name('rechazar');
+        ->name('rechazar-todo');
     
     Route::post('/{tramite}/solicitar-correcciones', [RevisionController::class, 'solicitarCorrecciones'])
-        ->middleware('can:revision-tramites.revisar')
+        ->middleware('can:revision-tramites.solicitar-correcciones')
         ->name('solicitar-correcciones');
     
     Route::post('/{tramite}/pausar', [RevisionController::class, 'pausarRevision'])
@@ -423,10 +449,12 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
     
     // Rutas de acciones por sección (permisos verificados en el controlador para AJAX)
     Route::post('/{tramite}/seccion/{seccion}/aprobar', [RevisionController::class, 'aprobarSeccion'])
-        ->name('seccion.aprobar');
+        ->middleware('can:revision-tramites.aprobar')
+        ->name('aprobar-seccion');
     
     Route::post('/{tramite}/seccion/{seccion}/rechazar', [RevisionController::class, 'rechazarSeccion'])
-        ->name('seccion.rechazar');
+        ->middleware('can:revision-tramites.rechazar')
+        ->name('rechazar-seccion');
     
     // Ruta para agregar comentarios
     Route::post('/{tramite}/comentar', [RevisionController::class, 'agregarComentario'])
@@ -435,10 +463,11 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
     
     // AJAX endpoints para revisión avanzada
     Route::get('/{tramite}/estado-revisiones', [RevisionController::class, 'obtenerEstadoRevisiones'])
-        ->name('estado');
+        ->name('estado-revisiones');
     
     Route::post('/{tramite}/seccion/{seccion}/comentario', [RevisionController::class, 'guardarComentarioSeccion'])
-        ->name('seccion.comentario');
+        ->middleware('can:revision-tramites.comentar')
+        ->name('guardar-comentario-seccion');
     
     Route::get('/{tramite}/documentos-seccion', [RevisionController::class, 'getDocumentosSeccion'])
         ->name('documentos-seccion');
@@ -449,9 +478,16 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
     
     // Rutas para aprobar/rechazar documentos individuales
     Route::post('/{tramite}/documento/{documento}/aprobar', [RevisionController::class, 'aprobarDocumento'])
-        ->name('documento.aprobar');
+        ->middleware('can:revision-tramites.aprobar')
+        ->name('aprobar-documento');
     Route::post('/{tramite}/documento/{documento}/rechazar', [RevisionController::class, 'rechazarDocumento'])
-        ->name('documento.rechazar');
+        ->middleware('can:revision-tramites.rechazar')
+        ->name('rechazar-documento');
+
+    // Nueva ruta para agendar citas desde revisión
+    Route::post('/{tramite}/agendar-cita', [RevisionController::class, 'agendarCitaRevision'])
+        ->middleware('can:citas.crear')
+        ->name('agendar-cita');
 });
 
 // ============================================================================
@@ -696,4 +732,26 @@ Route::prefix('documentos')->name('documentos.')->middleware(['auth'])->group(fu
     Route::get('/{documentoSolicitante}', [DocumentoSolicitanteController::class, 'ver'])->name('ver');
     Route::get('/version/{documentoVersion}', [DocumentoSolicitanteController::class, 'verVersion'])->name('ver-version');
 });
+
+// Ruta para verificar configuración PHP (solo en desarrollo)
+if (config('app.debug')) {
+    Route::get('/php-config', function() {
+        $config = [
+            'upload_max_filesize' => ini_get('upload_max_filesize'),
+            'post_max_size' => ini_get('post_max_size'),
+            'memory_limit' => ini_get('memory_limit'),
+            'max_execution_time' => ini_get('max_execution_time'),
+            'max_input_time' => ini_get('max_input_time'),
+            'max_file_uploads' => ini_get('max_file_uploads'),
+            'file_uploads' => ini_get('file_uploads') ? 'Habilitado' : 'Deshabilitado',
+        ];
+        
+        return view('php-config', compact('config'));
+    })->name('php.config');
+    
+    // Página de prueba para uploads
+    Route::get('/test-upload', function() {
+        return view('test-upload');
+    })->middleware('auth')->name('test.upload');
+}
 

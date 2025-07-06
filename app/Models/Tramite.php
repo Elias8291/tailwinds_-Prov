@@ -93,6 +93,11 @@ class Tramite extends Model
         return $this->hasMany(ProgresoTramite::class);
     }
 
+    public function cita()
+    {
+        return $this->hasOne(Cita::class);
+    }
+
     /**
      * Actualiza el progreso del trámite a una sección específica
      *

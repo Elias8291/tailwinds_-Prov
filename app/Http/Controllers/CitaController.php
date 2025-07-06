@@ -182,8 +182,19 @@ class CitaController extends Controller
         }
 
         try {
+            // Determinar el user_id correcto
+            $userId = $user->id; // Por defecto, el usuario actual
+            
+            // Si hay un tramite_id, asignar la cita al solicitante del trámite
+            if ($request->tramite_id) {
+                $tramite = Tramite::with('solicitante')->find($request->tramite_id);
+                if ($tramite && $tramite->solicitante && $tramite->solicitante->usuario_id) {
+                    $userId = $tramite->solicitante->usuario_id;
+                }
+            }
+            
             $cita = Cita::create([
-                'user_id' => $user->id,
+                'user_id' => $userId,
                 'fecha_hora' => $request->fecha_hora,
                 'motivo' => $request->motivo,
                 'notas' => $request->notas,
@@ -287,6 +298,114 @@ class CitaController extends Controller
         }
         
         return view('citas.agendar', compact('tramite'));
+    }
+
+    /**
+     * Agendar cita específica para un trámite
+     */
+    public function agendar(Request $request)
+    {
+        $request->validate([
+            'fecha_hora' => 'required|date|after:now',
+            'motivo' => 'required|string|max:255',
+            'notas' => 'nullable|string',
+            'tramite_id' => 'required|exists:tramite,id',
+        ]);
+
+        try {
+            // Obtener el trámite con la relación del solicitante
+            $tramite = Tramite::with('solicitante')->findOrFail($request->tramite_id);
+            
+            // Verificar que no exista ya una cita para este trámite
+            $citaExistente = Cita::where('tramite_id', $tramite->id)
+                ->whereIn('estado', ['pendiente', 'confirmada'])
+                ->first();
+
+            if ($citaExistente) {
+                return response()->json([
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Ya existe una cita programada para este trámite. Fecha: ' . 
+                               $citaExistente->fecha_hora->format('d/m/Y H:i')
+                ], 200);
+            }
+
+            // Verificar que la fecha no sea fin de semana
+            $fechaCita = \Carbon\Carbon::parse($request->fecha_hora);
+            if ($fechaCita->isWeekend()) {
+                return response()->json([
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'No se pueden agendar citas en fines de semana'
+                ], 200);
+            }
+
+            // Verificar que no haya conflicto de horario (máximo 4 citas por hora)
+            $citasEnHorario = Cita::where('fecha_hora', $request->fecha_hora)
+                ->where('estado', '!=', 'cancelada')
+                ->count();
+
+            if ($citasEnHorario >= 4) {
+                return response()->json([
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'No hay disponibilidad en ese horario. Máximo 4 citas por hora. Por favor, seleccione otro horario.'
+                ], 200);
+            }
+
+            // Verificar que el trámite tenga un solicitante válido
+            if (!$tramite->solicitante || !$tramite->solicitante->usuario_id) {
+                return response()->json([
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'No se pudo encontrar información del solicitante para este trámite'
+                ], 200);
+            }
+
+            // Crear la cita asignada al solicitante del trámite
+            $cita = Cita::create([
+                'user_id' => $tramite->solicitante->usuario_id,
+                'tramite_id' => $tramite->id,
+                'fecha_hora' => $request->fecha_hora,
+                'motivo' => $request->motivo,
+                'notas' => $request->notas,
+                'estado' => 'pendiente',
+            ]);
+
+            Log::info('🗓️ CITA AGENDADA para trámite', [
+                'tramite_id' => $tramite->id,
+                'cita_id' => $cita->id,
+                'fecha_hora' => $request->fecha_hora,
+                'motivo' => $request->motivo,
+                'solicitante_id' => $tramite->solicitante->usuario_id,
+                'usuario_que_agenda' => Auth::id(),
+                'solicitante_existe' => $tramite->solicitante ? 'si' : 'no',
+                'usuario_id_existe' => $tramite->solicitante && $tramite->solicitante->usuario_id ? 'si' : 'no'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cita agendada correctamente para el solicitante del trámite',
+                'cita' => [
+                    'id' => $cita->id,
+                    'fecha_hora' => $fechaCita->format('d/m/Y H:i'),
+                    'motivo' => $cita->motivo,
+                    'estado' => $cita->estado
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ ERROR al agendar cita para trámite', [
+                'tramite_id' => $request->tramite_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor al agendar la cita'
+            ], 500);
+        }
     }
 
     /**

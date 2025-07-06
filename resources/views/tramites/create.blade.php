@@ -616,8 +616,7 @@
                      x-transition:enter-end="opacity-100 translate-x-0"
                      x-transition:leave="transition ease-in duration-200 transform"
                      x-transition:leave-start="opacity-100 translate-x-0"
-                     x-transition:leave-end="opacity-0 -translate-x-4"
-                     @next-step="currentStep++">
+                     x-transition:leave-end="opacity-0 -translate-x-4">
                     
                     <!-- Contenido siempre listo (no hay skeleton individual) -->
                     @include('components.formularios.seccion-domicilio', [
@@ -634,8 +633,7 @@
                      x-transition:enter-end="opacity-100 translate-x-0"
                      x-transition:leave="transition ease-in duration-200 transform"
                      x-transition:leave-start="opacity-100 translate-x-0"
-                     x-transition:leave-end="opacity-0 -translate-x-4"
-                     @next-step="currentStep++">
+                     x-transition:leave-end="opacity-0 -translate-x-4">
                     
                     <!-- Contenido siempre listo (no hay skeleton individual) -->
                     @include('components.formularios.seccion-constitucion', [
@@ -654,8 +652,7 @@
                      x-transition:enter-end="opacity-100 translate-x-0"
                      x-transition:leave="transition ease-in duration-200 transform"
                      x-transition:leave-start="opacity-100 translate-x-0"
-                     x-transition:leave-end="opacity-0 -translate-x-4"
-                     @next-step="currentStep++">
+                     x-transition:leave-end="opacity-0 -translate-x-4">
                     
                     <!-- Contenido siempre listo (no hay skeleton individual) -->
                     @include('components.formularios.seccion-accionistas', [
@@ -672,8 +669,7 @@
                      x-transition:enter-end="opacity-100 translate-x-0"
                      x-transition:leave="transition ease-in duration-200 transform"
                      x-transition:leave-start="opacity-100 translate-x-0"
-                     x-transition:leave-end="opacity-0 -translate-x-4"
-                     @next-step="currentStep++">
+                     x-transition:leave-end="opacity-0 -translate-x-4">
                     
                     <!-- Contenido siempre listo (no hay skeleton individual) -->
                     @include('components.formularios.seccion-apoderado', [

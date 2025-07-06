@@ -16,7 +16,8 @@ class SeccionRevision extends Model
         'seccion_id',
         'estado',
         'comentario',
-        'revisado_por'
+        'revisado_por',
+        'fecha_revision'
     ];
 
     public function tramite()

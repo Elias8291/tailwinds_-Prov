@@ -175,4 +175,20 @@ return [
         App\Providers\RouteServiceProvider::class,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | File Upload Configuration
+    |--------------------------------------------------------------------------
+    |
+    | These settings control file upload limits for the application
+    |
+    */
+
+    'upload' => [
+        'max_file_size' => 100 * 1024 * 1024, // 100MB en bytes
+        'allowed_types' => ['pdf'],
+        'storage_disk' => 'public',
+        'storage_path' => 'documentos_solicitante',
+    ],
+
 ];

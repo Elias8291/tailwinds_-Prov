@@ -963,7 +963,7 @@ class TramiteSolicitanteController extends Controller
     {
         try {
             $request->validate([
-                'archivo' => 'required|file|mimes:pdf|max:10240', // 10MB máximo
+                'archivo' => 'required|file|mimes:pdf|max:102400', // 100MB máximo
                 'documento_id' => 'required|integer|exists:documento,id'
             ]);
 
@@ -1024,10 +1024,6 @@ class TramiteSolicitanteController extends Controller
                 ]
             );
 
-
-
-
-
             return response()->json([
                 'success' => true,
                 'mensaje' => 'Documento subido correctamente',
@@ -1045,6 +1041,282 @@ class TramiteSolicitanteController extends Controller
                 'success' => false,
                 'mensaje' => 'Error al subir el documento: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Reemplaza un documento previamente subido
+     */
+    public function reemplazarDocumento(Request $request)
+    {
+        try {
+            $request->validate([
+                'archivo' => 'required|file|mimes:pdf|max:102400', // 100MB máximo
+                'documento_solicitante_id' => 'required|integer|exists:documento_solicitante,id'
+            ]);
+
+            $user = Auth::user();
+            $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+            
+            if (!$solicitante) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró información del solicitante'
+                ], 200);
+            }
+
+            // Obtener el documento a reemplazar
+            $documentoSolicitante = DocumentoSolicitante::find($request->documento_solicitante_id);
+            
+            if (!$documentoSolicitante) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Documento no encontrado'
+                ], 200);
+            }
+
+            // Verificar que el documento pertenece al usuario
+            $tramite = Tramite::where('id', $documentoSolicitante->tramite_id)
+                ->where('solicitante_id', $solicitante->id)
+                ->first();
+
+            if (!$tramite) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes permisos para modificar este documento'
+                ], 200);
+            }
+
+            // Verificar que el documento esté rechazado
+            if ($documentoSolicitante->estado !== 'Rechazado') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Solo se pueden reemplazar documentos rechazados'
+                ], 200);
+            }
+
+            $file = $request->file('archivo');
+
+            // Generar nombre único para el archivo
+            $extension = $file->getClientOriginalExtension();
+            $nombreArchivo = uniqid('doc_' . $documentoSolicitante->documento_id . '_') . '.' . $extension;
+            
+            // Almacenar archivo en la ruta correcta
+            $ruta = $file->storeAs('documentos_solicitante/' . $tramite->id, $nombreArchivo, 'public');
+
+            // Actualizar el registro del documento
+            $documentoSolicitante->update([
+                'fecha_entrega' => now(),
+                'estado' => 'Pendiente',
+                'version_documento' => $documentoSolicitante->version_documento + 1,
+                'ruta_archivo' => encrypt($ruta), // Encriptar la ruta
+                'nombre_original' => $file->getClientOriginalName(),
+                'observaciones' => null, // Limpiar observaciones de rechazo
+                'fecha_revision' => null,
+                'documento_cotejado' => false // Resetear estado de cotejo
+            ]);
+
+            // Registrar el cambio en logs
+            Log::info('Documento reemplazado', [
+                'user_id' => $user->id,
+                'tramite_id' => $tramite->id,
+                'documento_solicitante_id' => $documentoSolicitante->id,
+                'nombre_archivo' => $file->getClientOriginalName(),
+                'version' => $documentoSolicitante->version_documento
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Documento reemplazado correctamente. Será revisado nuevamente por el personal administrativo.',
+                'ruta' => $ruta,
+                'docSolicitanteId' => $documentoSolicitante->id
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al reemplazar documento', [
+                'error' => $e->getMessage(),
+                'documento_solicitante_id' => $request->documento_solicitante_id ?? 'N/A'
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al reemplazar el documento: ' . $e->getMessage()
+            ], 200);
+        }
+    }
+
+    /**
+     * Obtiene el estado actualizado del trámite para actualizaciones automáticas
+     */
+    public function obtenerEstadoActualizado($tramiteId)
+    {
+        try {
+            $user = Auth::user();
+            $solicitante = Solicitante::where('usuario_id', $user->id)->first();
+            
+            if (!$solicitante) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró información del solicitante'
+                ], 200);
+            }
+
+            // Verificar que el trámite pertenece al usuario
+            $tramite = Tramite::where('id', $tramiteId)
+                ->where('solicitante_id', $solicitante->id)
+                ->with(['documentosSolicitante.documento', 'seccionesRevision', 'cita' => function ($query) {
+                    $query->whereIn('estado', ['pendiente', 'confirmada']);
+                }])
+                ->first();
+
+            if (!$tramite) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trámite no encontrado'
+                ], 200);
+            }
+
+            // Obtener información actualizada
+            $documentosIndividuales = $tramite->documentosSolicitante()->with('documento')->get();
+            $totalDocs = $documentosIndividuales->count();
+            $aprobados = $documentosIndividuales->where('estado', 'Aprobado')->count();
+            $rechazados = $documentosIndividuales->where('estado', 'Rechazado')->count();
+            $enRevision = $documentosIndividuales->whereIn('estado', ['En Revision', 'Pendiente'])->count();
+
+            // Preparar datos de documentos
+            $documentos = $documentosIndividuales->map(function ($doc) {
+                return [
+                    'id' => $doc->id,
+                    'nombre' => $doc->documento->nombre ?? 'Documento sin nombre',
+                    'descripcion' => $doc->documento->descripcion ?? '',
+                    'estado' => $doc->estado ?? 'Pendiente',
+                    'observaciones' => $doc->observaciones,
+                    'documento_cotejado' => $doc->documento_cotejado ?? false,
+                    'fecha_entrega' => $doc->fecha_entrega ? $doc->fecha_entrega->format('d/m/Y') : null,
+                    'fecha_revision' => $doc->fecha_revision ? $doc->fecha_revision->format('d/m/Y') : null,
+                ];
+            });
+
+            // Determinar estado de la sección de documentos
+            $estadoSeccionDocumentos = 'Sin documentos';
+            if ($totalDocs > 0) {
+                if ($rechazados > 0) {
+                    $estadoSeccionDocumentos = "$rechazados documento(s) rechazado(s)";
+                } elseif ($aprobados === $totalDocs) {
+                    $estadoSeccionDocumentos = "Todos los documentos aprobados ($aprobados/$totalDocs)";
+                } else {
+                    $estadoSeccionDocumentos = "En revisión ($aprobados aprobados, $enRevision pendientes)";
+                }
+            }
+
+            // Obtener información de secciones
+            $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
+            $secciones = $tipoPersona === 'Moral' ? [
+                1 => ['nombre' => 'Datos Generales', 'icono' => 'fa-user-circle'],
+                2 => ['nombre' => 'Domicilio', 'icono' => 'fa-map-marker-alt'],
+                3 => ['nombre' => 'Constitución', 'icono' => 'fa-building'],
+                4 => ['nombre' => 'Accionistas', 'icono' => 'fa-users'],
+                5 => ['nombre' => 'Apoderado Legal', 'icono' => 'fa-user-tie'],
+                6 => ['nombre' => 'Documentos', 'icono' => 'fa-file-upload']
+            ] : [
+                1 => ['nombre' => 'Datos Generales', 'icono' => 'fa-user-circle'],
+                2 => ['nombre' => 'Domicilio', 'icono' => 'fa-map-marker-alt'],
+                3 => ['nombre' => 'Documentos', 'icono' => 'fa-file-upload']
+            ];
+
+            $progresoMaximo = $tipoPersona === 'Moral' ? 6 : 3;
+            $estadosSecciones = [];
+            
+            foreach ($secciones as $numero => $seccion) {
+                $seccionRechazada = $tramite->seccionEstaRechazada($numero);
+                $seccionAprobada = $tramite->seccionEstaAprobada($numero);
+                
+                if ($seccion['nombre'] === 'Documentos') {
+                    $estadosSecciones[$numero] = [
+                        'nombre' => $seccion['nombre'],
+                        'estado' => $estadoSeccionDocumentos,
+                        'rechazada' => $rechazados > 0,
+                        'aprobada' => $aprobados === $totalDocs && $totalDocs > 0,
+                        'en_revision' => $enRevision > 0 && $rechazados === 0
+                    ];
+                } else {
+                    $estadosSecciones[$numero] = [
+                        'nombre' => $seccion['nombre'],
+                        'rechazada' => $seccionRechazada,
+                        'aprobada' => $seccionAprobada,
+                        'en_revision' => !$seccionRechazada && !$seccionAprobada && $tramite->progreso_tramite >= $numero
+                    ];
+                }
+            }
+
+            // Preparar información de la cita
+            $citaInfo = null;
+            if ($tramite->cita) {
+                $dias = [
+                    'Monday' => 'Lunes',
+                    'Tuesday' => 'Martes', 
+                    'Wednesday' => 'Miércoles',
+                    'Thursday' => 'Jueves',
+                    'Friday' => 'Viernes',
+                    'Saturday' => 'Sábado',
+                    'Sunday' => 'Domingo'
+                ];
+                
+                $citaInfo = [
+                    'id' => $tramite->cita->id,
+                    'fecha' => $tramite->cita->fecha_hora->format('d/m/Y'),
+                    'hora' => $tramite->cita->fecha_hora->format('H:i'),
+                    'dia' => $dias[$tramite->cita->fecha_hora->format('l')] ?? $tramite->cita->fecha_hora->format('l'),
+                    'fecha_hora' => $tramite->cita->fecha_hora->format('Y-m-d H:i:s'),
+                    'estado' => $tramite->cita->estado,
+                    'motivo' => $tramite->cita->motivo,
+                    'notas' => $tramite->cita->notas,
+                    'ubicacion' => [
+                        'nombre' => 'Ciudad Administrativa de Oaxaca',
+                        'edificio' => 'Edificio 1',
+                        'modulo' => 'Módulo de Proveedores'
+                    ]
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'tramite' => [
+                        'id' => $tramite->id,
+                        'estado' => $tramite->estado,
+                        'progreso_tramite' => $tramite->progreso_tramite,
+                        'progreso_maximo' => $progresoMaximo,
+                        'porcentaje_progreso' => $tramite->getPorcentajeProgreso(),
+                        'observaciones' => $tramite->observaciones,
+                        'fecha_inicio' => $tramite->fecha_inicio ? $tramite->fecha_inicio->format('d/m/Y') : null,
+                        'fecha_finalizacion' => $tramite->fecha_finalizacion ? $tramite->fecha_finalizacion->format('d/m/Y') : null,
+                        'puede_ser_editado' => $tramite->puedeSerEditado()
+                    ],
+                    'cita' => $citaInfo,
+                    'documentos' => $documentos,
+                    'estadisticas_documentos' => [
+                        'total' => $totalDocs,
+                        'aprobados' => $aprobados,
+                        'rechazados' => $rechazados,
+                        'en_revision' => $enRevision
+                    ],
+                    'secciones' => $estadosSecciones,
+                    'timestamp' => now()->timestamp
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al obtener estado actualizado del trámite', [
+                'error' => $e->getMessage(),
+                'tramite_id' => $tramiteId,
+                'user_id' => Auth::id()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener el estado del trámite'
+            ], 200);
         }
     }
 
@@ -1346,6 +1618,9 @@ class TramiteSolicitanteController extends Controller
 
             $tramite = Tramite::where('id', $tramiteId)
                 ->where('solicitante_id', $solicitante->id)
+                ->with(['cita' => function ($query) {
+                    $query->whereIn('estado', ['pendiente', 'confirmada']);
+                }])
                 ->first();
 
             if (!$tramite) {
