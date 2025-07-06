@@ -516,7 +516,7 @@
                 Anterior
             </button>
             <button type="button" 
-                    @click="finalizarTramite()"
+                    onclick="finalizarTramiteGlobal()"
                     :disabled="!todosDocumentosEnviados"
                     :class="!todosDocumentosEnviados ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#8a203f] hover:to-[#6d1a32]'"
                     class="flex items-center px-6 py-3 text-white rounded-lg transition duration-200 shadow-md hover:shadow-lg">
@@ -898,6 +898,28 @@ function documentosData() {
             };
             return schemes[colorScheme] || '⚫ Estándar';
         }
+    }
+}
+
+// Función global para finalizar trámite
+function finalizarTramiteGlobal() {
+    // Buscar el componente de documentos
+    const documentosElement = document.querySelector('[x-data*="documentosData"]');
+    if (documentosElement && typeof Alpine !== 'undefined') {
+        try {
+            const alpineData = Alpine.$data(documentosElement);
+            if (alpineData && typeof alpineData.finalizarTramite === 'function') {
+                alpineData.finalizarTramite();
+                return;
+            }
+        } catch (error) {
+            console.error('Error al finalizar trámite:', error);
+        }
+    }
+    
+    // Fallback: usar la función global de finalización si existe
+    if (typeof window.finalizarTramite === 'function') {
+        window.finalizarTramite();
     }
 }
 </script>
