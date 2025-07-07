@@ -62,14 +62,14 @@
                             <div class="mb-3">
                                 <p class="text-xs font-medium text-gray-500">Razón Social</p>
                                 <p class="text-base font-semibold text-gray-800 truncate">{{ $proveedor->solicitante->razon_social ?? $proveedor->solicitante->nombre_completo ?? 'N/D' }}</p>
-                            </div>
+                        </div>
                             <div>
                                 <p class="text-xs font-medium text-gray-500">RFC</p>
                                 <p class="text-base font-semibold text-gray-800">{{ $proveedor->solicitante->rfc ?? 'N/D' }}</p>
                             </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
                 <!-- Fechas y Estado -->
                 <div class="p-5 border-b border-gray-100">
@@ -89,12 +89,12 @@
                                             }
                                         } catch (\Exception $e) {
                                             $fechaRegistro = null;
-                                        }
-                                    @endphp
+                            }
+                        @endphp
                                     {{ $fechaRegistro ? $fechaRegistro->format('d/m/Y') : 'N/D' }}
                                 </p>
-                            </div>
-
+                                </div>
+                                
                             <div class="bg-gray-50/50 rounded-lg p-3">
                                 <p class="text-xs font-medium text-gray-500">Vencimiento</p>
                                 <p class="text-sm font-semibold text-gray-800 mt-1">
@@ -119,7 +119,7 @@
 
                 <!-- Tiempo Restante -->
                 @if($diasRestantes !== null && isset($infoProveedor['tiempo_restante']))
-                    <div class="p-5">
+                        <div class="p-5">
                         <div class="flex items-center space-x-3 mb-4">
                             <div class="w-10 h-10 rounded-lg flex items-center justify-center
                                 @if($diasRestantes < 0) bg-red-100 text-red-700
@@ -128,8 +128,8 @@
                                 <i class="fas @if($diasRestantes < 0) fa-exclamation-triangle @elseif($diasRestantes <= 30) fa-clock @else fa-shield-check @endif text-lg"></i>
                             </div>
                             <p class="text-sm text-gray-600">{{ $infoProveedor['tiempo_restante']['texto'] }}</p>
-                        </div>
-
+                            </div>
+                            
                         @if(isset($infoProveedor['tiempo_restante']['desglose']))
                             <div class="grid grid-cols-4 gap-3 bg-gray-50/50 rounded-lg p-4">
                                 @foreach(['años' => 'Años', 'meses' => 'Meses', 'dias' => 'Días', 'horas' => 'Horas'] as $key => $label)
@@ -154,7 +154,7 @@
                             <div>
                                 <h4 class="text-base font-semibold text-gray-800">Fecha Actual</h4>
                                 <p class="text-sm text-[#9d2449]">{{ \Carbon\Carbon::now()->format('d/m/Y') }}</p>
-                            </div>
+                                </div>
                         </div>
                     </div>
                 @endif

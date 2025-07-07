@@ -423,6 +423,7 @@ Route::middleware(['auth', 'can:tramites-solicitante.ver'])->prefix('tramites-so
 Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-tramites.ver'])->group(function () {
     // Rutas básicas de revisión
     Route::get('/', [RevisionController::class, 'index'])->name('index');
+    Route::get('/get-next-pv', [RevisionController::class, 'getNextPV'])->name('get-next-pv');
     Route::get('/{tramite}', [RevisionController::class, 'show'])->name('show');
     
     // Rutas específicas para tipos de revisión
@@ -434,6 +435,14 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
     
     // Rutas de acciones de revisión
     Route::post('/{tramite}/aprobar', [RevisionController::class, 'aprobarTodo'])
+        ->middleware('can:revision-tramites.aprobar')
+        ->name('aprobar');
+    
+    Route::post('/{tramite}/generar-oficio', [RevisionController::class, 'generarOficio'])
+        ->middleware('can:revision-tramites.aprobar')
+        ->name('generar-oficio');
+    
+    Route::post('/{tramite}/aprobar-todo', [RevisionController::class, 'aprobarTodo'])
         ->middleware('can:revision-tramites.aprobar')
         ->name('aprobar-todo');
     

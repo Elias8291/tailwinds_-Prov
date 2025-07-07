@@ -127,27 +127,183 @@
             </div>
 
             <div class="mt-6 flex items-center space-x-4">
-                <button onclick="aprobarTramite()" 
-                        class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200 flex items-center justify-center space-x-2">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Aprobar Trámite</span>
-                </button>
+                @if($tramite->estado !== 'Aprobado')
+                    <button onclick="mostrarModalAprobacion()" 
+                            class="flex-1 bg-[#9d2449] hover:bg-[#7a1d3a] text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Aprobar Trámite</span>
+                    </button>
 
-                <button onclick="cancelarTramite()" 
-                        class="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200 flex items-center justify-center space-x-2">
-                    <i class="fas fa-times-circle"></i>
-                    <span>Cancelar Trámite</span>
-                </button>
+                    <button onclick="cancelarTramite()" 
+                            class="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Cancelar Trámite</span>
+                    </button>
+                @else
+                    <div class="flex-1 bg-green-100 text-green-800 px-6 py-3 rounded-xl text-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span>Este trámite ya ha sido aprobado</span>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
 
     @push('styles')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    @endpush
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+    #modalAprobacion {
+        display: none;
+    }
+    
+    #modalAprobacion .fixed {
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    #modalAprobacion .inline-block {
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+        from { 
+            opacity: 0;
+            transform: translate3d(0, 100%, 0);
+        }
+        to { 
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+@endpush
 
     @push('scripts')
     <script>
+        // Crear el modal de forma dinámica solo cuando se necesite
+        let modalAprobacion = null;
+
+        function crearModal() {
+            if (!modalAprobacion) {
+                modalAprobacion = document.createElement('div');
+                modalAprobacion.id = 'modalAprobacion';
+                modalAprobacion.style.display = 'none';
+                modalAprobacion.innerHTML = `
+                    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                            <!-- Overlay de fondo -->
+                            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                                <div>
+                                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#9d2449]/10">
+                                        <i class="fas fa-check-circle text-[#9d2449] text-2xl"></i>
+                                    </div>
+                                    <div class="mt-3 text-center sm:mt-5">
+                                        <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">
+                                            Aprobar Trámite
+                                        </h3>
+                                        <div class="mt-4">
+                                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                                <div class="flex items-center justify-center">
+                                                    <div class="text-center">
+                                                        <i class="fas fa-spinner fa-spin text-[#9d2449] text-xl mb-2"></i>
+                                                        <p class="text-sm text-gray-600">
+                                                            Obteniendo número de proveedor...
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                                    <button type="button" 
+                                            onclick="confirmarAprobacion()"
+                                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#9d2449] text-base font-medium text-white hover:bg-[#7a1d3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] sm:col-start-2 sm:text-sm">
+                                        Confirmar Aprobación
+                                    </button>
+                                    <button type="button" 
+                                            onclick="cerrarModalAprobacion()"
+                                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] sm:mt-0 sm:col-start-1 sm:text-sm">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modalAprobacion);
+            }
+            return modalAprobacion;
+        }
+
+        async function mostrarModalAprobacion() {
+            try {
+                // Verificar si el trámite ya está aprobado
+                if ('{{ $tramite->estado }}' === 'Aprobado') {
+                    mostrarNotificacion('error', 'Este trámite ya ha sido aprobado');
+                    return;
+                }
+
+                // Crear el modal si no existe
+                const modal = crearModal();
+
+                // Obtener el siguiente PV antes de mostrar el modal
+                const responsePV = await fetch('/revision/get-next-pv', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!responsePV.ok) {
+                    throw new Error('Error al obtener el siguiente número PV');
+                }
+
+                const dataPV = await responsePV.json();
+                const nextPV = dataPV.numero_pv;
+
+                // Actualizar el contenido del modal con el PV
+                const modalContent = modal.querySelector('.bg-gray-50');
+                if (modalContent) {
+                    modalContent.innerHTML = `
+                        <div class="flex items-center justify-center flex-col">
+                            <i class="fas fa-info-circle text-[#9d2449] text-xl mb-2"></i>
+                            <p class="text-sm text-gray-600 mb-2">
+                                Al aprobar el trámite se asignará el siguiente número de proveedor:
+                            </p>
+                            <p class="text-2xl font-bold text-[#9d2449] mb-2">${nextPV}</p>
+                            <p class="text-xs text-gray-500">
+                                Este número es único y será asignado permanentemente al proveedor
+                            </p>
+                        </div>
+                        <input type="hidden" id="nextPV" value="${nextPV}">
+                    `;
+                }
+
+                modal.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('error', 'Error al obtener el número de proveedor');
+            }
+        }
+
+        function cerrarModalAprobacion() {
+            const modal = document.getElementById('modalAprobacion');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
         // Función para aprobar documento después del cotejo
         async function aprobarDocumento(documentoId) {
             const cotejado = document.getElementById(`cotejado_${documentoId}`).checked;
@@ -336,34 +492,157 @@
             });
         });
 
-        // Función para aprobar el trámite completo
-        async function aprobarTramite() {
-            if (!confirm('¿Está seguro de que desea aprobar este trámite? Esta acción no se puede deshacer.')) {
-                return;
-            }
-
+        // Función para aprobar el trámite completo y generar oficio
+        async function confirmarAprobacion() {
             try {
-                const response = await fetch(`/tramites/{{ $tramite->id }}/aprobar`, {
+                // Obtener el PV del input oculto
+                const nextPV = document.getElementById('nextPV').value;
+                if (!nextPV) {
+                    throw new Error('No se encontró el número de proveedor');
+                }
+
+                // Mostrar indicador de carga
+                const btnConfirmar = document.querySelector('button[onclick="confirmarAprobacion()"]');
+                const btnCancelar = document.querySelector('button[onclick="cerrarModalAprobacion()"]');
+                btnConfirmar.disabled = true;
+                btnCancelar.disabled = true;
+                btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...';
+
+                // Aprobar el trámite y crear el proveedor
+                const responseAprobacion = await fetch('{{ route("revision.aprobar", ["tramite" => $tramite->id]) }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'Accept': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify({
+                        estado: 'Aprobado',
+                        fecha_aprobacion: new Date().toISOString(),
+                        numero_pv: nextPV
+                    })
                 });
 
-                const data = await response.json();
-                if (data.success) {
-                    mostrarNotificacion('success', 'Trámite aprobado exitosamente');
-                    setTimeout(() => {
-                        window.location.href = '/revision';
-                    }, 2000);
+                // Verificar si la respuesta es JSON
+                const contentType = responseAprobacion.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("La respuesta del servidor no es JSON válido");
+                }
+
+                let dataAprobacion;
+                try {
+                    dataAprobacion = await responseAprobacion.json();
+                } catch (error) {
+                    console.error('Error al parsear JSON:', error);
+                    throw new Error('Error al procesar la respuesta del servidor');
+                }
+
+                if (!responseAprobacion.ok || !dataAprobacion.success) {
+                    const mensaje = dataAprobacion.message || `Error al aprobar el trámite (${responseAprobacion.status})`;
+                    console.error('Error en la respuesta:', {
+                        status: responseAprobacion.status,
+                        data: dataAprobacion
+                    });
+                    throw new Error(mensaje);
+                }
+
+                // Si la aprobación fue exitosa, generar el oficio
+                const responseOficio = await fetch('{{ route("revision.generar-oficio", ["tramite" => $tramite->id]) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        tipo_oficio: '{{ $tramite->tipo_tramite }}',
+                        proveedor_pv: nextPV
+                    })
+                });
+
+                // Verificar si la respuesta es JSON
+                const contentTypeOficio = responseOficio.headers.get("content-type");
+                if (!contentTypeOficio || !contentTypeOficio.includes("application/json")) {
+                    throw new Error("La respuesta del servidor para el oficio no es JSON válido");
+                }
+
+                let dataOficio;
+                try {
+                    dataOficio = await responseOficio.json();
+                } catch (error) {
+                    console.error('Error al parsear JSON del oficio:', error);
+                    throw new Error('Error al procesar la respuesta del servidor para el oficio');
+                }
+
+                if (!responseOficio.ok || !dataOficio.success) {
+                    const mensaje = dataOficio.message || `Error al generar oficio (${responseOficio.status})`;
+                    console.error('Error en la respuesta del oficio:', {
+                        status: responseOficio.status,
+                        data: dataOficio
+                    });
+                    throw new Error(mensaje);
+                }
+                if (dataOficio.success) {
+                    // Cerrar modal
+                    cerrarModalAprobacion();
+
+                    // Mostrar modal de éxito con Tailwind
+                    const modalExito = document.createElement('div');
+                    modalExito.className = 'fixed inset-0 z-50 overflow-y-auto';
+                    modalExito.innerHTML = `
+                        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                                <div>
+                                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                                        <i class="fas fa-check text-green-600 text-xl"></i>
+                                    </div>
+                                    <div class="mt-3 text-center sm:mt-5">
+                                        <h3 class="text-lg leading-6 font-bold text-gray-900">
+                                            Trámite Aprobado Exitosamente
+                                        </h3>
+                                        <div class="mt-4">
+                                            <div class="bg-gray-50 rounded-lg p-4 text-left space-y-2">
+                                                <p class="text-sm text-gray-600">
+                                                    <span class="font-semibold">Número de Proveedor:</span>
+                                                    <span class="text-[#9d2449] font-bold">${dataAprobacion.proveedor_pv}</span>
+                                                </p>
+                                                <p class="text-sm text-gray-600">
+                                                    <span class="font-semibold">Número de Oficio:</span>
+                                                    <span class="text-[#9d2449] font-bold">${dataOficio.numero_oficio}</span>
+                                                </p>
+                                            </div>
+                                            <p class="mt-2 text-sm text-gray-500">
+                                                El oficio ha sido generado y guardado en el sistema.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-5 sm:mt-6">
+                                    <button type="button"
+                                            onclick="window.location.href='/revision'"
+                                            class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-[#9d2449] text-base font-medium text-white hover:bg-[#7a1d3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] sm:text-sm transition-colors duration-200">
+                                        Volver a Revisiones
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modalExito);
                 } else {
-                    mostrarNotificacion('error', data.message || 'Error al aprobar el trámite');
+                    throw new Error(dataOficio.message || 'Error al generar el oficio');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                mostrarNotificacion('error', 'Error de conexión al aprobar el trámite');
+                // Restaurar botones
+                const btnConfirmar = document.querySelector('button[onclick="confirmarAprobacion()"]');
+                const btnCancelar = document.querySelector('button[onclick="cerrarModalAprobacion()"]');
+                btnConfirmar.disabled = false;
+                btnCancelar.disabled = false;
+                btnConfirmar.innerHTML = 'Confirmar Aprobación';
+                // Mostrar error
+                mostrarNotificacion('error', error.message || 'Error en el proceso de aprobación');
             }
         }
 

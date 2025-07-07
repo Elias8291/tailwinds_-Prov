@@ -171,6 +171,18 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Botón de Verificación de Identidad -->
+                            <div class="mt-4 border-t border-gray-200 pt-4">
+                                <button @click="showVerifyModal = true"
+                                        class="w-full bg-[#9d2449] hover:bg-[#7a1d3a] text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2">
+                                    <i class="fas fa-id-card"></i>
+                                    <span>Verificar Identidad</span>
+                                </button>
+                                <p class="text-xs text-gray-500 mt-2 text-center">
+                                    Haga clic para verificar la identidad del solicitante antes de proceder con el cotejo
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -236,40 +248,77 @@
                                 </div>
                                 <div class="mt-3 text-center sm:mt-5">
                                     <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                        Verificación de Identidad
+                                        Verificación de Identidad del Solicitante
                                     </h3>
-                                    <div class="mt-2">
-                                        <p class="text-sm text-gray-500">
-                                            Por favor, confirme que ha verificado físicamente la identidad del solicitante y que la identificación oficial presentada coincide con el documento digital.
-                                        </p>
+                                    <div class="mt-4">
+                                        <!-- Botón para ver identificación -->
+                                        <div class="mb-4">
+                                            <a href="{{ route('documentos.ver', ['documentoSolicitante' => $documentoIdentificacion->id ?? '']) }}" 
+                                               target="_blank"
+                                               class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors duration-200">
+                                                <i class="fas fa-id-card mr-2"></i>
+                                                Ver Identificación Digital
+                                            </a>
+                                            @if(!isset($documentoIdentificacion))
+                                                <p class="text-sm text-red-600 mt-2">
+                                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                                    No se encontró el documento de identificación
+                                                </p>
+                                            @endif
+                                        </div>
+
+                                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                                            <div class="flex items-start">
+                                                <div class="flex-shrink-0">
+                                                    <i class="fas fa-exclamation-triangle text-amber-400"></i>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <h3 class="text-sm font-medium text-amber-800">
+                                                        Importante
+                                                    </h3>
+                                                    <div class="mt-2 text-sm text-amber-700">
+                                                        <p class="text-left">
+                                                            Antes de proceder, verifique:
+                                                        </p>
+                                                        <ul class="list-disc list-inside mt-2 space-y-1 text-left">
+                                                            <li>La identificación oficial vigente</li>
+                                                            <li>Que la foto coincida con la persona presente</li>
+                                                            <li>Que los datos coincidan con los documentos digitales</li>
+                                                            <li>Que no presente alteraciones o daños</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-1 sm:gap-3">
+                            <div class="mt-5 sm:mt-6 space-y-3">
                                 <button type="button"
                                         @click="showVerifyModal = false; window.location.href = '{{ route('revision.presencial', $tramite) }}'"
-                                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-slate-600 text-base font-medium text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 sm:text-sm mb-3">
+                                        class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-3 bg-[#9d2449] text-base font-medium text-white hover:bg-[#7a1d3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] sm:text-sm transition-colors duration-200">
                                     <i class="fas fa-check-circle mr-2"></i>
-                                    Identificación Verificada Correctamente
+                                    Identidad Verificada - Continuar con el Cotejo
                                 </button>
                                 
                                 <button type="button"
                                         @click="showVerifyModal = false; window.location.href = '{{ route('citas.reagendar', ['tramite' => $tramite->id, 'motivo' => 'identificacion_no_coincide']) }}'"
-                                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:text-sm mb-3">
+                                        class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-3 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:text-sm transition-colors duration-200">
                                     <i class="fas fa-calendar-alt mr-2"></i>
-                                    Identificación No Coincide - Reagendar Cita
+                                    Reagendar Cita - Identificación No Coincide
                                 </button>
 
                                 <button type="button"
                                         @click="showVerifyModal = false; window.location.href = '{{ route('tramites.cancelar', ['tramite' => $tramite->id, 'motivo' => 'identificacion_invalida']) }}'"
-                                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-rose-600 text-base font-medium text-white hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 sm:text-sm mb-3">
+                                        class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-3 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm transition-colors duration-200">
                                     <i class="fas fa-times-circle mr-2"></i>
-                                    Cancelar Trámite por Identificación Inválida
+                                    Cancelar Trámite - Identificación Inválida
                                 </button>
 
                                 <button type="button"
                                         @click="showVerifyModal = false"
-                                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:text-sm">
+                                        class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:text-sm transition-colors duration-200">
+                                    <i class="fas fa-times mr-2"></i>
                                     Cerrar
                                 </button>
                             </div>

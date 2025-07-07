@@ -25,6 +25,7 @@ use App\Http\Controllers\TramiteSolicitanteController;
 use Illuminate\Http\JsonResponse;
 use App\Events\SolicitudCorreccionesEvent;
 use App\Models\Seccion;
+use App\Services\OficioService;
 
 class RevisionController extends Controller
 {
@@ -111,7 +112,18 @@ class RevisionController extends Controller
             ]);
 
             // Cargar relaciones necesarias
-            $tramite->load(['solicitante', 'revisor', 'detalleTramite', 'seccionesRevision.seccion']);
+            $tramite->load(['solicitante', 'revisor', 'detalleTramite', 'seccionesRevision.seccion', 'documentosSolicitante.documento']);
+            
+            // Buscar el documento de identificación
+            $documentoIdentificacion = $tramite->documentosSolicitante()
+                ->whereHas('documento', function($query) {
+                    $query->where('nombre', 'like', '%identificación%')
+                        ->orWhere('nombre', 'like', '%identificacion%')
+                        ->orWhere('nombre', 'like', '%INE%')
+                        ->orWhere('nombre', 'like', '%IFE%')
+                        ->orWhere('nombre', 'like', '%pasaporte%');
+                })
+                ->first();
             
             // 1. Obtener datos generales usando el controlador
             $datosGenerales = $this->obtenerDatosGenerales($tramite);
@@ -207,7 +219,8 @@ class RevisionController extends Controller
                 'comentariosGenerales',
                 'citaCotejo',
                 'todasSeccionesAprobadas',
-                'tipo_revision'
+                'tipo_revision',
+                'documentoIdentificacion'
             ));
 
         } catch (\Exception $e) {
@@ -894,99 +907,62 @@ class RevisionController extends Controller
         try {
             DB::beginTransaction();
 
-            // Determinar qué secciones aprobar según el tipo de persona
-            $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
-            $seccionesAAprobar = $tipoPersona === 'Moral' ? [1, 2, 3, 4, 5, 6] : [1, 2, 3]; // 3 es documentos para persona física
-            
-            Log::info('Iniciando revisión digital completa de trámite:', [
-                'tramite_id' => $tramite->id,
-                'tipo_persona' => $tipoPersona,
-                'secciones_a_aprobar' => $seccionesAAprobar,
-                'revisor' => Auth::id()
-            ]);
-
-            // Aprobar las secciones correspondientes
-            foreach ($seccionesAAprobar as $seccionId) {
-                SeccionRevision::updateOrCreate(
-                    [
-                        'tramite_id' => $tramite->id,
-                        'seccion_id' => $seccionId,
-                    ],
-                    [
-                        'estado' => 'aprobado',
-                        'comentario' => 'Aprobado en revisión digital completa',
-                        'revisor_id' => Auth::id(),
-                        'fecha_revision' => now()
-                    ]
-                );
+            // Verificar que el trámite tenga un solicitante
+            if (!$tramite->solicitante) {
+                throw new \Exception('El trámite no tiene un solicitante asignado');
             }
 
-            // Actualizar estado del trámite a "Revisión Digital Completada"
+            // Obtener el siguiente PV
+            $nextPV = $this->getNextPVNumber();
+
+            // Crear el proveedor según la estructura de la tabla
+            $proveedor = new Proveedor();
+            $proveedor->pv = $nextPV;
+            $proveedor->solicitante_id = $tramite->solicitante->id;
+            $proveedor->fecha_registro = now();
+            $proveedor->fecha_vencimiento = now()->addYear();
+            $proveedor->estado = 'Activo';
+            $proveedor->save();
+
+            // Actualizar estado del trámite
             $tramite->update([
-                'estado' => 'Revision Digital Completada',
+                'estado' => 'Aprobado',
                 'fecha_revision' => now(),
-                'revisado_por' => Auth::id(),
-                'observaciones' => 'Revisión digital aprobada. Pendiente cotejo físico de documentos.'
+                'revisado_por' => Auth::id()
             ]);
-
-            // ✅ AGENDAR CITA AUTOMÁTICAMENTE PARA COTEJO FÍSICO
-            $cita = \App\Models\Cita::agendarCotejoAutomatico($tramite);
-
-            // 🔔 CREAR NOTIFICACIÓN PARA EL USUARIO
-            if ($tramite->solicitante && $tramite->solicitante->usuario_id && $cita) {
-                try {
-                    $fechaCita = $cita->fecha_hora->format('d/m/Y');
-                    $horaCita = $cita->fecha_hora->format('H:i');
-                    
-                    \App\Models\Notificacion::crearParaUsuario(
-                        '✅ Revisión Digital Aprobada - Cita Agendada',
-                        "¡Excelente noticia! Su trámite #" . str_pad($tramite->id, 6, '0', STR_PAD_LEFT) . " ha completado exitosamente la revisión digital. " .
-                        "Se ha agendado automáticamente una cita para el cotejo físico de sus documentos:\n\n" .
-                        "📅 Fecha: {$fechaCita}\n⏰ Hora: {$horaCita}\n📍 Ubicación: Oficinas del Gobierno del Estado\n\n" .
-                        "Por favor, traiga TODOS los documentos originales para su verificación. " .
-                        "Después del cotejo exitoso, se le otorgará su código de proveedor oficial.",
-                        'Informativo',
-                        $tramite->solicitante->usuario_id
-                    );
-                    
-                    Log::info('Notificación de cita agendada enviada:', [
-                        'tramite_id' => $tramite->id,
-                        'usuario_id' => $tramite->solicitante->usuario_id,
-                        'cita_id' => $cita->id,
-                        'fecha_cita' => $cita->fecha_hora->format('Y-m-d H:i')
-                    ]);
-                } catch (\Exception $e) {
-                    Log::error('Error al crear notificación de cita:', [
-                        'tramite_id' => $tramite->id,
-                        'error' => $e->getMessage()
-                    ]);
-                }
-            }
 
             DB::commit();
 
-            Log::info('Revisión digital completada y cita agendada:', [
-                'tramite_id' => $tramite->id,
-                'revisor' => Auth::id(),
-                'tipo_persona' => $tipoPersona,
-                'cita_id' => $cita->id,
-                'fecha_cita' => $cita->fecha_hora->format('Y-m-d H:i'),
-                'nuevo_estado' => 'Revision Digital Completada'
-            ]);
+            // Si es una petición AJAX, devolver respuesta JSON
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Trámite aprobado y proveedor creado exitosamente',
+                    'proveedor_pv' => $nextPV
+                ]);
+            }
 
-            return redirect()->route('revision.index')->with('success', 
-                'Revisión digital completada exitosamente. Cita agendada para el ' . $cita->fecha_hora->format('d/m/Y') . ' a las ' . $cita->fecha_hora->format('H:i') . ' para cotejo físico de documentos.');
+            return redirect()->route('revision.index')
+                ->with('success', 'Trámite aprobado exitosamente. Número de proveedor: ' . $nextPV);
 
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Error al completar revisión digital:', [
+            Log::error('Error al aprobar el trámite:', [
                 'tramite_id' => $tramite->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return redirect()->back()->with('error', 'Error al completar la revisión digital: ' . $e->getMessage());
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al aprobar el trámite: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Error al aprobar el trámite: ' . $e->getMessage());
         }
     }
 
@@ -2181,5 +2157,138 @@ class RevisionController extends Controller
             ->toArray();
 
         return view('revision.cotejo-presencial', compact('tramite', 'documentos', 'revisionesExistentes'));
+    }
+
+    /**
+     * Generar oficio para un trámite aprobado
+     */
+    public function generarOficio(Request $request, Tramite $tramite)
+    {
+        try {
+            // Validar que el trámite tenga un proveedor asignado
+            if (!$tramite->proveedor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El trámite no tiene un proveedor asignado'
+                ], 400);
+            }
+
+            // Validar el tipo de oficio
+            $request->validate([
+                'tipo_oficio' => 'required|string|in:inscripcion,renovacion,actualizacion,cancelacion',
+                'proveedor_pv' => 'required|string'
+            ]);
+
+            // Instanciar el servicio de oficios
+            $oficioService = app(OficioService::class);
+
+            // Generar el oficio
+            $oficio = $oficioService->generarOficio($tramite, $request->tipo_oficio);
+
+            if (!$oficio) {
+                throw new \Exception('Error al generar el oficio');
+            }
+
+            Log::info('✅ Oficio generado exitosamente', [
+                'tramite_id' => $tramite->id,
+                'oficio_id' => $oficio->id,
+                'numero_oficio' => $oficio->numero_oficio,
+                'tipo' => $request->tipo_oficio
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Oficio generado exitosamente',
+                'numero_oficio' => $oficio->numero_oficio,
+                'ruta_archivo' => $oficio->ruta_archivo
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error al generar oficio:', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al generar el oficio: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener el siguiente número PV disponible
+     */
+    public function getNextPV()
+    {
+        try {
+            // Obtener el último PV de la tabla proveedor ordenado por el número
+            $ultimoPV = DB::table('proveedor')
+                ->whereNotNull('pv')
+                ->where('pv', 'like', 'PV%')
+                ->orderBy(DB::raw('CAST(SUBSTRING(pv, 3) AS UNSIGNED)'), 'desc')
+                ->value('pv');
+
+            if ($ultimoPV) {
+                // Extraer el número del último PV
+                $ultimoNumero = (int)substr($ultimoPV, 2); // Quita 'PV' y convierte a número
+                $siguienteNumero = $ultimoNumero + 1;
+            } else {
+                // Si no hay registros, empezar desde 9991
+                $siguienteNumero = 9991;
+            }
+
+            // Formatear el nuevo número PV
+            $nuevoPV = 'PV' . $siguienteNumero;
+
+            Log::info('Siguiente PV generado:', [
+                'ultimo_pv' => $ultimoPV ?? 'ninguno',
+                'nuevo_pv' => $nuevoPV,
+                'siguiente_numero' => $siguienteNumero
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'numero_pv' => $nuevoPV,
+                'ultimo_pv' => $ultimoPV
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al generar siguiente PV:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al generar el siguiente número PV: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener el siguiente PV para uso interno
+     */
+    private function getNextPVNumber()
+    {
+        // Obtener el último PV de la tabla proveedor ordenado por el número
+        $ultimoPV = DB::table('proveedor')
+            ->whereNotNull('pv')
+            ->where('pv', 'like', 'PV%')
+            ->orderBy(DB::raw('CAST(SUBSTRING(pv, 3) AS UNSIGNED)'), 'desc')
+            ->value('pv');
+
+        if ($ultimoPV) {
+            // Extraer el número del último PV
+            $ultimoNumero = (int)substr($ultimoPV, 2); // Quita 'PV' y convierte a número
+            $siguienteNumero = $ultimoNumero + 1;
+        } else {
+            // Si no hay registros, empezar desde 9991
+            $siguienteNumero = 9991;
+        }
+
+        // Formatear el nuevo número PV
+        return 'PV' . $siguienteNumero;
     }
 } 
