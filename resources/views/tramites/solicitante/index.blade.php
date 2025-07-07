@@ -725,6 +725,113 @@
             </div>
         </div>
         @endif
+
+        @php
+            $tramites = Auth::user()->solicitante->tramites()
+                ->orderBy('created_at', 'desc')
+                ->get();
+        @endphp
+
+        @if($tramites->count() > 0)
+            <!-- Historial de Trámites -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+                <!-- Header -->
+                <div class="border-b border-gray-100 p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-history text-[#9d2449]"></i>
+                            <h2 class="text-lg font-semibold text-gray-800">Historial de Trámites</h2>
+                        </div>
+                        <span class="text-sm text-gray-500">{{ $tramites->count() }} trámite(s)</span>
+                    </div>
+                </div>
+
+                <!-- Contenido -->
+                <div class="p-4">
+                    <div class="relative">
+                        <!-- Línea de tiempo vertical -->
+                        <div class="absolute left-2.5 top-0 h-full w-px bg-gray-200"></div>
+
+                        <!-- Lista de trámites -->
+                        <div class="space-y-3">
+                            @foreach($tramites as $tramite)
+                                <div class="relative pl-8 group">
+                                    <!-- Punto en la línea de tiempo -->
+                                    <div class="absolute left-0 top-3 w-5 h-5 rounded-full border-2 transform -translate-y-1/2
+                                        @if($tramite->estado === 'Cancelado') 
+                                            bg-red-50 border-red-300
+                                        @elseif($tramite->estado === 'Aprobado')
+                                            bg-emerald-50 border-emerald-300
+                                        @elseif($tramite->estado === 'Por Cotejar')
+                                            bg-amber-50 border-amber-300
+                                        @else
+                                            bg-blue-50 border-blue-300
+                                        @endif">
+                                    </div>
+
+                                    <!-- Tarjeta del trámite -->
+                                    <div class="bg-gray-50 rounded-lg p-3 hover:bg-white border border-gray-100 
+                                             transition duration-150 ease-in-out hover:shadow-sm">
+                                        <div class="flex items-center justify-between">
+                                            <!-- Info principal -->
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center text-sm">
+                                                    <span class="font-medium text-gray-900 truncate">
+                                                        {{ ucfirst($tramite->tipo_tramite) }}
+                                                    </span>
+                                                    <span class="ml-2 text-xs text-gray-500">
+                                                        #{{ $tramite->id }}
+                                                    </span>
+                                                </div>
+
+                                                <!-- Estado y fecha -->
+                                                <div class="mt-1 flex items-center gap-2">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                                        @if($tramite->estado === 'Cancelado') 
+                                                            bg-red-100 text-red-700
+                                                        @elseif($tramite->estado === 'Aprobado')
+                                                            bg-emerald-100 text-emerald-700
+                                                        @elseif($tramite->estado === 'Por Cotejar')
+                                                            bg-amber-100 text-amber-700
+                                                        @else
+                                                            bg-blue-100 text-blue-700
+                                                        @endif">
+                                                        {{ $tramite->estado }}
+                                                    </span>
+                                                    <span class="text-xs text-gray-500 flex items-center">
+                                                        <i class="far fa-clock mr-1"></i>
+                                                        {{ $tramite->created_at->format('d/m/Y H:i') }}
+                                                    </span>
+                                                </div>
+
+                                                <!-- Motivo de cancelación si existe -->
+                                                @if($tramite->estado === 'Cancelado' && $tramite->motivo_cancelacion)
+                                                    <div class="mt-1 text-xs text-red-600">
+                                                        <i class="fas fa-info-circle mr-1"></i>
+                                                        @php
+                                                            $motivo = str_replace('_', ' ', $tramite->motivo_cancelacion);
+                                                            $motivo = ucfirst($motivo);
+                                                        @endphp
+                                                        {{ $motivo }}
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <!-- Botón ver detalles -->
+                                            <a href="{{ route('tramites.solicitante.estado', $tramite) }}" 
+                                               class="ml-4 flex-shrink-0 text-[#9d2449] hover:text-[#7a1d3a] 
+                                                      transition-colors duration-150">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 

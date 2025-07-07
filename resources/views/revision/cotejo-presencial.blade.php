@@ -111,6 +111,35 @@
                 </div>
             </div>
         </div>
+
+        <!-- Botones de Acción del Trámite -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 p-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-[#9d2449]/10 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-clipboard-check text-[#9d2449] text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Finalizar Trámite</h2>
+                        <p class="text-sm text-gray-600">Seleccione una acción para finalizar el trámite</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex items-center space-x-4">
+                <button onclick="aprobarTramite()" 
+                        class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200 flex items-center justify-center space-x-2">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Aprobar Trámite</span>
+                </button>
+
+                <button onclick="cancelarTramite()" 
+                        class="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200 flex items-center justify-center space-x-2">
+                    <i class="fas fa-times-circle"></i>
+                    <span>Cancelar Trámite</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     @push('styles')
@@ -306,6 +335,70 @@
                 }
             });
         });
+
+        // Función para aprobar el trámite completo
+        async function aprobarTramite() {
+            if (!confirm('¿Está seguro de que desea aprobar este trámite? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/tramites/{{ $tramite->id }}/aprobar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    mostrarNotificacion('success', 'Trámite aprobado exitosamente');
+                    setTimeout(() => {
+                        window.location.href = '/revision';
+                    }, 2000);
+                } else {
+                    mostrarNotificacion('error', data.message || 'Error al aprobar el trámite');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('error', 'Error de conexión al aprobar el trámite');
+            }
+        }
+
+        // Función para cancelar el trámite
+        async function cancelarTramite() {
+            const motivo = prompt('Por favor, ingrese el motivo de la cancelación:');
+            if (!motivo) return;
+
+            try {
+                const response = await fetch(`/tramites/{{ $tramite->id }}/cancelar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        motivo_cancelacion: motivo
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    mostrarNotificacion('success', 'Trámite cancelado exitosamente');
+                    setTimeout(() => {
+                        window.location.href = '/revision';
+                    }, 2000);
+                } else {
+                    mostrarNotificacion('error', data.message || 'Error al cancelar el trámite');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('error', 'Error de conexión al cancelar el trámite');
+            }
+        }
     </script>
     @endpush
 @endsection 

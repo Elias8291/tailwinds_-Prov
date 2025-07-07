@@ -743,6 +743,26 @@
                             </a>
                         </div>
                     </div>
+
+                    <!-- Estado del Trámite -->
+                    @if($tramite->estado === 'Cancelado')
+                        <div class="flex items-center space-x-2 bg-red-50 rounded-lg px-4 py-2 border border-red-200">
+                            <i class="fas fa-times-circle text-red-600"></i>
+                            <div>
+                                <span class="text-red-700 font-medium">Trámite cancelado:</span>
+                                @php
+                                    $motivo = str_replace('_', ' ', $tramite->motivo_cancelacion);
+                                    $motivo = ucfirst($motivo);
+                                @endphp
+                                <span class="text-red-600">{{ $motivo }}</span>
+                            </div>
+                        </div>
+                    @else
+                        <div class="flex items-center space-x-2 bg-emerald-50 rounded-lg px-4 py-2 border border-emerald-200">
+                            <i class="fas fa-check-circle text-emerald-600"></i>
+                            <span class="text-emerald-700">Trámite activo - Estado: {{ $tramite->estado }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
 
