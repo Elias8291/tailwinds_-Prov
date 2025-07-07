@@ -11,6 +11,16 @@ class DocumentoSolicitantePolicy
     use HandlesAuthorization;
 
     /**
+     * Determine whether the user can view the documento.
+     */
+    public function view(User $user, DocumentoSolicitante $documento)
+    {
+        // El usuario debe ser el dueño del trámite o tener permisos de revisión
+        return $user->id === $documento->tramite->solicitante->user_id
+            || $user->hasPermissionTo('revisar-documentos');
+    }
+
+    /**
      * Determina si el usuario puede ver el documento.
      *
      * @param User $user

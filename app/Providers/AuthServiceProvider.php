@@ -7,6 +7,8 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Support\Facades\Auth;
 use App\Auth\CustomEloquentUserProvider;
 use App\Auth\CustomTokenRepository;
+use App\Models\DocumentoSolicitante;
+use App\Policies\DocumentoSolicitantePolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -17,6 +19,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         //
+        DocumentoSolicitante::class => DocumentoSolicitantePolicy::class,
     ];
 
     /**

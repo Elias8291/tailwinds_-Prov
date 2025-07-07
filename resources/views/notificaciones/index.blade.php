@@ -477,7 +477,7 @@ function moduloNotificaciones() {
         async cargarNotificaciones() {
             this.cargando = true;
             try {
-                const response = await fetch('{{ route("notificaciones.todas") }}', {
+                const response = await fetch('{{ route("notificaciones.obtener-todas") }}', {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')

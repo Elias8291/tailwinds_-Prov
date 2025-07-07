@@ -2100,7 +2100,8 @@
 <script>
     // ✅ FUNCIÓN GLOBAL DE NAVEGACIÓN PARA FORMULARIOS
     window.navegarSiguiente = function() {
-        // Ejecutando window.navegarSiguiente() en create.blade.php
+        // Resetear todos los estados de carga antes de navegar
+        resetearTodosLosEstados();
         
         // Buscar el contenedor principal de Alpine.js
         const alpineContainer = document.querySelector('[x-data*="currentStep"]');
@@ -2140,6 +2141,9 @@
 
     // ✅ FUNCIÓN GLOBAL DE NAVEGACIÓN ANTERIOR
     window.navegarAnterior = function() {
+        // Resetear todos los estados de carga antes de navegar
+        resetearTodosLosEstados();
+        
         const alpineContainer = document.querySelector('[x-data*="currentStep"]');
         
         if (alpineContainer) {
@@ -2167,6 +2171,76 @@
     // ✅ FUNCIÓN PARA ACTUALIZAR LA VISIBILIDAD DE LOS BOTONES (Eliminada - no hay botones externos)
     window.updateNavigationButtons = function() {
         // Función vacía - los botones están manejados por Alpine.js directamente
+    };
+
+    // ✅ FUNCIÓN PARA RESETEAR TODOS LOS ESTADOS DE CARGA
+    function resetearTodosLosEstados() {
+        try {
+            // Resetear estados de carga de botones
+            const botonesLoading = [
+                ['btn-guardar-domicilio', 'btn-text-domicilio', 'btn-loading-domicilio'],
+                ['btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion']
+            ];
+            
+            botonesLoading.forEach(([btnId, textId, loadingId]) => {
+                if (typeof ocultarEstadoCarga === 'function') {
+                    ocultarEstadoCarga(btnId, textId, loadingId);
+                }
+            });
+            
+            // Resetear estados de componentes Alpine
+            const componentesAlpine = [
+                '[x-data*="accionistasData"]',
+                '[x-data*="apoderadoData"]', 
+                '[x-data*="documentosData"]'
+            ];
+            
+            componentesAlpine.forEach(selector => {
+                const elemento = document.querySelector(selector);
+                if (elemento && typeof Alpine !== 'undefined') {
+                    try {
+                        const alpineData = Alpine.$data(elemento);
+                        if (alpineData && typeof alpineData.resetearEstados === 'function') {
+                            alpineData.resetearEstados();
+                        }
+                    } catch (error) {
+                        // Error silencioso para componentes que no tienen resetearEstados
+                    }
+                }
+            });
+            
+        } catch (error) {
+            // Error silencioso general
+        }
+    }
+
+    // ✅ FUNCIONES AUXILIARES PARA ESTADOS DE CARGA
+    window.mostrarEstadoCarga = function(btnId, textId, loadingId) {
+        try {
+            const btn = document.getElementById(btnId);
+            const text = document.getElementById(textId);
+            const loading = document.getElementById(loadingId);
+            
+            if (btn) btn.disabled = true;
+            if (text) text.style.display = 'none';
+            if (loading) loading.style.display = 'inline-flex';
+        } catch (error) {
+            // Error silencioso
+        }
+    };
+
+    window.ocultarEstadoCarga = function(btnId, textId, loadingId) {
+        try {
+            const btn = document.getElementById(btnId);
+            const text = document.getElementById(textId);
+            const loading = document.getElementById(loadingId);
+            
+            if (btn) btn.disabled = false;
+            if (text) text.style.display = 'inline-flex';
+            if (loading) loading.style.display = 'none';
+        } catch (error) {
+            // Error silencioso
+        }
     };
 
     // Función de prueba de navegación (desarrollo)

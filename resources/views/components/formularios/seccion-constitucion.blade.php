@@ -249,19 +249,20 @@
                 </div>
             </div>
             <!-- Botones de navegación -->
-            <div class="flex justify-between pt-6 border-t border-gray-100">
+            <div class="flex justify-between pt-6 border-t border-gray-200">
                 <button type="button" 
                         onclick="navegarAnteriorConstitucion()"
-                        class="inline-flex items-center bg-gray-600 text-white px-6 py-2 rounded-xl shadow-lg hover:bg-gray-700 transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-gray-600/20">
+                        class="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Anterior
                 </button>
                 <button type="button" 
                         id="btn-guardar-constitucion"
                         onclick="guardarConstitucionYSiguiente()"
-                        class="inline-flex items-center bg-[#9d2449] text-white px-6 py-2 rounded-xl shadow-lg hover:bg-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 focus:ring-2 focus:ring-[#9d2449]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                        class="px-8 py-3 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg hover:from-[#8a203f] hover:to-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#9d2449] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                     <span id="btn-text-constitucion">
-                        <i class="fas fa-save mr-2"></i> Guardar y Continuar
+                        <i class="fas fa-save mr-2"></i>
+                        Guardar y Continuar
                         <i class="fas fa-arrow-right ml-2"></i>
                     </span>
                     <span id="btn-loading-constitucion" class="hidden">
@@ -405,6 +406,12 @@ function navegarAnteriorConstitucion() {
 async function guardarConstitucionYSiguiente() {
     // Mostrar estado de carga
     mostrarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
+    
+    // Establecer timeout para ocultar automáticamente
+    const timeoutId = setTimeout(() => {
+        ocultarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
+    }, 3000); // 3 segundos máximo
+    
     try {
         // 1. Buscar el componente Alpine.js de constitución
         const constitucionContainer = document.querySelector('[x-data*="constitucionData"]');
@@ -412,17 +419,21 @@ async function guardarConstitucionYSiguiente() {
             const alpineData = Alpine.$data(constitucionContainer);
             if (alpineData && typeof alpineData.guardarConstitucion === 'function') {
                 const guardado = await alpineData.guardarConstitucion();
+                clearTimeout(timeoutId);
+                ocultarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
+                
                 if (guardado) {
                     navegarSiguienteDesdeConstitucion();
-                } else {
-                    ocultarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
                 }
                 return;
             }
         }
-        // Fallback: intentar navegar sin guardar
+        // Fallback: intentar navegar directamente
+        clearTimeout(timeoutId);
+        ocultarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
         navegarSiguienteDesdeConstitucion();
     } catch (error) {
+        clearTimeout(timeoutId);
         ocultarEstadoCarga('btn-guardar-constitucion', 'btn-text-constitucion', 'btn-loading-constitucion');
         navegarSiguienteDesdeConstitucion();
     }

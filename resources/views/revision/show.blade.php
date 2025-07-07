@@ -1,42 +1,48 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-[1400px] mx-auto px-6 py-6 space-y-6">
+<div class="max-w-[1200px] mx-auto px-6 py-8">
     <!-- Breadcrumb -->
-    <nav class="flex mb-4" aria-label="Breadcrumb">
+    <nav class="flex mb-6" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 md:space-x-2">
             <li class="inline-flex items-center">
-                <a href="{{ route('dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200">
-                    <i class="fas fa-home w-4 h-4 mr-2"></i>
+                <a href="{{ route('dashboard') }}" class="text-sm text-gray-600 hover:text-[#9d2449] transition-colors duration-200">
+                    <i class="fas fa-home mr-2"></i>
                     Dashboard
                 </a>
             </li>
             <li>
                 <div class="flex items-center">
                     <i class="fas fa-chevron-right w-3 h-3 text-gray-400 mx-1"></i>
-                    <a href="{{ route('revision.index') }}" class="ml-1 text-sm font-medium text-gray-600 hover:text-gray-900 md:ml-2 transition-colors duration-200">Revisiones</a>
+                    <a href="{{ route('revision.index') }}" class="text-sm text-gray-600 hover:text-[#9d2449] transition-colors duration-200">
+                        Revisiones
+                    </a>
                 </div>
             </li>
-            <li aria-current="page">
+            <li>
                 <div class="flex items-center">
                     <i class="fas fa-chevron-right w-3 h-3 text-gray-400 mx-1"></i>
-                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Trámite #{{ $tramite->id ?? '' }}</span>
+                    <span class="text-sm text-gray-500">Trámite #{{ $tramite->id ?? '' }}</span>
                 </div>
             </li>
         </ol>
     </nav>
 
     <!-- Header Principal -->
-    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 transform hover:scale-[1.01] transition-all duration-300 border border-gray-100">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <i class="fas fa-file-check text-white text-xl"></i>
+                <div class="w-12 h-12 bg-gradient-to-br from-[#9d2449] to-[#7a1d3a] rounded-xl flex items-center justify-center shadow-md">
+                    <i class="fas fa-sync-alt animate-spin-slow text-white text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-800">Proceso de Revisión</h1>
-                    <p class="text-gray-600">Selecciona la etapa de revisión que deseas realizar</p>
-                    <div class="mt-1 flex items-center space-x-3 text-sm text-gray-500">
+                    <div class="flex items-center space-x-3">
+                        <h1 class="text-2xl font-bold text-gray-800">Proceso de Revisión</h1>
+                        <span class="bg-[#9d2449]/10 text-[#9d2449] text-sm px-3 py-1 rounded-full font-medium">
+                            En proceso
+                        </span>
+                    </div>
+                    <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500">
                         <span class="flex items-center">
                             <i class="fas fa-hashtag mr-1"></i>
                             {{ $tramite->id }}
@@ -52,168 +58,262 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 text-sm text-gray-500">
-                <i class="fas fa-clock"></i>
-                <span>{{ now()->format('d/m/Y H:i') }}</span>
-            </div>
         </div>
     </div>
 
-    <!-- Selector de Tipo de Revisión -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Opciones de Revisión -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <!-- Revisión Digital -->
-        <div class="group">
-            <a href="{{ route('revision.digital', $tramite) }}" 
-               class="block bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-                
-                <!-- Header con badge -->
-                <div class="relative p-6 pb-4">
-                    <div class="absolute top-4 right-4">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 group-hover:bg-blue-500 group-hover:text-white transition-colors duration-300">
-                            <i class="fas fa-list-check mr-1"></i>
-                            Paso 1
-                        </span>
-                    </div>
-
-                    <div class="flex items-start space-x-4">
-                        <!-- Icono -->
-                        <div class="w-16 h-16 rounded-xl bg-blue-100 flex items-center justify-center group-hover:bg-blue-500 transition-colors duration-300 flex-shrink-0">
-                            <i class="fas fa-laptop text-2xl text-blue-600 group-hover:text-white transition-colors duration-300"></i>
-                        </div>
-
-                        <!-- Contenido -->
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-700 transition-colors duration-300">
+        <div class="group bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-[#9d2449]/10 hover:shadow-2xl transition-all duration-300">
+            <div class="flex items-start space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-check-circle text-white text-lg"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors duration-200">
                                 Revisión Digital
                             </h3>
-                            <p class="text-gray-600 text-sm leading-relaxed mb-4">
-                                Comparación y verificación de la información entre los formularios completados y los documentos subidos.
-                            </p>
-
-                            <!-- Características compactas -->
-                            <div class="space-y-2">
-                                <div class="flex items-center text-sm text-gray-700">
-                                    <i class="fas fa-balance-scale w-4 h-4 text-green-500 mr-2"></i>
-                                    <span>Comparación de formularios vs documentos</span>
-                                </div>
-                                <div class="flex items-center text-sm text-gray-700">
-                                    <i class="fas fa-search w-4 h-4 text-blue-500 mr-2"></i>
-                                    <span>Verificación de datos ingresados</span>
-                                </div>
-                                <div class="flex items-center text-sm text-gray-700">
-                                    <i class="fas fa-check-circle w-4 h-4 text-orange-500 mr-2"></i>
-                                    <span>Validación de completitud</span>
-                                </div>
+                            <div class="flex items-center text-sm text-emerald-600 mt-1">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                <span>Revisión completada</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Footer del botón -->
-                <div class="px-6 py-4 bg-gray-50 group-hover:bg-blue-50 transition-colors duration-300">
-                    <div class="flex items-center justify-center text-blue-600 group-hover:text-blue-700 font-semibold">
-                        <i class="fas fa-play mr-2"></i>
-                        Iniciar Revisión Digital
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- Cotejo Presencial -->
-        <div class="group">
-            <a href="{{ route('revision.presencial', $tramite) }}" 
-               class="block bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-                
-                <!-- Header con badge -->
-                <div class="relative p-6 pb-4">
-                    <div class="absolute top-4 right-4">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 group-hover:bg-red-500 group-hover:text-white transition-colors duration-300">
-                            <i class="fas fa-exclamation-circle mr-1"></i>
-                            Obligatorio
+                        <span class="text-xs font-medium bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">
+                            Paso 1 - Completado
                         </span>
                     </div>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Los documentos digitales han sido validados correctamente.
+                    </p>
+                    <a href="{{ route('revision.digital', $tramite) }}" 
+                       class="inline-flex items-center text-emerald-600 text-sm font-medium hover:text-emerald-700">
+                        <span>Ver detalles de la revisión</span>
+                        <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition-transform duration-300"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
 
-                    <div class="flex items-start space-x-4">
-                        <!-- Icono -->
-                        <div class="w-16 h-16 rounded-xl bg-amber-100 flex items-center justify-center group-hover:bg-amber-500 transition-colors duration-300 flex-shrink-0">
-                            <i class="fas fa-users text-2xl text-amber-600 group-hover:text-white transition-colors duration-300"></i>
+        <!-- Sección de Cotejo Presencial -->
+        <div x-data="{ showVerifyModal: false }" class="relative overflow-hidden rounded-xl shadow-lg border border-gray-200">
+            @if($tramite->estado === 'Cancelado')
+                <!-- Trámite Cancelado -->
+                <div class="bg-red-50 p-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-times-circle text-red-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-red-700">Trámite Cancelado</h3>
+                            <p class="text-sm text-red-600 mt-1">
+                                @php
+                                    $motivo = str_replace('_', ' ', $tramite->motivo_cancelacion);
+                                    $motivo = ucfirst($motivo);
+                                @endphp
+                                Motivo: {{ $motivo }}
+                            </p>
+                            @if($citaCotejo)
+                            <p class="text-xs text-red-500 mt-2">
+                                Tenía cita programada para: {{ \Carbon\Carbon::parse($citaCotejo->fecha_hora)->format('d/m/Y H:i') }} hrs
+                            </p>
+                            @endif
+                            <p class="text-xs text-red-500 mt-1">
+                                Cancelado el: {{ $tramite->fecha_cancelacion ? \Carbon\Carbon::parse($tramite->fecha_cancelacion)->format('d/m/Y H:i') : 'N/A' }} hrs
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @elseif($citaCotejo && $citaCotejo->estado === 'pendiente')
+                <!-- Cita Existente - Compacto -->
+                <div class="bg-white p-4">
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-[#9d2449]/10 rounded-lg flex items-center justify-center">
+                                    <svg class="h-5 w-5 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-900">Cita Agendada</h3>
+                                    <p class="text-gray-500 text-sm">Cotejo Presencial</p>
+                                </div>
+                            </div>
+                            
+                            <div class="px-3 py-1 bg-[#9d2449]/10 rounded-lg">
+                                <span class="text-xs font-semibold text-[#9d2449]">Pendiente</span>
+                            </div>
                         </div>
 
-                        <!-- Contenido -->
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-amber-700 transition-colors duration-300">
-                                Cotejo Presencial
-                            </h3>
-                            <p class="text-gray-600 text-sm leading-relaxed mb-4">
-                                Verificación física obligatoria de documentos originales para confirmar su autenticidad. Requerido después de la revisión digital.
-                            </p>
-
-                            <!-- Características compactas -->
-                            <div class="space-y-2">
-                                <div class="flex items-center text-sm text-gray-700">
-                                    <i class="fas fa-shield-check w-4 h-4 text-green-500 mr-2"></i>
-                                    <span>Verificación de documentos reales</span>
-                                </div>
-                                <div class="flex items-center text-sm text-gray-700">
-                                    <i class="fas fa-handshake w-4 h-4 text-blue-500 mr-2"></i>
-                                    <span>Cotejo presencial obligatorio</span>
-                                </div>
-                                <div class="flex items-center text-sm text-gray-700">
-                                    <i class="fas fa-file-signature w-4 h-4 text-orange-500 mr-2"></i>
-                                    <span>Confirmación de autenticidad</span>
+                        <!-- Información de la Cita -->
+                        <div class="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="text-center">
+                                        <div class="flex items-center space-x-2">
+                                            <svg class="h-4 w-4 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
+                                            </svg>
+                                            <span class="text-sm font-bold text-gray-700">
+                                                {{ $citaCotejo->fecha_hora->format('d/m/Y') }}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center space-x-2 mt-1">
+                                            <svg class="h-4 w-4 text-[#9d2449]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span class="text-sm font-bold text-gray-700">
+                                                {{ $citaCotejo->fecha_hora->format('H:i') }} hrs
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Footer del botón -->
-                <div class="px-6 py-4 bg-gray-50 group-hover:bg-amber-50 transition-colors duration-300">
-                    <div class="flex items-center justify-center text-amber-600 group-hover:text-amber-700 font-semibold">
-                        <i class="fas fa-calendar-plus mr-2"></i>
-                        Programar Cotejo Presencial
+            @else
+                <!-- Sin Cita o Cita No Pendiente -->
+                <div class="bg-gray-50 p-4 border-t border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar text-gray-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-400">Cotejo Presencial</h3>
+                                <p class="text-xs text-gray-400">
+                                    @if(!$citaCotejo)
+                                        No hay cita programada
+                                    @else
+                                        Cita {{ strtolower($citaCotejo->estado) }}
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </a>
+            @endif
+
+            <!-- Modal de Verificación de Identidad -->
+            @if($tramite->estado !== 'Cancelado')
+                <div x-show="showVerifyModal" 
+                     x-cloak
+                     class="fixed inset-0 z-50 overflow-y-auto"
+                     aria-labelledby="modal-title" 
+                     role="dialog" 
+                     aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <!-- Overlay de fondo -->
+                        <div x-show="showVerifyModal"
+                             x-transition:enter="ease-out duration-300"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100"
+                             x-transition:leave="ease-in duration-200"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                             @click="showVerifyModal = false"
+                             aria-hidden="true"></div>
+
+                        <!-- Centrado del modal -->
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                        <!-- Contenido del Modal -->
+                        <div x-show="showVerifyModal"
+                             x-transition:enter="ease-out duration-300"
+                             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                             x-transition:leave="ease-in duration-200"
+                             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                             class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                            <div>
+                                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#9d2449]/10">
+                                    <i class="fas fa-id-card text-[#9d2449] text-lg"></i>
+                                </div>
+                                <div class="mt-3 text-center sm:mt-5">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                        Verificación de Identidad
+                                    </h3>
+                                    <div class="mt-2">
+                                        <p class="text-sm text-gray-500">
+                                            Por favor, confirme que ha verificado físicamente la identidad del solicitante y que la identificación oficial presentada coincide con el documento digital.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-1 sm:gap-3">
+                                <button type="button"
+                                        @click="showVerifyModal = false; window.location.href = '{{ route('revision.presencial', $tramite) }}'"
+                                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-slate-600 text-base font-medium text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 sm:text-sm mb-3">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    Identificación Verificada Correctamente
+                                </button>
+                                
+                                <button type="button"
+                                        @click="showVerifyModal = false; window.location.href = '{{ route('citas.reagendar', ['tramite' => $tramite->id, 'motivo' => 'identificacion_no_coincide']) }}'"
+                                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:text-sm mb-3">
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    Identificación No Coincide - Reagendar Cita
+                                </button>
+
+                                <button type="button"
+                                        @click="showVerifyModal = false; window.location.href = '{{ route('tramites.cancelar', ['tramite' => $tramite->id, 'motivo' => 'identificacion_invalida']) }}'"
+                                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-rose-600 text-base font-medium text-white hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 sm:text-sm mb-3">
+                                    <i class="fas fa-times-circle mr-2"></i>
+                                    Cancelar Trámite por Identificación Inválida
+                                </button>
+
+                                <button type="button"
+                                        @click="showVerifyModal = false"
+                                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:text-sm">
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
-    <!-- Información adicional compacta -->
-    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-4 border border-gray-100">
-        <div class="flex items-start space-x-3">
-            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-info-circle text-blue-600"></i>
+    <!-- Nota Informativa -->
+    <div class="bg-gradient-to-r from-gray-50 to-white rounded-xl p-6 border border-gray-100 shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#9d2449]/5 to-[#7a1d3a]/5 rounded-full transform -translate-y-16 translate-x-16"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-[#9d2449]/5 to-[#7a1d3a]/5 rounded-full transform translate-y-12 -translate-x-12"></div>
+        
+        <div class="relative flex items-start space-x-4">
+            <div class="w-10 h-10 bg-gradient-to-br from-[#9d2449] to-[#7a1d3a] rounded-xl flex items-center justify-center">
+                <i class="fas fa-info-circle text-white"></i>
             </div>
-            <div>
-                <h3 class="font-semibold text-gray-800 mb-1">Proceso de Revisión</h3>
-                <p class="text-gray-600 text-sm">
-                    <strong>1. Revisión Digital:</strong> Comparación de formularios contra documentos subidos para verificar consistencia de datos. 
-                    <strong>2. Cotejo Presencial:</strong> Verificación física obligatoria de documentos originales para confirmar su autenticidad y completar el proceso.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Proceso paso a paso -->
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
-        <div class="flex items-center space-x-3 mb-4">
-            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                <i class="fas fa-route text-white text-sm"></i>
-            </div>
-            <h3 class="font-semibold text-gray-800">Flujo del Proceso</h3>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div class="flex items-center space-x-2">
-                <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                <span class="text-gray-700">Revisión Digital (Comparación)</span>
-            </div>
-            <div class="flex items-center space-x-2">
-                <span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                <span class="text-gray-700">Cotejo Presencial (Obligatorio)</span>
-            </div>
-            <div class="flex items-center space-x-2">
-                <span class="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                <span class="text-gray-700">Proceso Completado</span>
+            <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Estado del Proceso</h3>
+                <div class="mt-3 space-y-3">
+                    @if($tramite->estado === 'Cancelado')
+                        <div class="flex items-center space-x-2">
+                            <span class="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-times text-sm"></i>
+                            </span>
+                            <span class="text-sm text-red-600">El trámite ha sido cancelado</span>
+                        </div>
+                    @else
+                        <div class="flex items-center space-x-2">
+                            <span class="flex-shrink-0 w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-sm"></i>
+                            </span>
+                            <span class="text-sm text-gray-600">Revisión digital completada exitosamente</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="flex-shrink-0 w-8 h-8 bg-[#9d2449] text-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-clock text-sm"></i>
+                            </span>
+                            <span class="text-sm text-gray-600">Pendiente realizar el cotejo presencial de documentos</span>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -221,9 +321,31 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+    .animate-spin-slow {
+        animation: spin 3s linear infinite;
+    }
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
 @endpush
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script>
+    // Ya no necesitamos esta función ya que manejamos todo con Alpine.js directamente
+    function verificarIdentidad(tramiteId, tieneIdentificacion) {
+        if (!tieneIdentificacion) {
+            alert('Error: No se ha encontrado el documento de identificación en el sistema.');
+            return;
+        }
+        window.location.href = "{{ route('revision.presencial', $tramite) }}";
+    }
+</script>
 @endpush
 @endsection

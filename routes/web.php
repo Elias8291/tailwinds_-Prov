@@ -44,7 +44,7 @@ use App\Http\Controllers\Api\SectorController;
 
 // Controladores de Documentos
 use App\Http\Controllers\DocumentoMembretadoController;
-use App\Http\Controllers\MembreteController;
+use App\Http\Controllers\MembretesController;
 
 // Controladores de IA
 // use App\Http\Controllers\AI\DocumentTrainingController;
@@ -57,6 +57,9 @@ use App\Http\Controllers\DocumentoSolicitanteController;
 
 // Controladores de Notificaciones
 use App\Http\Controllers\NotificacionController;
+
+// Controlador de Mis Trámites
+use App\Http\Controllers\MisTramitesController;
 
 // ============================================================================
 // RUTAS PÚBLICAS (Sin autenticación requerida)
@@ -424,7 +427,10 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
     
     // Rutas específicas para tipos de revisión
     Route::get('/{tramite}/digital', [RevisionController::class, 'revisionDigital'])->name('digital');
-    Route::get('/{tramite}/presencial', [RevisionController::class, 'revisionPresencial'])->name('presencial');
+    Route::get('/{tramite}/presencial', [RevisionController::class, 'cotejo_presencial'])->name('presencial');
+    
+    // Ruta para verificación de identidad
+    Route::get('/{tramite}/cotejo-presencial', [RevisionController::class, 'cotejo_presencial'])->name('presencial');
     
     // Rutas de acciones de revisión
     Route::post('/{tramite}/aprobar', [RevisionController::class, 'aprobarTodo'])
@@ -484,6 +490,11 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
     Route::post('/{tramite}/agendar-cita', [RevisionController::class, 'agendarCitaRevision'])
         ->middleware('can:citas.crear')
         ->name('agendar-cita');
+    
+    // Nueva ruta para terminar revisión digital
+    Route::post('/{tramite}/terminar-revision-digital', [RevisionController::class, 'terminarRevisionDigital'])
+        ->middleware('can:revision-tramites.aprobar')
+        ->name('terminar-revision-digital');
 });
 
 // ============================================================================
@@ -615,12 +626,12 @@ Route::middleware(['auth'])->prefix('documento-membretado')->group(function () {
 
 Route::middleware(['auth'])->prefix('membretes')->group(function () {
     // Página principal de membretes
-    Route::get('/', [MembreteController::class, 'index'])->middleware('can:membretes.ver')->name('membretes.index');
+    Route::get('/', [MembretesController::class, 'index'])->middleware('can:membretes.ver')->name('membretes.index');
     
     // Ejemplos de documentos (descarga directa)
-    Route::get('/ejemplo/inscripcion', [MembreteController::class, 'ejemploInscripcion'])->name('membretes.ejemplo.inscripcion');
-    Route::get('/ejemplo/renovacion', [MembreteController::class, 'ejemploRenovacion'])->name('membretes.ejemplo.renovacion');
-    Route::get('/ejemplo/actualizacion', [MembreteController::class, 'ejemploActualizacion'])->name('membretes.ejemplo.actualizacion');
+    Route::get('/ejemplo/inscripcion', [MembretesController::class, 'ejemploInscripcion'])->name('membretes.ejemplo.inscripcion');
+    Route::get('/ejemplo/renovacion', [MembretesController::class, 'ejemploRenovacion'])->name('membretes.ejemplo.renovacion');
+    Route::get('/ejemplo/actualizacion', [MembretesController::class, 'ejemploActualizacion'])->name('membretes.ejemplo.actualizacion');
 });
 
 // ============================================================================
@@ -745,4 +756,43 @@ if (config('app.debug')) {
         return view('php-config', compact('config'));
     })->name('php.config');
 }
+
+// ============================================================================
+// MÓDULO DE MIS TRÁMITES
+// ============================================================================
+
+Route::middleware(['auth', 'can:tramites-solicitante.ver'])->group(function () {
+    Route::resource('mis-tramites', MisTramitesController::class)->only([
+        'index', 'show', 'edit'
+    ]);
+    Route::get('/mis-tramites/{tramite}/download', [MisTramitesController::class, 'download'])
+        ->name('mis-tramites.download');
+});
+
+// Rutas de membretes
+Route::get('/membretes/citas/{tramite}/generar', [MembretesController::class, 'generarCita'])
+    ->name('membretes.citas.generar')
+    ->middleware('auth');
+
+// Ruta para validar citas
+Route::get('/citas/validar/{cita}', [App\Http\Controllers\CitaController::class, 'validar'])
+    ->name('citas.validar');
+
+// Ruta para ver documentos
+Route::get('/documentos/{documentoSolicitante}', [DocumentoController::class, 'verDocumento'])
+    ->name('documentos.ver')
+    ->middleware('auth');
+
+// Rutas para reagendación de citas
+Route::get('/citas/siguiente-dia-disponible/{tramite}', [CitaController::class, 'siguienteDiaDisponible'])
+    ->name('citas.siguiente-dia-disponible');
+Route::post('/citas/reagendar/{tramite}', [CitaController::class, 'reagendar'])
+    ->name('citas.reagendar');
+
+// Rutas para reagendación de citas
+Route::get('/citas/{tramite}/reagendar', [CitaController::class, 'reagendar'])->name('citas.reagendar');
+Route::get('/citas/{tramite}/reagendada', [CitaController::class, 'mostrarReagendacion'])->name('citas.reagendada');
+
+// Ruta para cancelación de trámites
+Route::get('/tramites/{tramite}/cancelar', [TramiteSolicitanteController::class, 'cancelar'])->name('tramites.cancelar');
 

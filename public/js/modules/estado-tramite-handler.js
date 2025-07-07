@@ -13,6 +13,54 @@ let estadoPolling = {
 };
 
 let tramiteId = null;
+let prelineInitialized = false;
+
+// ===== UTILIDADES DOM =====
+
+// Función para verificar si un elemento es válido
+function isValidElement(element) {
+    return element && 
+           typeof element === 'object' && 
+           element.nodeType === Node.ELEMENT_NODE && 
+           typeof element.closest === 'function';
+}
+
+// Función para inicializar PrelineUI de forma segura
+function initPrelineSafe() {
+    if (typeof HSStaticMethods !== 'undefined' && !prelineInitialized) {
+        try {
+            // Esperar a que el DOM esté completamente cargado
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    HSStaticMethods.autoInit();
+                    prelineInitialized = true;
+                });
+            } else {
+                HSStaticMethods.autoInit();
+                prelineInitialized = true;
+            }
+        } catch (error) {
+            console.warn('Error inicializando PrelineUI:', error);
+        }
+    }
+}
+
+// Función para reinicializar PrelineUI después de cambios en el DOM
+function reinitPrelineComponents() {
+    if (typeof HSStaticMethods !== 'undefined' && prelineInitialized) {
+        try {
+            // Reinicializar componentes específicos
+            const components = ['HSSelect', 'HSDropdown', 'HSComboBox'];
+            components.forEach(component => {
+                if (typeof window[component] !== 'undefined' && window[component].autoInit) {
+                    window[component].autoInit();
+                }
+            });
+        } catch (error) {
+            console.warn('Error reinicializando componentes PrelineUI:', error);
+        }
+    }
+}
 
 // ===== FUNCIONES PRINCIPALES =====
 
@@ -22,30 +70,25 @@ async function habilitarEdicion(id) {
     }
     
     try {
-        const response = await fetch(`/tramites-solicitante/habilitar-edicion/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json'
-            }
+        const response = await window.safeFetch(`/tramites-solicitante/habilitar-edicion/${id}`, {
+            method: 'POST'
         });
         
         const data = await response.json();
         
         if (data.success) {
-            alert(data.message);
+            mostrarNotificacion('success', data.message);
             if (data.redirect_url) {
                 window.location.href = data.redirect_url;
             } else {
                 window.location.reload();
             }
         } else {
-            alert('Error: ' + data.message);
+            mostrarNotificacion('error', data.message);
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error al habilitar la edición del trámite');
+        console.error('Error habilitando edición:', error);
+        mostrarNotificacion('error', 'Error al habilitar la edición del trámite');
     }
 }
 
@@ -55,13 +98,8 @@ async function corregirSeccion(id, seccionId) {
     }
     
     try {
-        const response = await fetch(`/tramites-solicitante/corregir-seccion/${id}/${seccionId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json'
-            }
+        const response = await window.safeFetch(`/tramites-solicitante/corregir-seccion/${id}/${seccionId}`, {
+            method: 'POST'
         });
         
         const data = await response.json();
@@ -69,11 +107,11 @@ async function corregirSeccion(id, seccionId) {
         if (data.success) {
             window.location.href = data.redirect_url;
         } else {
-            alert('Error: ' + data.message);
+            mostrarNotificacion('error', data.message);
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error al habilitar la corrección de la sección');
+        console.error('Error corrigiendo sección:', error);
+        mostrarNotificacion('error', 'Error al habilitar la corrección de la sección');
     }
 }
 
@@ -86,13 +124,16 @@ function toggleDocumentos(seccionId) {
         return;
     }
     
+    // Prevenir conflictos con eventos de PrelineUI
+    event.stopPropagation();
+    
     if (panel.classList.contains('hidden')) {
         // Mostrar panel
         panel.classList.remove('hidden');
         panel.classList.add('animate-slideDown');
         chevron.style.transform = 'rotate(180deg)';
         
-        // Opcional: smooth scroll hacia el panel
+        // Smooth scroll opcional
         setTimeout(() => {
             panel.scrollIntoView({ 
                 behavior: 'smooth', 
@@ -123,8 +164,8 @@ function handleFileChange(documentoId, input) {
         return;
     }
     
-            if (file.size > 50 * 1024 * 1024) { // 50MB
-            mostrarNotificacion('error', 'El archivo es demasiado grande. Máximo 50MB permitido');
+    if (file.size > 50 * 1024 * 1024) { // 50MB
+        mostrarNotificacion('error', 'El archivo es demasiado grande. Máximo 50MB permitido');
         input.value = '';
         return;
     }
@@ -146,14 +187,18 @@ async function subirDocumento(documentoId, file) {
     
     try {
         // Mostrar progreso
-        progressContainer.classList.remove('hidden');
-        botonSubir.disabled = true;
-        botonSubir.classList.add('opacity-50', 'cursor-not-allowed');
+        if (progressContainer) progressContainer.classList.remove('hidden');
+        if (botonSubir) {
+            botonSubir.disabled = true;
+            botonSubir.classList.add('opacity-50', 'cursor-not-allowed');
+        }
         
-        // Simular progreso inicial con animación
-        progressBar.classList.add('progress-pulse');
-        progressBar.style.width = '10%';
-        progressText.textContent = 'Preparando archivo...';
+        // Progreso inicial
+        if (progressBar) {
+            progressBar.classList.add('progress-pulse');
+            progressBar.style.width = '10%';
+        }
+        if (progressText) progressText.textContent = 'Preparando archivo...';
         
         // Crear FormData
         const formData = new FormData();
@@ -163,8 +208,8 @@ async function subirDocumento(documentoId, file) {
         
         // Progreso a 30%
         setTimeout(() => {
-            progressBar.style.width = '30%';
-            progressText.textContent = 'Subiendo archivo...';
+            if (progressBar) progressBar.style.width = '30%';
+            if (progressText) progressText.textContent = 'Subiendo archivo...';
         }, 200);
         
         // Hacer petición
@@ -178,15 +223,17 @@ async function subirDocumento(documentoId, file) {
         });
         
         // Progreso a 70%
-        progressBar.style.width = '70%';
-        progressText.textContent = 'Procesando...';
+        if (progressBar) progressBar.style.width = '70%';
+        if (progressText) progressText.textContent = 'Procesando...';
         
         const data = await response.json();
         
         // Progreso a 100%
-        progressBar.style.width = '100%';
-        progressBar.classList.remove('progress-pulse');
-        progressText.textContent = 'Completado';
+        if (progressBar) {
+            progressBar.style.width = '100%';
+            progressBar.classList.remove('progress-pulse');
+        }
+        if (progressText) progressText.textContent = 'Completado';
         
         if (data.success) {
             mostrarNotificacion('success', data.message || 'Documento subido correctamente');
@@ -204,17 +251,23 @@ async function subirDocumento(documentoId, file) {
         mostrarNotificacion('error', error.message || 'Error de conexión al subir el documento');
         
         // Resetear progreso en caso de error
-        progressBar.classList.remove('progress-pulse');
-        progressBar.style.width = '0%';
-        progressText.textContent = 'Error en la subida';
+        if (progressBar) {
+            progressBar.classList.remove('progress-pulse');
+            progressBar.style.width = '0%';
+        }
+        if (progressText) progressText.textContent = 'Error en la subida';
     } finally {
         // Ocultar progreso y restaurar botón después de un delay
         setTimeout(() => {
-            progressContainer.classList.add('hidden');
-            botonSubir.disabled = false;
-            botonSubir.classList.remove('opacity-50', 'cursor-not-allowed');
-            progressBar.classList.remove('progress-pulse');
-            progressBar.style.width = '0%';
+            if (progressContainer) progressContainer.classList.add('hidden');
+            if (botonSubir) {
+                botonSubir.disabled = false;
+                botonSubir.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            if (progressBar) {
+                progressBar.classList.remove('progress-pulse');
+                progressBar.style.width = '0%';
+            }
         }, 2000);
     }
 }
@@ -276,11 +329,16 @@ function actualizarDocumentoUI(documentoId, nuevoEstado, nombreArchivo) {
 // ===== SISTEMA DE NOTIFICACIONES =====
 
 function mostrarNotificacion(tipo, mensaje) {
-    // Remover notificaciones existentes
+    // Usar la función global si está disponible
+    if (typeof window.showGlobalNotification === 'function') {
+        window.showGlobalNotification(tipo, mensaje);
+        return;
+    }
+    
+    // Fallback a la implementación local
     const existentes = document.querySelectorAll('.notificacion-estado');
     existentes.forEach(el => el.remove());
     
-    // Crear nueva notificación
     const notificacion = document.createElement('div');
     notificacion.className = `notificacion-estado fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 max-w-sm ${
         tipo === 'success' ? 'bg-green-100 border border-green-300 text-green-800' : 'bg-red-100 border border-red-300 text-red-800'
@@ -300,12 +358,10 @@ function mostrarNotificacion(tipo, mensaje) {
     
     document.body.appendChild(notificacion);
     
-    // Animación de entrada
     setTimeout(() => {
         notificacion.style.transform = 'translateX(0)';
     }, 10);
     
-    // Remover después de 5 segundos
     setTimeout(() => {
         if (notificacion.parentElement) {
             notificacion.style.transform = 'translateX(100%)';
@@ -327,7 +383,7 @@ function iniciarPolling() {
     estadoPolling.activo = true;
     estadoPolling.intentosReconexion = 0;
     
-    console.log('🔄 Iniciando actualización automática del estado');
+    console.log('🔄 Iniciando sistema de actualización automática');
     
     // Actualizar botón de control
     actualizarBotonPolling();
@@ -346,7 +402,7 @@ function detenerPolling() {
         estadoPolling.intervalo = null;
     }
     estadoPolling.activo = false;
-    console.log('⏸️ Actualizaciones automáticas detenidas');
+    console.log('⏸️ Sistema de actualización pausado');
     actualizarBotonPolling();
 }
 
@@ -385,13 +441,7 @@ async function consultarEstado() {
     try {
         mostrarIndicadorActualizacion();
         
-        const response = await fetch(`/tramites-solicitante/estado-actualizado/${tramiteId}`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
+        const response = await window.safeFetch(`/tramites-solicitante/estado-actualizado/${tramiteId}`);
         
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
@@ -402,7 +452,7 @@ async function consultarEstado() {
         if (data.success) {
             // Verificar si hay cambios
             if (estadoPolling.ultimoTimestamp && data.data.timestamp !== estadoPolling.ultimoTimestamp) {
-                console.log('🔄 Se detectaron cambios en el trámite');
+                console.log('🔄 Cambios detectados en el trámite');
                 actualizarInterfaz(data.data);
                 mostrarNotificacion('success', '¡Estado del trámite actualizado!');
             }
@@ -416,7 +466,7 @@ async function consultarEstado() {
         }
         
     } catch (error) {
-        console.error('❌ Error en polling:', error);
+        console.error('❌ Error en consulta:', error);
         manejarErrorPolling();
     } finally {
         ocultarIndicadorActualizacion();
@@ -425,23 +475,37 @@ async function consultarEstado() {
 
 // Actualizar la interfaz con los nuevos datos
 function actualizarInterfaz(datos) {
-    // Actualizar estado principal del trámite
-    actualizarEstadoPrincipal(datos.tramite);
+    // Pausar temporalmente eventos para evitar conflictos
+    const preventivoEvento = (e) => {
+        if (e.target && !isValidElement(e.target)) {
+            e.stopPropagation();
+        }
+    };
     
-    // Actualizar progreso
-    actualizarProgreso(datos.tramite);
+    document.addEventListener('click', preventivoEvento, true);
     
-    // Actualizar documentos
-    actualizarDocumentos(datos.documentos, datos.estadisticas_documentos);
-    
-    // Actualizar secciones
-    actualizarSecciones(datos.secciones);
-    
-    // Actualizar información de la cita
-    actualizarCita(datos.cita, datos.tramite.estado);
-    
-    // Actualizar botones de acción
-    actualizarBotonesAccion(datos.tramite);
+    try {
+        // Actualizar componentes
+        actualizarEstadoPrincipal(datos.tramite);
+        actualizarProgreso(datos.tramite);
+        actualizarDocumentos(datos.documentos, datos.estadisticas_documentos);
+        actualizarSecciones(datos.secciones);
+        actualizarCita(datos.cita, datos.tramite.estado);
+        actualizarBotonesAccion(datos.tramite);
+        
+        // Reinicializar componentes PrelineUI después de cambios
+        setTimeout(() => {
+            reinitPrelineComponents();
+        }, 100);
+        
+    } catch (error) {
+        console.error('Error actualizando interfaz:', error);
+    } finally {
+        // Remover listener preventivo
+        setTimeout(() => {
+            document.removeEventListener('click', preventivoEvento, true);
+        }, 200);
+    }
 }
 
 // Actualizar estado principal del trámite
@@ -855,44 +919,40 @@ function getDocumentoClasses(estado) {
 
 // ===== INICIALIZACIÓN =====
 
-// Función para inicializar el módulo
+// Función de inicialización principal
 function initEstadoTramiteHandler(id) {
     tramiteId = id;
     
-    // Agregar data-attributes a documentos
-    document.querySelectorAll('.documento-card').forEach((card, index) => {
-        const input = card.querySelector('input[type="file"]');
-        if (input && input.id) {
-            const documentoId = input.id.replace('file-', '');
-            card.setAttribute('data-documento-id', documentoId);
+    // Inicializar PrelineUI de forma segura
+    initPrelineSafe();
+    
+    // Iniciar polling automático
+    iniciarPolling();
+    
+    // Manejar visibilidad de página para pausar/reanudar polling
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            if (estadoPolling.activo) {
+                detenerPolling();
+                console.log('🔄 Polling pausado - página no visible');
+            }
+        } else {
+            if (!estadoPolling.activo) {
+                iniciarPolling();
+                console.log('🔄 Polling reanudado - página visible');
+            }
         }
     });
     
-    // Inicializar el botón de polling
-    actualizarBotonPolling();
+    // Cleanup al cerrar/salir de la página
+    window.addEventListener('beforeunload', () => {
+        detenerPolling();
+    });
     
-    // Iniciar polling después de 3 segundos
-    setTimeout(() => {
-        iniciarPolling();
-    }, 3000);
+    console.log('✅ Estado Tramite Handler inicializado correctamente');
 }
 
-// Event listeners para el ciclo de vida de la página
-window.addEventListener('beforeunload', function() {
-    detenerPolling();
-});
-
-document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-        detenerPolling();
-    } else {
-        setTimeout(() => {
-            iniciarPolling();
-        }, 1000);
-    }
-});
-
-// Exponer funciones globales necesarias
+// Exportar funciones globales
 window.habilitarEdicion = habilitarEdicion;
 window.corregirSeccion = corregirSeccion;
 window.toggleDocumentos = toggleDocumentos;

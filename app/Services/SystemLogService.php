@@ -279,4 +279,19 @@ class SystemLogService
     {
         self::error("Actividad sospechosa detectada: {$activity}", 'security', $details);
     }
+
+    /**
+     * Registra una acción en el log del sistema
+     */
+    public static function registrarAccion(string $accion, string $descripcion, int $registro_id = null, string $tabla = null)
+    {
+        return Log::create([
+            'accion' => $accion,
+            'descripcion' => $descripcion,
+            'registro_id' => $registro_id,
+            'tabla' => $tabla,
+            'usuario_id' => auth()->id(),
+            'ip' => request()->ip()
+        ]);
+    }
 } 

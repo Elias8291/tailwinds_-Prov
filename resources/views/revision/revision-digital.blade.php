@@ -649,6 +649,171 @@
                 </div>
             </div>
         </div>
+
+        <!-- Botón para Terminar Revisión Digital -->
+        <div x-data="terminarRevisionData()" class="mt-8">
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 p-6">
+                <div class="text-center">
+                    <div class="mb-4">
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-[#9d2449] to-[#7a1d3a]">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Finalizar Revisión Digital</h3>
+                    <p class="text-gray-600 mb-6">Complete la revisión digital y programe automáticamente el cotejo presencial</p>
+                    
+                    <!-- Estado de revisiones -->
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div class="flex items-center justify-between">
+                                <span>Datos Generales:</span>
+                                <span :class="getEstadoClass('{{ $revisionesExistentes[1]['estado'] ?? 'pendiente' }}')" 
+                                      class="px-2 py-1 rounded-full text-xs font-medium">
+                                    {{ ucfirst($revisionesExistentes[1]['estado'] ?? 'Pendiente') }}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Domicilio:</span>
+                                <span :class="getEstadoClass('{{ $revisionesExistentes[2]['estado'] ?? 'pendiente' }}')" 
+                                      class="px-2 py-1 rounded-full text-xs font-medium">
+                                    {{ ucfirst($revisionesExistentes[2]['estado'] ?? 'Pendiente') }}
+                                </span>
+                            </div>
+                            @if($tramite->solicitante && $tramite->solicitante->tipo_persona === 'Moral')
+                            <div class="flex items-center justify-between">
+                                <span>Constitución:</span>
+                                <span :class="getEstadoClass('{{ $revisionesExistentes[3]['estado'] ?? 'pendiente' }}')" 
+                                      class="px-2 py-1 rounded-full text-xs font-medium">
+                                    {{ ucfirst($revisionesExistentes[3]['estado'] ?? 'Pendiente') }}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Accionistas:</span>
+                                <span :class="getEstadoClass('{{ $revisionesExistentes[4]['estado'] ?? 'pendiente' }}')" 
+                                      class="px-2 py-1 rounded-full text-xs font-medium">
+                                    {{ ucfirst($revisionesExistentes[4]['estado'] ?? 'Pendiente') }}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Apoderado Legal:</span>
+                                <span :class="getEstadoClass('{{ $revisionesExistentes[5]['estado'] ?? 'pendiente' }}')" 
+                                      class="px-2 py-1 rounded-full text-xs font-medium">
+                                    {{ ucfirst($revisionesExistentes[5]['estado'] ?? 'Pendiente') }}
+                                </span>
+                            </div>
+                            @endif
+                            <div class="flex items-center justify-between">
+                                <span>Documentos:</span>
+                                <span :class="getEstadoClass('{{ $revisionesExistentes[6]['estado'] ?? 'pendiente' }}')" 
+                                      class="px-2 py-1 rounded-full text-xs font-medium">
+                                    {{ ucfirst($revisionesExistentes[6]['estado'] ?? 'Pendiente') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mensajes de estado dinámicos -->
+                    <div x-show="!todasSeccionesRevisadas()" class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="flex items-center justify-center">
+                            <svg class="h-5 w-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                            <span class="text-yellow-800 text-sm font-medium">
+                                Faltan <span x-text="seccionesCompletadas() + '/' + totalSeccionesRequeridas()"></span> secciones por revisar
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje cuando hay rechazos -->
+                    <div x-show="todasSeccionesRevisadas() && haySeccionesRechazadas()" class="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                        <div class="flex items-center justify-center">
+                            <svg class="h-5 w-5 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                            <span class="text-orange-800 text-sm font-medium">
+                                Hay secciones rechazadas. El solicitante debe hacer correcciones.
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje cuando todo está aprobado -->
+                    <div x-show="todasSeccionesRevisadas() && todasSeccionesAprobadas()" class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div class="flex items-center justify-center">
+                            <svg class="h-5 w-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span class="text-green-800 text-sm font-medium">
+                                ¡Perfecto! Todas las secciones están aprobadas. Listo para cita presencial.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div x-show="success" 
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform -translate-y-2"
+                         x-transition:enter-end="opacity-100 transform translate-y-0"
+                         class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div class="flex items-center justify-center">
+                            <svg class="h-5 w-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span class="text-green-800 text-sm font-medium" x-text="success"></span>
+                        </div>
+                    </div>
+
+                    <div x-show="error" 
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform -translate-y-2"
+                         x-transition:enter-end="opacity-100 transform translate-y-0"
+                         class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-center justify-center">
+                            <svg class="h-5 w-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            <span class="text-red-800 text-sm font-medium" x-text="error"></span>
+                        </div>
+                    </div>
+
+                    <!-- Botón principal dinámico -->
+                    <button 
+                        type="button"
+                        @click="terminarRevisionDigital()"
+                        :disabled="!todasSeccionesRevisadas() || isLoading"
+                        :class="getBotonClass()"
+                        class="inline-flex items-center px-8 py-3 rounded-lg font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#9d2449] focus:ring-offset-2">
+                        
+                        <svg x-show="isLoading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        
+                        <!-- Icono cuando todo está aprobado -->
+                        <svg x-show="!isLoading && todasSeccionesRevisadas() && todasSeccionesAprobadas()" class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        
+                        <!-- Icono cuando hay rechazos -->
+                        <svg x-show="!isLoading && todasSeccionesRevisadas() && haySeccionesRechazadas()" class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        
+                        <!-- Icono por defecto -->
+                        <svg x-show="!isLoading && !todasSeccionesRevisadas()" class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        
+                        <span x-text="getBotonTexto()"></span>
+                    </button>
+
+                    <div class="mt-4 text-xs text-gray-500">
+                        <p x-text="getDescripcionBoton()"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     @push('styles')
@@ -670,6 +835,286 @@
 
     @push('scripts')
     <script>
+        function terminarRevisionData() {
+            return {
+                isLoading: false,
+                success: null,
+                error: null,
+                
+                // Estados de las secciones (desde el servidor)
+                seccionesEstados: {
+                    1: '{{ $revisionesExistentes[1]['estado'] ?? 'pendiente' }}', // Datos Generales
+                    2: '{{ $revisionesExistentes[2]['estado'] ?? 'pendiente' }}', // Domicilio
+                    @if($tramite->solicitante && $tramite->solicitante->tipo_persona === 'Moral')
+                    3: '{{ $revisionesExistentes[3]['estado'] ?? 'pendiente' }}', // Constitución
+                    4: '{{ $revisionesExistentes[4]['estado'] ?? 'pendiente' }}', // Accionistas  
+                    5: '{{ $revisionesExistentes[5]['estado'] ?? 'pendiente' }}', // Apoderado Legal
+                    @endif
+                    6: '{{ $revisionesExistentes[6]['estado'] ?? 'pendiente' }}'  // Documentos
+                },
+                
+                tipoPersona: '{{ $tramite->solicitante->tipo_persona ?? 'Física' }}',
+                
+                init() {
+                    // Escuchar cambios en las revisiones de secciones
+                    this.escucharCambiosRevision();
+                    
+                    // Configurar watchers para actualización automática
+                    this.$watch('seccionesEstados', () => {
+                        this.$nextTick(() => {
+                            // Forzar actualización del UI
+                            this.$dispatch('revision-updated');
+                        });
+                    });
+                },
+                
+                // Escuchar eventos de cambio de estado de revisiones
+                escucharCambiosRevision() {
+                    // Escuchar eventos globales de actualización de revisión
+                    window.addEventListener('revision-section-updated', (event) => {
+                        const { seccionId, estado } = event.detail;
+                        if (this.seccionesEstados.hasOwnProperty(seccionId)) {
+                            this.seccionesEstados[seccionId] = estado;
+                            console.log(`Sección ${seccionId} actualizada a: ${estado}`);
+                        }
+                    });
+                    
+                    // Escuchar cambios en los elementos de estado de la UI
+                    const observerCallback = (mutations) => {
+                        mutations.forEach((mutation) => {
+                            if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                                this.actualizarEstadosDesdeUI();
+                            }
+                        });
+                    };
+                    
+                    const observer = new MutationObserver(observerCallback);
+                    
+                    // Observar cambios en los elementos de estado
+                    for (let i = 1; i <= 6; i++) {
+                        const elemento = document.getElementById(`estado_seccion_${i}`);
+                        if (elemento) {
+                            observer.observe(elemento, {
+                                childList: true,
+                                subtree: true,
+                                characterData: true
+                            });
+                        }
+                    }
+                },
+                
+                // Actualizar estados leyendo desde la UI actual
+                actualizarEstadosDesdeUI() {
+                    for (let i = 1; i <= 6; i++) {
+                        const elemento = document.getElementById(`estado_seccion_${i}`);
+                        if (elemento && this.seccionesEstados.hasOwnProperty(i)) {
+                            const textoEstado = elemento.textContent.toLowerCase().trim();
+                            if (textoEstado.includes('aprobado') || textoEstado.includes('approved')) {
+                                this.seccionesEstados[i] = 'aprobado';
+                            } else if (textoEstado.includes('rechazado') || textoEstado.includes('rejected')) {
+                                this.seccionesEstados[i] = 'rechazado';
+                            } else if (textoEstado.includes('pendiente') || textoEstado.includes('pending')) {
+                                this.seccionesEstados[i] = 'pendiente';
+                            }
+                        }
+                    }
+                },
+                
+                // Función para obtener las clases CSS según el estado
+                getEstadoClass(estado) {
+                    switch(estado) {
+                        case 'aprobado':
+                            return 'bg-green-100 text-green-800';
+                        case 'rechazado':
+                            return 'bg-red-100 text-red-800';
+                        case 'pendiente':
+                        default:
+                            return 'bg-yellow-100 text-yellow-800';
+                    }
+                },
+                
+                // Validar que todas las secciones requeridas estén revisadas
+                todasSeccionesRevisadas() {
+                    const seccionesRequeridas = this.tipoPersona === 'Moral' 
+                        ? [1, 2, 3, 4, 5, 6] // Persona Moral: todas las secciones
+                        : [1, 2, 6]; // Persona Física: solo datos generales, domicilio y documentos
+                    
+                    return seccionesRequeridas.every(seccionId => {
+                        const estado = this.seccionesEstados[seccionId];
+                        return estado === 'aprobado' || estado === 'rechazado';
+                    });
+                },
+                
+                // Verificar si todas las secciones están aprobadas
+                todasSeccionesAprobadas() {
+                    const seccionesRequeridas = this.tipoPersona === 'Moral' 
+                        ? [1, 2, 3, 4, 5, 6] 
+                        : [1, 2, 6];
+                    
+                    return seccionesRequeridas.every(seccionId => {
+                        return this.seccionesEstados[seccionId] === 'aprobado';
+                    });
+                },
+                
+                // Verificar si hay secciones rechazadas
+                haySeccionesRechazadas() {
+                    const seccionesRequeridas = this.tipoPersona === 'Moral' 
+                        ? [1, 2, 3, 4, 5, 6] 
+                        : [1, 2, 6];
+                    
+                    return seccionesRequeridas.some(seccionId => {
+                        return this.seccionesEstados[seccionId] === 'rechazado';
+                    });
+                },
+                
+                // Obtener clase del botón según el estado
+                getBotonClass() {
+                    if (!this.todasSeccionesRevisadas() || this.isLoading) {
+                        return 'bg-gray-300 text-gray-500 cursor-not-allowed';
+                    }
+                    
+                    if (this.todasSeccionesAprobadas()) {
+                        return 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg transform hover:-translate-y-0.5';
+                    }
+                    
+                    if (this.haySeccionesRechazadas()) {
+                        return 'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white shadow-lg transform hover:-translate-y-0.5';
+                    }
+                    
+                    return 'bg-gradient-to-r from-[#9d2449] to-[#7a1d3a] hover:from-[#7a1d3a] hover:to-[#6d1a32] text-white shadow-lg transform hover:-translate-y-0.5';
+                },
+                
+                // Obtener texto del botón según el estado
+                getBotonTexto() {
+                    if (this.isLoading) {
+                        return 'Procesando...';
+                    }
+                    
+                    if (!this.todasSeccionesRevisadas()) {
+                        return 'Completar Revisión';
+                    }
+                    
+                    if (this.todasSeccionesAprobadas()) {
+                        return 'Agendar Cita Presencial';
+                    }
+                    
+                    if (this.haySeccionesRechazadas()) {
+                        return 'Enviar para Correcciones';
+                    }
+                    
+                    return 'Terminar Revisión Digital';
+                },
+                
+                // Obtener descripción del botón según el estado
+                getDescripcionBoton() {
+                    if (!this.todasSeccionesRevisadas()) {
+                        return 'Complete la revisión de todas las secciones requeridas';
+                    }
+                    
+                    if (this.todasSeccionesAprobadas()) {
+                        return 'Se agendará automáticamente una cita para el cotejo presencial';
+                    }
+                    
+                    if (this.haySeccionesRechazadas()) {
+                        return 'Se notificará al solicitante para que haga las correcciones necesarias';
+                    }
+                    
+                    return 'Complete la revisión digital y programe automáticamente el cotejo presencial';
+                },
+                
+                // Función principal para terminar la revisión digital
+                async terminarRevisionDigital() {
+                    if (this.isLoading) return;
+                    
+                    if (!this.todasSeccionesRevisadas()) {
+                        this.error = 'Debe completar la revisión de todas las secciones antes de finalizar';
+                        return;
+                    }
+                    
+                    this.isLoading = true;
+                    this.error = null;
+                    this.success = null;
+                    
+                    try {
+                        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        
+                        // Determinar el tipo de acción
+                        const todasAprobadas = this.todasSeccionesAprobadas();
+                        const hayRechazadas = this.haySeccionesRechazadas();
+                        
+                        const payload = {
+                            tipo_persona: this.tipoPersona,
+                            secciones_estados: this.seccionesEstados,
+                            todas_aprobadas: todasAprobadas,
+                            hay_rechazadas: hayRechazadas,
+                            accion: todasAprobadas ? 'agendar_cita' : 'enviar_correcciones'
+                        };
+                        
+                        console.log('Enviando payload:', payload);
+                        
+                        // Llamada AJAX para terminar la revisión digital
+                        const response = await fetch(`/revision/{{ $tramite->id }}/terminar-revision-digital`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok && data.success) {
+                            if (todasAprobadas) {
+                                this.success = data.message || 'Revisión digital aprobada. Cita de cotejo presencial agendada automáticamente.';
+                            } else {
+                                this.success = data.message || 'Revisión digital completada. Solicitante notificado para correcciones.';
+                            }
+                            
+                            // Redirigir después de un tiempo
+                            setTimeout(() => {
+                                if (data.redirect_url) {
+                                    window.location.href = data.redirect_url;
+                                } else {
+                                    // Recargar la página para mostrar el estado actualizado
+                                    window.location.reload();
+                                }
+                            }, 3000);
+                            
+                        } else {
+                            this.error = data.message || 'Error al finalizar la revisión digital';
+                            console.error('Error al terminar revisión digital:', data);
+                        }
+                        
+                    } catch (error) {
+                        this.error = 'Error de conexión al finalizar la revisión. Por favor, intente nuevamente.';
+                        console.error('Error de red al terminar revisión digital:', error);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                
+                // Función para obtener el número de secciones completadas
+                seccionesCompletadas() {
+                    const seccionesRequeridas = this.tipoPersona === 'Moral' 
+                        ? [1, 2, 3, 4, 5, 6] 
+                        : [1, 2, 6];
+                    
+                    return seccionesRequeridas.filter(seccionId => {
+                        const estado = this.seccionesEstados[seccionId];
+                        return estado === 'aprobado' || estado === 'rechazado';
+                    }).length;
+                },
+                
+                // Función para obtener el total de secciones requeridas
+                totalSeccionesRequeridas() {
+                    return this.tipoPersona === 'Moral' ? 6 : 3;
+                }
+            };
+        }
+
         function agendarCitaData() {
             return {
                 // Asegurar que el modal esté oculto desde el inicio
@@ -769,6 +1214,81 @@
                 }
             };
         }
+
+        // Función global para disparar eventos de actualización de revisión
+        window.actualizarEstadoRevision = function(seccionId, nuevoEstado) {
+            console.log(`Actualizando sección ${seccionId} a estado: ${nuevoEstado}`);
+            
+            // Actualizar el elemento visual inmediatamente
+            const elemento = document.getElementById(`estado_seccion_${seccionId}`);
+            if (elemento) {
+                const span = elemento.querySelector('span:last-child');
+                if (span) {
+                    span.textContent = nuevoEstado.charAt(0).toUpperCase() + nuevoEstado.slice(1);
+                }
+                
+                // Actualizar clases CSS
+                elemento.className = elemento.className.replace(/bg-(green|red|yellow)-100 text-(green|red|yellow)-800/g, '');
+                
+                switch(nuevoEstado) {
+                    case 'aprobado':
+                        elemento.classList.add('bg-green-100', 'text-green-800');
+                        break;
+                    case 'rechazado':
+                        elemento.classList.add('bg-red-100', 'text-red-800');
+                        break;
+                    case 'pendiente':
+                    default:
+                        elemento.classList.add('bg-yellow-100', 'text-yellow-800');
+                        break;
+                }
+            }
+            
+            // Emitir evento global
+            window.dispatchEvent(new CustomEvent('revision-section-updated', {
+                detail: { seccionId: parseInt(seccionId), estado: nuevoEstado }
+            }));
+        };
+
+        // Interceptar las respuestas AJAX de revisión para actualizar automáticamente
+        document.addEventListener('DOMContentLoaded', function() {
+            // Observer para detectar cambios en los spans de estado
+            const observeStateChanges = () => {
+                for (let i = 1; i <= 6; i++) {
+                    const elemento = document.getElementById(`estado_seccion_${i}`);
+                    if (elemento) {
+                        const observer = new MutationObserver((mutations) => {
+                            mutations.forEach((mutation) => {
+                                if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                                    const nuevoTexto = elemento.textContent.toLowerCase().trim();
+                                    let nuevoEstado = 'pendiente';
+                                    
+                                    if (nuevoTexto.includes('aprobado')) {
+                                        nuevoEstado = 'aprobado';
+                                    } else if (nuevoTexto.includes('rechazado')) {
+                                        nuevoEstado = 'rechazado';
+                                    }
+                                    
+                                    // Emitir evento de cambio
+                                    window.dispatchEvent(new CustomEvent('revision-section-updated', {
+                                        detail: { seccionId: i, estado: nuevoEstado }
+                                    }));
+                                }
+                            });
+                        });
+                        
+                        observer.observe(elemento, {
+                            childList: true,
+                            subtree: true,
+                            characterData: true
+                        });
+                    }
+                }
+            };
+            
+            // Inicializar observers después de que Alpine se haya cargado
+            setTimeout(observeStateChanges, 1000);
+        });
     </script>
     @endpush
 @endsection 

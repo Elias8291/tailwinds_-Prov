@@ -25,6 +25,19 @@ class Notificacion extends Model
     ];
 
     /**
+     * Tipos de notificación válidos
+     */
+    const TIPOS = [
+        'Informativo' => 'Informativo',
+        'Advertencia' => 'Advertencia',
+        'Error' => 'Error',
+        'aprobacion' => 'aprobacion',
+        'correcciones' => 'correcciones',
+        'cita' => 'cita',
+        'revision' => 'revision'
+    ];
+
+    /**
      * Relación muchos a muchos con usuarios
      */
     public function usuarios()
@@ -82,19 +95,25 @@ class Notificacion extends Model
     /**
      * Crear notificación para usuario específico
      */
-    public static function crearParaUsuario($titulo, $mensaje, $tipo, $usuarioId)
+    public static function crearParaUsuario(string $titulo, string $mensaje, string $tipo, int $usuarioId)
     {
-        $notificacion = static::create([
+        // Asegurarse de que el tipo sea válido
+        if (!array_key_exists($tipo, self::TIPOS)) {
+            $tipo = 'Informativo'; // Valor por defecto si el tipo no es válido
+        }
+
+        // Crear la notificación
+        $notificacion = self::create([
             'titulo' => $titulo,
             'mensaje' => $mensaje,
-            'fecha' => now(),
-            'tipo' => $tipo,
-            'estado' => 'Pendiente'
+            'tipo' => self::TIPOS[$tipo],
+            'estado' => 'no_leida',
+            'fecha' => now()
         ]);
 
+        // Crear la relación con el usuario
         $notificacion->usuarios()->attach($usuarioId, [
-            'fecha_notificacion' => now(),
-            'estado' => 'Pendiente'
+            'fecha_notificacion' => now()
         ]);
 
         return $notificacion;

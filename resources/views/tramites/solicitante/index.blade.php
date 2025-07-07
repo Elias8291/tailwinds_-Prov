@@ -381,12 +381,18 @@
                                         Trámite Completado
                                     </span>
                                     <br>¡Su inscripción ha sido aprobada exitosamente!
-                                @elseif($tramiteEnProgreso->estado === 'Rechazado')
-                                    <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full mb-2">
-                                        <i class="fas fa-times-circle mr-1"></i>
-                                        Requiere Correcciones
+                                @elseif($tramiteEnProgreso->estado === 'Rechazado' || $tramiteEnProgreso->estado === 'Para Corrección')
+                                    <span class="inline-flex items-center px-2 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-edit mr-1"></i>
+                                        Para Corrección
                                     </span>
-                                    <br>Revise las observaciones y corrija la información
+                                    <br>Revise las observaciones y realice las correcciones necesarias
+                                @elseif($tramiteEnProgreso->estado === 'Por Cotejar')
+                                    <span class="inline-flex items-center px-2 py-1 bg-[#9d2449]/10 text-[#9d2449] text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-calendar-check mr-1"></i>
+                                        Por Cotejar
+                                    </span>
+                                    <br>Asista a su cita para el cotejo presencial de documentos
                                 @else
                                     <span class="inline-flex items-center px-2 py-1 bg-[#9d2449]/10 text-[#9d2449] text-xs font-semibold rounded-full mb-2">
                                         <div class="w-2 h-2 bg-[#9d2449] rounded-full mr-2 animate-pulse"></div>
@@ -418,7 +424,7 @@
 
                     <!-- Botón elegante mejorado -->
                     @if($tipoTramite['inscripcion'])
-                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion' && in_array($tramiteEnProgreso->estado, ['En Revision', 'Aprobado', 'Rechazado']))
+                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'inscripcion' && in_array($tramiteEnProgreso->estado, ['En Revision', 'Aprobado', 'Rechazado', 'Para Corrección', 'Por Cotejar']))
                             <!-- Trámite enviado - Mostrar enlace al estado -->
                             <a href="{{ route('tramites.solicitante.estado', $tramiteEnProgreso) }}" class="w-full bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#7a1d37] hover:to-[#9d2449] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group block">
                                 <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -511,12 +517,18 @@
                                         Renovación Completada
                                     </span>
                                     <br>¡Su renovación ha sido aprobada exitosamente!
-                                @elseif($tramiteEnProgreso->estado === 'Rechazado')
-                                    <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full mb-2">
-                                        <i class="fas fa-times-circle mr-1"></i>
-                                        Requiere Correcciones
+                                @elseif($tramiteEnProgreso->estado === 'Rechazado' || $tramiteEnProgreso->estado === 'Para Corrección')
+                                    <span class="inline-flex items-center px-2 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-edit mr-1"></i>
+                                        Para Corrección
                                     </span>
-                                    <br>Revise las observaciones y corrija la información
+                                    <br>Revise las observaciones y realice las correcciones necesarias
+                                @elseif($tramiteEnProgreso->estado === 'Por Cotejar')
+                                    <span class="inline-flex items-center px-2 py-1 bg-[#9d2449]/10 text-[#9d2449] text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-calendar-check mr-1"></i>
+                                        Por Cotejar
+                                    </span>
+                                    <br>Asista a su cita para el cotejo presencial de documentos
                                 @else
                                     <span class="inline-flex items-center px-2 py-1 bg-[#c1437a]/10 text-[#c1437a] text-xs font-semibold rounded-full mb-2">
                                         <div class="w-2 h-2 bg-[#c1437a] rounded-full mr-2 animate-pulse"></div>
@@ -545,7 +557,7 @@
 
                     <!-- Botón elegante mejorado -->
                     @if($tipoTramite['renovacion'])
-                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion' && in_array($tramiteEnProgreso->estado, ['En Revision', 'Aprobado', 'Rechazado']))
+                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'renovacion' && in_array($tramiteEnProgreso->estado, ['En Revision', 'Aprobado', 'Rechazado', 'Para Corrección', 'Por Cotejar']))
                             <!-- Trámite enviado - Mostrar enlace al estado -->
                             <a href="{{ route('tramites.solicitante.estado', $tramiteEnProgreso) }}" class="w-full bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#7a1d37] hover:to-[#9d2449] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group block">
                                 <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -639,12 +651,18 @@
                                         Actualización Completada
                                     </span>
                                     <br>¡Su actualización ha sido aprobada exitosamente!
-                                @elseif($tramiteEnProgreso->estado === 'Rechazado')
-                                    <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full mb-2">
-                                        <i class="fas fa-times-circle mr-1"></i>
-                                        Requiere Correcciones
+                                @elseif($tramiteEnProgreso->estado === 'Rechazado' || $tramiteEnProgreso->estado === 'Para Corrección')
+                                    <span class="inline-flex items-center px-2 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-edit mr-1"></i>
+                                        Para Corrección
                                     </span>
-                                    <br>Revise las observaciones y corrija la información
+                                    <br>Revise las observaciones y realice las correcciones necesarias
+                                @elseif($tramiteEnProgreso->estado === 'Por Cotejar')
+                                    <span class="inline-flex items-center px-2 py-1 bg-[#9d2449]/10 text-[#9d2449] text-xs font-semibold rounded-full mb-2">
+                                        <i class="fas fa-calendar-check mr-1"></i>
+                                        Por Cotejar
+                                    </span>
+                                    <br>Asista a su cita para el cotejo presencial de documentos
                                 @else
                                     <span class="inline-flex items-center px-2 py-1 bg-[#7a1d37]/10 text-[#7a1d37] text-xs font-semibold rounded-full mb-2">
                                         <div class="w-2 h-2 bg-[#7a1d37] rounded-full mr-2 animate-pulse"></div>
@@ -671,7 +689,7 @@
 
                     <!-- Botón elegante mejorado -->
                     @if($tipoTramite['actualizacion'])
-                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion' && in_array($tramiteEnProgreso->estado, ['En Revision', 'Aprobado', 'Rechazado']))
+                        @if($tramiteEnProgreso && strtolower($tramiteEnProgreso->tipo_tramite) === 'actualizacion' && in_array($tramiteEnProgreso->estado, ['En Revision', 'Aprobado', 'Rechazado', 'Para Corrección', 'Por Cotejar']))
                             <!-- Trámite enviado - Mostrar enlace al estado -->
                             <a href="{{ route('tramites.solicitante.estado', $tramiteEnProgreso) }}" class="w-full bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#7a1d37] hover:to-[#9d2449] text-white py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden group block">
                                 <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

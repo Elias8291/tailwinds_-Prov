@@ -1,4 +1,4 @@
-@props(['title' => 'Documentos Requeridos', 'tramite' => null, 'mostrar_navegacion' => true, 'documentos' => [], 'readonly' => false, 'en_revision' => false])
+@props(['title' => 'Documentos Requeridos', 'tramite' => null, 'mostrar_navegacion' => true, 'documentos' => [], 'readonly' => false, 'en_revision' => false, 'modo_cotejo' => false])
 <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8" 
      @if(!$readonly) x-data="documentosData()" x-init="init()" @endif>
     <!-- Encabezado con icono -->
@@ -140,7 +140,9 @@
                             <i class="fas fa-clipboard-check text-[#9d2449] mr-2"></i>
                             Revisión de Documento
                         </h5>
-                        <!-- Opción de Documento Cotejado -->
+                        
+                        @if($modo_cotejo)
+                        <!-- Opción de Documento Cotejado - Solo visible en modo cotejo -->
                         <div class="mb-4">
                             <label class="flex items-center space-x-3 cursor-pointer">
                                 <input type="checkbox" 
@@ -157,6 +159,8 @@
                                 Marcar cuando el documento físico ha sido verificado y cotejado correctamente
                             </p>
                         </div>
+                        @endif
+
                         <!-- Campo de Comentario Individual -->
                         <div class="mb-4">
                             <label for="comentario_doc_{{ $documento['id'] }}" class="block text-sm font-medium text-gray-700 mb-2">
@@ -170,6 +174,7 @@
                                           placeholder="Comentarios específicos sobre este documento...">{{ $documento['comentario_revision'] ?? '' }}</textarea>
                             </div>
                         </div>
+
                         <!-- Botones de Acción por Documento -->
                         <div class="flex flex-col sm:flex-row gap-2">
                             <button type="button" 
@@ -559,6 +564,17 @@ function documentosData() {
             } else {
                 await this.obtenerDatosTramite();
             }
+            
+            // Resetear estados de carga cuando el usuario navega
+            this.resetearEstados();
+        },
+        
+        resetearEstados() {
+            this.uploading = false;
+            this.uploadingDocId = null;
+            this.finalizando = false;
+            this.showError = false;
+            this.showSuccess = false;
         },
         async obtenerDatosTramite() {
             try {

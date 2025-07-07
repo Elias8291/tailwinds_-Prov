@@ -1897,4 +1897,289 @@ class RevisionController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Terminar la revisión digital con gestión automática de estados y notificaciones
+     */
+    public function terminarRevisionDigital(Request $request, Tramite $tramite)
+    {
+        try {
+            Log::info('=== TERMINANDO REVISIÓN DIGITAL ===', [
+                'tramite_id' => $tramite->id,
+                'usuario_id' => Auth::id(),
+                'payload' => $request->all()
+            ]);
+
+            // Validar que el usuario tenga permisos
+            if (!auth()->user()->can('revision-tramites.aprobar')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes permisos para terminar la revisión digital'
+                ], 403);
+            }
+
+            // Obtener datos del request
+            $tipoPersona = $request->input('tipo_persona', 'Física');
+            $seccionesEstados = $request->input('secciones_estados', []);
+            $todasAprobadas = $request->input('todas_aprobadas', false);
+            $hayRechazadas = $request->input('hay_rechazadas', false);
+            $accion = $request->input('accion', 'finalizar');
+
+            // Validar que todas las secciones requeridas estén revisadas
+            $seccionesRequeridas = $tipoPersona === 'Moral' ? [1, 2, 3, 4, 5, 6] : [1, 2, 6];
+            
+            foreach ($seccionesRequeridas as $seccionId) {
+                if (!isset($seccionesEstados[$seccionId]) || 
+                    !in_array($seccionesEstados[$seccionId], ['aprobado', 'rechazado'])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "La sección {$seccionId} no está completamente revisada"
+                    ], 400);
+                }
+            }
+
+            DB::beginTransaction();
+
+            // Determinar el nuevo estado y acciones según los resultados
+            if ($todasAprobadas) {
+                // Todas las secciones aprobadas - proceder a cotejo presencial
+                $this->procesarAprobacionCompleta($tramite);
+                $mensaje = 'Revisión digital aprobada. Cita de cotejo presencial agendada automáticamente.';
+                
+            } else if ($hayRechazadas) {
+                // Hay secciones rechazadas - enviar para correcciones
+                $this->procesarSolicitudCorrecciones($tramite, $seccionesEstados);
+                $mensaje = 'Revisión digital completada. Solicitante notificado para realizar correcciones.';
+                
+            } else {
+                // Caso no definido
+                throw new \Exception('Estado de revisión no válido');
+            }
+
+            // Actualizar el trámite
+            $tramite->update([
+                'estado' => $todasAprobadas ? 'Por Cotejar' : 'Para Corrección',
+                'revisado_por' => Auth::id(),
+                'fecha_revision' => now(),
+                'observaciones' => $todasAprobadas 
+                    ? 'Revisión digital aprobada. Programado para cotejo presencial.'
+                    : 'Revisión digital completada. Requiere correcciones del solicitante.'
+            ]);
+
+            // Registrar en historial
+            $this->registrarHistorial($tramite, 'revision_digital_terminada', $mensaje);
+
+            DB::commit();
+
+            Log::info('✅ Revisión digital terminada exitosamente', [
+                'tramite_id' => $tramite->id,
+                'estado_final' => $tramite->estado,
+                'todas_aprobadas' => $todasAprobadas,
+                'hay_rechazadas' => $hayRechazadas
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $mensaje,
+                'redirect_url' => route('revision.index'),
+                'estado_tramite' => $tramite->estado,
+                'todas_aprobadas' => $todasAprobadas,
+                'hay_rechazadas' => $hayRechazadas
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('❌ Error al terminar revisión digital:', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al terminar la revisión digital: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Procesar aprobación completa - crear cita de cotejo presencial
+     */
+    private function procesarAprobacionCompleta(Tramite $tramite)
+    {
+        try {
+            // Crear cita de cotejo presencial automáticamente
+            $fechaCita = now()->addDays(3); // 3 días después de la aprobación
+            
+            $cita = Cita::create([
+                'tramite_id' => $tramite->id,
+                'user_id' => $tramite->solicitante->usuario_id,
+                'fecha_hora' => $fechaCita->format('Y-m-d 09:00:00'),
+                'estado' => 'pendiente',
+                'motivo' => 'Cotejo físico de documentos - Trámite aprobado digitalmente',
+                'notas' => 'Cita agendada automáticamente tras aprobación digital'
+            ]);
+
+            // Crear notificación para el solicitante
+            $this->crearNotificacion(
+                $tramite->solicitante->usuario_id,
+                'Cita Agendada',
+                'Cita agendada para el ' . $fechaCita->format('d/m/Y') . ' a las 09:00 horas.',
+                'cita',
+                $tramite->id
+            );
+
+            Log::info('✅ Cita de cotejo presencial creada automáticamente', [
+                'tramite_id' => $tramite->id,
+                'cita_id' => $cita->id,
+                'fecha_cita' => $fechaCita->format('Y-m-d H:i')
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error al crear cita de cotejo presencial:', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Procesar solicitud de correcciones con límite de tiempo
+     */
+    private function procesarSolicitudCorrecciones(Tramite $tramite, array $seccionesEstados)
+    {
+        try {
+            // Establecer fecha límite para correcciones (2 días)
+            $fechaLimite = now()->addDays(2);
+            
+            // Actualizar el trámite con fecha límite
+            $tramite->update([
+                'fecha_limite_correcciones' => $fechaLimite
+            ]);
+
+            // Obtener secciones rechazadas para el mensaje
+            $seccionesRechazadas = [];
+            foreach ($seccionesEstados as $seccionId => $estado) {
+                if ($estado === 'rechazado') {
+                    $seccionesRechazadas[] = $this->obtenerNombreSeccion($seccionId);
+                }
+            }
+
+            // Crear notificación para el solicitante
+            $this->crearNotificacion(
+                $tramite->solicitante->usuario_id,
+                'Revisa tu trámite',
+                'Revisa tu trámite. Fecha límite: ' . $fechaLimite->format('d/m/Y'),
+                'revision',
+                $tramite->id
+            );
+
+            // Disparar evento para notificaciones adicionales
+            event(new SolicitudCorreccionesEvent($tramite, $seccionesRechazadas, $fechaLimite));
+
+            Log::info('✅ Solicitud de correcciones procesada', [
+                'tramite_id' => $tramite->id,
+                'fecha_limite' => $fechaLimite->format('Y-m-d H:i'),
+                'secciones_rechazadas' => $seccionesRechazadas
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error al procesar solicitud de correcciones:', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Crear notificación para el usuario
+     */
+    private function crearNotificacion($userId, $titulo, $mensaje, $tipo, $tramiteId = null)
+    {
+        try {
+            // Usar el método estático del modelo para crear la notificación
+            $notificacion = Notificacion::crearParaUsuario($titulo, $mensaje, $tipo, $userId);
+
+            Log::info('✅ Notificación creada exitosamente', [
+                'usuario_id' => $userId,
+                'notificacion_id' => $notificacion->id,
+                'tipo' => $tipo,
+                'titulo' => $titulo
+            ]);
+
+            return $notificacion;
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error al crear notificación:', [
+                'usuario_id' => $userId,
+                'error' => $e->getMessage(),
+                'titulo' => $titulo,
+                'tipo' => $tipo
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Obtener nombre de sección por ID
+     */
+    private function obtenerNombreSeccion($seccionId)
+    {
+        $nombres = [
+            1 => 'Datos Generales',
+            2 => 'Domicilio',
+            3 => 'Constitución',
+            4 => 'Accionistas',
+            5 => 'Apoderado Legal',
+            6 => 'Documentos'
+        ];
+
+        return $nombres[$seccionId] ?? "Sección {$seccionId}";
+    }
+
+    /**
+     * Muestra la vista de cotejo presencial
+     */
+    public function cotejo_presencial(Request $request, $tramite)
+    {
+        $tramite = Tramite::with(['solicitante', 'documentosSolicitante.documento'])->findOrFail($tramite);
+        
+        // Obtener documentos
+        $documentos = $tramite->documentosSolicitante()
+            ->with(['documento', 'versiones'])
+            ->get()
+            ->map(function($doc) {
+                return [
+                    'id' => $doc->id,
+                    'nombre' => $doc->documento->nombre,
+                    'descripcion' => $doc->documento->descripcion,
+                    'estado' => $doc->estado,
+                    'ruta_archivo' => $doc->ruta_archivo,
+                    'fecha_entrega' => $doc->fecha_entrega,
+                    'observaciones' => $doc->observaciones,
+                    'documento_id' => $doc->documento_id,
+                    'documento_cotejado' => $doc->documento_cotejado,
+                    'comentario_revision' => $doc->comentario_revision
+                ];
+            })
+            ->toArray();
+
+        // Obtener revisiones existentes
+        $revisionesExistentes = SeccionRevision::where('tramite_id', $tramite->id)
+            ->get()
+            ->keyBy('seccion_id')
+            ->map(function($revision) {
+                return [
+                    'estado' => $revision->estado,
+                    'comentario' => $revision->comentario,
+                    'observaciones' => $revision->observaciones
+                ];
+            })
+            ->toArray();
+
+        return view('revision.cotejo-presencial', compact('tramite', 'documentos', 'revisionesExistentes'));
+    }
 } 

@@ -11,6 +11,39 @@
             />
         </div>
 
+        <!-- Alerta de Verificación -->
+        <div class="bg-[#9d2449]/10 border border-[#9d2449]/20 rounded-xl p-6">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-shield-check text-[#9d2449] text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-[#9d2449]">Verificación de Documentos Físicos</h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Verifique cuidadosamente cada documento físico. Preste especial atención a:
+                    </p>
+                    <ul class="mt-2 space-y-1 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-[#9d2449] mr-2"></i>
+                            Calidad del papel y textura
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-[#9d2449] mr-2"></i>
+                            Sellos y firmas originales
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-[#9d2449] mr-2"></i>
+                            Elementos de seguridad (hologramas, marcas de agua)
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-[#9d2449] mr-2"></i>
+                            Coincidencia exacta con la versión digital
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <!-- Sección de Documentos para Cotejo -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
             <div x-data="{ 
@@ -62,6 +95,7 @@
                                 ];
                             })->toArray(),
                             'readonly' => true,
+                            'en_revision' => true,
                             'modo_cotejo' => true
                         ])
                     </div>
@@ -81,5 +115,197 @@
 
     @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    @endpush
+
+    @push('scripts')
+    <script>
+        // Función para aprobar documento después del cotejo
+        async function aprobarDocumento(documentoId) {
+            const cotejado = document.getElementById(`cotejado_${documentoId}`).checked;
+            const comentario = document.getElementById(`comentario_doc_${documentoId}`).value;
+            const coincideDigital = document.getElementById(`coincide_digital_${documentoId}`).checked;
+            const coincideFisico = document.getElementById(`coincide_fisico_${documentoId}`).checked;
+
+            if (!cotejado) {
+                alert('Debe marcar el documento como cotejado físicamente antes de aprobarlo.');
+                return;
+            }
+
+            if (!coincideDigital || !coincideFisico) {
+                alert('Debe verificar que el documento coincide tanto con la versión digital como con los requisitos físicos.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/revision/{{ $tramite->id }}/documento/${documentoId}/aprobar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        comentario: comentario || 'Documento verificado y cotejado correctamente',
+                        documento_cotejado: true,
+                        cotejo_presencial: true,
+                        observaciones_cotejo: `Documento verificado físicamente. ${comentario}`,
+                        fecha_cotejo: new Date().toISOString()
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    actualizarEstadoDocumento(documentoId, 'Aprobado', comentario);
+                    mostrarNotificacion('success', 'Documento aprobado y cotejado correctamente');
+                } else {
+                    mostrarNotificacion('error', data.message || 'Error al aprobar el documento');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('error', 'Error de conexión al aprobar el documento');
+            }
+        }
+
+        // Función para rechazar documento
+        async function rechazarDocumento(documentoId) {
+            const comentario = document.getElementById(`comentario_doc_${documentoId}`).value;
+            const coincideDigital = document.getElementById(`coincide_digital_${documentoId}`).checked;
+            const coincideFisico = document.getElementById(`coincide_fisico_${documentoId}`).checked;
+            
+            if (!comentario || comentario.trim().length < 10) {
+                mostrarNotificacion('error', 'Debe proporcionar un comentario detallado explicando por qué se rechaza el documento');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/revision/{{ $tramite->id }}/documento/${documentoId}/rechazar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        comentario: comentario,
+                        documento_cotejado: false,
+                        cotejo_presencial: false,
+                        observaciones_cotejo: `Documento rechazado en cotejo físico. ${comentario}`,
+                        fecha_cotejo: new Date().toISOString()
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    actualizarEstadoDocumento(documentoId, 'Rechazado', comentario);
+                    mostrarNotificacion('success', 'Documento rechazado correctamente');
+                } else {
+                    mostrarNotificacion('error', data.message || 'Error al rechazar el documento');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('error', 'Error de conexión al rechazar el documento');
+            }
+        }
+
+        // Función para mostrar notificaciones
+        function mostrarNotificacion(tipo, mensaje) {
+            const notificacion = document.createElement('div');
+            notificacion.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
+                tipo === 'success' ? 'bg-green-100 border border-green-200 text-green-800' : 'bg-red-100 border border-red-200 text-red-800'
+            }`;
+            
+            notificacion.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} mr-2"></i>
+                    <span>${mensaje}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notificacion);
+            
+            setTimeout(() => {
+                notificacion.remove();
+            }, 5000);
+        }
+
+        // Función para actualizar el estado visual del documento
+        function actualizarEstadoDocumento(documentoId, nuevoEstado, comentario) {
+            const documentoContainer = document.getElementById(`cotejado_${documentoId}`).closest('.bg-white');
+            
+            if (!documentoContainer) return;
+
+            // Actualizar clases del contenedor
+            documentoContainer.classList.remove('border-gray-300', 'border-blue-300', 'border-red-300', 'border-green-300');
+            documentoContainer.classList.remove('bg-gray-50', 'bg-blue-50', 'bg-red-50', 'bg-green-50');
+            
+            if (nuevoEstado === 'Aprobado') {
+                documentoContainer.classList.add('border-green-300', 'bg-green-50');
+            } else if (nuevoEstado === 'Rechazado') {
+                documentoContainer.classList.add('border-red-300', 'bg-red-50');
+            }
+            
+            // Actualizar badge de estado
+            const estadoSpan = documentoContainer.querySelector('.px-3.py-1');
+            if (estadoSpan) {
+                estadoSpan.className = `px-3 py-1 ${
+                    nuevoEstado === 'Aprobado' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                } text-xs font-medium rounded-full`;
+                estadoSpan.innerHTML = `<i class="fas ${
+                    nuevoEstado === 'Aprobado' ? 'fa-check' : 'fa-times'
+                } mr-1"></i>${nuevoEstado}`;
+            }
+
+            // Actualizar controles
+            const checkbox = document.getElementById(`cotejado_${documentoId}`);
+            const textarea = document.getElementById(`comentario_doc_${documentoId}`);
+            const botonesAccion = documentoContainer.querySelectorAll('button[onclick*="aprobarDocumento"], button[onclick*="rechazarDocumento"]');
+            
+            if (checkbox) checkbox.disabled = true;
+            if (textarea) {
+                textarea.value = comentario;
+                textarea.disabled = true;
+            }
+            
+            botonesAccion.forEach(boton => {
+                boton.disabled = true;
+                boton.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+        }
+
+        // Agregar checkboxes de verificación al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const documentos = document.querySelectorAll('[id^="cotejado_"]');
+            documentos.forEach(doc => {
+                const documentoId = doc.id.split('_')[1];
+                const container = doc.closest('.bg-white');
+                if (!container) return;
+
+                const checkboxesContainer = document.createElement('div');
+                checkboxesContainer.className = 'mt-4 space-y-2 border-t pt-4';
+                checkboxesContainer.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="coincide_digital_${documentoId}" class="rounded text-[#9d2449] focus:ring-[#9d2449]">
+                        <label for="coincide_digital_${documentoId}" class="text-sm text-gray-700">
+                            Coincide con la versión digital
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="coincide_fisico_${documentoId}" class="rounded text-[#9d2449] focus:ring-[#9d2449]">
+                        <label for="coincide_fisico_${documentoId}" class="text-sm text-gray-700">
+                            Cumple con los requisitos físicos (sellos, firmas, etc.)
+                        </label>
+                    </div>
+                `;
+
+                // Insertar antes del área de comentarios
+                const comentariosArea = container.querySelector('textarea');
+                if (comentariosArea) {
+                    comentariosArea.parentNode.insertBefore(checkboxesContainer, comentariosArea);
+                }
+            });
+        });
+    </script>
     @endpush
 @endsection 

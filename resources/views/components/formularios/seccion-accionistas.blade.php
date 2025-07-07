@@ -353,15 +353,16 @@
             <div class="flex justify-between pt-6 border-t border-gray-200">
                 <button type="button" 
                         onclick="navegarAnteriorAccionistas()"
-                        class="flex items-center px-6 py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-200">
+                        class="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Anterior
                 </button>
                 <button type="submit" 
                         :disabled="loading || totalPorcentaje !== 100"
-                        :class="loading || totalPorcentaje !== 100 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#8a203f] hover:to-[#6d1a32]'"
-                        class="flex items-center px-6 py-3 text-white rounded-lg transition duration-200 shadow-md hover:shadow-lg">
+                        :class="loading || totalPorcentaje !== 100 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-gradient-to-r from-[#9d2449] to-[#8a203f] hover:from-[#8a203f] hover:to-[#7a1c38]'"
+                        class="px-8 py-3 text-white rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#9d2449] focus:ring-offset-2">
                     <span x-show="!loading">
+                        <i class="fas fa-save mr-2"></i>
                         Guardar y Continuar
                         <i class="fas fa-arrow-right ml-2"></i>
                     </span>
@@ -399,6 +400,15 @@ function accionistasData() {
                 this.tramiteId = tramite.id;
                 await this.cargarDatosDesdeTramite(tramite.id);
             }
+            
+            // Resetear estados de carga cuando el usuario navega
+            this.resetearEstados();
+        },
+        
+        resetearEstados() {
+            this.loading = false;
+            this.showError = false;
+            this.showSuccess = false;
         },
         async cargarDatosDesdeObjeto(datosAccionistas) {
             try {

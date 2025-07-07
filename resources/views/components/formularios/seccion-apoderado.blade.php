@@ -402,6 +402,15 @@ function apoderadoData() {
                 await this.cargarDatosDesdeTramite(tramite.id);
             } else {
             }
+            
+            // Resetear estados de carga cuando el usuario navega
+            this.resetearEstados();
+        },
+        
+        resetearEstados() {
+            this.loading = false;
+            this.showError = false;
+            this.showSuccess = false;
         },
         async cargarDatosDesdeObjeto(datosApoderado) {
             try {

@@ -12,15 +12,30 @@ class Tramite extends Model
 
     protected $table = 'tramite';
 
+    /**
+     * Estados posibles para un trámite
+     */
+    const ESTADOS = [
+        'Pendiente' => 'Pendiente',
+        'En Revision' => 'En Revision',
+        'Aprobado' => 'Aprobado',
+        'Rechazado' => 'Rechazado',
+        'Por Cotejar' => 'Por Cotejar',
+        'Cancelado' => 'Cancelado'
+    ];
+
     protected $fillable = [
         'solicitante_id',
         'tipo_tramite',
         'estado',
+        'motivo_cancelacion',
+        'fecha_cancelacion',
         'progreso_tramite',
         'revisado_por',
         'fecha_revision',
         'fecha_inicio',
         'fecha_finalizacion',
+        'fecha_limite_correcciones',
         'observaciones',
     ];
 
@@ -28,6 +43,7 @@ class Tramite extends Model
         'fecha_revision' => 'datetime',
         'fecha_inicio' => 'datetime',
         'fecha_finalizacion' => 'datetime',
+        'fecha_limite_correcciones' => 'datetime',
         'progreso_tramite' => 'integer',
     ];
 
@@ -202,7 +218,7 @@ class Tramite extends Model
      */
     public function puedeSerEditado()
     {
-        return in_array($this->estado, ['Pendiente', 'Rechazado']);
+        return in_array($this->estado, ['Pendiente', 'Rechazado', 'Para Corrección']);
     }
 
     /**
@@ -238,6 +254,7 @@ class Tramite extends Model
             'Aprobado' => 'green',
             'Rechazado' => 'red',
             'Por Cotejar' => 'purple',
+            'Para Corrección' => 'orange',
             default => 'gray'
         };
     }
@@ -334,5 +351,36 @@ class Tramite extends Model
                 'estado' => 'Pendiente'
             ]);
         }
+    }
+
+    /**
+     * Obtiene las citas asociadas al trámite
+     */
+    public function citas()
+    {
+        return $this->hasMany(Cita::class);
+    }
+
+    /**
+     * Cancela el trámite y registra el motivo
+     */
+    public function cancelar($motivo = null)
+    {
+        $this->update([
+            'estado' => self::ESTADOS['Cancelado'],
+            'motivo_cancelacion' => $motivo,
+            'fecha_cancelacion' => now()
+        ]);
+
+        // Cancelar la cita pendiente si existe
+        $citaPendiente = $this->citas()->where('estado', 'pendiente')->first();
+        if ($citaPendiente) {
+            $citaPendiente->update([
+                'estado' => 'cancelada',
+                'motivo_cancelacion' => $motivo
+            ]);
+        }
+
+        return $this;
     }
 } 

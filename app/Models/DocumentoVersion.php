@@ -13,8 +13,14 @@ class DocumentoVersion extends Model
 
     protected $fillable = [
         'documento_solicitante_id',
-        'archivo',
-        'comentarios'
+        'version',
+        'ruta_archivo',
+        'fecha_subida',
+        'observaciones'
+    ];
+
+    protected $casts = [
+        'fecha_subida' => 'date'
     ];
 
     /**

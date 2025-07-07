@@ -276,17 +276,32 @@ function notificaciones() {
         async cargarNotificaciones() {
             this.cargando = true;
             try {
-                const response = await fetch('{{ route("notificaciones.header") }}', {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
-                
-                if (response.ok) {
+                // Usar safeFetch si está disponible
+                if (typeof window.safeFetch === 'function') {
+                    const response = await window.safeFetch('{{ route("notificaciones.header") }}');
                     const data = await response.json();
                     this.notificaciones = data.notificaciones;
                     this.contadorNoLeidas = data.contador_no_leidas;
+                } else {
+                    // Fallback con verificación segura del token CSRF
+                    const csrfToken = this.getCsrfToken();
+                    const headers = {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    };
+                    
+                    if (csrfToken) {
+                        headers['X-CSRF-TOKEN'] = csrfToken;
+                    }
+                    
+                    const response = await fetch('{{ route("notificaciones.header") }}', {
+                        headers: headers
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.notificaciones = data.notificaciones;
+                        this.contadorNoLeidas = data.contador_no_leidas;
+                    }
                 }
             } catch (error) {
                 console.error('Error al cargar notificaciones:', error);
@@ -297,20 +312,39 @@ function notificaciones() {
         
         async cargarContador() {
             try {
-                const response = await fetch('{{ route("notificaciones.contador") }}', {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
-                
-                if (response.ok) {
+                // Usar safeFetch si está disponible
+                if (typeof window.safeFetch === 'function') {
+                    const response = await window.safeFetch('{{ route("notificaciones.contador") }}');
                     const data = await response.json();
                     this.contadorNoLeidas = data.contador;
+                } else {
+                    // Fallback con verificación segura del token CSRF
+                    const csrfToken = this.getCsrfToken();
+                    const headers = {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    };
+                    
+                    if (csrfToken) {
+                        headers['X-CSRF-TOKEN'] = csrfToken;
+                    }
+                    
+                    const response = await fetch('{{ route("notificaciones.contador") }}', {
+                        headers: headers
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.contadorNoLeidas = data.contador;
+                    }
                 }
             } catch (error) {
                 console.error('Error al cargar contador:', error);
             }
+        },
+        
+        getCsrfToken() {
+            const metaTag = document.querySelector('meta[name="csrf-token"]');
+            return metaTag ? metaTag.getAttribute('content') : null;
         },
         
         async toggleNotificaciones() {
@@ -323,21 +357,44 @@ function notificaciones() {
         
         async marcarComoLeida(notificacionId) {
             try {
-                const response = await fetch(`{{ url('notificaciones') }}/${notificacionId}/marcar-leida`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                // Usar safeFetch si está disponible
+                if (typeof window.safeFetch === 'function') {
+                    const response = await window.safeFetch(`{{ url('notificaciones') }}/${notificacionId}/marcar-leida`, {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        // Actualizar la notificación como leída
+                        const notificacion = this.notificaciones.find(n => n.id === notificacionId);
+                        if (notificacion && !notificacion.leida) {
+                            notificacion.leida = true;
+                            this.contadorNoLeidas = Math.max(0, this.contadorNoLeidas - 1);
+                        }
                     }
-                });
-                
-                if (response.ok) {
-                    // Actualizar la notificación como leída
-                    const notificacion = this.notificaciones.find(n => n.id === notificacionId);
-                    if (notificacion && !notificacion.leida) {
-                        notificacion.leida = true;
-                        this.contadorNoLeidas = Math.max(0, this.contadorNoLeidas - 1);
+                } else {
+                    // Fallback con verificación segura del token CSRF
+                    const csrfToken = this.getCsrfToken();
+                    const headers = {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    };
+                    
+                    if (csrfToken) {
+                        headers['X-CSRF-TOKEN'] = csrfToken;
+                    }
+                    
+                    const response = await fetch(`{{ url('notificaciones') }}/${notificacionId}/marcar-leida`, {
+                        method: 'POST',
+                        headers: headers
+                    });
+                    
+                    if (response.ok) {
+                        // Actualizar la notificación como leída
+                        const notificacion = this.notificaciones.find(n => n.id === notificacionId);
+                        if (notificacion && !notificacion.leida) {
+                            notificacion.leida = true;
+                            this.contadorNoLeidas = Math.max(0, this.contadorNoLeidas - 1);
+                        }
                     }
                 }
             } catch (error) {
@@ -347,21 +404,43 @@ function notificaciones() {
         
         async marcarTodasComoLeidas() {
             try {
-                const response = await fetch('{{ route("notificaciones.marcar-todas-leidas") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
-                
-                if (response.ok) {
-                    // Marcar todas como leídas
-                    this.notificaciones.forEach(notificacion => {
-                        notificacion.leida = true;
+                // Usar safeFetch si está disponible
+                if (typeof window.safeFetch === 'function') {
+                    const response = await window.safeFetch('{{ route("notificaciones.marcar-todas-leidas") }}', {
+                        method: 'POST'
                     });
-                    this.contadorNoLeidas = 0;
+                    
+                    if (response.ok) {
+                        // Marcar todas como leídas
+                        this.notificaciones.forEach(notificacion => {
+                            notificacion.leida = true;
+                        });
+                        this.contadorNoLeidas = 0;
+                    }
+                } else {
+                    // Fallback con verificación segura del token CSRF
+                    const csrfToken = this.getCsrfToken();
+                    const headers = {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    };
+                    
+                    if (csrfToken) {
+                        headers['X-CSRF-TOKEN'] = csrfToken;
+                    }
+                    
+                    const response = await fetch('{{ route("notificaciones.marcar-todas-leidas") }}', {
+                        method: 'POST',
+                        headers: headers
+                    });
+                    
+                    if (response.ok) {
+                        // Marcar todas como leídas
+                        this.notificaciones.forEach(notificacion => {
+                            notificacion.leida = true;
+                        });
+                        this.contadorNoLeidas = 0;
+                    }
                 }
             } catch (error) {
                 console.error('Error al marcar todas como leídas:', error);

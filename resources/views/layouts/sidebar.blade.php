@@ -156,29 +156,47 @@
                     <!-- Notificaciones -->
                     <a href="{{ route('notificaciones.index') }}" class="group/item flex items-center min-w-[250px] px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
                         {{ request()->routeIs('notificaciones.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}"
-                        x-data="{ 
+                        x-data="{
                             contador: 0,
+                            cargando: false,
+                            intervalo: null,
+
+                            init() {
+                                this.cargarContador();
+                                this.intervalo = setInterval(() => this.cargarContador(), 30000);
+                            },
+
+                            destroy() {
+                                if (this.intervalo) {
+                                    clearInterval(this.intervalo);
+                                }
+                            },
+
                             async cargarContador() {
+                                if (this.cargando) return;
+                                this.cargando = true;
+
                                 try {
-                                    const response = await fetch('{{ route('notificaciones.contador') }}', {
-                                        headers: {
-                                            'X-Requested-With': 'XMLHttpRequest',
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').getAttribute('content')
-                                        }
-                                    });
+                                    const token = document.querySelector('meta[name=csrf-token]');
+                                    const headers = {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'Accept': 'application/json'
+                                    };
+                                    if (token) headers['X-CSRF-TOKEN'] = token.getAttribute('content');
+
+                                    const response = await fetch('/notificaciones/contador', { headers });
+
                                     if (response.ok) {
                                         const data = await response.json();
                                         this.contador = data.contador;
                                     }
                                 } catch (error) {
                                     console.error('Error al cargar contador:', error);
+                                } finally {
+                                    this.cargando = false;
                                 }
                             }
-                        }"
-                        x-init="
-                            cargarContador();
-                            setInterval(() => cargarContador(), 30000);
-                        ">
+                        }">
                         <div class="relative">
                             <svg class="{{ request()->routeIs('notificaciones.*') ? 'text-primary' : 'text-gray-400 group-hover/item:text-primary' }} flex-shrink-0 w-6 h-6 transition-all duration-200 group-hover/item:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -428,29 +446,47 @@
                     <!-- Notificaciones en móvil -->
                     <a href="{{ route('notificaciones.index') }}" @click="sidebarOpen = false" class="group flex items-center px-3 py-3 text-base font-medium rounded-xl transition-all duration-200 
                         {{ request()->routeIs('notificaciones.*') ? 'bg-primary-50 text-primary border-l-4 border-primary shadow-sm' : 'text-gray-700 hover:bg-white hover:shadow-md hover:text-primary' }}"
-                        x-data="{ 
+                        x-data="{
                             contador: 0,
+                            cargando: false,
+                            intervalo: null,
+
+                            init() {
+                                this.cargarContador();
+                                this.intervalo = setInterval(() => this.cargarContador(), 30000);
+                            },
+
+                            destroy() {
+                                if (this.intervalo) {
+                                    clearInterval(this.intervalo);
+                                }
+                            },
+
                             async cargarContador() {
+                                if (this.cargando) return;
+                                this.cargando = true;
+
                                 try {
-                                    const response = await fetch('{{ route('notificaciones.contador') }}', {
-                                        headers: {
-                                            'X-Requested-With': 'XMLHttpRequest',
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').getAttribute('content')
-                                        }
-                                    });
+                                    const token = document.querySelector('meta[name=csrf-token]');
+                                    const headers = {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'Accept': 'application/json'
+                                    };
+                                    if (token) headers['X-CSRF-TOKEN'] = token.getAttribute('content');
+
+                                    const response = await fetch('/notificaciones/contador', { headers });
+
                                     if (response.ok) {
                                         const data = await response.json();
                                         this.contador = data.contador;
                                     }
                                 } catch (error) {
                                     console.error('Error al cargar contador:', error);
+                                } finally {
+                                    this.cargando = false;
                                 }
                             }
-                        }"
-                        x-init="
-                            cargarContador();
-                            setInterval(() => cargarContador(), 30000);
-                        ">
+                        }">
                         <div class="relative mr-4">
                             <svg class="{{ request()->routeIs('notificaciones.*') ? 'text-primary' : 'text-gray-400 group-hover:text-primary' }} flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />

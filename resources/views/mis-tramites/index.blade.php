@@ -32,9 +32,15 @@
                     </div>
                     <div class="text-center bg-white/10 rounded-lg p-3">
                         <div class="text-2xl font-bold text-blue-300">
-                            {{ $tramites->where('estado', 'En Revision')->count() }}
+                            {{ $tramites->whereIn('estado', ['En Revision', 'Por Cotejar'])->count() }}
                         </div>
-                        <div class="text-xs text-white/80">En Revisión</div>
+                        <div class="text-xs text-white/80">En Proceso</div>
+                    </div>
+                    <div class="text-center bg-white/10 rounded-lg p-3">
+                        <div class="text-2xl font-bold text-orange-300">
+                            {{ $tramites->whereIn('estado', ['Rechazado', 'Para Corrección'])->count() }}
+                        </div>
+                        <div class="text-xs text-white/80">Requieren Atención</div>
                     </div>
                 </div>
             </div>
@@ -57,6 +63,8 @@
                             <option value="En Revision" {{ request('estado') == 'En Revision' ? 'selected' : '' }}>En Revisión</option>
                             <option value="Aprobado" {{ request('estado') == 'Aprobado' ? 'selected' : '' }}>Aprobado</option>
                             <option value="Rechazado" {{ request('estado') == 'Rechazado' ? 'selected' : '' }}>Rechazado</option>
+                            <option value="Por Cotejar" {{ request('estado') == 'Por Cotejar' ? 'selected' : '' }}>Por Cotejar</option>
+                            <option value="Para Corrección" {{ request('estado') == 'Para Corrección' ? 'selected' : '' }}>Para Corrección</option>
                         </select>
                     </div>
 
@@ -180,13 +188,30 @@
                                             {{ $tramite->estado == 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
                                                ($tramite->estado == 'En Revision' ? 'bg-blue-100 text-blue-800' : 
                                                ($tramite->estado == 'Aprobado' ? 'bg-green-100 text-green-800' : 
-                                               ($tramite->estado == 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-purple-100 text-purple-800'))) }}">
+                                               ($tramite->estado == 'Rechazado' ? 'bg-red-100 text-red-800' :
+                                               ($tramite->estado == 'Por Cotejar' ? 'bg-purple-100 text-purple-800' : 
+                                               ($tramite->estado == 'Para Corrección' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800'))))) }}">
                                             <i class="fas {{ $tramite->estado == 'Pendiente' ? 'fa-clock' : 
                                                            ($tramite->estado == 'En Revision' ? 'fa-tasks' : 
                                                            ($tramite->estado == 'Aprobado' ? 'fa-check' : 
-                                                           ($tramite->estado == 'Rechazado' ? 'fa-times' : 'fa-question'))) }} mr-1.5"></i>
+                                                           ($tramite->estado == 'Rechazado' ? 'fa-times' :
+                                                           ($tramite->estado == 'Por Cotejar' ? 'fa-calendar-check' : 
+                                                           ($tramite->estado == 'Para Corrección' ? 'fa-edit' : 'fa-question'))))) }} mr-1.5"></i>
                                             {{ $tramite->estado }}
+                                            @if($tramite->estado == 'Por Cotejar' && $tramite->cita)
+                                                <span class="ml-1 text-purple-700">
+                                                    ({{ $tramite->cita->fecha_hora->format('d/m/Y') }})
+                                                </span>
+                                            @endif
                                         </span>
+                                        @if($tramite->estado == 'Por Cotejar' && $tramite->cita)
+                                            <div class="mt-1.5">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-800">
+                                                    <i class="fas fa-clock mr-1"></i>
+                                                    {{ $tramite->cita->fecha_hora->format('H:i') }} hrs
+                                                </span>
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center space-x-3">

@@ -559,4 +559,119 @@ class CitaController extends Controller
 
         return view('citas.dashboard-cotejo', compact('citasHoy', 'citasProximas'));
     }
+
+    public function validar(Cita $cita)
+    {
+        return view('citas.validar', [
+            'cita' => $cita->load(['tramite.solicitante'])
+        ]);
+    }
+
+    /**
+     * Obtiene el siguiente día hábil disponible para citas
+     */
+    public function siguienteDiaDisponible(Request $request, $tramiteId)
+    {
+        try {
+            // Obtener el trámite
+            $tramite = Tramite::findOrFail($tramiteId);
+            
+            // Obtener la fecha actual
+            $fecha = now()->addDay();
+            
+            // Buscar el siguiente día hábil disponible
+            while (true) {
+                // Verificar si es fin de semana
+                if ($fecha->isWeekend()) {
+                    $fecha->addDay();
+                    continue;
+                }
+                
+                // Verificar si es día inhábil
+                $diaInhabil = DiasInhabiles::where(function($query) use ($fecha) {
+                    $query->where('fecha_inicio', '<=', $fecha)
+                          ->where(function($q) use ($fecha) {
+                              $q->where('fecha_fin', '>=', $fecha)
+                                ->orWhereNull('fecha_fin');
+                          });
+                })->exists();
+                
+                if ($diaInhabil) {
+                    $fecha->addDay();
+                    continue;
+                }
+                
+                // Verificar disponibilidad de horarios
+                $citasExistentes = Cita::whereDate('fecha_hora', $fecha->format('Y-m-d'))->count();
+                if ($citasExistentes < 10) { // Máximo 10 citas por día
+                    // Encontramos un día disponible
+                    break;
+                }
+                
+                $fecha->addDay();
+            }
+            
+            // Asignar hora (9:00 AM)
+            $fechaHora = $fecha->setHour(9)->setMinute(0)->setSecond(0);
+            
+            return response()->json([
+                'success' => true,
+                'fecha_disponible' => $fechaHora->format('Y-m-d H:i:s'),
+                'message' => 'Fecha disponible encontrada'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al buscar fecha disponible: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reagendar una cita existente
+     */
+    public function reagendar(Request $request, Tramite $tramite)
+    {
+        // Verificar si el trámite ya tuvo una reagendación previa
+        $citasAnteriores = $tramite->citas()
+            ->where('motivo_reagendacion', 'identificacion_no_coincide')
+            ->count();
+
+        if ($citasAnteriores > 0) {
+            // Ya tuvo una reagendación previa, cancelar el trámite
+            return redirect()->route('tramites.cancelar', [
+                'tramite' => $tramite->id,
+                'motivo' => 'excede_intentos_identificacion'
+            ]);
+        }
+
+        // Obtener la cita actual
+        $citaActual = $tramite->citas()->where('estado', 'pendiente')->first();
+        
+        if ($citaActual) {
+            // Marcar la cita actual como reagendada
+            $citaActual->update([
+                'estado' => 'reagendada',
+                'motivo_reagendacion' => 'identificacion_no_coincide'
+            ]);
+        }
+
+        // Redirigir a la vista de reagendación
+        return redirect()->route('citas.reagendada', [
+            'tramite' => $tramite->id,
+            'motivo' => 'La identificación presentada no coincide con el documento digital'
+        ])->with('warning', 'Por favor, seleccione una nueva fecha para su cita. Recuerde traer una identificación oficial válida que coincida con la registrada en el sistema.');
+    }
+
+    /**
+     * Muestra la vista de reagendación de cita
+     */
+    public function mostrarReagendacion(Request $request, Tramite $tramite)
+    {
+        return view('citas.reagendada', [
+            'tramite' => $tramite,
+            'motivo' => $request->get('motivo')
+        ]);
+    }
 } 

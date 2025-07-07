@@ -111,12 +111,15 @@
                                 contador: 0,
                                 async cargarContador() {
                                     try {
-                                        const response = await fetch('{{ route('notificaciones.contador') }}', {
-                                            headers: {
-                                                'X-Requested-With': 'XMLHttpRequest',
-                                                'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').getAttribute('content')
-                                            }
-                                        });
+                                        const token = document.querySelector('meta[name=csrf-token]');
+                                        const headers = {
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                            'Accept': 'application/json'
+                                        };
+                                        if (token) headers['X-CSRF-TOKEN'] = token.getAttribute('content');
+
+                                        const response = await fetch('{{ route('notificaciones.contador') }}', { headers });
+                                        
                                         if (response.ok) {
                                             const data = await response.json();
                                             this.contador = data.contador;

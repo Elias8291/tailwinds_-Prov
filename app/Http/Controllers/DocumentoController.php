@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Documento;
 use App\Models\SeccionTramite;
 use Illuminate\Http\Request;
+use App\Models\DocumentoSolicitante;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Crypt;
 
 class DocumentoController extends Controller
 {
@@ -198,5 +201,32 @@ class DocumentoController extends Controller
             'document.mimes' => 'El documento debe ser PDF, PNG, JPG o JPEG.',
             'document.max' => 'El documento no debe exceder 5MB.',
         ])->validate();
+    }
+
+    public function verDocumento(DocumentoSolicitante $documentoSolicitante)
+    {
+        // Verificar permisos
+        $this->authorize('view', $documentoSolicitante);
+
+        try {
+            // Desencriptar la ruta del archivo
+            $rutaDesencriptada = Crypt::decryptString($documentoSolicitante->ruta_archivo);
+            
+            // Verificar que el archivo existe
+            if (!Storage::exists($rutaDesencriptada)) {
+                return response()->json(['error' => 'El archivo no existe'], 404);
+            }
+
+            // Obtener el tipo de contenido
+            $mimeType = Storage::mimeType($rutaDesencriptada);
+
+            // Servir el archivo
+            return response()->file(
+                Storage::path($rutaDesencriptada),
+                ['Content-Type' => $mimeType]
+            );
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            return response()->json(['error' => 'Error al desencriptar la ruta del archivo'], 400);
+        }
     }
 } 

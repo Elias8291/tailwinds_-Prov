@@ -282,11 +282,15 @@ class TramiteSolicitanteController extends Controller
         }
 
         // Buscar un trámite en progreso del solicitante con las relaciones necesarias
+        // Incluir también trámites "Para Corrección" y "Rechazado" para que se muestren en el dashboard
         $tramite = Tramite::with([
-            'detalleTramite.direccion.asentamiento.localidad.municipio.estado'
+            'detalleTramite.direccion.asentamiento.localidad.municipio.estado',
+            'cita' => function($query) {
+                $query->whereIn('estado', ['pendiente', 'confirmada']);
+            }
         ])
         ->where('solicitante_id', $solicitante->id)
-        ->whereIn('estado', ['Pendiente', 'En Revision'])
+        ->whereIn('estado', ['Pendiente', 'En Revision', 'Para Corrección', 'Rechazado', 'Aprobado', 'Por Cotejar'])
         ->latest()
         ->first();
         
@@ -408,7 +412,7 @@ class TramiteSolicitanteController extends Controller
 
         // Si hay secciones rechazadas, retroceder a la primera sección rechazada
         $seccionesRechazadas = $tramite->getSeccionesParaCorregir();
-        if (!empty($seccionesRechazadas) && $tramite->estado === 'Rechazado') {
+                    if (!empty($seccionesRechazadas) && ($tramite->estado === 'Rechazado' || $tramite->estado === 'Para Corrección')) {
             $tramite->retrocederASeccionRechazada();
             
             return redirect()->route('tramites.create.tipo', [
@@ -446,7 +450,7 @@ class TramiteSolicitanteController extends Controller
         // Verificar OTRA VEZ si ya existe un trámite del mismo tipo en progreso
         $tramiteExistente = Tramite::where('solicitante_id', $solicitante->id)
             ->where('tipo_tramite', ucfirst($tipoTramite))
-            ->whereIn('estado', ['Pendiente', 'En Revision'])
+            ->whereIn('estado', ['Pendiente', 'En Revision', 'Para Corrección', 'Rechazado'])
             ->first();
             
         if ($tramiteExistente) {
@@ -2247,5 +2251,48 @@ class TramiteSolicitanteController extends Controller
         $datos['documentos'] = $tramite->documentosSolicitante ? $tramite->documentosSolicitante->toArray() : [];
 
         return $datos;
+    }
+
+    /**
+     * Cancela un trámite y registra el motivo
+     */
+    public function cancelar(Request $request, Tramite $tramite)
+    {
+        // Validar que el trámite pueda ser cancelado
+        if (!in_array($tramite->estado, [
+            Tramite::ESTADOS['Pendiente'],
+            Tramite::ESTADOS['En Revision'],
+            Tramite::ESTADOS['Por Cotejar']
+        ])) {
+            return redirect()->back()
+                ->with('error', 'Este trámite no puede ser cancelado en su estado actual.');
+        }
+
+        // Obtener el motivo de la cancelación
+        $motivo = $request->get('motivo', 'No especificado');
+
+        // Cancelar el trámite
+        $tramite->cancelar($motivo);
+
+        // Crear notificación para el usuario
+        if ($tramite->solicitante && $tramite->solicitante->usuario_id) {
+            \App\Models\Notificacion::crearParaUsuario(
+                'Trámite Cancelado',
+                "Su trámite #{$tramite->id} ha sido cancelado. Motivo: {$motivo}",
+                'Error',
+                $tramite->solicitante->usuario_id
+            );
+        }
+
+        // Registrar en el log del sistema
+        \App\Services\SystemLogService::registrarAccion(
+            'Trámite Cancelado',
+            'El trámite #' . $tramite->id . ' fue cancelado. Motivo: ' . $motivo,
+            $tramite->id,
+            'tramites'
+        );
+
+        return redirect()->route('mis-tramites.index')
+            ->with('warning', 'El trámite ha sido cancelado. Motivo: ' . $motivo);
     }
 }

@@ -53,7 +53,11 @@
                                     </div>
                         </div>
                     @elseif(isset($documento['id']))
-                        <iframe src="{{ route('revision.ver-documento', ['tramite' => $tramiteId, 'documento' => $documento['id']]) }}" class="w-full h-full"></iframe>
+                        <iframe src="{{ route('revision.ver-documento', ['tramite' => $tramiteId, 'documento' => $documento['id']]) }}" 
+                                class="w-full h-full" 
+                                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                                loading="lazy"
+                                title="Visor de documento {{ $documento['nombre'] ?? 'documento' }}"></iframe>
                     @else
                         <div class="flex flex-col items-center justify-center h-full bg-gray-50 space-y-4">
                             <i class="fas fa-file-alt text-gray-400 text-4xl"></i>
