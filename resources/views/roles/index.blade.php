@@ -145,98 +145,82 @@
                 </div>
                 
                 <form method="GET" action="{{ route('roles.index') }}" class="space-y-5">
-                    <!-- Grid de filtros compacto -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Búsqueda general -->
-                        <div class="group">
-                            <label for="search" class="block text-xs font-medium text-gray-700 mb-2 flex items-center">
-                                <div class="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
-                                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                    </svg>
+                    <!-- Fila de filtros y botones -->
+                    <div class="flex flex-col lg:flex-row lg:items-end lg:gap-4">
+                        <!-- Filtros -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
+                            <!-- Búsqueda general -->
+                            <div class="group">
+                                <label for="search" class="block text-xs font-medium text-gray-700 mb-2 flex items-center">
+                                    <div class="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
+                                        <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                    </div>
+                                    Buscar Rol
+                                </label>
+                                <div class="relative">
+                                    <input type="text" name="search" id="search" value="{{ request('search') }}" 
+                                           placeholder="Nombre del rol..."
+                                           class="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm text-gray-700 placeholder-gray-400 hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                    </div>
                                 </div>
-                                Buscar Rol
-                            </label>
-                            <div class="relative">
-                                <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                                       placeholder="Nombre del rol..."
-                                       class="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm text-gray-700 placeholder-gray-400 hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
-                                <div class="absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                    </svg>
+                            </div>
+                            <!-- Ordenar por -->
+                            <div class="group">
+                                <label for="sort" class="block text-xs font-medium text-gray-700 mb-2 flex items-center">
+                                    <div class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center mr-2">
+                                        <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                    Ordenar por
+                                </label>
+                                <div class="relative">
+                                    <select name="sort" id="sort" class="w-full appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 hover:border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200">
+                                        <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Nombre</option>
+                                        <option value="created_at" {{ request('sort') == 'created_at' ? 'selected' : '' }}>Fecha creación</option>
+                                        <option value="permissions_count" {{ request('sort') == 'permissions_count' ? 'selected' : '' }}>Número de permisos</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Elementos por página -->
+                            <div class="group">
+                                <label for="perPage" class="block text-xs font-medium text-gray-700 mb-2 flex items-center">
+                                    <div class="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center mr-2">
+                                        <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                                        </svg>
+                                    </div>
+                                    Mostrar
+                                </label>
+                                <div class="relative">
+                                    <select name="perPage" id="perPage" class="w-full appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 hover:border-purple-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200">
+                                        @foreach([10, 25, 50, 100] as $option)
+                                        <option value="{{ $option }}" {{ request('perPage', 10) == $option ? 'selected' : '' }}>
+                                            {{ $option }} elementos
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Ordenar por -->
-                        <div class="group">
-                            <label for="sort" class="block text-xs font-medium text-gray-700 mb-2 flex items-center">
-                                <div class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center mr-2">
-                                    <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                    </svg>
-                                </div>
-                                Ordenar por
-                            </label>
-                            <div class="relative">
-                                <select name="sort" id="sort" class="w-full appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 hover:border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200">
-                                    <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Nombre</option>
-                                    <option value="created_at" {{ request('sort') == 'created_at' ? 'selected' : '' }}>Fecha creación</option>
-                                    <option value="permissions_count" {{ request('sort') == 'permissions_count' ? 'selected' : '' }}>Número de permisos</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Elementos por página -->
-                        <div class="group">
-                            <label for="perPage" class="block text-xs font-medium text-gray-700 mb-2 flex items-center">
-                                <div class="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center mr-2">
-                                    <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                                    </svg>
-                                </div>
-                                Mostrar
-                            </label>
-                            <div class="relative">
-                                <select name="perPage" id="perPage" class="w-full appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 hover:border-purple-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200">
-                                    @foreach([10, 25, 50, 100] as $option)
-                                    <option value="{{ $option }}" {{ request('perPage', 10) == $option ? 'selected' : '' }}>
-                                        {{ $option }} elementos
-                                    </option>
-                                    @endforeach
-                                </select>
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Botones de acción compactos -->
-                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-                        <div class="text-sm text-gray-600">
-                            @if(request()->has('search'))
-                                Filtros aplicados - 
-                            @endif
-                            <span class="font-medium text-gray-900">{{ method_exists($roles, 'total') ? $roles->total() : $roles->count() }}</span> roles encontrados
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <a href="{{ route('roles.index') }}" 
-                               class="inline-flex items-center px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400/20 transition-all duration-200">
-                                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                Limpiar
-                            </a>
-                            
+                        <!-- Botones de acción -->
+                        <div class="flex gap-3 mt-4 lg:mt-0 lg:ml-4 justify-end">
                             <button type="submit" 
                                     class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-[#B4325E] to-[#93264B] hover:from-[#93264B] hover:to-[#7a1d37] text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B4325E]/30 transition-all duration-200 shadow-sm hover:shadow-md">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,130 +228,137 @@
                                 </svg>
                                 Filtrar
                             </button>
-                        </div>
-                    </div>
-                </form>
-
-                <!-- Separador -->
-                <div class="border-t border-gray-200 my-6"></div>
-
-                <!-- Tabla de Roles -->
-                <div class="overflow-hidden">
-            <!-- Vista móvil -->
-            <div class="block md:hidden">
-                @foreach($roles as $role)
-                <div class="p-4 border-b border-gray-100 table-row-animate hover:bg-gray-50/50 transition-all duration-200">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center space-x-3">
-                            <div class="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-[#B4325E] to-[#93264B] text-white rounded-xl shadow-md flex items-center justify-center font-bold text-xl">
-                                {{ strtoupper(substr($role->name, 0, 1)) }}
-                            </div>
-                            <div>
-                                <div class="font-semibold text-gray-900">{{ $role->name }}</div>
-                                <div class="text-xs text-gray-500">Creado {{ $role->created_at->diffForHumans() }}</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <a href="{{ route('roles.edit', $role) }}" 
-                               class="p-2 text-[#B4325E] hover:text-[#93264B] hover:bg-[#B4325E]/10 rounded-lg transition-colors duration-200">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            <a href="{{ route('roles.index') }}" 
+                               class="inline-flex items-center px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400/20 transition-all duration-200">
+                                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                 </svg>
+                                Limpiar
                             </a>
-                            @if(!in_array($role->name, ['admin', 'solicitante']))
-                            <button type="button"
-                                    @click="$dispatch('open-modal', 'confirm-role-deletion-{{ $role->id }}')"
-                                    class="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors duration-200">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
-                            @endif
                         </div>
                     </div>
-                    <div class="mt-3">
-                        <div class="flex flex-wrap gap-2">
-                            @foreach($role->permissions as $permission)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 shadow-sm hover:bg-blue-100 transition-colors duration-200">
-                                {{ $permission->name }}
-                            </span>
-                            @endforeach
+
+                    <!-- Separador -->
+                    <div class="border-t border-gray-200 my-6"></div>
+
+                    <!-- Tabla de Roles -->
+                    <div class="overflow-hidden">
+                <!-- Vista móvil -->
+                <div class="block md:hidden">
+                    @foreach($roles as $role)
+                    <div class="p-4 border-b border-gray-100 table-row-animate hover:bg-gray-50/50 transition-all duration-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-[#B4325E] to-[#93264B] text-white rounded-xl shadow-md flex items-center justify-center font-bold text-xl">
+                                    {{ strtoupper(substr($role->name, 0, 1)) }}
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-900">{{ $role->name }}</div>
+                                    <div class="text-xs text-gray-500">Creado {{ $role->created_at->diffForHumans() }}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <a href="{{ route('roles.edit', $role) }}" 
+                                   class="p-2 text-[#B4325E] hover:text-[#93264B] hover:bg-[#B4325E]/10 rounded-lg transition-colors duration-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </a>
+                                @if(!in_array($role->name, ['admin', 'solicitante']))
+                                <button type="button"
+                                        @click="$dispatch('open-modal', 'confirm-role-deletion-{{ $role->id }}')"
+                                        class="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors duration-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($role->permissions as $permission)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 shadow-sm hover:bg-blue-100 transition-colors duration-200">
+                                    {{ $permission->name }}
+                                </span>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
+                    @endforeach
                 </div>
-                @endforeach
-            </div>
 
-            <!-- Vista desktop -->
-            <div class="hidden md:block">
-                <table class="min-w-full divide-y divide-gray-200 border border-gray-200 shadow-sm">
-                    <thead>
-                        <tr class="bg-[#B4325E] text-white">
-                            <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider border-r border-gray-200/30">
-                                Rol
-                            </th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider border-r border-gray-200/30">
-                                Permisos
-                            </th>
-                            <th scope="col" class="px-6 py-4 text-center text-xs uppercase tracking-wider">
-                                Acciones
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-100">
-                        @foreach($roles as $role)
-                        <tr class="hover:bg-gray-50/50 transition-all duration-200 table-row-animate">
-                            <td class="px-6 py-4 whitespace-nowrap border-r border-gray-200">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-[#B4325E] to-[#93264B] text-white rounded-xl shadow-md flex items-center justify-center font-bold text-xl">
-                                        {{ strtoupper(substr($role->name, 0, 1)) }}
+                <!-- Vista desktop -->
+                <div class="hidden md:block">
+                    <table class="min-w-full divide-y divide-gray-200 border border-gray-200 shadow-sm">
+                        <thead>
+                            <tr class="bg-[#B4325E] text-white">
+                                <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider border-r border-gray-200/30">
+                                    Rol
+                                </th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs uppercase tracking-wider border-r border-gray-200/30">
+                                    Permisos
+                                </th>
+                                <th scope="col" class="px-6 py-4 text-center text-xs uppercase tracking-wider">
+                                    Acciones
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100">
+                            @foreach($roles as $role)
+                            <tr class="hover:bg-gray-50/50 transition-all duration-200 table-row-animate">
+                                <td class="px-6 py-4 whitespace-nowrap border-r border-gray-200">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-[#B4325E] to-[#93264B] text-white rounded-xl shadow-md flex items-center justify-center font-bold text-xl">
+                                            {{ strtoupper(substr($role->name, 0, 1)) }}
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm text-gray-900">{{ $role->name }}</div>
+                                            <div class="text-xs text-gray-500">Creado {{ $role->created_at->diffForHumans() }}</div>
+                                        </div>
                                     </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm text-gray-900">{{ $role->name }}</div>
-                                        <div class="text-xs text-gray-500">Creado {{ $role->created_at->diffForHumans() }}</div>
+                                </td>
+                                <td class="px-6 py-4 border-r border-gray-200">
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach($role->permissions as $permission)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs bg-blue-50 text-blue-700 border border-blue-100 shadow-sm hover:bg-blue-100 transition-colors duration-200">
+                                            {{ $permission->name }}
+                                        </span>
+                                        @endforeach
                                     </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 border-r border-gray-200">
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach($role->permissions as $permission)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs bg-blue-50 text-blue-700 border border-blue-100 shadow-sm hover:bg-blue-100 transition-colors duration-200">
-                                        {{ $permission->name }}
-                                    </span>
-                                    @endforeach
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
-                                <div class="flex items-center justify-center space-x-3">
-                                    @can('roles.editar')
-                                    <a href="{{ route('roles.edit', $role) }}" 
-                                       class="text-primary hover:text-primary-dark transform hover:scale-110 transition-all duration-200 p-2 rounded-lg hover:bg-primary-50">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </a>
-                                    @endcan
-
-                                    @if(!in_array($role->name, ['admin', 'solicitante']))
-                                        @can('roles.eliminar')
-                                        <button type="button"
-                                                @click="$dispatch('open-modal', 'confirm-role-deletion-{{ $role->id }}')"
-                                                class="text-red-600 hover:text-red-900 transform hover:scale-110 transition-all duration-200 p-2 rounded-lg hover:bg-red-50">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                                    <div class="flex items-center justify-center space-x-3">
+                                        @can('roles.editar')
+                                        <a href="{{ route('roles.edit', $role) }}" 
+                                           class="text-primary hover:text-primary-dark transform hover:scale-110 transition-all duration-200 p-2 rounded-lg hover:bg-primary-50">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
-                                        </button>
+                                        </a>
                                         @endcan
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
 
-                    <!-- Paginación usando componente -->
-                    <x-pagination :items="$roles" label="roles" />
+                                        @if(!in_array($role->name, ['admin', 'solicitante']))
+                                            @can('roles.eliminar')
+                                            <button type="button"
+                                                    @click="$dispatch('open-modal', 'confirm-role-deletion-{{ $role->id }}')"
+                                                    class="text-red-600 hover:text-red-900 transform hover:scale-110 transition-all duration-200 p-2 rounded-lg hover:bg-red-50">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                            @endcan
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                        <!-- Paginación usando componente -->
+                        <x-pagination :items="$roles" label="roles" />
+                    </div>
                 </div>
             </div>
         </div>

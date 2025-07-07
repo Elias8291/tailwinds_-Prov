@@ -4,7 +4,7 @@
 <div class="flex items-center justify-center">
     <div class="w-full max-w-4xl px-2">
         <div class="bg-white shadow-xl rounded-3xl p-6 border border-gray-100">
-            <h1 class="text-4xl font-extrabold text-[#9d2449] mb-6 text-center tracking-tight drop-shadow-lg">
+            <h1 class="text-4xl font-extrabold text-gray-800 mb-6 text-center tracking-tight drop-shadow-lg">
                 <i class="fas fa-stamp mr-2"></i> Membretes Oficiales
             </h1>
             <p class="text-gray-600 text-center mb-10 text-lg">
@@ -73,9 +73,9 @@
             <div class="mt-8 bg-white border border-gray-200 rounded-2xl p-6 shadow">
                 <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2"><i class="fas fa-info-circle text-[#9d2449]"></i> Información sobre los Documentos</h3>
                 <div class="text-gray-700 space-y-2 text-base">
-                    <p><i class="fas fa-file-alt text-[#9d2449] mr-2"></i><strong>Formato:</strong> Oficio oficial del Gobierno del Estado de Oaxaca</p>
-                    <p><i class="fas fa-certificate text-[#9d2449] mr-2"></i><strong>Elementos incluidos:</strong> Logo oficial, membrete, lema constitucional 2025</p>
-                    <p><i class="fas fa-list text-[#9d2449] mr-2"></i><strong>Tipos disponibles:</strong></p>
+                    <p><i class="fas fa-file-alt text-gray-500 mr-2"></i><strong>Formato:</strong> Oficio oficial del Gobierno del Estado de Oaxaca</p>
+                    <p><i class="fas fa-certificate text-gray-500 mr-2"></i><strong>Elementos incluidos:</strong> Logo oficial, membrete, lema constitucional 2025</p>
+                    <p><i class="fas fa-list text-gray-500 mr-2"></i><strong>Tipos disponibles:</strong></p>
                     <ul class="list-disc list-inside ml-8 space-y-1">
                         <li><strong>Inscripción:</strong> Para registro inicial de nuevos proveedores</li>
                         <li><strong>Renovación:</strong> Para renovación anual de registros existentes</li>
@@ -95,4 +95,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection
