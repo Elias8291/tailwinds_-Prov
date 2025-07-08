@@ -531,12 +531,7 @@
             const form = document.querySelector('form');
             if (validateForm()) {
                 isRegistering = true;
-                startRegistrationProcess();
-                
-                // Pequeño delay para que se vea la animación antes del envío
-                setTimeout(() => {
-                    form.submit();
-                }, 200);
+                form.submit(); // Enviar el formulario directamente
             } else {
                 showError('Por favor, complete todos los campos requeridos.');
             }
@@ -688,7 +683,7 @@
     function startRegistrationProcess() {
         console.log('Iniciando proceso de registro...');
         
-        // Ocultar el botón normal y mostrar estado de carga
+        // Mostrar estado de carga
         showRegistrationLoading(true);
         
         // Deshabilitar toda la interfaz
@@ -842,28 +837,27 @@
 
     // Interceptar el envío del formulario para manejar errores
     document.querySelector('form').addEventListener('submit', function(e) {
-        // Si el formulario ya está en proceso de envío, no hacer nada
-        if (this.dataset.submitting === 'true') {
-            return;
-        }
-        
-        // Marcar como enviando
-        this.dataset.submitting = 'true';
-        
-        // El progreso ya se inició en handleActionButton
-        console.log('Formulario enviado - procesando...');
+        // No prevenir el envío por defecto
+        // Solo actualizar la UI para mostrar el progreso
+        startRegistrationProcess();
     });
 
-    // Manejar errores de red o fallos en el envío
-    window.addEventListener('beforeunload', function(e) {
-        // Si hay un proceso de registro en curso, advertir al usuario
-        const registrationProgress = document.getElementById('registrationProgress');
-        if (registrationProgress && !registrationProgress.classList.contains('hidden')) {
-            const message = 'El registro está en proceso. ¿Está seguro de que desea salir?';
-            e.returnValue = message;
-            return message;
-        }
-    });
+    // Remover el evento beforeunload que causa problemas
+    // window.addEventListener('beforeunload', function(e) { ... });
+
+    // Función para iniciar el proceso de registro
+    function startRegistrationProcess() {
+        console.log('Iniciando proceso de registro...');
+        
+        // Mostrar estado de carga
+        showRegistrationLoading(true);
+        
+        // Deshabilitar toda la interfaz
+        disableForm(true);
+        
+        // Simular progreso de registro
+        simulateRegistrationProgress();
+    }
 </script>
 <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
