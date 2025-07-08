@@ -226,7 +226,7 @@
     </div>
 
     <!-- Formulario de registro (inicialmente oculto) -->
-    <div id="registrationForm" class="hidden space-y-1.5 transition-all duration-300 ease-in-out">
+    <div id="registrationForm" class="hidden space-y-2 transition-all duration-300 ease-in-out">
         <input type="hidden" id="qrUrl" name="qr_url">
         
         <!-- Campos ocultos para datos del SAT -->
@@ -252,45 +252,79 @@
             Ver Datos del SAT
         </button>
 
+        <!-- Indicador de validación del RFC del SAT -->
+        <div id="rfcSatIndicator" class="hidden">
+            <div class="flex items-center justify-between p-2.5 rounded-lg border-l-4 transition-all duration-300" id="rfcSatStatus">
+                <div class="flex items-center space-x-2">
+                    <div id="rfcSatIcon" class="flex-shrink-0"></div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-gray-700">RFC del SAT</p>
+                        <p class="text-xs font-mono text-gray-900" id="rfcSatValue"></p>
+                    </div>
+                </div>
+                <div id="rfcSatMessage" class="text-xs font-medium"></div>
+            </div>
+        </div>
+
         <div>
             <label for="email" class="block text-xs font-medium text-gray-700 mb-0.5">Correo Electrónico</label>
-            <input type="email" id="email" name="email" required 
-                   class="w-full px-2.5 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 text-sm"
-                   placeholder="ejemplo@correo.com">
-        </div>
-
-        <div>
-            <label for="password" class="block text-xs font-medium text-gray-700 mb-0.5">Contraseña</label>
             <div class="relative">
-                <input type="password" id="password" name="password" required 
+                <input type="email" id="email" name="email" required 
                        class="w-full px-2.5 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 text-sm"
-                       placeholder="••••••••">
-                <button type="button" 
-                        onclick="togglePassword('password')"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="password-toggle-icon">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                </button>
+                       placeholder="ejemplo@correo.com">
+                <div id="emailValidationIcon" class="absolute right-2 top-1/2 -translate-y-1/2 hidden">
+                    <!-- Icono de validación se mostrará aquí -->
+                </div>
+            </div>
+            <!-- Área fija para validación -->
+            <div class="h-6 relative">
+                <div id="emailValidation" class="absolute top-0 left-0 w-full opacity-0 transform translate-y-1 transition-all duration-200"></div>
             </div>
         </div>
 
-        <div>
-            <label for="password_confirmation" class="block text-xs font-medium text-gray-700 mb-0.5">Confirmar Contraseña</label>
-            <div class="relative">
-                <input type="password" id="password_confirmation" name="password_confirmation" required 
-                       class="w-full px-2.5 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 text-sm"
-                       placeholder="••••••••">
-                <button type="button" 
-                        onclick="togglePassword('password_confirmation')"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="password_confirmation-toggle-icon">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                </button>
+        <!-- Contraseñas en 2 columnas para escritorio -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
+            <div>
+                <label for="password" class="block text-xs font-medium text-gray-700 mb-0.5">Contraseña</label>
+                <div class="relative">
+                    <input type="password" id="password" name="password" required 
+                           class="w-full px-2.5 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 text-sm"
+                           placeholder="••••••••">
+                    <button type="button" 
+                            onclick="togglePassword('password')"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="password-toggle-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
+
+            <div>
+                <label for="password_confirmation" class="block text-xs font-medium text-gray-700 mb-0.5">Confirmar Contraseña</label>
+                <div class="relative">
+                    <input type="password" id="password_confirmation" name="password_confirmation" required 
+                           class="w-full px-2.5 py-1.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 text-sm"
+                           placeholder="••••••••">
+                    <div class="absolute right-8 top-1/2 -translate-y-1/2">
+                        <div id="passwordMatchIcon" class="hidden"></div>
+                    </div>
+                    <button type="button" 
+                            onclick="togglePassword('password_confirmation')"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="password_confirmation-toggle-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Área fija para validación de contraseñas -->
+        <div class="h-6 relative">
+            <div id="passwordMatchValidation" class="absolute top-0 left-0 w-full opacity-0 transform translate-y-1 transition-all duration-200"></div>
         </div>
     </div>
 
@@ -298,7 +332,7 @@
     <canvas id="pdfCanvas" class="hidden"></canvas>
 
     <!-- Botones de acción -->
-    <div class="space-y-1.5 pt-2">
+    <div class="space-y-2 pt-3">
         <button type="button" id="actionButton" onclick="handleActionButton()" class="group w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 relative overflow-hidden text-sm">
             <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -475,11 +509,22 @@
                     verDatosBtn.classList.remove('hidden');
                 }
 
+                // Validar RFC internamente y mostrar indicador
+                if (data.details && data.details.rfc) {
+                    // Mostrar indicador del RFC del SAT
+                    showRfcSatIndicator(data.details.rfc);
+                    
+                    // Validar RFC automáticamente
+                    validateRfc(data.details.rfc);
+                }
+
                 // Autocompletar email si está disponible
                 if (data.details && data.details.email) {
                     const emailInput = document.getElementById('email');
                     if (emailInput) {
                         emailInput.value = data.details.email;
+                        // Validar email automáticamente
+                        validateEmail(data.details.email);
                     }
                 }
 
@@ -661,18 +706,29 @@
 
     // Agregar validación en tiempo real para email y password
     document.addEventListener('input', function(e) {
-        if (e.target.id === 'email' || e.target.id === 'password' || e.target.id === 'password_confirmation') {
+        if (e.target.id === 'email') {
+            // Validar email en tiempo real
+            const email = e.target.value.trim();
+            if (email.length > 3) {
+                clearTimeout(window.emailValidationTimeout);
+                window.emailValidationTimeout = setTimeout(() => {
+                    validateEmail(email);
+                }, 300);
+            } else {
+                clearValidationMessage('email');
+            }
+            
+            // Actualizar estado del formulario
+            if (documentProcessed) {
+                updateFormValidation();
+            }
+        } else if (e.target.id === 'password' || e.target.id === 'password_confirmation') {
+            // Validar coincidencia de contraseñas en tiempo real
+            validatePasswordMatch();
+            
             // Solo actualizar el estado visual si ya se procesó el documento
             if (documentProcessed) {
-                const isValid = validateForm();
-                const actionButton = document.getElementById('actionButton');
-                if (actionButton) {
-                    if (isValid) {
-                        actionButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                    } else {
-                        actionButton.classList.add('opacity-50', 'cursor-not-allowed');
-                    }
-                }
+                updateFormValidation();
             }
         }
     });
@@ -858,6 +914,412 @@
         // Simular progreso de registro
         simulateRegistrationProgress();
     }
+
+    // ===== FUNCIONES DE VALIDACIÓN EN TIEMPO REAL =====
+    
+    // Variables para control de validaciones
+    window.validationState = {
+        email: { valid: null, checking: false },
+        rfc: { valid: null, checking: false },
+        passwordMatch: { valid: null, strongPassword: null }
+    };
+
+    // Función para validar email
+    async function validateEmail(email) {
+        if (!email || email.length < 5) {
+            clearValidationMessage('email');
+            return;
+        }
+
+        // Marcar como validando
+        window.validationState.email.checking = true;
+        showValidationLoading('email', true);
+
+        try {
+            const response = await fetch(`/api/validate/email?email=${encodeURIComponent(email)}`);
+            const data = await response.json();
+            
+            window.validationState.email.valid = data.valid;
+            window.validationState.email.checking = false;
+            
+            showValidationMessage('email', data.message, data.valid);
+            showValidationLoading('email', false);
+            
+            updateFormValidation();
+        } catch (error) {
+            console.error('Error validating email:', error);
+            window.validationState.email.checking = false;
+            showValidationLoading('email', false);
+            showValidationMessage('email', 'Error de conexión', false);
+        }
+    }
+
+    // Función para validar RFC (validación interna con indicador visual)
+    async function validateRfc(rfc) {
+        if (!rfc || rfc.length < 10) {
+            window.validationState.rfc.valid = null;
+            return;
+        }
+
+        // Marcar como validando y mostrar loading en el indicador
+        window.validationState.rfc.checking = true;
+        updateRfcSatIndicator(rfc, null, true);
+
+        try {
+            const response = await fetch(`/api/validate/rfc?rfc=${encodeURIComponent(rfc)}`);
+            const data = await response.json();
+            
+            window.validationState.rfc.valid = data.valid;
+            window.validationState.rfc.checking = false;
+            
+            // Actualizar indicador con resultado
+            updateRfcSatIndicator(rfc, data.valid, false, data.message);
+            
+            updateFormValidation();
+        } catch (error) {
+            console.error('Error validating RFC:', error);
+            window.validationState.rfc.checking = false;
+            window.validationState.rfc.valid = false;
+            
+            // Mostrar error en el indicador
+            updateRfcSatIndicator(rfc, false, false, 'Error de conexión');
+        }
+    }
+
+    // Función para mostrar el indicador del RFC del SAT
+    function showRfcSatIndicator(rfc) {
+        const indicator = document.getElementById('rfcSatIndicator');
+        const valueElement = document.getElementById('rfcSatValue');
+        
+        if (indicator && valueElement) {
+            valueElement.textContent = rfc;
+            indicator.classList.remove('hidden');
+        }
+    }
+
+    // Función para actualizar el estado del indicador del RFC
+    function updateRfcSatIndicator(rfc, isValid, isLoading, message = '') {
+        const statusContainer = document.getElementById('rfcSatStatus');
+        const iconElement = document.getElementById('rfcSatIcon');
+        const messageElement = document.getElementById('rfcSatMessage');
+        const valueElement = document.getElementById('rfcSatValue');
+        
+        if (!statusContainer || !iconElement || !messageElement || !valueElement) return;
+
+        valueElement.textContent = rfc;
+
+        if (isLoading) {
+            // Estado de carga
+            statusContainer.className = 'flex items-center justify-between p-2.5 rounded-lg border-l-4 transition-all duration-300 bg-blue-50 border-blue-500';
+            iconElement.innerHTML = `
+                <div class="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>
+            `;
+            messageElement.textContent = 'Validando...';
+            messageElement.className = 'text-xs font-medium text-blue-600';
+        } else if (isValid === true) {
+            // RFC disponible
+            statusContainer.className = 'flex items-center justify-between p-2.5 rounded-lg border-l-4 transition-all duration-300 bg-green-50 border-green-500';
+            iconElement.innerHTML = `
+                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            `;
+            messageElement.textContent = message || 'Disponible';
+            messageElement.className = 'text-xs font-medium text-green-600';
+        } else if (isValid === false) {
+            // RFC ya existe o error
+            statusContainer.className = 'flex items-center justify-between p-2.5 rounded-lg border-l-4 transition-all duration-300 bg-red-50 border-red-500';
+            iconElement.innerHTML = `
+                <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            `;
+            messageElement.textContent = message || 'Ya registrado';
+            messageElement.className = 'text-xs font-medium text-red-600';
+        }
+    }
+
+    // Función para mostrar mensaje de validación (solo para email)
+    function showValidationMessage(field, message, isValid) {
+        // Solo procesar para email, RFC se valida internamente
+        if (field !== 'email') return;
+        
+        const validationDiv = document.getElementById(`${field}Validation`);
+        const iconDiv = document.getElementById(`${field}ValidationIcon`);
+        const inputField = document.getElementById(field);
+        
+        if (!validationDiv) return;
+
+        validationDiv.innerHTML = `
+            <div class="flex items-center space-x-1 text-xs">
+                <svg class="w-3 h-3 ${isValid ? 'text-green-500' : 'text-red-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    ${isValid 
+                        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>'
+                        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>'
+                    }
+                </svg>
+                <span class="${isValid ? 'text-green-600' : 'text-red-600'}">${message}</span>
+            </div>
+        `;
+        
+        // Mostrar con animación suave
+        validationDiv.style.opacity = '1';
+        validationDiv.style.transform = 'translateY(0)';
+
+        // Actualizar icono en el input
+        if (iconDiv) {
+            iconDiv.innerHTML = `
+                <svg class="w-4 h-4 ${isValid ? 'text-green-500' : 'text-red-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    ${isValid 
+                        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>'
+                        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>'
+                    }
+                </svg>
+            `;
+            iconDiv.classList.remove('hidden');
+        }
+
+        // Actualizar borde del input
+        if (inputField) {
+            inputField.classList.remove('border-red-300', 'border-green-300');
+            inputField.classList.add(isValid ? 'border-green-300' : 'border-red-300');
+        }
+    }
+
+    // Función para mostrar indicador de carga en validación (solo para email)
+    function showValidationLoading(field, show) {
+        // Solo procesar para email, RFC se valida internamente
+        if (field !== 'email') return;
+        
+        const iconDiv = document.getElementById(`${field}ValidationIcon`);
+        
+        if (!iconDiv) return;
+
+        if (show) {
+            iconDiv.innerHTML = `
+                <div class="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin"></div>
+            `;
+            iconDiv.classList.remove('hidden');
+        }
+    }
+
+    // Función para limpiar mensaje de validación (solo para email)
+    function clearValidationMessage(field) {
+        // Solo procesar para email, RFC se valida internamente
+        if (field !== 'email') {
+            // Para RFC, solo limpiar el estado
+            if (field === 'rfc' && window.validationState[field]) {
+                window.validationState[field].valid = null;
+            }
+            return;
+        }
+        
+        const validationDiv = document.getElementById(`${field}Validation`);
+        const iconDiv = document.getElementById(`${field}ValidationIcon`);
+        const inputField = document.getElementById(field);
+        
+        if (validationDiv) {
+            // Ocultar con animación suave
+            validationDiv.style.opacity = '0';
+            validationDiv.style.transform = 'translateY(4px)';
+        }
+        
+        if (iconDiv) {
+            iconDiv.classList.add('hidden');
+        }
+        
+        if (inputField) {
+            inputField.classList.remove('border-red-300', 'border-green-300');
+        }
+        
+        window.validationState[field].valid = null;
+    }
+
+    // Función para actualizar el estado general del formulario
+    function updateFormValidation() {
+        const isValid = validateForm();
+        const actionButton = document.getElementById('actionButton');
+        
+        if (actionButton && documentProcessed) {
+            if (isValid) {
+                actionButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                actionButton.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    }
+
+    // Función para validar coincidencia de contraseñas
+    function validatePasswordMatch() {
+        const password = document.getElementById('password');
+        const passwordConfirmation = document.getElementById('password_confirmation');
+        
+        if (!password || !passwordConfirmation) return;
+
+        const passwordValue = password.value;
+        const confirmationValue = passwordConfirmation.value;
+        
+        // Solo validar si ambos campos tienen contenido
+        if (passwordValue.length === 0 && confirmationValue.length === 0) {
+            clearPasswordMatchValidation();
+            return;
+        }
+        
+        // Si solo uno tiene contenido, no mostrar validación aún
+        if (passwordValue.length === 0 || confirmationValue.length === 0) {
+            clearPasswordMatchValidation();
+            return;
+        }
+        
+        const passwordsMatch = passwordValue === confirmationValue;
+        const passwordStrong = validatePasswordStrength(passwordValue);
+        
+        showPasswordMatchValidation(passwordsMatch, passwordStrong);
+    }
+
+    // Función para validar fortaleza de contraseña
+    function validatePasswordStrength(password) {
+        if (password.length < 8) return { valid: false, message: 'Mínimo 8 caracteres' };
+        
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumbers = /\d/.test(password);
+        const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+        
+        const criteriaMet = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar].filter(Boolean).length;
+        
+        if (criteriaMet >= 3) {
+            return { valid: true, message: 'Contraseña segura' };
+        } else if (criteriaMet >= 2) {
+            return { valid: true, message: 'Contraseña aceptable' };
+        } else {
+            return { valid: false, message: 'Contraseña débil' };
+        }
+    }
+
+    // Función para mostrar validación de contraseñas
+    function showPasswordMatchValidation(passwordsMatch, passwordStrength) {
+        const validationDiv = document.getElementById('passwordMatchValidation');
+        const iconDiv = document.getElementById('passwordMatchIcon');
+        const passwordInput = document.getElementById('password');
+        const confirmationInput = document.getElementById('password_confirmation');
+        
+        if (!validationDiv || !iconDiv) return;
+
+        let message = '';
+        let isValid = false;
+        let iconColor = '';
+        let borderColor = '';
+
+        if (passwordsMatch && passwordStrength.valid) {
+            message = `✅ Las contraseñas coinciden - ${passwordStrength.message}`;
+            isValid = true;
+            iconColor = 'text-green-500';
+            borderColor = 'border-green-300';
+        } else if (passwordsMatch && !passwordStrength.valid) {
+            message = `⚠️ Las contraseñas coinciden - ${passwordStrength.message}`;
+            isValid = false;
+            iconColor = 'text-yellow-500';
+            borderColor = 'border-yellow-300';
+        } else {
+            message = '❌ Las contraseñas no coinciden';
+            isValid = false;
+            iconColor = 'text-red-500';
+            borderColor = 'border-red-300';
+        }
+
+        // Mostrar mensaje
+        validationDiv.innerHTML = `
+            <div class="flex items-center space-x-1 text-xs">
+                <span class="${isValid && passwordsMatch ? 'text-green-600' : 'text-red-600'}">${message}</span>
+            </div>
+        `;
+        
+        validationDiv.style.opacity = '1';
+        validationDiv.style.transform = 'translateY(0)';
+
+        // Mostrar icono
+        iconDiv.innerHTML = `
+            <svg class="w-4 h-4 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                ${passwordsMatch 
+                    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>'
+                    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>'
+                }
+            </svg>
+        `;
+        iconDiv.classList.remove('hidden');
+
+        // Actualizar bordes
+        if (passwordInput && confirmationInput) {
+            [passwordInput, confirmationInput].forEach(input => {
+                input.classList.remove('border-red-300', 'border-green-300', 'border-yellow-300');
+                input.classList.add(borderColor);
+            });
+        }
+
+        // Actualizar estado global
+        window.validationState.passwordMatch = { 
+            valid: passwordsMatch && passwordStrength.valid,
+            strongPassword: passwordStrength.valid 
+        };
+    }
+
+    // Función para limpiar validación de contraseñas
+    function clearPasswordMatchValidation() {
+        const validationDiv = document.getElementById('passwordMatchValidation');
+        const iconDiv = document.getElementById('passwordMatchIcon');
+        const passwordInput = document.getElementById('password');
+        const confirmationInput = document.getElementById('password_confirmation');
+        
+        if (validationDiv) {
+            validationDiv.style.opacity = '0';
+            validationDiv.style.transform = 'translateY(4px)';
+        }
+        
+        if (iconDiv) {
+            iconDiv.classList.add('hidden');
+        }
+        
+        if (passwordInput && confirmationInput) {
+            [passwordInput, confirmationInput].forEach(input => {
+                input.classList.remove('border-red-300', 'border-green-300', 'border-yellow-300');
+            });
+        }
+        
+        window.validationState.passwordMatch = { valid: null, strongPassword: null };
+    }
+
+    // Modificar la función validateForm existente para incluir validaciones en tiempo real
+    function validateForm() {
+        const form = document.querySelector('form');
+        const inputs = form.querySelectorAll('input[required]');
+        
+        let allFilled = true;
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                allFilled = false;
+            }
+        });
+
+        // Validar que las contraseñas coincidan
+        const password = document.getElementById('password');
+        const passwordConfirmation = document.getElementById('password_confirmation');
+        const passwordsMatch = password && passwordConfirmation ? 
+            password.value === passwordConfirmation.value && password.value.length >= 8 : true;
+
+        // Validar que los datos del SAT estén presentes
+        const satDataValid = documentProcessed && 
+            document.getElementById('satRfc').value && 
+            document.getElementById('satNombre').value;
+
+        // Validar en tiempo real (solo si ya se han validado)
+        const emailValid = window.validationState.email.valid !== false;
+        const rfcValid = window.validationState.rfc.valid !== false;
+        const passwordMatchValid = window.validationState.passwordMatch ? 
+            window.validationState.passwordMatch.valid !== false : passwordsMatch;
+
+        return allFilled && passwordsMatch && satDataValid && emailValid && rfcValid && passwordMatchValid;
+    }
 </script>
 <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
@@ -975,6 +1437,12 @@
             verDatosBtn.classList.add('hidden');
         }
         
+        // Ocultar indicador del RFC del SAT
+        const rfcSatIndicator = document.getElementById('rfcSatIndicator');
+        if (rfcSatIndicator) {
+            rfcSatIndicator.classList.add('hidden');
+        }
+        
         // Ocultar botón de enviar
         const submitButton = document.querySelector('button[type="submit"]');
         if (submitButton) {
@@ -994,6 +1462,9 @@
         if (passwordConfirmInput) {
             passwordConfirmInput.value = '';
         }
+        
+        // Limpiar validación de contraseñas
+        clearPasswordMatchValidation();
         
         // Limpiar campos ocultos del SAT
         document.getElementById('qrUrl').value = '';

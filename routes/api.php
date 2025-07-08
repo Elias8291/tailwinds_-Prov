@@ -7,6 +7,7 @@ use App\Http\Controllers\HistorialProveedorController;
 use App\Http\Controllers\Api\SectorController;
 use App\Http\Controllers\LocationDataController;
 use App\Http\Controllers\RevisionController;
+use App\Http\Controllers\Api\ValidationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +23,11 @@ use App\Http\Controllers\RevisionController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Validation Routes (no auth required for registration)
+Route::get('/validate/email', [ValidationController::class, 'checkEmail']);
+Route::get('/validate/rfc', [ValidationController::class, 'checkRfc']);
+Route::get('/validate/both', [ValidationController::class, 'checkBoth']);
 
 // RFC Search Routes
 Route::get('/rfc-search/{rfc}', [RfcSearchController::class, 'search']);
