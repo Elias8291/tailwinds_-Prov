@@ -18,6 +18,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- Configuración de Tailwind -->
+    {{--
     <script>
         tailwind.config = {
             theme: {
@@ -35,6 +36,7 @@
             }
         }
     </script>
+    --}}
 
     <style>
         /* Animaciones personalizadas */
@@ -565,7 +567,6 @@
 
         // FUNCIÓN ANTERIOR - SIEMPRE DISPONIBLE
         window.previousSlide = function() {
-            console.log('👈 BOTÓN ANTERIOR - FUNCIONANDO!');
             currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
             showSlide(currentSlideIndex);
             restartAutoSlide();
@@ -573,7 +574,6 @@
 
         // FUNCIÓN SIGUIENTE - SIEMPRE DISPONIBLE  
         window.nextSlideManual = function() {
-            console.log('👉 BOTÓN SIGUIENTE - FUNCIONANDO!');
             currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
             showSlide(currentSlideIndex);
             restartAutoSlide();
@@ -581,7 +581,6 @@
 
         // FUNCIÓN IR A SLIDE ESPECÍFICO
         window.goToSlide = function(index) {
-            console.log('🎯 IR A SLIDE:', index);
             currentSlideIndex = index;
             showSlide(currentSlideIndex);
             restartAutoSlide();
@@ -589,14 +588,12 @@
 
         // Mostrar slide específico
         function showSlide(index) {
-            console.log('📺 Mostrando slide:', index);
             
             // Obtener todos los slides
             const slides = document.querySelectorAll('.carousel-slide');
             const dots = document.querySelectorAll('.carousel-dot');
             
             if (slides.length === 0) {
-                console.log('⚠️ No se encontraron slides');
                 return;
             }
 
@@ -630,8 +627,6 @@
                     }
                 }
             });
-
-            console.log('✅ Slide actualizado correctamente');
         }
 
         // Auto-avance
@@ -649,14 +644,12 @@
 
         // Configurar dots cuando el DOM esté listo
         function setupCarousel() {
-            console.log('🚀 Configurando carrusel...');
             
             const dots = document.querySelectorAll('.carousel-dot');
             
             // Event listeners para dots
             dots.forEach((dot, index) => {
                 dot.addEventListener('click', () => {
-                    console.log('🔘 Click en dot:', index);
                     window.goToSlide(index);
                 });
             });
@@ -676,8 +669,6 @@
             // Mostrar primer slide
             showSlide(0);
             startAutoSlide();
-            
-            console.log('✅ Carrusel configurado correctamente');
         }
 
         // Inicializar cuando DOM esté listo
@@ -686,13 +677,6 @@
         } else {
             setupCarousel();
         }
-
-        // Test directo de funciones
-        console.log('🎮 CARRUSEL LISTO:');
-        console.log('- window.previousSlide =', typeof window.previousSlide);
-        console.log('- window.nextSlideManual =', typeof window.nextSlideManual);
-        console.log('- window.goToSlide =', typeof window.goToSlide);
-        console.log('👆 ¡HAZ CLIC EN LOS BOTONES GRANDES DEL CARRUSEL!');
     </script>
 </body>
 </html> 
