@@ -9,7 +9,6 @@ class EstadosTableSeeder extends Seeder
 {
     public function run()
     {
-        // Asegúrate de que el país México tenga el ID 103 en la tabla 'pais'
         $estado = [
             'Aguascalientes',
             'Baja California',
@@ -47,7 +46,7 @@ class EstadosTableSeeder extends Seeder
 
         foreach ($estado as $nombre) {
             DB::table('estado')->insert([
-                'pais_id' => 103, // Asegúrate de que el ID de México sea 103
+                'pais_id' => 103,
                 'nombre' => $nombre,
                 'created_at' => now(),
                 'updated_at' => now(),

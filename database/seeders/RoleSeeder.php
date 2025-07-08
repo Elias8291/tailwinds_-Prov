@@ -15,6 +15,8 @@ class RoleSeeder extends Seeder
      */
     public function run()
     {
+        $this->command->info('Creando roles...');
+        
         // === SUPER ADMINISTRADOR ===
         $superAdmin = Role::firstOrCreate([
             'name' => 'Super Administrador',
@@ -156,7 +158,7 @@ class RoleSeeder extends Seeder
 
         $this->asignarPermisosSeguro($operador, $permisosOperador);
 
-        $this->command->info('✅ Se han actualizado los roles con permisos organizados y limpios.');
+        $this->command->info('✅ Roles creados exitosamente');
     }
 
     /**

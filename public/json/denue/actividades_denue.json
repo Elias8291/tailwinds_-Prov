@@ -1,0 +1,2529 @@
+{
+  "sectores": [
+    {
+      "codigo": "23",
+      "nombre": "Construcción",
+      "descripcion": "Edificación e infraestructura"
+    },
+    {
+      "codigo": "11",
+      "nombre": "Agricultura, ganadería, aprovechamiento forestal, pesca y caza",
+      "descripcion": "Sector primario"
+    },
+    {
+      "codigo": "21",
+      "nombre": "Minería",
+      "descripcion": "Extracción de recursos minerales"
+    },
+    {
+      "codigo": "82",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "86",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "78",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "98",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "70",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "89",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "16",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "61",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "76",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "75",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "13",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "10",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "40",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "84",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "93",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "81",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "97",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "38",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "96",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "63",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "62",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "67",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "71",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "55",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "90",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "95",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "80",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "68",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "35",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "18",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "94",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "22",
+      "nombre": "Electricidad, agua y gas",
+      "descripcion": "Servicios públicos"
+    },
+    {
+      "codigo": "99",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "30",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "77",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "79",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "87",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "85",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "64",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "27",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "56",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "37",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "31",
+      "nombre": "Industrias manufactureras",
+      "descripcion": "Transformación de materias primas"
+    },
+    {
+      "codigo": "92",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "44",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "72",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "42",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "66",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "19",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "88",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "24",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "65",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "83",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "36",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "43",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "69",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "25",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "29",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "15",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "26",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "20",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "17",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "54",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "59",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "74",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "57",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "46",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "73",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "32",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "45",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "33",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "34",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "14",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "41",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "91",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "60",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "39",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "12",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "28",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "51",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "47",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "53",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "58",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    },
+    {
+      "codigo": "52",
+      "nombre": "Actividades económicas diversas",
+      "descripcion": "Actividades no clasificadas en otros sectores"
+    }
+  ],
+  "actividades": [
+    {
+      "nombre": "Cafeterías, fuentes de sodas, neverías, refresquerías y similares",
+      "codigo_scian": "237781",
+      "sector_codigo": "23",
+      "descripcion": "Actividad registrada en DENUE: SAN PEDRO, San Pedro, COAHUILA DE ZARAGOZA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218801",
+      "updated_at": "2025-07-08T07:10:16.218817"
+    },
+    {
+      "nombre": "Comercio al por menor en minisupers",
+      "codigo_scian": "118133",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: COCULA, Cocula, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218840",
+      "updated_at": "2025-07-08T07:10:16.218842"
+    },
+    {
+      "nombre": "Comercio al por menor en tiendas de abarrotes, ultramarinos y misceláneas",
+      "codigo_scian": "117019",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD NEZAHUALCÓYOTL, Nezahualcóyotl, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218850",
+      "updated_at": "2025-07-08T07:10:16.218850"
+    },
+    {
+      "nombre": "Comercio al por menor de aceites y grasas lubricantes, aditivos y similares para vehículos de motor",
+      "codigo_scian": "115154",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: LEÓN DE LOS ALDAMA, León, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218868",
+      "updated_at": "2025-07-08T07:10:16.218869"
+    },
+    {
+      "nombre": "Comercio al por menor de frutas y verduras frescas",
+      "codigo_scian": "869871",
+      "sector_codigo": "86",
+      "descripcion": "Actividad registrada en DENUE: CELAYA, Celaya, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218874",
+      "updated_at": "2025-07-08T07:10:16.218875"
+    },
+    {
+      "nombre": "Agrupaciones de autoayuda para alcohólicos y personas con otras adicciones",
+      "codigo_scian": "786301",
+      "sector_codigo": "78",
+      "descripcion": "Actividad registrada en DENUE: LA BARCA, La Barca, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218879",
+      "updated_at": "2025-07-08T07:10:16.218881"
+    },
+    {
+      "nombre": "Laboratorios médicos y de diagnóstico del sector privado",
+      "codigo_scian": "890104",
+      "sector_codigo": "89",
+      "descripcion": "Actividad registrada en DENUE: SAN PEDRO GARZA GARCÍA, San Pedro Garza García, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218896",
+      "updated_at": "2025-07-08T07:10:16.218897"
+    },
+    {
+      "nombre": "Comercio al por menor de otros alimentos",
+      "codigo_scian": "169248",
+      "sector_codigo": "16",
+      "descripcion": "Actividad registrada en DENUE: ZAPOPAN, Zapopan, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218903",
+      "updated_at": "2025-07-08T07:10:16.218904"
+    },
+    {
+      "nombre": "Edificación de naves y plantas industriales, excepto la supervisión",
+      "codigo_scian": "614272",
+      "sector_codigo": "61",
+      "descripcion": "Actividad registrada en DENUE: TIJUANA, Tijuana, BAJA CALIFORNIA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218909",
+      "updated_at": "2025-07-08T07:10:16.218910"
+    },
+    {
+      "nombre": "Bufetes jurídicos",
+      "codigo_scian": "762690",
+      "sector_codigo": "76",
+      "descripcion": "Actividad registrada en DENUE: MIGUEL HIDALGO, Miguel Hidalgo, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218913",
+      "updated_at": "2025-07-08T07:10:16.218914"
+    },
+    {
+      "nombre": "Comercio al por menor de artículos religiosos",
+      "codigo_scian": "753499",
+      "sector_codigo": "75",
+      "descripcion": "Actividad registrada en DENUE: ARRIAGA, Arriaga, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218918",
+      "updated_at": "2025-07-08T07:10:16.218919"
+    },
+    {
+      "nombre": "Comercio al por menor en tiendas de artesanías",
+      "codigo_scian": "134441",
+      "sector_codigo": "13",
+      "descripcion": "Actividad registrada en DENUE: SAN MIGUEL DE ALLENDE, San Miguel de Allende, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218923",
+      "updated_at": "2025-07-08T07:10:16.218924"
+    },
+    {
+      "nombre": "Comercio al por menor de artículos usados",
+      "codigo_scian": "405925",
+      "sector_codigo": "40",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD RÍO BRAVO, Río Bravo, TAMAULIPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218933",
+      "updated_at": "2025-07-08T07:10:16.218933"
+    },
+    {
+      "nombre": "Comercio al por menor de otros artículos de uso personal",
+      "codigo_scian": "106791",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD NEZAHUALCÓYOTL, Nezahualcóyotl, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218941",
+      "updated_at": "2025-07-08T07:10:16.218942"
+    },
+    {
+      "nombre": "Restaurantes con servicio de preparación de tacos y tortas",
+      "codigo_scian": "843427",
+      "sector_codigo": "84",
+      "descripcion": "Actividad registrada en DENUE: MEXICALI, Mexicali, BAJA CALIFORNIA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218947",
+      "updated_at": "2025-07-08T07:10:16.218948"
+    },
+    {
+      "nombre": "Fabricación de equipo y aparatos de distribución de energía eléctrica",
+      "codigo_scian": "939007",
+      "sector_codigo": "93",
+      "descripcion": "Actividad registrada en DENUE: REYNOSA, Reynosa, TAMAULIPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218952",
+      "updated_at": "2025-07-08T07:10:16.218953"
+    },
+    {
+      "nombre": "Comercio al por menor de teléfonos y otros aparatos de comunicación",
+      "codigo_scian": "815452",
+      "sector_codigo": "81",
+      "descripcion": "Actividad registrada en DENUE: TUXTLA GUTIÉRREZ, Tuxtla Gutiérrez, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218956",
+      "updated_at": "2025-07-08T07:10:16.218957"
+    },
+    {
+      "nombre": "Operadores de servicios de telecomunicaciones alámbricas",
+      "codigo_scian": "974548",
+      "sector_codigo": "97",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD NEZAHUALCÓYOTL, Nezahualcóyotl, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218960",
+      "updated_at": "2025-07-08T07:10:16.218961"
+    },
+    {
+      "nombre": "Comercio al por menor de gasolina y diesel",
+      "codigo_scian": "386992",
+      "sector_codigo": "38",
+      "descripcion": "Actividad registrada en DENUE: HERMOSILLO, Hermosillo, SONORA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218964",
+      "updated_at": "2025-07-08T07:10:16.218965"
+    },
+    {
+      "nombre": "Comercio al por menor de automóviles y camionetas usados",
+      "codigo_scian": "117620",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: SAN NICOLÁS DE LOS GARZA, San Nicolás de los Garza, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218968",
+      "updated_at": "2025-07-08T07:10:16.218969"
+    },
+    {
+      "nombre": "Restaurantes con servicio de preparación de antojitos",
+      "codigo_scian": "113952",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD NEZAHUALCÓYOTL, Nezahualcóyotl, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218975",
+      "updated_at": "2025-07-08T07:10:16.218975"
+    },
+    {
+      "nombre": "Fabricación de muebles de oficina y estantería",
+      "codigo_scian": "117424",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: MORELIA, Morelia, MICHOACÁN DE OCAMPO       ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218983",
+      "updated_at": "2025-07-08T07:10:16.218984"
+    },
+    {
+      "nombre": "Casas de empeño",
+      "codigo_scian": "118391",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: TORREÓN, Torreón, COAHUILA DE ZARAGOZA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218988",
+      "updated_at": "2025-07-08T07:10:16.218989"
+    },
+    {
+      "nombre": "Comercio al por menor de bicicletas",
+      "codigo_scian": "635453",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: NAUCALPAN DE JUÁREZ, Naucalpan de Juárez, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218991",
+      "updated_at": "2025-07-08T07:10:16.218992"
+    },
+    {
+      "nombre": "Comercio al por mayor de otras materias primas para otras industrias",
+      "codigo_scian": "629967",
+      "sector_codigo": "62",
+      "descripcion": "Actividad registrada en DENUE: MONCLOVA, Monclova, COAHUILA DE ZARAGOZA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218994",
+      "updated_at": "2025-07-08T07:10:16.218995"
+    },
+    {
+      "nombre": "Reparación y mantenimiento de otros artículos para el hogar y personales",
+      "codigo_scian": "100915",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: ECATEPEC DE MORELOS, Ecatepec de Morelos, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.218999",
+      "updated_at": "2025-07-08T07:10:16.219000"
+    },
+    {
+      "nombre": "Comercio al por mayor de cemento, tabique y grava",
+      "codigo_scian": "117327",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: TUXTLA GUTIÉRREZ, Tuxtla Gutiérrez, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219003",
+      "updated_at": "2025-07-08T07:10:16.219004"
+    },
+    {
+      "nombre": "Comercio al por menor de automóviles y camionetas nuevos",
+      "codigo_scian": "673013",
+      "sector_codigo": "67",
+      "descripcion": "Actividad registrada en DENUE: AZCAPOTZALCO, Azcapotzalco, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219006",
+      "updated_at": "2025-07-08T07:10:16.219007"
+    },
+    {
+      "nombre": "Servicios de administración de carreteras, puentes y servicios auxiliares",
+      "codigo_scian": "117387",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: SANTA MARÍA CANCHESDA, Temascalcingo, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219014",
+      "updated_at": "2025-07-08T07:10:16.219015"
+    },
+    {
+      "nombre": "Comercio al por menor de ropa de cuero y piel y de otros artículos de estos materiales",
+      "codigo_scian": "716172",
+      "sector_codigo": "71",
+      "descripcion": "Actividad registrada en DENUE: CHIHUAHUA, Chihuahua, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219019",
+      "updated_at": "2025-07-08T07:10:16.219020"
+    },
+    {
+      "nombre": "Comercio al por menor de calzado",
+      "codigo_scian": "716193",
+      "sector_codigo": "71",
+      "descripcion": "Actividad registrada en DENUE: CHIHUAHUA, Chihuahua, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219025",
+      "updated_at": "2025-07-08T07:10:16.219026"
+    },
+    {
+      "nombre": "Otro autotransporte foráneo de carga general",
+      "codigo_scian": "902624",
+      "sector_codigo": "90",
+      "descripcion": "Actividad registrada en DENUE: NUEVO LAREDO, Nuevo Laredo, TAMAULIPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219038",
+      "updated_at": "2025-07-08T07:10:16.219038"
+    },
+    {
+      "nombre": "Transporte colectivo urbano y suburbano de pasajeros en autobuses de ruta fija",
+      "codigo_scian": "954048",
+      "sector_codigo": "95",
+      "descripcion": "Actividad registrada en DENUE: FRESNILLO, Fresnillo, ZACATECAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219043",
+      "updated_at": "2025-07-08T07:10:16.219045"
+    },
+    {
+      "nombre": "Beneficio del café",
+      "codigo_scian": "932351",
+      "sector_codigo": "93",
+      "descripcion": "Actividad registrada en DENUE: PANTELHÓ, Pantelhó, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219048",
+      "updated_at": "2025-07-08T07:10:16.219049"
+    },
+    {
+      "nombre": "Cajas de ahorro popular",
+      "codigo_scian": "409010",
+      "sector_codigo": "40",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD MADERO, Ciudad Madero, TAMAULIPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219052",
+      "updated_at": "2025-07-08T07:10:16.219052"
+    },
+    {
+      "nombre": "Comercio al por menor de artículos y aparatos deportivos",
+      "codigo_scian": "555325",
+      "sector_codigo": "55",
+      "descripcion": "Actividad registrada en DENUE: JUÁREZ, Juárez, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219055",
+      "updated_at": "2025-07-08T07:10:16.219055"
+    },
+    {
+      "nombre": "Comercio al por menor de carnes rojas",
+      "codigo_scian": "801988",
+      "sector_codigo": "80",
+      "descripcion": "Actividad registrada en DENUE: XICO, Valle de Chalco Solidaridad, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219058",
+      "updated_at": "2025-07-08T07:10:16.219058"
+    },
+    {
+      "nombre": "Construcción de carreteras, puentes y similares",
+      "codigo_scian": "117234",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: ESTACIÓN MANUEL (ÚRSULO GALVÁN), González, TAMAULIPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219066",
+      "updated_at": "2025-07-08T07:10:16.219067"
+    },
+    {
+      "nombre": "Hoteles con otros servicios integrados",
+      "codigo_scian": "634349",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: ZAPOPAN, Zapopan, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219069",
+      "updated_at": "2025-07-08T07:10:16.219070"
+    },
+    {
+      "nombre": "Comercio al por mayor de botanas y frituras",
+      "codigo_scian": "632483",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: IZTAPALAPA, Iztapalapa, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219072",
+      "updated_at": "2025-07-08T07:10:16.219073"
+    },
+    {
+      "nombre": "Comercio al por menor de cerveza",
+      "codigo_scian": "117788",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: URUAPAN, Uruapan, MICHOACÁN DE OCAMPO       ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219085",
+      "updated_at": "2025-07-08T07:10:16.219086"
+    },
+    {
+      "nombre": "Servicios de preparación de otros alimentos para consumo inmediato",
+      "codigo_scian": "117264",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: CHIMALHUACÁN, Chimalhuacán, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219091",
+      "updated_at": "2025-07-08T07:10:16.219092"
+    },
+    {
+      "nombre": "Alquiler de equipo de cómputo y de otras máquinas y mobiliario de oficina",
+      "codigo_scian": "183382",
+      "sector_codigo": "18",
+      "descripcion": "Actividad registrada en DENUE: ZAPOPAN, Zapopan, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219095",
+      "updated_at": "2025-07-08T07:10:16.219097"
+    },
+    {
+      "nombre": "Edificación de inmuebles comerciales y de servicios, excepto la supervisión",
+      "codigo_scian": "118358",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: ZAPOPAN, Zapopan, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219101",
+      "updated_at": "2025-07-08T07:10:16.219102"
+    },
+    {
+      "nombre": "Comercio al por menor de blancos",
+      "codigo_scian": "716188",
+      "sector_codigo": "71",
+      "descripcion": "Actividad registrada en DENUE: CHIHUAHUA, Chihuahua, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219107",
+      "updated_at": "2025-07-08T07:10:16.219108"
+    },
+    {
+      "nombre": "Escuelas del sector privado que combinan diversos niveles de educación",
+      "codigo_scian": "635564",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: SAN MATEO ATENCO, San Mateo Atenco, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219110",
+      "updated_at": "2025-07-08T07:10:16.219111"
+    },
+    {
+      "nombre": "Comercio al por menor de gas L. P. en estaciones de carburación",
+      "codigo_scian": "848631",
+      "sector_codigo": "84",
+      "descripcion": "Actividad registrada en DENUE: SAN FRANCISCO TLALCILALCALPAN, Almoloya de Juárez, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219115",
+      "updated_at": "2025-07-08T07:10:16.219116"
+    },
+    {
+      "nombre": "Restaurantes con servicio de preparación de pescados y mariscos",
+      "codigo_scian": "716173",
+      "sector_codigo": "71",
+      "descripcion": "Actividad registrada en DENUE: CHIHUAHUA, Chihuahua, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219118",
+      "updated_at": "2025-07-08T07:10:16.219119"
+    },
+    {
+      "nombre": "Restaurantes con servicio de preparación de alimentos a la carta o de comida corrida",
+      "codigo_scian": "229192",
+      "sector_codigo": "22",
+      "descripcion": "Actividad registrada en DENUE: TLALNEPANTLA, Tlalnepantla de Baz, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219125",
+      "updated_at": "2025-07-08T07:10:16.219126"
+    },
+    {
+      "nombre": "Restaurantes que preparan otro tipo de alimentos para llevar",
+      "codigo_scian": "117605",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: SAN JUAN DEL RÍO, San Juan del Río, QUERÉTARO                               ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219128",
+      "updated_at": "2025-07-08T07:10:16.219129"
+    },
+    {
+      "nombre": "Comercio al por mayor de semillas y granos alimenticios, especias y chiles secos",
+      "codigo_scian": "102436",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: VILLA ÁVILA CAMACHO (LA CEIBA), Xicotepec, PUEBLA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219138",
+      "updated_at": "2025-07-08T07:10:16.219138"
+    },
+    {
+      "nombre": "Bares, cantinas y similares",
+      "codigo_scian": "979592",
+      "sector_codigo": "97",
+      "descripcion": "Actividad registrada en DENUE: SAN BLAS ATEMPA, San Blas Atempa, OAXACA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219140",
+      "updated_at": "2025-07-08T07:10:16.219141"
+    },
+    {
+      "nombre": "Comercio al por mayor de desechos de plástico",
+      "codigo_scian": "970640",
+      "sector_codigo": "97",
+      "descripcion": "Actividad registrada en DENUE: COLONIA JUÁREZ, San Mateo del Mar, OAXACA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219144",
+      "updated_at": "2025-07-08T07:10:16.219145"
+    },
+    {
+      "nombre": "Comercio al por mayor de desechos metálicos",
+      "codigo_scian": "111246",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: HUAUCHINANGO, Huauchinango, PUEBLA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219149",
+      "updated_at": "2025-07-08T07:10:16.219150"
+    },
+    {
+      "nombre": "Comercio al por menor de otros combustibles",
+      "codigo_scian": "111195",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: SAN DIONISIO OCOTEPEC, San Dionisio Ocotepec, OAXACA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219156",
+      "updated_at": "2025-07-08T07:10:16.219157"
+    },
+    {
+      "nombre": "Comercio al por menor de pescados y mariscos",
+      "codigo_scian": "107960",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: SAN MATEO DEL MAR, San Mateo del Mar, OAXACA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219160",
+      "updated_at": "2025-07-08T07:10:16.219160"
+    },
+    {
+      "nombre": "Comercio al por menor de plantas y flores naturales",
+      "codigo_scian": "100329",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD DE LIBRES, Libres, PUEBLA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219176",
+      "updated_at": "2025-07-08T07:10:16.219177"
+    },
+    {
+      "nombre": "Comercio al por menor de ropa, excepto de bebé y lencería",
+      "codigo_scian": "102383",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: TENANGO DE LAS FLORES, Huauchinango, PUEBLA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219181",
+      "updated_at": "2025-07-08T07:10:16.219182"
+    },
+    {
+      "nombre": "Consultorios dentales del sector privado",
+      "codigo_scian": "107432",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: LEÓN DE LOS ALDAMA, León, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219188",
+      "updated_at": "2025-07-08T07:10:16.219188"
+    },
+    {
+      "nombre": "Comercio al por mayor de mobiliario, equipo e instrumental médico y de laboratorio",
+      "codigo_scian": "300973",
+      "sector_codigo": "30",
+      "descripcion": "Actividad registrada en DENUE: MONTERREY, Monterrey, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219193",
+      "updated_at": "2025-07-08T07:10:16.219194"
+    },
+    {
+      "nombre": "Comercio al por menor de artículos de perfumería y cosméticos",
+      "codigo_scian": "822948",
+      "sector_codigo": "82",
+      "descripcion": "Actividad registrada en DENUE: JUÁREZ, Juárez, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219201",
+      "updated_at": "2025-07-08T07:10:16.219202"
+    },
+    {
+      "nombre": "Comercio al por menor de partes y refacciones nuevas para automóviles, camionetas y camiones",
+      "codigo_scian": "874581",
+      "sector_codigo": "87",
+      "descripcion": "Actividad registrada en DENUE: GUADALUPE, Guadalupe, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219210",
+      "updated_at": "2025-07-08T07:10:16.219211"
+    },
+    {
+      "nombre": "Transporte escolar y de personal",
+      "codigo_scian": "931648",
+      "sector_codigo": "93",
+      "descripcion": "Actividad registrada en DENUE: LAS PINTITAS, El Salto, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219214",
+      "updated_at": "2025-07-08T07:10:16.219215"
+    },
+    {
+      "nombre": "Comercio al por menor de muebles para el hogar",
+      "codigo_scian": "947830",
+      "sector_codigo": "94",
+      "descripcion": "Actividad registrada en DENUE: CUERNAVACA, Cuernavaca, MORELOS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219239",
+      "updated_at": "2025-07-08T07:10:16.219240"
+    },
+    {
+      "nombre": "Comercio al por menor de dulces y materias primas para repostería",
+      "codigo_scian": "761604",
+      "sector_codigo": "76",
+      "descripcion": "Actividad registrada en DENUE: GUADALAJARA, Guadalajara, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219245",
+      "updated_at": "2025-07-08T07:10:16.219246"
+    },
+    {
+      "nombre": "Comercio al por menor de artículos para albercas y otros artículos",
+      "codigo_scian": "940662",
+      "sector_codigo": "94",
+      "descripcion": "Actividad registrada en DENUE: LEÓN DE LOS ALDAMA, León, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219268",
+      "updated_at": "2025-07-08T07:10:16.219268"
+    },
+    {
+      "nombre": "Comercio al por mayor de equipo y material eléctrico",
+      "codigo_scian": "634712",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: TLALNEPANTLA, Tlalnepantla de Baz, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219274",
+      "updated_at": "2025-07-08T07:10:16.219275"
+    },
+    {
+      "nombre": "Comercio al por menor de gas L. P. en cilindros y para tanques estacionarios",
+      "codigo_scian": "117983",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: DOÑA INÉS [GRANJA], Corregidora, QUERÉTARO                               ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219289",
+      "updated_at": "2025-07-08T07:10:16.219290"
+    },
+    {
+      "nombre": "Escuelas del sector público de educación para necesidades especiales",
+      "codigo_scian": "376605",
+      "sector_codigo": "37",
+      "descripcion": "Actividad registrada en DENUE: TUXTLA GUTIÉRREZ, Tuxtla Gutiérrez, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219302",
+      "updated_at": "2025-07-08T07:10:16.219303"
+    },
+    {
+      "nombre": "Comercio al por menor de semillas y granos alimenticios, especias y chiles secos",
+      "codigo_scian": "753499",
+      "sector_codigo": "75",
+      "descripcion": "Actividad registrada en DENUE: ARRIAGA, Arriaga, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219307",
+      "updated_at": "2025-07-08T07:10:16.219308"
+    },
+    {
+      "nombre": "Salones y clínicas de belleza y peluquerías",
+      "codigo_scian": "103060",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: ECATEPEC DE MORELOS, Ecatepec de Morelos, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219312",
+      "updated_at": "2025-07-08T07:10:16.219313"
+    },
+    {
+      "nombre": "Construcción de obras de urbanización",
+      "codigo_scian": "931730",
+      "sector_codigo": "93",
+      "descripcion": "Actividad registrada en DENUE: MORELIA, Morelia, MICHOACÁN DE OCAMPO       ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219321",
+      "updated_at": "2025-07-08T07:10:16.219322"
+    },
+    {
+      "nombre": "Sociedades financieras de objeto múltiple",
+      "codigo_scian": "932635",
+      "sector_codigo": "93",
+      "descripcion": "Actividad registrada en DENUE: OCOTLÁN DE MORELOS, Ocotlán de Morelos, OAXACA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219327",
+      "updated_at": "2025-07-08T07:10:16.219327"
+    },
+    {
+      "nombre": "Comercio al por menor de regalos",
+      "codigo_scian": "873014",
+      "sector_codigo": "87",
+      "descripcion": "Actividad registrada en DENUE: SANTIAGO DE QUERÉTARO, Querétaro, QUERÉTARO                               ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219333",
+      "updated_at": "2025-07-08T07:10:16.219333"
+    },
+    {
+      "nombre": "Comercio al por menor de artículos de mercería y bonetería",
+      "codigo_scian": "819224",
+      "sector_codigo": "81",
+      "descripcion": "Actividad registrada en DENUE: LAS MARGARITAS, Las Margaritas, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219337",
+      "updated_at": "2025-07-08T07:10:16.219338"
+    },
+    {
+      "nombre": "Farmacias sin minisúper",
+      "codigo_scian": "117230",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: HEROICA NOGALES, Nogales, SONORA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219343",
+      "updated_at": "2025-07-08T07:10:16.219344"
+    },
+    {
+      "nombre": "Comercio al por menor en ferreterías y tlapalerías",
+      "codigo_scian": "640688",
+      "sector_codigo": "64",
+      "descripcion": "Actividad registrada en DENUE: XALAPA-ENRÍQUEZ, Xalapa, VERACRUZ DE IGNACIO DE LA LLAVE",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219356",
+      "updated_at": "2025-07-08T07:10:16.219357"
+    },
+    {
+      "nombre": "Servicios de administración de bienes raíces",
+      "codigo_scian": "670370",
+      "sector_codigo": "67",
+      "descripcion": "Actividad registrada en DENUE: TAPACHULA DE CÓRDOVA Y ORDÓÑEZ, Tapachula, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219362",
+      "updated_at": "2025-07-08T07:10:16.219364"
+    },
+    {
+      "nombre": "Asociaciones y organizaciones civiles",
+      "codigo_scian": "319295",
+      "sector_codigo": "31",
+      "descripcion": "Actividad registrada en DENUE: COLIMA, Colima, COLIMA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219368",
+      "updated_at": "2025-07-08T07:10:16.219369"
+    },
+    {
+      "nombre": "Comercio al por menor en supermercados",
+      "codigo_scian": "117273",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: MAZATLÁN, Mazatlán, SINALOA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219379",
+      "updated_at": "2025-07-08T07:10:16.219379"
+    },
+    {
+      "nombre": "Fabricación de resinas de plásticos reciclados",
+      "codigo_scian": "792918",
+      "sector_codigo": "79",
+      "descripcion": "Actividad registrada en DENUE: IZTAPALAPA, Iztapalapa, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219431",
+      "updated_at": "2025-07-08T07:10:16.219432"
+    },
+    {
+      "nombre": "Comercio al por mayor de partes y refacciones nuevas para automóviles, camionetas y camiones",
+      "codigo_scian": "868490",
+      "sector_codigo": "86",
+      "descripcion": "Actividad registrada en DENUE: XALAPA-ENRÍQUEZ, Xalapa, VERACRUZ DE IGNACIO DE LA LLAVE",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219451",
+      "updated_at": "2025-07-08T07:10:16.219452"
+    },
+    {
+      "nombre": "Restaurantes con servicio de preparación de pizzas, hamburguesas, hot dogs y pollos rostizados para llevar",
+      "codigo_scian": "817313",
+      "sector_codigo": "81",
+      "descripcion": "Actividad registrada en DENUE: JUÁREZ, Juárez, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219479",
+      "updated_at": "2025-07-08T07:10:16.219480"
+    },
+    {
+      "nombre": "Comercio al por menor de paletas de hielo y helados",
+      "codigo_scian": "642097",
+      "sector_codigo": "64",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD APODACA, Apodaca, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219490",
+      "updated_at": "2025-07-08T07:10:16.219491"
+    },
+    {
+      "nombre": "Comercio al por menor de bebidas no alcohólicas y hielo",
+      "codigo_scian": "109369",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD NEZAHUALCÓYOTL, Nezahualcóyotl, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219503",
+      "updated_at": "2025-07-08T07:10:16.219503"
+    },
+    {
+      "nombre": "Comercio al por menor de productos naturistas, medicamentos homeopáticos y de complementos alimenticios",
+      "codigo_scian": "753493",
+      "sector_codigo": "75",
+      "descripcion": "Actividad registrada en DENUE: ARRIAGA, Arriaga, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219509",
+      "updated_at": "2025-07-08T07:10:16.219510"
+    },
+    {
+      "nombre": "Edificación de vivienda multifamiliar",
+      "codigo_scian": "614414",
+      "sector_codigo": "61",
+      "descripcion": "Actividad registrada en DENUE: TORREÓN, Torreón, COAHUILA DE ZARAGOZA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219524",
+      "updated_at": "2025-07-08T07:10:16.219525"
+    },
+    {
+      "nombre": "Fabricación de productos de madera para la construcción",
+      "codigo_scian": "631286",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: BENITO JUÁREZ, Benito Juárez, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219530",
+      "updated_at": "2025-07-08T07:10:16.219530"
+    },
+    {
+      "nombre": "Alquiler sin intermediación de oficinas y locales comerciales",
+      "codigo_scian": "805911",
+      "sector_codigo": "80",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD MADERO, Ciudad Madero, TAMAULIPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219542",
+      "updated_at": "2025-07-08T07:10:16.219542"
+    },
+    {
+      "nombre": "Comercio al por menor de llantas y cámaras para automóviles, camionetas y camiones",
+      "codigo_scian": "118336",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: AZCAPOTZALCO, Azcapotzalco, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219549",
+      "updated_at": "2025-07-08T07:10:16.219550"
+    },
+    {
+      "nombre": "Comercio al por menor de artículos de joyería y relojes",
+      "codigo_scian": "625708",
+      "sector_codigo": "62",
+      "descripcion": "Actividad registrada en DENUE: CUAUHTÉMOC, Cuauhtémoc, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219558",
+      "updated_at": "2025-07-08T07:10:16.219558"
+    },
+    {
+      "nombre": "Otro autotransporte local de carga general",
+      "codigo_scian": "82695",
+      "sector_codigo": "82",
+      "descripcion": "Actividad registrada en DENUE: MEXICALI, Mexicali, BAJA CALIFORNIA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219565",
+      "updated_at": "2025-07-08T07:10:16.219566"
+    },
+    {
+      "nombre": "Casas de juegos electrónicos",
+      "codigo_scian": "117556",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: CULIACÁN ROSALES, Culiacán, SINALOA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219571",
+      "updated_at": "2025-07-08T07:10:16.219572"
+    },
+    {
+      "nombre": "Comercio al por menor de juguetes",
+      "codigo_scian": "622530",
+      "sector_codigo": "62",
+      "descripcion": "Actividad registrada en DENUE: JUÁREZ, Juárez, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219576",
+      "updated_at": "2025-07-08T07:10:16.219577"
+    },
+    {
+      "nombre": "Servicios de contabilidad y auditoría",
+      "codigo_scian": "114481",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: CUAUHTÉMOC, Cuauhtémoc, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219589",
+      "updated_at": "2025-07-08T07:10:16.219589"
+    },
+    {
+      "nombre": "Pesca y captura de peces, crustáceos, moluscos y otras especies",
+      "codigo_scian": "618145",
+      "sector_codigo": "61",
+      "descripcion": "Actividad registrada en DENUE: SAN JUANITO DE TRES BRAZOS, Centla, TABASCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219598",
+      "updated_at": "2025-07-08T07:10:16.219598"
+    },
+    {
+      "nombre": "Comercio al por menor de lentes",
+      "codigo_scian": "899935",
+      "sector_codigo": "89",
+      "descripcion": "Actividad registrada en DENUE: CHIHUAHUA, Chihuahua, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219611",
+      "updated_at": "2025-07-08T07:10:16.219612"
+    },
+    {
+      "nombre": "Comercio al por menor de partes y refacciones usadas para automóviles, camionetas y camiones",
+      "codigo_scian": "117277",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: MORELIA, Morelia, MICHOACÁN DE OCAMPO       ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219624",
+      "updated_at": "2025-07-08T07:10:16.219624"
+    },
+    {
+      "nombre": "Venta de billetes de lotería, pronósticos deportivos y otros boletos de sorteo",
+      "codigo_scian": "199228",
+      "sector_codigo": "19",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD NEZAHUALCÓYOTL, Nezahualcóyotl, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219637",
+      "updated_at": "2025-07-08T07:10:16.219638"
+    },
+    {
+      "nombre": "Aserrado de tablas y tablones",
+      "codigo_scian": "117286",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: LEONA VICARIO, Puerto Morelos , QUINTANA ROO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219661",
+      "updated_at": "2025-07-08T07:10:16.219662"
+    },
+    {
+      "nombre": "Centros de planificación familiar del sector privado",
+      "codigo_scian": "117632",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: CANCÚN, Benito Juárez, QUINTANA ROO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219688",
+      "updated_at": "2025-07-08T07:10:16.219689"
+    },
+    {
+      "nombre": "Servicios de fotocopiado, fax y afines",
+      "codigo_scian": "698728",
+      "sector_codigo": "69",
+      "descripcion": "Actividad registrada en DENUE: LAS VIGAS DE RAMÍREZ, Las Vigas de Ramírez, VERACRUZ DE IGNACIO DE LA LLAVE",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219762",
+      "updated_at": "2025-07-08T07:10:16.219763"
+    },
+    {
+      "nombre": "Comercio al por menor de discos y casetes",
+      "codigo_scian": "113686",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: OCOPULCO, Chiautla, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219765",
+      "updated_at": "2025-07-08T07:10:16.219766"
+    },
+    {
+      "nombre": "Comercio al por menor de revistas y periódicos",
+      "codigo_scian": "259454",
+      "sector_codigo": "25",
+      "descripcion": "Actividad registrada en DENUE: RAMOS ARIZPE, Ramos Arizpe, COAHUILA DE ZARAGOZA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219772",
+      "updated_at": "2025-07-08T07:10:16.219772"
+    },
+    {
+      "nombre": "Comercio al por menor de pintura",
+      "codigo_scian": "191416",
+      "sector_codigo": "19",
+      "descripcion": "Actividad registrada en DENUE: ZAPOPAN, Zapopan, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219794",
+      "updated_at": "2025-07-08T07:10:16.219795"
+    },
+    {
+      "nombre": "Comercio al por menor de artículos desechables",
+      "codigo_scian": "863943",
+      "sector_codigo": "86",
+      "descripcion": "Actividad registrada en DENUE: LAS MARGARITAS, Las Margaritas, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219827",
+      "updated_at": "2025-07-08T07:10:16.219828"
+    },
+    {
+      "nombre": "Comercio al por menor de bisutería y accesorios de vestir",
+      "codigo_scian": "899935",
+      "sector_codigo": "89",
+      "descripcion": "Actividad registrada en DENUE: CHIHUAHUA, Chihuahua, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219839",
+      "updated_at": "2025-07-08T07:10:16.219840"
+    },
+    {
+      "nombre": "Comercio al por menor de carne de aves",
+      "codigo_scian": "722233",
+      "sector_codigo": "72",
+      "descripcion": "Actividad registrada en DENUE: COMITÁN DE DOMÍNGUEZ, Comitán de Domínguez, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219848",
+      "updated_at": "2025-07-08T07:10:16.219849"
+    },
+    {
+      "nombre": "Elaboración de tortillas de maíz y molienda de nixtamal",
+      "codigo_scian": "117575",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: SAN CRISTÓBAL DE LAS CASAS, San Cristóbal de las Casas, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219858",
+      "updated_at": "2025-07-08T07:10:16.219859"
+    },
+    {
+      "nombre": "Escuelas de educación primaria del sector público",
+      "codigo_scian": "299068",
+      "sector_codigo": "29",
+      "descripcion": "Actividad registrada en DENUE: MONTERREY, Monterrey, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219869",
+      "updated_at": "2025-07-08T07:10:16.219869"
+    },
+    {
+      "nombre": "Comercio al por menor de vinos y licores",
+      "codigo_scian": "900901",
+      "sector_codigo": "90",
+      "descripcion": "Actividad registrada en DENUE: XALAPA-ENRÍQUEZ, Xalapa, VERACRUZ DE IGNACIO DE LA LLAVE",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219875",
+      "updated_at": "2025-07-08T07:10:16.219876"
+    },
+    {
+      "nombre": "Farmacias con minisúper",
+      "codigo_scian": "196352",
+      "sector_codigo": "19",
+      "descripcion": "Actividad registrada en DENUE: PUERTO VALLARTA, Puerto Vallarta, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219903",
+      "updated_at": "2025-07-08T07:10:16.219903"
+    },
+    {
+      "nombre": "Comercio al por mayor de leche y otros productos lácteos",
+      "codigo_scian": "118054",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: IGUALA DE LA INDEPENDENCIA, Iguala de la Independencia, GUERRERO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219919",
+      "updated_at": "2025-07-08T07:10:16.219919"
+    },
+    {
+      "nombre": "Comercio al por menor de motocicletas",
+      "codigo_scian": "952097",
+      "sector_codigo": "95",
+      "descripcion": "Actividad registrada en DENUE: ECATEPEC DE MORELOS, Ecatepec de Morelos, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219923",
+      "updated_at": "2025-07-08T07:10:16.219924"
+    },
+    {
+      "nombre": "Reparación y mantenimiento de otro equipo electrónico y de equipo de precisión",
+      "codigo_scian": "152620",
+      "sector_codigo": "15",
+      "descripcion": "Actividad registrada en DENUE: PACHUCA DE SOTO, Pachuca de Soto, HIDALGO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219944",
+      "updated_at": "2025-07-08T07:10:16.219945"
+    },
+    {
+      "nombre": "Comercio al por menor de lencería",
+      "codigo_scian": "112026",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: VERACRUZ, Veracruz, VERACRUZ DE IGNACIO DE LA LLAVE",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.219978",
+      "updated_at": "2025-07-08T07:10:16.219978"
+    },
+    {
+      "nombre": "Comercio al por menor de ropa de bebé",
+      "codigo_scian": "112711",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: TLALNEPANTLA, Tlalnepantla de Baz, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220053",
+      "updated_at": "2025-07-08T07:10:16.220054"
+    },
+    {
+      "nombre": "Comercio al por menor de electrodomésticos menores y aparatos de línea blanca",
+      "codigo_scian": "633354",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: CELAYA, Celaya, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220064",
+      "updated_at": "2025-07-08T07:10:16.220065"
+    },
+    {
+      "nombre": "Agentes, ajustadores y gestores de seguros y fianzas",
+      "codigo_scian": "928190",
+      "sector_codigo": "92",
+      "descripcion": "Actividad registrada en DENUE: PUERTO VALLARTA, Puerto Vallarta, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220080",
+      "updated_at": "2025-07-08T07:10:16.220080"
+    },
+    {
+      "nombre": "Otros servicios de intermediación para el transporte de carga",
+      "codigo_scian": "939099",
+      "sector_codigo": "93",
+      "descripcion": "Actividad registrada en DENUE: LAS PINTAS, El Salto, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220093",
+      "updated_at": "2025-07-08T07:10:16.220094"
+    },
+    {
+      "nombre": "Reparación mecánica en general de automóviles y camiones",
+      "codigo_scian": "100225",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: ENSENADA, Ensenada, BAJA CALIFORNIA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220100",
+      "updated_at": "2025-07-08T07:10:16.220100"
+    },
+    {
+      "nombre": "Comercio al por mayor de abarrotes",
+      "codigo_scian": "925018",
+      "sector_codigo": "92",
+      "descripcion": "Actividad registrada en DENUE: PLAYA VICENTE, Playa Vicente, VERACRUZ DE IGNACIO DE LA LLAVE",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220114",
+      "updated_at": "2025-07-08T07:10:16.220115"
+    },
+    {
+      "nombre": "Reparación y mantenimiento de bicicletas",
+      "codigo_scian": "106482",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: TLALNEPANTLA, Tlalnepantla de Baz, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220132",
+      "updated_at": "2025-07-08T07:10:16.220133"
+    },
+    {
+      "nombre": "Reparación y mantenimiento de maquinaria y equipo industrial",
+      "codigo_scian": "204746",
+      "sector_codigo": "20",
+      "descripcion": "Actividad registrada en DENUE: TENANGO DEL AIRE, Tenango del Aire, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220144",
+      "updated_at": "2025-07-08T07:10:16.220144"
+    },
+    {
+      "nombre": "Comercio al por mayor de otros materiales de desecho",
+      "codigo_scian": "117664",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: GUADALUPE, Guadalupe, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220154",
+      "updated_at": "2025-07-08T07:10:16.220155"
+    },
+    {
+      "nombre": "Comercio al por menor de telas",
+      "codigo_scian": "991777",
+      "sector_codigo": "99",
+      "descripcion": "Actividad registrada en DENUE: TEJUPILCO DE HIDALGO, Tejupilco, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220165",
+      "updated_at": "2025-07-08T07:10:16.220166"
+    },
+    {
+      "nombre": "Transporte turístico por agua",
+      "codigo_scian": "118402",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: CABO PULMO, Los Cabos, BAJA CALIFORNIA SUR",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220180",
+      "updated_at": "2025-07-08T07:10:16.220181"
+    },
+    {
+      "nombre": "Elaboración de tortillas de harina de trigo de forma tradicional",
+      "codigo_scian": "304257",
+      "sector_codigo": "30",
+      "descripcion": "Actividad registrada en DENUE: MONTERREY, Monterrey, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220185",
+      "updated_at": "2025-07-08T07:10:16.220185"
+    },
+    {
+      "nombre": "Escuelas de educación superior del sector privado",
+      "codigo_scian": "939442",
+      "sector_codigo": "93",
+      "descripcion": "Actividad registrada en DENUE: LEÓN DE LOS ALDAMA, León, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220205",
+      "updated_at": "2025-07-08T07:10:16.220205"
+    },
+    {
+      "nombre": "Servicios de mudanzas",
+      "codigo_scian": "181144",
+      "sector_codigo": "18",
+      "descripcion": "Actividad registrada en DENUE: ZAPOPAN, Zapopan, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220229",
+      "updated_at": "2025-07-08T07:10:16.220229"
+    },
+    {
+      "nombre": "Comercio al por menor de alfombras, cortinas, tapices y similares",
+      "codigo_scian": "104415",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: MISIÓN SAN AGUSTÍN [CONJUNTO URBANO], Acolman, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220272",
+      "updated_at": "2025-07-08T07:10:16.220273"
+    },
+    {
+      "nombre": "Comercio al por menor de leche, otros productos lácteos y embutidos",
+      "codigo_scian": "722228",
+      "sector_codigo": "72",
+      "descripcion": "Actividad registrada en DENUE: COMITÁN DE DOMÍNGUEZ, Comitán de Domínguez, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220280",
+      "updated_at": "2025-07-08T07:10:16.220280"
+    },
+    {
+      "nombre": "Fabricación de asientos y accesorios interiores para vehículos automotores",
+      "codigo_scian": "117915",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: TECNOLÓGICO INNOVACIÓN [PARQUE INDUSTRIAL], El Marqués, QUERÉTARO                               ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220335",
+      "updated_at": "2025-07-08T07:10:16.220336"
+    },
+    {
+      "nombre": "Fabricación de productos a base de piedras de cantera",
+      "codigo_scian": "115001",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: GUADALUPE VICTORIA, Guadalupe Victoria, DURANGO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220348",
+      "updated_at": "2025-07-08T07:10:16.220349"
+    },
+    {
+      "nombre": "Inmobiliarias y corredores de bienes raíces",
+      "codigo_scian": "103533",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: LEÓN DE LOS ALDAMA, León, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220363",
+      "updated_at": "2025-07-08T07:10:16.220363"
+    },
+    {
+      "nombre": "Consultorios de medicina general del sector privado",
+      "codigo_scian": "933191",
+      "sector_codigo": "93",
+      "descripcion": "Actividad registrada en DENUE: ALLENDE, Coatzacoalcos, VERACRUZ DE IGNACIO DE LA LLAVE",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220371",
+      "updated_at": "2025-07-08T07:10:16.220372"
+    },
+    {
+      "nombre": "Impresión de formas continuas y otros impresos",
+      "codigo_scian": "902254",
+      "sector_codigo": "90",
+      "descripcion": "Actividad registrada en DENUE: URUAPAN, Uruapan, MICHOACÁN DE OCAMPO       ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220387",
+      "updated_at": "2025-07-08T07:10:16.220387"
+    },
+    {
+      "nombre": "Comercialización de energía eléctrica",
+      "codigo_scian": "930116",
+      "sector_codigo": "93",
+      "descripcion": "Actividad registrada en DENUE: SAN FRANCISCO DEL RINCÓN, San Francisco del Rincón, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220392",
+      "updated_at": "2025-07-08T07:10:16.220393"
+    },
+    {
+      "nombre": "Servicios de acceso a computadoras",
+      "codigo_scian": "161261",
+      "sector_codigo": "16",
+      "descripcion": "Actividad registrada en DENUE: LA PAZ, La Paz, BAJA CALIFORNIA SUR",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220401",
+      "updated_at": "2025-07-08T07:10:16.220402"
+    },
+    {
+      "nombre": "Comercio al por menor de artículos de papelería",
+      "codigo_scian": "818434",
+      "sector_codigo": "81",
+      "descripcion": "Actividad registrada en DENUE: MATEHUALA, Matehuala, SAN LUIS POTOSÍ        ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220407",
+      "updated_at": "2025-07-08T07:10:16.220408"
+    },
+    {
+      "nombre": "Comercio al por mayor de artículos y aparatos deportivos",
+      "codigo_scian": "999950",
+      "sector_codigo": "99",
+      "descripcion": "Actividad registrada en DENUE: TAXCO DE ALARCÓN, Taxco de Alarcón, GUERRERO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220412",
+      "updated_at": "2025-07-08T07:10:16.220413"
+    },
+    {
+      "nombre": "Purificación y embotellado de agua",
+      "codigo_scian": "116454",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: CIUDAD NICOLÁS ROMERO, Nicolás Romero, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220416",
+      "updated_at": "2025-07-08T07:10:16.220417"
+    },
+    {
+      "nombre": "Comercio al por menor de mascotas",
+      "codigo_scian": "214590",
+      "sector_codigo": "21",
+      "descripcion": "Actividad registrada en DENUE: CHALCO DE DÍAZ COVARRUBIAS, Chalco, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220424",
+      "updated_at": "2025-07-08T07:10:16.220425"
+    },
+    {
+      "nombre": "Comercio al por menor de mobiliario, equipo y accesorios de cómputo",
+      "codigo_scian": "369114",
+      "sector_codigo": "36",
+      "descripcion": "Actividad registrada en DENUE: SAN LUIS POTOSÍ, San Luis Potosí, SAN LUIS POTOSÍ        ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220433",
+      "updated_at": "2025-07-08T07:10:16.220434"
+    },
+    {
+      "nombre": "Servicios de administración de negocios",
+      "codigo_scian": "996486",
+      "sector_codigo": "99",
+      "descripcion": "Actividad registrada en DENUE: CUAUHTÉMOC, Cuauhtémoc, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220438",
+      "updated_at": "2025-07-08T07:10:16.220438"
+    },
+    {
+      "nombre": "Servicios de consultoría en administración",
+      "codigo_scian": "108880",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: CUAUHTÉMOC, Cuauhtémoc, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220441",
+      "updated_at": "2025-07-08T07:10:16.220441"
+    },
+    {
+      "nombre": "Servicios de investigación de mercados y encuestas de opinión pública",
+      "codigo_scian": "840021",
+      "sector_codigo": "84",
+      "descripcion": "Actividad registrada en DENUE: GUADALAJARA, Guadalajara, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220445",
+      "updated_at": "2025-07-08T07:10:16.220446"
+    },
+    {
+      "nombre": "Comercio al por mayor de pintura",
+      "codigo_scian": "639230",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: SAN LUIS POTOSÍ, San Luis Potosí, SAN LUIS POTOSÍ        ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220449",
+      "updated_at": "2025-07-08T07:10:16.220450"
+    },
+    {
+      "nombre": "Fabricación de pinturas y recubrimientos",
+      "codigo_scian": "639393",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: VILLA DE POZOS, Villa de Pozos SLP, SAN LUIS POTOSÍ        ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220453",
+      "updated_at": "2025-07-08T07:10:16.220454"
+    },
+    {
+      "nombre": "Estaciones de transmisión de programas de radio",
+      "codigo_scian": "632608",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: VICTORIA DE DURANGO, Durango, DURANGO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220474",
+      "updated_at": "2025-07-08T07:10:16.220475"
+    },
+    {
+      "nombre": "Centros de acondicionamiento físico del sector privado",
+      "codigo_scian": "106527",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: CHIHUAHUA, Chihuahua, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220479",
+      "updated_at": "2025-07-08T07:10:16.220480"
+    },
+    {
+      "nombre": "Lavanderías y tintorerías",
+      "codigo_scian": "542728",
+      "sector_codigo": "54",
+      "descripcion": "Actividad registrada en DENUE: CHIHUAHUA, Chihuahua, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220483",
+      "updated_at": "2025-07-08T07:10:16.220483"
+    },
+    {
+      "nombre": "Servicios de diseño de sistemas de cómputo y servicios relacionados",
+      "codigo_scian": "105809",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: SANTA CATARINA, Acolman, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220504",
+      "updated_at": "2025-07-08T07:10:16.220505"
+    },
+    {
+      "nombre": "Hojalatería y pintura de automóviles y camiones",
+      "codigo_scian": "113040",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: SAN LUIS RÍO COLORADO, San Luis Río Colorado, SONORA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220516",
+      "updated_at": "2025-07-08T07:10:16.220517"
+    },
+    {
+      "nombre": "Administración pública en general",
+      "codigo_scian": "444796",
+      "sector_codigo": "44",
+      "descripcion": "Actividad registrada en DENUE: COATEPEC, Coatepec, VERACRUZ DE IGNACIO DE LA LLAVE",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220565",
+      "updated_at": "2025-07-08T07:10:16.220566"
+    },
+    {
+      "nombre": "Servicios veterinarios para mascotas prestados por el sector privado",
+      "codigo_scian": "108586",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: MUNA, Muna, YUCATÁN       ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220569",
+      "updated_at": "2025-07-08T07:10:16.220570"
+    },
+    {
+      "nombre": "Reparación de calzado y otros artículos de piel y cuero",
+      "codigo_scian": "774764",
+      "sector_codigo": "77",
+      "descripcion": "Actividad registrada en DENUE: GUSTAVO A. MADERO, Gustavo A. Madero, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220580",
+      "updated_at": "2025-07-08T07:10:16.220581"
+    },
+    {
+      "nombre": "Comercio al por mayor de productos químicos para la industria farmacéutica y para otro uso industrial",
+      "codigo_scian": "623231",
+      "sector_codigo": "62",
+      "descripcion": "Actividad registrada en DENUE: IZTAPALAPA, Iztapalapa, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220602",
+      "updated_at": "2025-07-08T07:10:16.220603"
+    },
+    {
+      "nombre": "Diseño gráfico",
+      "codigo_scian": "116450",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: SAN NICOLÁS DE LOS GARZA, San Nicolás de los Garza, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220640",
+      "updated_at": "2025-07-08T07:10:16.220641"
+    },
+    {
+      "nombre": "Elaboración de botanas",
+      "codigo_scian": "635367",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: LERMA DE VILLADA, Lerma, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220655",
+      "updated_at": "2025-07-08T07:10:16.220656"
+    },
+    {
+      "nombre": "Restaurantes de autoservicio",
+      "codigo_scian": "628648",
+      "sector_codigo": "62",
+      "descripcion": "Actividad registrada en DENUE: TIJUANA, Tijuana, BAJA CALIFORNIA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220796",
+      "updated_at": "2025-07-08T07:10:16.220796"
+    },
+    {
+      "nombre": "Suministro de personal permanente",
+      "codigo_scian": "776726",
+      "sector_codigo": "77",
+      "descripcion": "Actividad registrada en DENUE: LEÓN DE LOS ALDAMA, León, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220800",
+      "updated_at": "2025-07-08T07:10:16.220800"
+    },
+    {
+      "nombre": "Agencias de publicidad",
+      "codigo_scian": "637332",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: MONTERREY, Monterrey, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220804",
+      "updated_at": "2025-07-08T07:10:16.220804"
+    },
+    {
+      "nombre": "Escuelas del sector público que combinan diversos niveles de educación",
+      "codigo_scian": "647292",
+      "sector_codigo": "64",
+      "descripcion": "Actividad registrada en DENUE: VALLADOLID, Valladolid, YUCATÁN       ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220808",
+      "updated_at": "2025-07-08T07:10:16.220809"
+    },
+    {
+      "nombre": "Comercio al por menor en tiendas departamentales",
+      "codigo_scian": "631343",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: COYOACÁN, Coyoacán, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:16.220880",
+      "updated_at": "2025-07-08T07:10:16.220881"
+    },
+    {
+      "nombre": "Servicios de preparación de alimentos en unidades móviles",
+      "codigo_scian": "111453",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: VALLE DE BRAVO, Valle de Bravo, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501545",
+      "updated_at": "2025-07-08T07:10:22.501553"
+    },
+    {
+      "nombre": "Captación, tratamiento y suministro de agua realizados por el sector público",
+      "codigo_scian": "828969",
+      "sector_codigo": "82",
+      "descripcion": "Actividad registrada en DENUE: TLALNEPANTLA, Tlalnepantla de Baz, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501560",
+      "updated_at": "2025-07-08T07:10:22.501560"
+    },
+    {
+      "nombre": "Servicios de recepción de llamadas telefónicas y promoción por teléfono",
+      "codigo_scian": "864034",
+      "sector_codigo": "86",
+      "descripcion": "Actividad registrada en DENUE: CUAUHTÉMOC, Cuauhtémoc, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501566",
+      "updated_at": "2025-07-08T07:10:22.501567"
+    },
+    {
+      "nombre": "Otros servicios de reparación y mantenimiento de automóviles y camiones",
+      "codigo_scian": "222964",
+      "sector_codigo": "22",
+      "descripcion": "Actividad registrada en DENUE: TLALNEPANTLA, Tlalnepantla de Baz, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501574",
+      "updated_at": "2025-07-08T07:10:22.501575"
+    },
+    {
+      "nombre": "Asociaciones, organizaciones y cámaras de productores, comerciantes y prestadores de servicios",
+      "codigo_scian": "816007",
+      "sector_codigo": "81",
+      "descripcion": "Actividad registrada en DENUE: CABO SAN LUCAS, Los Cabos, BAJA CALIFORNIA SUR",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501578",
+      "updated_at": "2025-07-08T07:10:22.501579"
+    },
+    {
+      "nombre": "Servicios de orientación y trabajo social para la niñez y la juventud prestados por el sector privado",
+      "codigo_scian": "106570",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: ZAPOTLANEJO, Zapotlanejo, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501630",
+      "updated_at": "2025-07-08T07:10:22.501630"
+    },
+    {
+      "nombre": "Otros servicios personales",
+      "codigo_scian": "106099",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: SAN SALVADOR TIZATLALLI, Metepec, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501643",
+      "updated_at": "2025-07-08T07:10:22.501643"
+    },
+    {
+      "nombre": "Otros servicios relacionados con los servicios inmobiliarios",
+      "codigo_scian": "923946",
+      "sector_codigo": "92",
+      "descripcion": "Actividad registrada en DENUE: MONTERREY, Monterrey, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501757",
+      "updated_at": "2025-07-08T07:10:22.501757"
+    },
+    {
+      "nombre": "Fabricación de muebles, excepto cocinas integrales, muebles modulares de baño y muebles de oficina y estantería",
+      "codigo_scian": "115666",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: SAN ANDRÉS CHOLULA, San Andrés Cholula, PUEBLA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501775",
+      "updated_at": "2025-07-08T07:10:22.501775"
+    },
+    {
+      "nombre": "Servicios de mensajería y paquetería foránea",
+      "codigo_scian": "946936",
+      "sector_codigo": "94",
+      "descripcion": "Actividad registrada en DENUE: HEROICA PUEBLA DE ZARAGOZA, Puebla, PUEBLA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501800",
+      "updated_at": "2025-07-08T07:10:22.501801"
+    },
+    {
+      "nombre": "Servicios de preparación de alimentos para ocasiones especiales",
+      "codigo_scian": "114777",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: HEROICA PUEBLA DE ZARAGOZA, Puebla, PUEBLA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501820",
+      "updated_at": "2025-07-08T07:10:22.501821"
+    },
+    {
+      "nombre": "Servicios de arquitectura",
+      "codigo_scian": "110305",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: MONCLOVA, Monclova, COAHUILA DE ZARAGOZA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501823",
+      "updated_at": "2025-07-08T07:10:22.501824"
+    },
+    {
+      "nombre": "Actividades de seguridad nacional",
+      "codigo_scian": "858425",
+      "sector_codigo": "85",
+      "descripcion": "Actividad registrada en DENUE: COYOACÁN, Coyoacán, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501829",
+      "updated_at": "2025-07-08T07:10:22.501830"
+    },
+    {
+      "nombre": "Hoteles sin otros servicios integrados",
+      "codigo_scian": "930425",
+      "sector_codigo": "93",
+      "descripcion": "Actividad registrada en DENUE: TAPACHULA DE CÓRDOVA Y ORDÓÑEZ, Tapachula, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501833",
+      "updated_at": "2025-07-08T07:10:22.501833"
+    },
+    {
+      "nombre": "Servicios de orientación y trabajo social para la niñez y la juventud prestados por el sector público",
+      "codigo_scian": "468697",
+      "sector_codigo": "46",
+      "descripcion": "Actividad registrada en DENUE: COPAINALÁ, Copainalá, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501887",
+      "updated_at": "2025-07-08T07:10:22.501888"
+    },
+    {
+      "nombre": "Servicios de fotografía y videograbación",
+      "codigo_scian": "949556",
+      "sector_codigo": "94",
+      "descripcion": "Actividad registrada en DENUE: SAN PEDRO GARZA GARCÍA, San Pedro Garza García, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501924",
+      "updated_at": "2025-07-08T07:10:22.501924"
+    },
+    {
+      "nombre": "Procesamiento electrónico de información, hospedaje y otros servicios relacionados",
+      "codigo_scian": "927663",
+      "sector_codigo": "92",
+      "descripcion": "Actividad registrada en DENUE: TLALNEPANTLA, Tlalnepantla de Baz, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501965",
+      "updated_at": "2025-07-08T07:10:22.501966"
+    },
+    {
+      "nombre": "Sanitarios públicos y bolerías",
+      "codigo_scian": "991072",
+      "sector_codigo": "99",
+      "descripcion": "Actividad registrada en DENUE: LA MAGDALENA CONTRERAS, La Magdalena Contreras, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.501995",
+      "updated_at": "2025-07-08T07:10:22.501996"
+    },
+    {
+      "nombre": "Reparación y mantenimiento de motocicletas",
+      "codigo_scian": "107949",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: MISANTLA, Misantla, VERACRUZ DE IGNACIO DE LA LLAVE",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502019",
+      "updated_at": "2025-07-08T07:10:22.502020"
+    },
+    {
+      "nombre": "Servicios de investigación y de protección y custodia, excepto mediante monitoreo",
+      "codigo_scian": "117353",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: TIJUANA, Tijuana, BAJA CALIFORNIA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502029",
+      "updated_at": "2025-07-08T07:10:22.502030"
+    },
+    {
+      "nombre": "Reparación de suspensiones de automóviles y camiones",
+      "codigo_scian": "138119",
+      "sector_codigo": "13",
+      "descripcion": "Actividad registrada en DENUE: MEXICALI, Mexicali, BAJA CALIFORNIA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502055",
+      "updated_at": "2025-07-08T07:10:22.502055"
+    },
+    {
+      "nombre": "Residencias del sector privado para el cuidado de personas con problemas de trastorno mental y adicción",
+      "codigo_scian": "106997",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: SAN PEDRO, San Pedro, COAHUILA DE ZARAGOZA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502059",
+      "updated_at": "2025-07-08T07:10:22.502059"
+    },
+    {
+      "nombre": "Estacionamientos y pensiones para vehículos automotores",
+      "codigo_scian": "117581",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: LORETO, Loreto, ZACATECAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502077",
+      "updated_at": "2025-07-08T07:10:22.502078"
+    },
+    {
+      "nombre": "Servicios de protección y custodia mediante el monitoreo de sistemas de seguridad",
+      "codigo_scian": "942079",
+      "sector_codigo": "94",
+      "descripcion": "Actividad registrada en DENUE: SAN LUIS POTOSÍ, San Luis Potosí, SAN LUIS POTOSÍ        ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502090",
+      "updated_at": "2025-07-08T07:10:22.502090"
+    },
+    {
+      "nombre": "Servicios de agencias aduanales",
+      "codigo_scian": "628369",
+      "sector_codigo": "62",
+      "descripcion": "Actividad registrada en DENUE: TIJUANA, Tijuana, BAJA CALIFORNIA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502099",
+      "updated_at": "2025-07-08T07:10:22.502100"
+    },
+    {
+      "nombre": "Servicios de grúa",
+      "codigo_scian": "974083",
+      "sector_codigo": "97",
+      "descripcion": "Actividad registrada en DENUE: TEPIC, Tepic, NAYARIT",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502122",
+      "updated_at": "2025-07-08T07:10:22.502123"
+    },
+    {
+      "nombre": "Otros servicios de telecomunicaciones",
+      "codigo_scian": "105418",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: TEHUACÁN, Tehuacán, PUEBLA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502137",
+      "updated_at": "2025-07-08T07:10:22.502138"
+    },
+    {
+      "nombre": "Alquiler de maquinaria y equipo comercial y de servicios",
+      "codigo_scian": "117692",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: CULIACÁN ROSALES, Culiacán, SINALOA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502141",
+      "updated_at": "2025-07-08T07:10:22.502142"
+    },
+    {
+      "nombre": "Servicios de dibujo",
+      "codigo_scian": "936609",
+      "sector_codigo": "93",
+      "descripcion": "Actividad registrada en DENUE: ATLIXCO, Atlixco, PUEBLA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502148",
+      "updated_at": "2025-07-08T07:10:22.502148"
+    },
+    {
+      "nombre": "Otros servicios de almacenamiento general sin instalaciones especializadas",
+      "codigo_scian": "671032",
+      "sector_codigo": "67",
+      "descripcion": "Actividad registrada en DENUE: SAN LUIS POTOSÍ, San Luis Potosí, SAN LUIS POTOSÍ        ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502156",
+      "updated_at": "2025-07-08T07:10:22.502156"
+    },
+    {
+      "nombre": "Servicios de blindaje y de adaptación de automóviles y camiones",
+      "codigo_scian": "118418",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: NUEVO LAREDO, Nuevo Laredo, TAMAULIPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502171",
+      "updated_at": "2025-07-08T07:10:22.502172"
+    },
+    {
+      "nombre": "Alquiler de maquinaria y equipo para mover, levantar y acomodar materiales",
+      "codigo_scian": "868895",
+      "sector_codigo": "86",
+      "descripcion": "Actividad registrada en DENUE: SAN NICOLÁS DE LOS GARZA, San Nicolás de los Garza, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502177",
+      "updated_at": "2025-07-08T07:10:22.502178"
+    },
+    {
+      "nombre": "Servicios de revelado e impresión de fotografías",
+      "codigo_scian": "115203",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: SANTIAGO PAPASQUIARO, Santiago Papasquiaro, DURANGO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502192",
+      "updated_at": "2025-07-08T07:10:22.502193"
+    },
+    {
+      "nombre": "Otros servicios de consultoría científica y técnica",
+      "codigo_scian": "760325",
+      "sector_codigo": "76",
+      "descripcion": "Actividad registrada en DENUE: HERMOSILLO, Hermosillo, SONORA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502230",
+      "updated_at": "2025-07-08T07:10:22.502230"
+    },
+    {
+      "nombre": "Supervisión de edificación de inmuebles comerciales y de servicios",
+      "codigo_scian": "644476",
+      "sector_codigo": "64",
+      "descripcion": "Actividad registrada en DENUE: MONTERREY, Monterrey, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502233",
+      "updated_at": "2025-07-08T07:10:22.502234"
+    },
+    {
+      "nombre": "Otros servicios educativos proporcionados por el sector privado",
+      "codigo_scian": "830123",
+      "sector_codigo": "83",
+      "descripcion": "Actividad registrada en DENUE: ENSENADA, Ensenada, BAJA CALIFORNIA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502252",
+      "updated_at": "2025-07-08T07:10:22.502253"
+    },
+    {
+      "nombre": "Servicios de apoyo para efectuar trámites legales",
+      "codigo_scian": "867180",
+      "sector_codigo": "86",
+      "descripcion": "Actividad registrada en DENUE: VICTORIA DE DURANGO, Durango, DURANGO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502256",
+      "updated_at": "2025-07-08T07:10:22.502256"
+    },
+    {
+      "nombre": "Departamentos y casas amueblados con servicios de hotelería",
+      "codigo_scian": "113321",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: CHELEM, Progreso, YUCATÁN       ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502259",
+      "updated_at": "2025-07-08T07:10:22.502260"
+    },
+    {
+      "nombre": "Servicios de rotulación y otros servicios de publicidad",
+      "codigo_scian": "774931",
+      "sector_codigo": "77",
+      "descripcion": "Actividad registrada en DENUE: VERACRUZ, Veracruz, VERACRUZ DE IGNACIO DE LA LLAVE",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502269",
+      "updated_at": "2025-07-08T07:10:22.502270"
+    },
+    {
+      "nombre": "Reparación y mantenimiento de maquinaria y equipo comercial y de servicios",
+      "codigo_scian": "108032",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: MÉRIDA, Mérida, YUCATÁN       ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502277",
+      "updated_at": "2025-07-08T07:10:22.502278"
+    },
+    {
+      "nombre": "Comercio al por mayor de maquinaria y equipo para otros servicios y para actividades comerciales",
+      "codigo_scian": "370773",
+      "sector_codigo": "37",
+      "descripcion": "Actividad registrada en DENUE: SAN LUIS POTOSÍ, San Luis Potosí, SAN LUIS POTOSÍ        ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502295",
+      "updated_at": "2025-07-08T07:10:22.502296"
+    },
+    {
+      "nombre": "Servicios de ingeniería",
+      "codigo_scian": "929025",
+      "sector_codigo": "92",
+      "descripcion": "Actividad registrada en DENUE: TLALPAN, Tlalpan, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502300",
+      "updated_at": "2025-07-08T07:10:22.502301"
+    },
+    {
+      "nombre": "Operadores de servicios de telecomunicaciones vía satélite",
+      "codigo_scian": "723026",
+      "sector_codigo": "72",
+      "descripcion": "Actividad registrada en DENUE: ZAPOPAN, Zapopan, JALISCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502308",
+      "updated_at": "2025-07-08T07:10:22.502309"
+    },
+    {
+      "nombre": "Otros servicios profesionales, científicos y técnicos",
+      "codigo_scian": "102188",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: CUAUHTÉMOC, Cuauhtémoc, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502317",
+      "updated_at": "2025-07-08T07:10:22.502318"
+    },
+    {
+      "nombre": "Otros servicios recreativos prestados por el sector privado",
+      "codigo_scian": "871969",
+      "sector_codigo": "87",
+      "descripcion": "Actividad registrada en DENUE: CANCÚN, Benito Juárez, QUINTANA ROO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502329",
+      "updated_at": "2025-07-08T07:10:22.502330"
+    },
+    {
+      "nombre": "Operadores de servicios de telecomunicaciones inalámbricas",
+      "codigo_scian": "108467",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: TAMULTÉ DE LAS SABANAS, Centro, TABASCO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502354",
+      "updated_at": "2025-07-08T07:10:22.502354"
+    },
+    {
+      "nombre": "Instalaciones eléctricas en construcciones",
+      "codigo_scian": "394406",
+      "sector_codigo": "39",
+      "descripcion": "Actividad registrada en DENUE: HERMOSILLO, Hermosillo, SONORA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502363",
+      "updated_at": "2025-07-08T07:10:22.502363"
+    },
+    {
+      "nombre": "Servicios de limpieza de inmuebles",
+      "codigo_scian": "114201",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: AGUASCALIENTES, Aguascalientes, AGUASCALIENTES",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502366",
+      "updated_at": "2025-07-08T07:10:22.502367"
+    },
+    {
+      "nombre": "Servicios de profesores particulares",
+      "codigo_scian": "117829",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: TIJUANA, Tijuana, BAJA CALIFORNIA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502409",
+      "updated_at": "2025-07-08T07:10:22.502410"
+    },
+    {
+      "nombre": "Otros consultorios del sector privado para el cuidado de la salud",
+      "codigo_scian": "704771",
+      "sector_codigo": "70",
+      "descripcion": "Actividad registrada en DENUE: YAJALÓN, Yajalón, CHIAPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502416",
+      "updated_at": "2025-07-08T07:10:22.502417"
+    },
+    {
+      "nombre": "Servicios de consultoría en medio ambiente",
+      "codigo_scian": "104160",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: GUSTAVO A. MADERO, Gustavo A. Madero, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502460",
+      "updated_at": "2025-07-08T07:10:22.502460"
+    },
+    {
+      "nombre": "Servicios funerarios",
+      "codigo_scian": "631605",
+      "sector_codigo": "63",
+      "descripcion": "Actividad registrada en DENUE: COYOACÁN, Coyoacán, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502470",
+      "updated_at": "2025-07-08T07:10:22.502471"
+    },
+    {
+      "nombre": "Otros servicios de apoyo a los negocios",
+      "codigo_scian": "686038",
+      "sector_codigo": "68",
+      "descripcion": "Actividad registrada en DENUE: ÁLVARO OBREGÓN, Álvaro Obregón, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502487",
+      "updated_at": "2025-07-08T07:10:22.502488"
+    },
+    {
+      "nombre": "Otros servicios relacionados con la contabilidad",
+      "codigo_scian": "853296",
+      "sector_codigo": "85",
+      "descripcion": "Actividad registrada en DENUE: SAN PEDRO GARZA GARCÍA, San Pedro Garza García, NUEVO LEÓN   ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502490",
+      "updated_at": "2025-07-08T07:10:22.502491"
+    },
+    {
+      "nombre": "Servicios de mensajería y paquetería local",
+      "codigo_scian": "794065",
+      "sector_codigo": "79",
+      "descripcion": "Actividad registrada en DENUE: CUAUHTÉMOC, Cuauhtémoc, CHIHUAHUA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502493",
+      "updated_at": "2025-07-08T07:10:22.502494"
+    },
+    {
+      "nombre": "Otros servicios de reservaciones",
+      "codigo_scian": "113159",
+      "sector_codigo": "11",
+      "descripcion": "Actividad registrada en DENUE: LOS MOCHIS, Ahome, SINALOA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502640",
+      "updated_at": "2025-07-08T07:10:22.502640"
+    },
+    {
+      "nombre": "Servicios de instalación y mantenimiento de áreas verdes",
+      "codigo_scian": "106078",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: HEROICA PUEBLA DE ZARAGOZA, Puebla, PUEBLA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:22.502680",
+      "updated_at": "2025-07-08T07:10:22.502681"
+    },
+    {
+      "nombre": "Comercio al por mayor de productos farmacéuticos",
+      "codigo_scian": "697325",
+      "sector_codigo": "69",
+      "descripcion": "Actividad registrada en DENUE: MEXICALI, Mexicali, BAJA CALIFORNIA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:34.654181",
+      "updated_at": "2025-07-08T07:10:34.654194"
+    },
+    {
+      "nombre": "Escuelas del sector privado dedicadas a la enseñanza de oficios",
+      "codigo_scian": "789401",
+      "sector_codigo": "78",
+      "descripcion": "Actividad registrada en DENUE: GUANAJUATO, Guanajuato, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:34.654199",
+      "updated_at": "2025-07-08T07:10:34.654200"
+    },
+    {
+      "nombre": "Comercio al por mayor de medicamentos veterinarios y alimentos para animales, excepto mascotas",
+      "codigo_scian": "133673",
+      "sector_codigo": "13",
+      "descripcion": "Actividad registrada en DENUE: IRAPUATO, Irapuato, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:34.654233",
+      "updated_at": "2025-07-08T07:10:34.654233"
+    },
+    {
+      "nombre": "Clínicas de consultorios médicos del sector privado",
+      "codigo_scian": "929600",
+      "sector_codigo": "92",
+      "descripcion": "Actividad registrada en DENUE: TORREÓN, Torreón, COAHUILA DE ZARAGOZA",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:34.654269",
+      "updated_at": "2025-07-08T07:10:34.654270"
+    },
+    {
+      "nombre": "Comercio al por menor de artículos ortopédicos",
+      "codigo_scian": "251386",
+      "sector_codigo": "25",
+      "descripcion": "Actividad registrada en DENUE: TENANGO DE ARISTA, Tenango del Valle, MÉXICO                      ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:34.654392",
+      "updated_at": "2025-07-08T07:10:34.654393"
+    },
+    {
+      "nombre": "Actividades administrativas de instituciones de bienestar social",
+      "codigo_scian": "106099",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: MIGUEL HIDALGO, Miguel Hidalgo, CIUDAD DE MÉXICO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:34.654766",
+      "updated_at": "2025-07-08T07:10:34.654768"
+    },
+    {
+      "nombre": "Fabricación de preparaciones farmacéuticas",
+      "codigo_scian": "257435",
+      "sector_codigo": "25",
+      "descripcion": "Actividad registrada en DENUE: MORELIA, Morelia, MICHOACÁN DE OCAMPO       ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:34.655105",
+      "updated_at": "2025-07-08T07:10:34.655107"
+    },
+    {
+      "nombre": "Confección, bordado y deshilado de productos textiles",
+      "codigo_scian": "982451",
+      "sector_codigo": "98",
+      "descripcion": "Actividad registrada en DENUE: NUEVO LAREDO, Nuevo Laredo, TAMAULIPAS",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:39.865468",
+      "updated_at": "2025-07-08T07:10:39.865477"
+    },
+    {
+      "nombre": "Comercio al por menor de cigarros, puros y tabaco",
+      "codigo_scian": "992923",
+      "sector_codigo": "99",
+      "descripcion": "Actividad registrada en DENUE: SAN MIGUEL DE ALLENDE, San Miguel de Allende, GUANAJUATO",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:39.865609",
+      "updated_at": "2025-07-08T07:10:39.865610"
+    },
+    {
+      "nombre": "Comercio al por mayor de ropa, bisutería y accesorios de vestir",
+      "codigo_scian": "107563",
+      "sector_codigo": "10",
+      "descripcion": "Actividad registrada en DENUE: AMEALCO DE BONFIL, Amealco de Bonfil, QUERÉTARO                               ",
+      "fuente": "DENUE-INEGI",
+      "created_at": "2025-07-08T07:10:39.865977",
+      "updated_at": "2025-07-08T07:10:39.865981"
+    }
+  ]
+}

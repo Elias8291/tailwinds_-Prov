@@ -2,6 +2,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use App\Models\Documento;
 
 class DocumentoSeeder extends Seeder
@@ -13,6 +14,8 @@ class DocumentoSeeder extends Seeder
      */
     public function run()
     {
+        $this->command->info('Creando documentos...');
+
         $documentos = [
             [
                 'nombre' => 'Identificación Oficial',
@@ -82,8 +85,8 @@ class DocumentoSeeder extends Seeder
             ]
         ];
 
-        foreach ($documentos as $documento) {
-            Documento::create($documento);
-        }
+        DB::table('documento')->insert($documentos);
+
+        $this->command->info('✅ Documentos creados exitosamente');
     }
 }

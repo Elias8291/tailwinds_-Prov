@@ -14,6 +14,8 @@ class PermissionSeeder extends Seeder
      */
     public function run()
     {
+        $this->command->info('Creando permisos...');
+
         // Limpiar permisos obsoletos primero
         $this->limpiarPermisosObsoletos();
 
@@ -130,14 +132,10 @@ class PermissionSeeder extends Seeder
 
         // Crear cada permiso en la base de datos
         foreach ($permisos as $permiso) {
-            Permission::firstOrCreate([
-                'name' => $permiso,
-                'guard_name' => 'web'
-            ]);
+            Permission::firstOrCreate(['name' => $permiso]);
         }
 
-        // Mostrar información al ejecutar el seeder
-        $this->command->info('✅ Se han creado ' . count($permisos) . ' permisos organizados exitosamente.');
+        $this->command->info('✅ Permisos creados exitosamente');
     }
 
     /**

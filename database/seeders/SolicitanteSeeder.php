@@ -8,52 +8,32 @@ use Illuminate\Support\Facades\File;
 
 class SolicitanteSeeder extends Seeder
 {
+    private const TIPOS_PERSONA = ['Física', 'Moral'];
+    private $idsValidos = [];
+
     public function run()
     {
+        $this->command->info('Creando solicitantes...');
+
         $jsonPath = public_path('json/solicitante.json');
 
-        if (!File::exists($jsonPath)) {
-            $this->command->error('The solicitantes.json file does not exist!');
+        if (!File::exists($jsonPath) || 
+            !($solicitantes = json_decode(File::get($jsonPath), true)) || 
+            empty($solicitantes)) {
+            $this->command->error('❌ Error al cargar solicitantes');
             return;
         }
 
-        $solicitantes = json_decode(File::get($jsonPath), true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->command->error('JSON parsing error: ' . json_last_error_msg());
-            return;
-        }
-
-        if (empty($solicitantes)) {
-            $this->command->error('No data found in solicitantes.json!');
-            return;
-        }
-
-        $userIds = DB::table('users')->pluck('id')->toArray();
-
+        $this->cargarIdsValidos();
+        
         foreach ($solicitantes as $solicitante) {
-            // Skip entries missing required keys
-            if (!isset($solicitante['tipo_persona']) || !isset($solicitante['rfc'])) {
-                $this->command->warn('Skipping invalid entry: Missing tipo_persona or rfc');
+            if (!$this->validarCamposRequeridos($solicitante)) {
                 continue;
             }
 
-            // Validate tipo_persona
-            $tipoPersona = in_array($solicitante['tipo_persona'], ['Física', 'Moral'])
-                ? $solicitante['tipo_persona']
-                : 'Física'; // Default to 'Física' if invalid
-
-            // Assign usuario_id only if valid and exists in users table
-            $userId = null;
-            if (!empty($userIds) && isset($solicitante['usuario_id']) && in_array($solicitante['usuario_id'], $userIds)) {
-                $userId = $solicitante['usuario_id'];
-            } elseif (isset($solicitante['usuario_id'])) {
-                $this->command->warn('Invalid usuario_id in JSON: ' . $solicitante['usuario_id'] . '. Setting usuario_id to null.');
-            }
-
             DB::table('solicitante')->insert([
-                'usuario_id' => $userId,
-                'tipo_persona' => $tipoPersona,
+                'usuario_id' => $this->validarId('user', $solicitante['usuario_id'] ?? null),
+                'tipo_persona' => $this->validarTipoPersona($solicitante['tipo_persona']),
                 'curp' => $solicitante['curp'] ?? null,
                 'rfc' => $solicitante['rfc'],
                 'created_at' => now(),
@@ -61,6 +41,32 @@ class SolicitanteSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('Solicitante records seeded successfully!');
+        $this->command->info('✅ Solicitantes creados exitosamente');
+    }
+
+    private function cargarIdsValidos()
+    {
+        $this->idsValidos = [
+            'user' => DB::table('users')->pluck('id')->toArray(),
+        ];
+    }
+
+    private function validarCamposRequeridos($solicitante): bool
+    {
+        return isset($solicitante['tipo_persona'], $solicitante['rfc']);
+    }
+
+    private function validarId(string $tipo, $id)
+    {
+        if ($id === null) {
+            return null;
+        }
+
+        return in_array($id, $this->idsValidos[$tipo]) ? $id : null;
+    }
+
+    private function validarTipoPersona(string $tipo): string
+    {
+        return in_array($tipo, self::TIPOS_PERSONA) ? $tipo : 'Física';
     }
 }

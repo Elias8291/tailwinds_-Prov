@@ -5,72 +5,105 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Artisan;
 
 class ActividadesSeeder extends Seeder
 {
     public function run()
     {
-        // Primero intentar poblar con datos de DENUE
-        $this->command->info('🚀 Intentando poblar actividades desde DENUE INEGI...');
+        $this->command->info('Cargando actividades...');
         
-        try {
-            // Ejecutar el comando de población DENUE
-            Artisan::call('denue:popular-actividades');
-            $output = Artisan::output();
-            
-            $this->command->info('✅ Actividades pobladas desde DENUE exitosamente');
-            $this->command->line($output);
-            
-            // Verificar si se poblaron datos
-            $totalActividades = DB::table('actividad')->count();
-            $totalSectores = DB::table('sector')->count();
-            
-            $this->command->info("📊 Resumen:");
-            $this->command->line("   - Sectores creados: {$totalSectores}");
-            $this->command->line("   - Actividades creadas: {$totalActividades}");
-            
-            if ($totalActividades > 0) {
-                $this->command->info('🎉 Base de datos poblada exitosamente con datos DENUE');
-                return;
-            }
-            
-        } catch (\Exception $e) {
-            $this->command->warn('⚠️ Error al poblar desde DENUE: ' . $e->getMessage());
-            $this->command->info('🔄 Intentando con datos locales de respaldo...');
+        $jsonPath = public_path('json/denue/actividades_denue.json');
+        
+        if (File::exists($jsonPath)) {
+            $this->poblarDesdeDenueJson($jsonPath);
+        } else {
+            $this->poblarDesdeJsonLocal();
         }
-        
-        // Respaldo: usar datos del JSON local si DENUE falla
-        $this->poblarDesdeJsonLocal();
     }
     
-    /**
-     * Poblar desde archivo JSON local como respaldo
-     */
+    private function poblarDesdeDenueJson($jsonPath)
+    {
+        try {
+            $jsonData = File::get($jsonPath);
+            $data = json_decode($jsonData, true);
+            
+            if (!isset($data['sectores']) || !isset($data['actividades'])) {
+                throw new \Exception('Formato de archivo JSON inválido');
+            }
+            
+            DB::beginTransaction();
+            
+            // Limpiar e insertar sectores
+            DB::table('actividad')->delete();
+            DB::table('sector')->delete();
+            
+            foreach ($data['sectores'] as $sector) {
+                DB::table('sector')->insert([
+                    'codigo' => $sector['codigo'],
+                    'nombre' => $sector['nombre'],
+                    'descripcion' => $sector['descripcion'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+            
+            // Obtener IDs de sectores e insertar actividades
+            $sectoresDB = DB::table('sector')->get()->keyBy('codigo');
+            $actividadesLote = [];
+            
+            foreach ($data['actividades'] as $actividad) {
+                $sectorId = $sectoresDB->get($actividad['sector_codigo'])->id ?? null;
+                
+                if ($sectorId) {
+                    $actividadesLote[] = [
+                        'nombre' => $actividad['nombre'],
+                        'codigo_scian' => $actividad['codigo_scian'],
+                        'sector_id' => $sectorId,
+                        'descripcion' => $actividad['descripcion'],
+                        'fuente' => $actividad['fuente'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+                
+                if (count($actividadesLote) >= 1000) {
+                    DB::table('actividad')->insert($actividadesLote);
+                    $actividadesLote = [];
+                }
+            }
+            
+            if (!empty($actividadesLote)) {
+                DB::table('actividad')->insert($actividadesLote);
+            }
+            
+            DB::commit();
+            $this->command->info('✅ Actividades cargadas exitosamente');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->poblarDesdeJsonLocal();
+        }
+    }
+    
     private function poblarDesdeJsonLocal()
     {
         try {
             $jsonPath = public_path('json/actividades.json');
             
             if (!File::exists($jsonPath)) {
-                $this->command->error('❌ No se encontró el archivo de actividades locales');
+                $this->command->error('❌ No se encontró el archivo de actividades');
                 return;
             }
             
-            $jsonData = File::get($jsonPath);
-            $data = json_decode($jsonData, true);
+            $data = json_decode(File::get($jsonPath), true);
             
             if (!isset($data['Hoja1']) || empty($data['Hoja1'])) {
                 $this->command->error('❌ Formato de archivo JSON inválido');
                 return;
             }
             
-            $this->command->info('📁 Cargando actividades desde archivo local...');
-            
-            // Crear sectores básicos si no existen
             $this->crearSectoresBasicos();
             
-            // Insertar actividades desde JSON
             $actividades = [];
             foreach ($data['Hoja1'] as $item) {
                 $actividades[] = [
@@ -86,40 +119,32 @@ class ActividadesSeeder extends Seeder
             
             if (!empty($actividades)) {
                 DB::table('actividad')->insert($actividades);
-                $this->command->info('✅ ' . count($actividades) . ' actividades cargadas desde archivo local');
+                $this->command->info('✅ Actividades cargadas exitosamente');
             }
             
         } catch (\Exception $e) {
-            $this->command->error('❌ Error al cargar datos locales: ' . $e->getMessage());
+            $this->command->error('❌ Error al cargar actividades');
         }
     }
     
-    /**
-     * Crear sectores básicos para el JSON local
-     */
     private function crearSectoresBasicos()
     {
-        $sectoresBasicos = [
-            ['id' => 1, 'nombre' => 'Agricultura y ganadería', 'codigo' => '11', 'descripcion' => 'Sector primario'],
-            ['id' => 2, 'nombre' => 'Comercio', 'codigo' => '43', 'descripcion' => 'Actividades comerciales'],
-            ['id' => 3, 'nombre' => 'Servicios', 'codigo' => '81', 'descripcion' => 'Sector servicios'],
-            ['id' => 4, 'nombre' => 'Industria', 'codigo' => '31', 'descripcion' => 'Sector industrial'],
-            ['id' => 5, 'nombre' => 'Construcción', 'codigo' => '23', 'descripcion' => 'Sector construcción'],
+        $sectores = [
+            ['id' => 1, 'nombre' => 'Agricultura y ganadería', 'codigo' => '11'],
+            ['id' => 2, 'nombre' => 'Comercio', 'codigo' => '43'],
+            ['id' => 3, 'nombre' => 'Servicios', 'codigo' => '81'],
+            ['id' => 4, 'nombre' => 'Industria', 'codigo' => '31'],
+            ['id' => 5, 'nombre' => 'Construcción', 'codigo' => '23'],
         ];
-        
-        foreach ($sectoresBasicos as $sector) {
-            DB::table('sector')->updateOrInsert(
-                ['id' => $sector['id']],
-                [
-                    'nombre' => $sector['nombre'],
-                    'codigo' => $sector['codigo'],
-                    'descripcion' => $sector['descripcion'],
+
+        DB::table('sector')->insertOrIgnore(
+            collect($sectores)->map(function ($sector) {
+                return array_merge($sector, [
+                    'descripcion' => 'Sector económico',
                     'created_at' => now(),
                     'updated_at' => now(),
-                ]
-            );
-        }
-        
-        $this->command->info('✅ Sectores básicos creados/actualizados');
+                ]);
+            })->toArray()
+        );
     }
 }

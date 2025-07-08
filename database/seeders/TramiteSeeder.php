@@ -8,74 +8,41 @@ use Illuminate\Support\Facades\File;
 
 class TramiteSeeder extends Seeder
 {
+    private const TIPOS_TRAMITE = ['Inscripcion', 'Renovacion', 'Actualizacion'];
+    private const ESTADOS = ['Pendiente', 'En Revision', 'Aprobado', 'Rechazado'];
+    private $idsValidos = [];
+
     public function run()
     {
+        $this->command->info('Creando trámites...');
+        
         $jsonPath = public_path('json/tramite.json');
-
         if (!File::exists($jsonPath)) {
-            $this->command->error('The tramites.json file does not exist!');
+            $this->command->error('❌ Error al cargar trámites: archivo no encontrado');
             return;
         }
 
-        $tramites = json_decode(File::get($jsonPath), true);
+        $jsonContent = File::get($jsonPath);
+        $tramites = json_decode($jsonContent, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->command->error('JSON parsing error: ' . json_last_error_msg());
+        if (!is_array($tramites)) {
+            $this->command->error('❌ Error al cargar trámites: formato inválido');
             return;
         }
 
-        if (empty($tramites)) {
-            $this->command->error('No data found in tramites.json!');
-            return;
-        }
-
-        $solicitanteIds = DB::table('solicitante')->pluck('id')->toArray();
-        $userIds = DB::table('users')->pluck('id')->toArray();
+        $this->cargarIdsValidos();
 
         foreach ($tramites as $tramite) {
-            // Skip entries missing required keys
-            if (!isset($tramite['tipo_tramite']) || !isset($tramite['estado'])) {
-                $this->command->warn('Skipping invalid entry: Missing tipo_tramite or estado');
+            if (!$this->validarCamposRequeridos($tramite)) {
                 continue;
             }
 
-            // Validate tipo_tramite
-            $tipoTramite = in_array($tramite['tipo_tramite'], ['Inscripcion', 'Renovacion', 'Actualizacion'])
-                ? $tramite['tipo_tramite']
-                : 'Inscripcion'; // Default to 'Inscripcion' if invalid
-
-            // Validate estado
-            $estado = in_array($tramite['estado'], ['Pendiente', 'En Revision', 'Aprobado', 'Rechazado'])
-                ? $tramite['estado']
-                : 'Pendiente'; // Default to 'Pendiente' if invalid
-
-            // Validate solicitante_id
-            $solicitanteId = null;
-            if (isset($tramite['solicitante_id']) && in_array($tramite['solicitante_id'], $solicitanteIds)) {
-                $solicitanteId = $tramite['solicitante_id'];
-            } elseif (isset($tramite['solicitante_id'])) {
-                $this->command->warn('Invalid solicitante_id in JSON: ' . $tramite['solicitante_id'] . '. Setting solicitante_id to null.');
-            }
-
-            // Validate revisado_por
-            $revisadoPor = null;
-            if (isset($tramite['revisado_por']) && in_array($tramite['revisado_por'], $userIds)) {
-                $revisadoPor = $tramite['revisado_por'];
-            } elseif (isset($tramite['revisado_por'])) {
-                $this->command->warn('Invalid revisado_por in JSON: ' . $tramite['revisado_por'] . '. Setting revisado_por to null.');
-            }
-
-            // Validate progreso_tramite
-            $progresoTramite = isset($tramite['progreso_tramite']) && is_numeric($tramite['progreso_tramite'])
-                ? max(0, min(100, (int)$tramite['progreso_tramite'])) // Ensure between 0 and 100
-                : 0;
-
             DB::table('tramite')->insert([
-                'solicitante_id' => $solicitanteId,
-                'tipo_tramite' => $tipoTramite,
-                'estado' => $estado,
-                'progreso_tramite' => $progresoTramite,
-                'revisado_por' => $revisadoPor,
+                'solicitante_id' => $this->validarId('solicitante', $tramite['solicitante_id'] ?? null),
+                'tipo_tramite' => $this->validarTipoTramite($tramite['tipo_tramite']),
+                'estado' => $this->validarEstado($tramite['estado'] ?? 'pendiente'),
+                'progreso_tramite' => $this->validarProgreso($tramite['progreso_tramite'] ?? 0),
+                'revisado_por' => $this->validarId('user', $tramite['revisado_por'] ?? null),
                 'fecha_revision' => $tramite['fecha_revision'] ?? null,
                 'fecha_inicio' => $tramite['fecha_inicio'] ?? null,
                 'fecha_finalizacion' => $tramite['fecha_finalizacion'] ?? null,
@@ -85,6 +52,46 @@ class TramiteSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('Tramite records seeded successfully!');
+        $this->command->info('✅ Trámites creados exitosamente');
+    }
+
+    private function cargarIdsValidos()
+    {
+        $this->idsValidos = [
+            'solicitante' => DB::table('solicitante')->pluck('id')->toArray(),
+            'user' => DB::table('users')->pluck('id')->toArray(),
+        ];
+    }
+
+    private function validarCamposRequeridos($tramite): bool
+    {
+        return isset($tramite['solicitante_id'], $tramite['tipo_tramite']);
+    }
+
+    private function validarId(string $tipo, $id)
+    {
+        if ($id === null) {
+            return null;
+        }
+
+        return in_array($id, $this->idsValidos[$tipo]) ? $id : null;
+    }
+
+    private function validarTipoTramite(string $tipo): string
+    {
+        return in_array($tipo, self::TIPOS_TRAMITE) ? $tipo : 'Inscripcion';
+    }
+
+    private function validarEstado(string $estado): string
+    {
+        return in_array($estado, self::ESTADOS) ? $estado : 'Pendiente';
+    }
+
+    private function validarProgreso($progreso): int
+    {
+        if (!is_numeric($progreso)) {
+            return 0;
+        }
+        return max(0, min(100, (int)$progreso));
     }
 }

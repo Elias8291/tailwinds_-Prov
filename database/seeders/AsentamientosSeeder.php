@@ -12,55 +12,39 @@ class AsentamientosSeeder extends Seeder
      * Tamaño del bloque para inserción por lotes
      * @var int
      */
-    protected $chunkSize = 100;
+    protected $chunkSize = 1000;
 
     public function run()
     {
-        // Ruta al archivo JSON
+        $this->command->info('Creando asentamientos...');
+        
         $jsonPath = public_path('json/asentamientos.json');
-
-        // Verificar si el archivo existe
         if (!File::exists($jsonPath)) {
-            $this->command->error('El archivo JSON no se encuentra en la ruta: ' . $jsonPath);
+            $this->command->error('❌ Error al cargar asentamientos');
             return;
         }
 
-        // Leer el archivo JSON
-        $jsonData = File::get($jsonPath);
-        $data = json_decode($jsonData, true);
-
-        // Verificar si el JSON se decodificó correctamente
-        if ($data === null || !isset($data['settlements'])) {
-            $this->command->error('Error al decodificar el JSON o estructura incorrecta.');
+        $data = json_decode(File::get($jsonPath), true);
+        if (!isset($data['settlements'])) {
+            $this->command->error('❌ Error al cargar asentamientos');
             return;
         }
 
-        // Preparar los datos para inserción por bloques
-        $asentamientos = [];
-        foreach ($data['settlements'] as $settlement) {
-            $asentamientos[] = [
-                'nombre' => $settlement['name'],
-                'codigo_postal' => $settlement['zip_code'],
-                'localidad_id' => $settlement['localidad_id'],
-                'tipo_asentamiento_id' => $settlement['settlement_type_id'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-
-            // Insertar cuando alcancemos el tamaño del bloque
-            if (count($asentamientos) >= $this->chunkSize) {
-                DB::table('asentamiento')->insert($asentamientos);
-                $asentamientos = []; // Resetear el array
-                $this->command->info('Insertados ' . $this->chunkSize . ' registros...');
-            }
+        foreach (array_chunk($data['settlements'], $this->chunkSize) as $chunk) {
+            DB::table('asentamiento')->insert(
+                collect($chunk)->map(function ($settlement) {
+                    return [
+                        'nombre' => $settlement['name'],
+                        'codigo_postal' => $settlement['zip_code'],
+                        'localidad_id' => $settlement['localidad_id'],
+                        'tipo_asentamiento_id' => $settlement['settlement_type_id'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                })->toArray()
+            );
         }
 
-        // Insertar los registros restantes (si los hay)
-        if (!empty($asentamientos)) {
-            DB::table('asentamiento')->insert($asentamientos);
-            $this->command->info('Insertados ' . count($asentamientos) . ' registros finales...');
-        }
-
-        $this->command->info('Total de asentamientos insertados: ' . count($data['settlements']));
+        $this->command->info('✅ Asentamientos creados exitosamente');
     }
 }

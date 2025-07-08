@@ -15,25 +15,45 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            PermissionSeeder::class,
-            RoleSeeder::class,
-            UserSeeder::class,
-            PaisSeeder::class,
-            EstadosTableSeeder::class,
-            MunicipioSeeder::class,
-            LocalidadSeeder::class,
-            TiposAsentamientoSeeder::class,
-            AsentamientosSeeder::class,
-            DocumentoSeeder::class,
-            SectoresSeeder::class,
-            ActividadesSeeder::class,
-            SolicitanteSeeder::class,
-            TramiteSeeder::class,
-            DetalleTramiteSeeder::class,
-            ProveedorSeeder::class,
-            SeccionTramiteSeeder::class,
-            UserPermissionSeeder::class,
-        ]);
+        $this->command->info('🌱 Iniciando proceso de seeding...');
+
+        $seeders = [
+            'Permisos' => PermissionSeeder::class,
+            'Roles' => RoleSeeder::class,
+            'Usuarios' => UserSeeder::class,
+            'Países' => PaisSeeder::class,
+            'Estados' => EstadosTableSeeder::class,
+            'Municipios' => MunicipioSeeder::class,
+            'Localidades' => LocalidadSeeder::class,
+            'Tipos de Asentamiento' => TiposAsentamientoSeeder::class,
+            'Asentamientos' => AsentamientosSeeder::class,
+            'Documentos' => DocumentoSeeder::class,
+            'Sectores' => SectoresSeeder::class,
+            'Actividades' => ActividadesSeeder::class,
+            'Días Inhábiles' => DiasInhabilesSeeder::class,
+            'Solicitantes' => SolicitanteSeeder::class,
+            'Trámites' => TramiteSeeder::class,
+            'Detalles de Trámite' => DetalleTramiteSeeder::class,
+            'Proveedores' => ProveedorSeeder::class,
+            'Secciones de Trámite' => SeccionTramiteSeeder::class,
+            'Permisos de Usuario' => UserPermissionSeeder::class,
+        ];
+
+        $total = count($seeders);
+        $current = 0;
+
+        foreach ($seeders as $name => $seeder) {
+            $current++;
+            $this->command->info(sprintf(
+                '(%d/%d) Ejecutando %s...',
+                $current,
+                $total,
+                $name
+            ));
+            
+            $this->call($seeder);
+        }
+
+        $this->command->info('✅ Proceso de seeding completado exitosamente');
     }
 }
