@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('oficios', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tramite_id')->constrained('tramites')->onDelete('cascade');
+            $table->foreignId('tramite_id')->constrained('tramite')->onDelete('cascade');
             $table->string('numero_oficio')->unique();
             $table->string('tipo_oficio');
             $table->string('ruta_archivo');
