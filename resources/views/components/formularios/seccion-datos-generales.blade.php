@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST" class="space-y-6">
+    <form id="datos-generales-form" action="{{ route('datos-generales.guardar') }}" method="POST">
         @csrf
         
         <!-- Campos ocultos -->
@@ -12,11 +12,11 @@
         <input type="hidden" name="tramite_id" value="{{ $datosTramite['tramite_id'] ?? request()->route('tramite') ?? session('tramite_id') ?? '' }}">
         <input type="hidden" name="tipo_tramite" value="{{ $datosTramite['tipo_tramite'] ?? request()->route('tipo_tramite') ?? 'inscripcion' }}">
 
-        <!-- Contenedor principal con padding consistente -->
-        <div class="p-6 space-y-8">
+        <!-- Contenedor principal con padding adaptativo -->
+        <div class="p-4 md:p-6 space-y-4 md:space-y-8">
             <!-- Datos del Proveedor -->
-            <div class="space-y-6 p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
-                <div class="flex items-center space-x-3 mb-6">
+            <div class="space-y-4 md:space-y-6 p-4 md:p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-3 space-y-2 md:space-y-0 mb-4 md:mb-6">
                     <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
                         <i class="fas fa-building text-lg"></i>
                     </div>
@@ -26,7 +26,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <!-- Tipo de Proveedor -->
                     <div class="form-group">
                         <label for="tipo_persona" class="block text-sm font-medium text-gray-700 mb-2">
@@ -36,7 +36,7 @@
                                id="tipo_persona"
                                name="tipo_persona"
                                value="{{ $datosTramite['tipo_persona'] ?? $datosSolicitante['tipo_persona'] ?? '' }}" 
-                               class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                               class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                                readonly>
                     </div>
 
@@ -49,7 +49,7 @@
                                id="rfc"
                                name="rfc"
                                value="{{ $datosTramite['rfc'] ?? $datosSolicitante['rfc'] ?? '' }}" 
-                               class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                               class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                                readonly>
                     </div>
                 </div>
@@ -64,40 +64,35 @@
                            id="curp"
                            name="curp"
                            value="{{ $datosTramite['curp'] ?? $datosSolicitante['curp'] ?? '' }}" 
-                           class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                           class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
                            readonly>
                 </div>
                 @endif
 
-                <!-- Nombre Completo (Solo persona física) -->
-                @if(($datosTramite['tipo_persona'] ?? $datosSolicitante['tipo_persona'] ?? '') === 'Física')
+                <!-- Nombre Completo o Razón Social -->
                 <div class="form-group">
-                    <label for="nombre_completo" class="block text-sm font-medium text-gray-700 mb-2">
-                        Nombre Completo <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" 
-                           id="nombre_completo"
-                           name="nombre_completo"
-                           value="{{ $datosTramite['nombre_completo'] ?? $datosSolicitante['nombre_completo'] ?? '' }}" 
-                           class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
-                           readonly>
+                    @if(($datosTramite['tipo_persona'] ?? $datosSolicitante['tipo_persona'] ?? '') === 'Física')
+                        <label for="nombre_completo" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nombre Completo <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="nombre_completo"
+                               name="nombre_completo"
+                               value="{{ $datosTramite['nombre_completo'] ?? $datosSolicitante['nombre_completo'] ?? '' }}" 
+                               class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                               readonly>
+                    @else
+                        <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
+                            Razón Social <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="razon_social"
+                               name="razon_social"
+                               value="{{ $datosTramite['razon_social'] ?? $datosSolicitante['razon_social'] ?? '' }}" 
+                               class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                               readonly>
+                    @endif
                 </div>
-                @endif
-
-                <!-- Razón Social (Solo persona moral) -->
-                @if(($datosTramite['tipo_persona'] ?? $datosSolicitante['tipo_persona'] ?? '') === 'Moral')
-                <div class="form-group">
-                    <label for="razon_social" class="block text-sm font-medium text-gray-700 mb-2">
-                        Razón Social <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" 
-                           id="razon_social"
-                           name="razon_social"
-                           value="{{ $datosTramite['razon_social'] ?? $datosSolicitante['razon_social'] ?? '' }}" 
-                           class="block w-full px-4 py-2.5 text-gray-600 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
-                           readonly>
-                </div>
-                @endif
 
                 <!-- Giro -->
                 @unless($readonly)
@@ -107,8 +102,8 @@
                     </label>
                     <textarea id="giro" 
                               name="giro" 
-                              rows="4"
-                              class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('giro') border-red-500 @enderror"
+                              rows="3"
+                              class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('giro') border-red-500 @enderror"
                               placeholder="Describa el giro de la empresa">{{ old('giro', $datosTramite['giro'] ?? '') }}</textarea>
                     @error('giro')
                         <p class="mt-1 text-sm text-red-600">{{ $errors->first('giro') }}</p>
@@ -117,7 +112,7 @@
                 @else
                 <div class="form-group">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Giro</label>
-                    <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
+                    <div class="p-3 md:p-4 bg-gray-100 border border-gray-200 rounded-lg">
                         <p class="text-gray-700">{{ $datosTramite['giro'] ?? 'No especificado' }}</p>
                     </div>
                 </div>
@@ -126,8 +121,8 @@
 
             <!-- Actividades Económicas -->
             @unless($readonly)
-            <div class="space-y-6 p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
-                <div class="flex items-center space-x-3 mb-6">
+            <div class="space-y-4 md:space-y-6 p-4 md:p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-3 space-y-2 md:space-y-0 mb-4 md:mb-6">
                     <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
                         <i class="fas fa-chart-line text-lg"></i>
                     </div>
@@ -138,69 +133,69 @@
                 </div>
 
                 <!-- Buscador de actividades -->
-                <div class="form-group mb-6">
+                <div class="form-group mb-4 md:mb-6">
                     <label for="actividad_search" class="block text-sm font-medium text-gray-700 mb-2">
-                        Buscar Actividades *
-                        </label>
+                        Buscar Actividades <span class="text-red-500">*</span>
+                    </label>
                     <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <p class="text-sm text-blue-700">
                             <i class="fas fa-lightbulb mr-2"></i>
                             Agrega las actividades económicas tal como aparecen en tu constancia de situación fiscal.
-                                </p>
-                        </div>
+                        </p>
+                    </div>
                     
                     <div class="relative">
                         <input type="text" 
                                id="actividad_search" 
                                placeholder="Escriba para buscar actividad..."
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
+                               class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all"
                                autocomplete="off">
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
-                            </div>
                         </div>
+                    </div>
                     
                     <!-- Dropdown de resultados -->
                     <div id="actividad-dropdown" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl hidden max-h-64 overflow-hidden">
                         <div id="actividad-resultados" class="max-h-48 overflow-y-auto"></div>
-                            <div id="actividad-no-resultados" class="px-6 py-8 text-center hidden">
+                        <div id="actividad-no-resultados" class="px-4 md:px-6 py-6 md:py-8 text-center hidden">
                             <p class="text-gray-500 text-sm">No se encontraron actividades</p>
-                                    <button type="button" 
-                                            id="btn-agregar-manual"
+                            <button type="button" 
+                                    id="btn-agregar-manual"
                                     class="mt-4 px-4 py-2 bg-[#9d2449] text-white text-sm rounded-lg hover:bg-[#8a203f] transition-colors">
                                 <i class="fas fa-plus mr-2"></i>Agregar actividad personalizada
-                                    </button>
-                                </div>
-                            </div>
+                            </button>
                         </div>
+                    </div>
+                </div>
 
                 <!-- Actividades seleccionadas -->
                 <div class="form-group">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Actividades Seleccionadas</label>
-                    <div id="actividades-seleccionadas" class="min-h-[60px] p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div id="actividades-seleccionadas" class="min-h-[60px] p-3 md:p-4 bg-gray-50 border border-gray-200 rounded-lg">
                         <div id="no-actividades-message" class="flex items-center justify-center text-gray-400 text-sm italic">
                             <i class="fas fa-plus-circle mr-2"></i>No hay actividades seleccionadas
-                    </div>
+                        </div>
                     </div>
                     <input type="hidden" id="actividades_seleccionadas_input" name="actividades_seleccionadas" value="{{ old('actividades_seleccionadas', $datosTramite['actividades_seleccionadas'] ?? '') }}">
                     @error('actividades_seleccionadas')
-                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('actividades_seleccionadas') }}</p>
-                        @enderror
+                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('actividades_seleccionadas') }}</p>
+                    @enderror
                 </div>
-                    </div>
+            </div>
             @else
             <!-- Mostrar actividades en modo solo lectura -->
-            <div class="space-y-6 p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
-                <div class="flex items-center space-x-3 mb-6">
+            <div class="space-y-4 md:space-y-6 p-4 md:p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-3 space-y-2 md:space-y-0 mb-4 md:mb-6">
                     <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
                         <i class="fas fa-chart-line text-lg"></i>
-                </div>
+                    </div>
                     <div>
                         <h3 class="text-lg font-semibold text-gray-800">Actividades Económicas</h3>
                         <p class="text-sm text-gray-500">Actividades económicas registradas</p>
                     </div>
                 </div>
-                <div class="p-4 bg-gray-100 border border-gray-200 rounded-lg">
+                <div class="p-3 md:p-4 bg-gray-100 border border-gray-200 rounded-lg">
                     @php
                         $actividades_ids = json_decode($datosTramite['actividades_seleccionadas'] ?? '[]', true);
                         $actividades_nombres = [];
@@ -229,8 +224,8 @@
             @endunless
 
             <!-- Información Adicional -->
-            <div class="space-y-6 p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
-                <div class="flex items-center space-x-3 mb-6">
+            <div class="space-y-4 md:space-y-6 p-4 md:p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-3 space-y-2 md:space-y-0 mb-4 md:mb-6">
                     <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
                         <i class="fas fa-globe text-lg"></i>
                     </div>
@@ -246,16 +241,16 @@
                     <input type="url" 
                            id="pagina_web" 
                            name="pagina_web"
-                           class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('pagina_web') border-red-500 @enderror"
+                           class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('pagina_web') border-red-500 @enderror"
                            placeholder="https://www.ejemplo.com"
                            value="{{ old('pagina_web', $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? '') }}">
-                        @error('pagina_web')
-                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('pagina_web') }}</p>
-                        @enderror
+                    @error('pagina_web')
+                        <p class="mt-1 text-sm text-red-600">{{ $errors->first('pagina_web') }}</p>
+                    @enderror
                     @else
-                    <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                    <div class="p-3 md:p-4 bg-gray-100 border border-gray-200 rounded-lg">
                         @if(!empty($datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] ?? ''))
-                            <a href="{{ $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                            <a href="{{ $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] }}" target="_blank" class="text-blue-600 hover:text-blue-800 break-all">
                                 {{ $datosTramite['pagina_web'] ?? $datosSolicitante['pagina_web'] }}
                             </a>
                         @else
@@ -267,8 +262,8 @@
             </div>
 
             <!-- Datos de Contacto -->
-            <div class="space-y-6 p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
-                <div class="flex items-center space-x-3 mb-6">
+            <div class="space-y-4 md:space-y-6 p-4 md:p-6 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-3 space-y-2 md:space-y-0 mb-4 md:mb-6">
                     <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#9d2449] to-[#8a203f] text-white shadow-sm">
                         <i class="fas fa-address-card text-lg"></i>
                     </div>
@@ -278,7 +273,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <!-- Nombre -->
                     <div class="form-group">
                         <label for="contacto_nombre" class="block text-sm font-medium text-gray-700 mb-2">
@@ -288,16 +283,16 @@
                         <input type="text" 
                                id="contacto_nombre" 
                                name="contacto_nombre"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_nombre') border-red-500 @enderror"
+                               class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_nombre') border-red-500 @enderror"
                                placeholder="Nombre completo del contacto"
                                value="{{ old('contacto_nombre', $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? '') }}">
-                            @error('contacto_nombre')
-                                <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_nombre') }}</p>
-                            @enderror
+                        @error('contacto_nombre')
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_nombre') }}</p>
+                        @enderror
                         @else
-                        <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                        <div class="p-3 md:p-4 bg-gray-100 border border-gray-200 rounded-lg">
                             {{ $datosTramite['contacto_nombre'] ?? $datosSolicitante['contacto_nombre'] ?? 'No especificado' }}
-                    </div>
+                        </div>
                         @endunless
                     </div>
 
@@ -310,16 +305,16 @@
                         <input type="text" 
                                id="contacto_cargo" 
                                name="contacto_cargo"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_cargo') border-red-500 @enderror"
+                               class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_cargo') border-red-500 @enderror"
                                placeholder="Cargo en la empresa"
                                value="{{ old('contacto_cargo', $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? '') }}">
-                            @error('contacto_cargo')
-                                <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_cargo') }}</p>
-                            @enderror
+                        @error('contacto_cargo')
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_cargo') }}</p>
+                        @enderror
                         @else
-                        <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                        <div class="p-3 md:p-4 bg-gray-100 border border-gray-200 rounded-lg">
                             {{ $datosTramite['contacto_cargo'] ?? $datosSolicitante['contacto_cargo'] ?? 'No especificado' }}
-                    </div>
+                        </div>
                         @endunless
                     </div>
 
@@ -332,16 +327,16 @@
                         <input type="email" 
                                id="contacto_correo" 
                                name="contacto_correo"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_correo') border-red-500 @enderror"
+                               class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_correo') border-red-500 @enderror"
                                placeholder="correo@ejemplo.com"
                                value="{{ old('contacto_correo', $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? '') }}">
-                            @error('contacto_correo')
-                                <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_correo') }}</p>
-                            @enderror
+                        @error('contacto_correo')
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_correo') }}</p>
+                        @enderror
                         @else
-                        <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                        <div class="p-3 md:p-4 bg-gray-100 border border-gray-200 rounded-lg">
                             {{ $datosTramite['contacto_correo'] ?? $datosSolicitante['contacto_correo'] ?? 'No especificado' }}
-                    </div>
+                        </div>
                         @endunless
                     </div>
 
@@ -354,18 +349,18 @@
                         <input type="tel" 
                                id="contacto_telefono" 
                                name="contacto_telefono"
-                               class="block w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_telefono') border-red-500 @enderror"
+                               class="block w-full px-3 md:px-4 py-2 md:py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/20 transition-all @error('contacto_telefono') border-red-500 @enderror"
                                placeholder="10 dígitos"
                                value="{{ old('contacto_telefono', $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? '') }}">
-                            @error('contacto_telefono')
-                                <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_telefono') }}</p>
-                            @enderror
+                        @error('contacto_telefono')
+                            <p class="mt-1 text-sm text-red-600">{{ $errors->first('contacto_telefono') }}</p>
+                        @enderror
                         @else
-                        <div class="p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                        <div class="p-3 md:p-4 bg-gray-100 border border-gray-200 rounded-lg">
                             {{ $datosTramite['contacto_telefono'] ?? $datosSolicitante['contacto_telefono'] ?? 'No especificado' }}
-                    </div>
+                        </div>
                         @endunless
-                </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -373,9 +368,9 @@
         <!-- Botones de navegación -->
         @unless($readonly)
         @if(!isset($mostrar_navegacion) || $mostrar_navegacion !== false)
-        <div class="flex justify-end p-6 bg-gray-50 border-t border-gray-200">
+        <div class="flex justify-end p-4 md:p-6 bg-gray-50 border-t border-gray-200">
             <button type="submit" 
-                    class="px-8 py-3 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg hover:from-[#8a203f] hover:to-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#9d2449] focus:ring-offset-2">
+                    class="w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 bg-gradient-to-r from-[#9d2449] to-[#8a203f] text-white rounded-lg hover:from-[#8a203f] hover:to-[#7a1c38] transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#9d2449] focus:ring-offset-2">
                 <i class="fas fa-save mr-2"></i>
                 Guardar y Continuar
                 <i class="fas fa-arrow-right ml-2"></i>
@@ -387,6 +382,82 @@
 </div>
 
 @unless($readonly)
+<style>
+/* Estilos base responsivos */
+.form-group {
+    @apply mb-4;
+}
+
+/* Ajustes para móvil */
+@media (max-width: 768px) {
+    input, select, textarea {
+        @apply text-base;
+    }
+    
+    .form-group label {
+        @apply text-sm mb-1;
+    }
+    
+    #actividad-dropdown {
+        @apply fixed left-4 right-4 top-auto bottom-4 w-auto max-h-[60vh];
+    }
+    
+    #actividades-seleccionadas {
+        @apply max-h-[150px] overflow-y-auto;
+    }
+    
+    .actividad-tag {
+        @apply text-sm py-1 px-2;
+    }
+}
+
+/* Transiciones suaves */
+input, select, textarea, button {
+    @apply transition-all duration-200;
+}
+
+/* Efectos hover para las secciones */
+.space-y-6 > div {
+    @apply transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md;
+}
+
+/* Efectos hover para campos de formulario */
+.form-group:hover input:not([readonly]),
+.form-group:hover select:not([readonly]),
+.form-group:hover textarea:not([readonly]) {
+    @apply border-[#9d2449]/30;
+}
+
+/* Dropdown styles */
+#actividad-dropdown {
+    @apply animate-slide-down;
+}
+
+@keyframes slide-down {
+    from {
+        @apply opacity-0 -translate-y-2;
+    }
+    to {
+        @apply opacity-100 translate-y-0;
+    }
+}
+
+/* Estilos para el modo oscuro */
+@media (prefers-color-scheme: dark) {
+    .dark\:bg-gray-800 {
+        @apply bg-gray-800;
+    }
+    
+    .dark\:text-white {
+        @apply text-white;
+    }
+    
+    .dark\:border-gray-700 {
+        @apply border-gray-700;
+    }
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -974,44 +1045,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
-<style>
-/* Transiciones suaves */
-input, select, textarea, button {
-    transition: all 0.2s ease-in-out;
-}
-
-/* Efectos hover para las secciones */
-.space-y-6 > div {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.space-y-6 > div:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* Efectos hover para campos de formulario */
-.form-group:hover input:not([readonly]),
-.form-group:hover select:not([readonly]),
-.form-group:hover textarea:not([readonly]) {
-    border-color: rgb(157 36 73 / 0.3);
-}
-
-/* Dropdown styles */
-#actividad-dropdown {
-    animation: slideDown 0.2s ease-out;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-</style>
 @endunless

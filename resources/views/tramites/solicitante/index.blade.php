@@ -727,9 +727,9 @@
         @endif
 
         @php
-            $tramites = Auth::user()->solicitante->tramites()
-                ->orderBy('created_at', 'desc')
-                ->get();
+            $tramites = Auth::user()->solicitante
+                ? Auth::user()->solicitante->tramites()->orderBy('created_at', 'desc')->get()
+                : collect();
         @endphp
 
         @if($tramites->count() > 0)
