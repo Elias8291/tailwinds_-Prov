@@ -350,6 +350,14 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                                 </svg>
                                             </a>
+                                            <!-- Nuevo icono para Revisión V2 -->
+                                            <a href="{{ route('revision.v2', $tramite) }}" 
+                                               class="text-purple-600 hover:text-purple-800 transform hover:scale-110 transition-all duration-200"
+                                               title="Vista de revisión alternativa">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                                </svg>
+                                            </a>
                                             @if($tramite->estado === 'Pendiente' || $tramite->estado === 'Por Cotejar')
                                             <a href="{{ route('revision.show', $tramite) }}" 
                                                class="text-blue-600 hover:text-blue-900 transform hover:scale-110 transition-all duration-200">
@@ -475,6 +483,14 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </a>
+                                    <!-- Nuevo icono para Revisión V2 en móvil -->
+                                    <a href="{{ route('revision.v2', $tramite) }}" 
+                                       class="text-purple-600 hover:text-purple-800 transform hover:scale-110 transition-all duration-200"
+                                       title="Vista de revisión alternativa">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                         </svg>
                                     </a>
                                     @if($tramite->estado === 'En Revision')

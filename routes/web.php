@@ -506,6 +506,9 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
         ->name('terminar-revision-digital');
 });
 
+// Rutas de revisión
+Route::get('/revision/{tramite}/v2', [RevisionController::class, 'showV2'])->name('revision.v2');
+
 // ============================================================================
 // MÓDULO DE GESTIÓN - DOCUMENTOS
 // ============================================================================

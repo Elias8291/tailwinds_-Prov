@@ -1,4 +1,4 @@
-@props(['documento', 'formulario', 'titulo', 'tramiteId'])
+@props(['documento', 'formulario' => '', 'titulo', 'tramiteId'])
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" 
     x-data="documentViewer('{{ $titulo }}', {{ isset($documento['id']) ? $documento['id'] : 'null' }})"

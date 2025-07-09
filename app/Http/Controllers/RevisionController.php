@@ -761,6 +761,27 @@ class RevisionController extends Controller
         ]);
 
         try {
+            // Si es la sección de documentos (ID 6), verificar que todos los documentos estén aprobados
+            if ($seccionId == 6) {
+                $documentos = $tramite->documentosSolicitante;
+                $totalDocumentos = $documentos->count();
+                $documentosAprobados = $documentos->where('estado', 'Aprobado')->count();
+
+                if ($totalDocumentos === 0) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No hay documentos para revisar en esta sección'
+                    ], 400);
+                }
+
+                if ($documentosAprobados < $totalDocumentos) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No se puede aprobar la sección hasta que todos los documentos estén aprobados'
+                    ], 400);
+                }
+            }
+
             DB::beginTransaction();
 
             // Actualizar la revisión de la sección
@@ -2290,5 +2311,18 @@ class RevisionController extends Controller
 
         // Formatear el nuevo número PV
         return 'PV' . $siguienteNumero;
+    }
+
+    /**
+     * Muestra la vista alternativa de revisión (V2)
+     */
+    public function showV2(Tramite $tramite)
+    {
+        $secciones = $tramite->seccionesRevision;
+        
+        return view('revision.show-v2', [
+            'tramite' => $tramite,
+            'secciones' => $secciones
+        ]);
     }
 } 

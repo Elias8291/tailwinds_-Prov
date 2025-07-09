@@ -7,7 +7,7 @@ use App\Http\Controllers\HistorialProveedorController;
 use App\Http\Controllers\Api\SectorController;
 use App\Http\Controllers\LocationDataController;
 use App\Http\Controllers\RevisionController;
-use App\Http\Controllers\Api\ValidationController;
+use App\Http\Controllers\Formularios\DocumentosController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,11 +23,6 @@ use App\Http\Controllers\Api\ValidationController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
-// Validation Routes (no auth required for registration)
-Route::get('/validate/email', [ValidationController::class, 'checkEmail']);
-Route::get('/validate/rfc', [ValidationController::class, 'checkRfc']);
-Route::get('/validate/both', [ValidationController::class, 'checkBoth']);
 
 // RFC Search Routes
 Route::get('/rfc-search/{rfc}', [RfcSearchController::class, 'search']);
@@ -49,5 +44,7 @@ Route::get('/location-data/{codigoPostal}', [LocationDataController::class, 'get
 // Tramite Routes
 Route::get('/tramite/{tramiteId}/domicilio', [App\Http\Controllers\DetalleTramiteController::class, 'getDomicilioApi']);
 Route::get('/tramite/{tramiteId}/constitucion', [App\Http\Controllers\DetalleTramiteController::class, 'getConstitucionApi']);
-Route::get('/tramite/{tramiteId}/accionistas', [App\Http\Controllers\DetalleTramiteController::class, 'getAccionistasApi']);
-Route::get('/tramite/{tramiteId}/apoderado', [App\Http\Controllers\DetalleTramiteController::class, 'getApoderadoApi']);
+
+// Documentos Routes
+Route::post('/documentos/{id}/aprobar', [DocumentosController::class, 'aprobar']);
+Route::post('/documentos/{id}/rechazar', [DocumentosController::class, 'rechazar']);

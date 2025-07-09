@@ -249,6 +249,24 @@ class DocumentosController extends Controller
         }
     }
 
+    public function aprobar($id, Request $request)
+    {
+        $documento = DocumentoSolicitante::findOrFail($id);
+        $documento->estado = 'Aprobado';
+        $documento->observaciones = $request->input('comentario');
+        $documento->save();
+        return response()->json(['success' => true, 'estado' => 'Aprobado']);
+    }
+
+    public function rechazar($id, Request $request)
+    {
+        $documento = DocumentoSolicitante::findOrFail($id);
+        $documento->estado = 'Rechazado';
+        $documento->observaciones = $request->input('comentario');
+        $documento->save();
+        return response()->json(['success' => true, 'estado' => 'Rechazado']);
+    }
+
     /**
      * Verifica si se han subido todos los documentos requeridos y actualiza el progreso
      *
