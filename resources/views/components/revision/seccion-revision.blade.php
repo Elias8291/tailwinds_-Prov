@@ -5,105 +5,76 @@
     x-init="init()">
     
     <!-- Header con botón para colapsar -->
-    <div class="px-6 py-4 flex items-center justify-between border-b cursor-pointer hover:bg-gray-50 transition-colors"
+    <div class="px-6 py-4 flex items-center justify-between border-b cursor-pointer hover:bg-gray-50/70 transition-colors"
          @click="isCommentsOpen = !isCommentsOpen">
-        <h3 class="text-lg font-medium text-gray-900">
-            Revisión de Sección
-            <span x-show="estado === 'aprobado'" class="ml-2 px-3 py-1 text-sm rounded-full bg-green-100 text-green-800 border border-green-200">
-                ✓ Aprobado
+        <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-3">
+            <i class="fas fa-clipboard-check text-xl text-[#9d2449]"></i>
+            <span>Revisión de Sección</span>
+            <span x-show="estado === 'aprobado'" class="ml-2 px-3 py-1 text-xs font-bold rounded-full bg-green-100 text-green-800 border border-green-200 shadow-sm">
+                Aprobado
             </span>
-            <span x-show="estado === 'rechazado'" class="ml-2 px-3 py-1 text-sm rounded-full bg-red-100 text-red-800 border border-red-200">
-                ✗ Rechazado
+            <span x-show="estado === 'rechazado'" class="ml-2 px-3 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800 border border-red-200 shadow-sm">
+                Rechazado
             </span>
-            <span x-show="!estado || estado === 'pendiente'" class="ml-2 px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
-                ⏳ Pendiente
+            <span x-show="!estado || estado === 'pendiente'" class="ml-2 px-3 py-1 text-xs font-bold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200 shadow-sm">
+                Pendiente
             </span>
         </h3>
-        <button type="button" class="text-gray-400 hover:text-gray-500">
-            <svg class="h-5 w-5 transition-transform" 
-                 :class="{ 'transform rotate-180': isCommentsOpen }"
-                 fill="none" 
-                 viewBox="0 0 24 24" 
-                 stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
+        <button type="button" class="text-gray-400 hover:text-gray-600 transition-transform" :class="{ 'transform rotate-180': isCommentsOpen }">
+            <i class="fas fa-chevron-down text-sm"></i>
         </button>
     </div>
 
     <!-- Contenido colapsable -->
     <div x-show="isCommentsOpen" 
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 transform -translate-y-2"
-         x-transition:enter-end="opacity-100 transform translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 transform translate-y-0"
-         x-transition:leave-end="opacity-0 transform -translate-y-2"
-         class="p-6 space-y-5">
+         x-transition
+         class="p-6 space-y-5 bg-gray-50/70 backdrop-blur-sm">
         
         <!-- Área de comentarios -->
-        <div class="space-y-3">
-            <label for="comentario_seccion_{{ $seccionId }}" class="block text-sm font-medium text-gray-700 mb-2">
-                Comentarios de revisión
-                <span x-show="estado === 'aprobado' || estado === 'rechazado'" class="ml-2 text-xs text-gray-500 font-normal">
-                    (puedes modificar el estado y comentario)
-                </span>
+        <div>
+            <label for="comentario_seccion_{{ $seccionId }}" class="block text-sm font-semibold text-gray-800 mb-2">
+                <i class="fas fa-edit mr-2 text-[#9d2449]"></i>Añadir Comentarios
             </label>
             <textarea
                 id="comentario_seccion_{{ $seccionId }}"
                 x-model="comentario"
-                rows="3"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#9d2449] focus:ring-[#9d2449] sm:text-sm px-3 py-2"
+                rows="4"
+                class="block w-full rounded-xl border-gray-300 bg-white p-4 text-sm text-gray-800 placeholder-gray-500 shadow-inner transition-all duration-300 focus:border-[#9d2449] focus:ring-2 focus:ring-[#9d2449]/30 focus:outline-none resize-y min-h-[120px]"
                 :disabled="isLoading"
-                placeholder="Ingrese sus comentarios aquí..."></textarea>
+                placeholder="Si rechaza, este comentario será visible para el solicitante."></textarea>
         </div>
 
         <!-- Mensajes de error y éxito -->
-        <div class="mt-3">
+        <div class="min-h-[2rem]">
             <template x-if="error">
-                <div class="text-sm text-red-700 bg-red-50 border border-red-200 px-4 py-3 rounded-lg" x-text="error"></div>
+                <div class="text-sm text-red-700 bg-red-100 border border-red-200 px-4 py-2 rounded-lg flex items-center gap-2">
+                    <i class="fas fa-times-circle"></i><span x-text="error"></span>
+                </div>
             </template>
             <template x-if="success">
-                <div class="text-sm text-green-700 bg-green-50 border border-green-200 px-4 py-3 rounded-lg" x-text="success"></div>
+                <div class="text-sm text-green-700 bg-green-100 border border-green-200 px-4 py-2 rounded-lg flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i><span x-text="success"></span>
+                </div>
             </template>
         </div>
 
         <!-- Botones de acción -->
-        <div class="flex space-x-4 pt-2">
-            <button
-                type="button"
-                @click="aprobarSeccion()"
-                :disabled="isLoading"
-                :class="estado === 'aprobado' 
-                    ? 'inline-flex items-center justify-center rounded-lg border border-transparent bg-green-600 py-2.5 px-5 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
-                    : 'inline-flex items-center justify-center rounded-lg border border-transparent bg-[#9d2449] py-2.5 px-5 text-sm font-medium text-white shadow-sm hover:bg-[#8a203f] focus:outline-none focus:ring-2 focus:ring-[#9d2449] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'">
-                <template x-if="isLoading && estado !== 'aprobado'">
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </template>
-                <svg x-show="!isLoading" class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span x-text="estado === 'aprobado' ? 'Aprobado ✓' : 'Aprobar'"></span>
-            </button>
+        <div class="flex items-center justify-end gap-3 pt-2">
             <button
                 type="button"
                 @click="rechazarSeccion()"
+                :disabled="isLoading || comentario.trim().length < 10"
+                class="font-semibold py-2 px-5 rounded-lg text-red-600 bg-white border-2 border-red-200 hover:bg-red-50 hover:border-red-500 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                <i class="fas fa-times-circle"></i>
+                <span x-text="isLoading ? 'Procesando...' : 'Rechazar'"></span>
+            </button>
+             <button
+                type="button"
+                @click="aprobarSeccion()"
                 :disabled="isLoading"
-                :class="estado === 'rechazado' 
-                    ? 'inline-flex items-center justify-center rounded-lg border border-transparent bg-red-700 py-2.5 px-5 text-sm font-medium text-white shadow-sm hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
-                    : 'inline-flex items-center justify-center rounded-lg border border-transparent bg-red-600 py-2.5 px-5 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'">
-                <template x-if="isLoading && estado !== 'rechazado'">
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </template>
-                <svg x-show="!isLoading" class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                <span x-text="estado === 'rechazado' ? 'Rechazado ✗' : 'Rechazar'"></span>
+                class="font-semibold py-2 px-5 rounded-lg text-white bg-green-600 hover:bg-green-700 transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2">
+                <i class="fas fa-check-circle"></i>
+                <span x-text="isLoading ? 'Procesando...' : 'Aprobar'"></span>
             </button>
         </div>
     </div>
@@ -114,7 +85,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('seccionRevision', (seccionId, estadoInicial, comentarioInicial, tramiteId) => ({
         seccionId: seccionId,
         comentario: comentarioInicial || '',
-        estado: estadoInicial || '',
+        estado: estadoInicial || null,
         tramiteId: tramiteId,
         isLoading: false,
         error: null,
@@ -124,8 +95,8 @@ document.addEventListener('alpine:init', () => {
         init() {
             this.seccionId = seccionId;
             this.tramiteId = tramiteId;
-            // Abrir automáticamente si hay un comentario o estado
-            this.isCommentsOpen = !!(this.comentario || this.estado);
+            // Abrir automáticamente si hay un comentario o el estado es pendiente
+            this.isCommentsOpen = !!(this.comentario || this.estado === 'pendiente' || !this.estado);
         },
 
         async aprobarSeccion() {
@@ -156,25 +127,19 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.estado = 'aprobado';
-                this.success = 'Sección aprobada correctamente';
+                this.success = data.message || 'Sección aprobada correctamente.';
                 
-                // Disparar evento de actualización para el botón de terminar revisión
                 if (typeof window.actualizarEstadoRevision === 'function') {
                     window.actualizarEstadoRevision(this.seccionId, 'aprobado');
                 }
                 
-                // Cerrar el panel después de aprobar
                 setTimeout(() => {
                     this.isCommentsOpen = false;
-                }, 1500);
+                    this.success = null;
+                }, 2000);
 
-                // Actualizar la vista si es necesario
-                if (typeof window.actualizarProgresoTramite === 'function') {
-                    window.actualizarProgresoTramite();
-                }
             } catch (error) {
-                this.error = error.message || 'Error al aprobar la sección';
-                console.error('Error al aprobar sección:', error);
+                this.error = error.message;
             } finally {
                 this.isLoading = false;
             }
@@ -183,8 +148,8 @@ document.addEventListener('alpine:init', () => {
         async rechazarSeccion() {
             if (this.isLoading) return;
             
-            if (!this.comentario?.trim()) {
-                this.error = 'El comentario es requerido para rechazar una sección';
+            if (!this.comentario?.trim() || this.comentario.trim().length < 10) {
+                this.error = 'El comentario es obligatorio y debe tener al menos 10 caracteres.';
                 return;
             }
 
@@ -213,25 +178,19 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.estado = 'rechazado';
-                this.success = 'Sección rechazada correctamente';
+                this.success = data.message || 'Sección rechazada correctamente.';
                 
-                // Disparar evento de actualización para el botón de terminar revisión
                 if (typeof window.actualizarEstadoRevision === 'function') {
                     window.actualizarEstadoRevision(this.seccionId, 'rechazado');
                 }
                 
-                // Cerrar el panel después de rechazar
                 setTimeout(() => {
                     this.isCommentsOpen = false;
-                }, 1500);
+                    this.success = null;
+                }, 2000);
 
-                // Actualizar la vista si es necesario
-                if (typeof window.actualizarProgresoTramite === 'function') {
-                    window.actualizarProgresoTramite();
-                }
             } catch (error) {
-                this.error = error.message || 'Error al rechazar la sección';
-                console.error('Error al rechazar sección:', error);
+                this.error = error.message;
             } finally {
                 this.isLoading = false;
             }

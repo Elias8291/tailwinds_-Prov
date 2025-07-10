@@ -1,10 +1,73 @@
-// Inicialización de Google Maps
-if (!window.googleMapsLoaded) {
-    window.googleMapsLoaded = false;
-    window.initGoogleMaps = function() {
-        window.googleMapsLoaded = true;
-        document.dispatchEvent(new Event('google-maps-loaded'));
-    };
+// Configuración de Google Maps
+const GOOGLE_MAPS_CONFIG = {
+    apiKey: 'AIzaSyCUqfgNQ2Q4AVy8OTNMfogJceDbA0FHZKs',
+    version: 'weekly',
+    libraries: ['places'],
+    language: 'es',
+    region: 'MX'
+};
+
+class GoogleMapsLoader {
+    static instance = null;
+    static loadPromise = null;
+
+    static getInstance() {
+        if (!GoogleMapsLoader.instance) {
+            GoogleMapsLoader.instance = new GoogleMapsLoader();
+        }
+        return GoogleMapsLoader.instance;
+    }
+
+    async load() {
+        if (GoogleMapsLoader.loadPromise) {
+            return GoogleMapsLoader.loadPromise;
+        }
+
+        GoogleMapsLoader.loadPromise = new Promise((resolve, reject) => {
+            // Si Google Maps ya está cargado, resolver inmediatamente
+            if (window.google && window.google.maps) {
+                resolve(window.google.maps);
+                return;
+            }
+
+            // Cargar directamente desde Google CDN
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            const libraries = GOOGLE_MAPS_CONFIG.libraries.join(',');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_CONFIG.apiKey}&libraries=${libraries}&v=${GOOGLE_MAPS_CONFIG.version}&language=${GOOGLE_MAPS_CONFIG.language}&region=${GOOGLE_MAPS_CONFIG.region}&callback=initGoogleMaps`;
+            script.async = true;
+            script.defer = true;
+
+            // Configurar callback global
+            window.initGoogleMaps = () => {
+                if (window.google && window.google.maps) {
+                    resolve(window.google.maps);
+                } else {
+                    reject(new Error('Google Maps no se cargó correctamente'));
+                }
+                // Limpiar el callback global después de usarlo
+                delete window.initGoogleMaps;
+            };
+
+            // Manejar errores
+            script.onerror = (error) => {
+                GoogleMapsLoader.loadPromise = null;
+                console.error('Error cargando Google Maps:', error);
+                
+                // Verificar si el error es por bloqueador
+                if (error.target.src.includes('maps.googleapis.com')) {
+                    const viewer = new GoogleMapsViewer();
+                    viewer.showBlockedMessage();
+                }
+                
+                reject(new Error('No se pudo cargar Google Maps'));
+            };
+
+            document.head.appendChild(script);
+        });
+
+        return GoogleMapsLoader.loadPromise;
+    }
 }
 
 class AddressFieldsFinder {
@@ -78,6 +141,24 @@ class GoogleMapsViewer {
             isValid: false,
             messages: []
         };
+        this.addressFinder = null;
+    }
+
+    showBlockedMessage() {
+        if (this.mapRef) {
+            const message = document.createElement('div');
+            message.className = 'p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700';
+            message.innerHTML = `
+                <h3 class="font-bold mb-2">Google Maps está bloqueado</h3>
+                <p class="mb-2">Parece que un bloqueador de anuncios está impidiendo cargar Google Maps.</p>
+                <p class="mb-2">Para ver el mapa, por favor:</p>
+                <ol class="list-decimal list-inside">
+                    <li class="mb-1">Desactive temporalmente su bloqueador de anuncios para este sitio</li>
+                    <li class="mb-1">Recargue la página</li>
+                </ol>
+            `;
+            this.mapRef.appendChild(message);
+        }
     }
 
     async initialize() {
@@ -86,7 +167,32 @@ class GoogleMapsViewer {
             return;
         }
 
-        // Inicializar Street View primero
+        try {
+            this.showLoading(true);
+
+            // Inicializar el buscador de direcciones
+            const formulario = this.mapRef.closest('.grid').querySelector('[x-ref="formulario"]');
+            this.addressFinder = new AddressFieldsFinder(formulario);
+
+            // Cargar Google Maps
+            await GoogleMapsLoader.getInstance().load();
+
+            // Inicializar componentes del mapa
+            await this.initializeMapComponents();
+
+            // Cargar la dirección del formulario
+            await this.loadAddressFromForm();
+
+            this.showLoading(false);
+        } catch (error) {
+            console.error('Error al inicializar el mapa:', error);
+            this.showError('No se pudo cargar el mapa. Por favor, inténtelo de nuevo.');
+            this.showLoading(false);
+        }
+    }
+
+    async initializeMapComponents() {
+        // Inicializar Street View
         this.streetView = new google.maps.StreetViewPanorama(this.streetViewRef, {
             position: { lat: 19.4326, lng: -99.1332 },
             pov: { heading: 0, pitch: 0 },
@@ -101,7 +207,7 @@ class GoogleMapsViewer {
             showRoadLabels: true
         });
 
-        // Inicializar el mapa con Street View integrado
+        // Inicializar el mapa
         this.map = new google.maps.Map(this.mapRef, {
             zoom: 17,
             center: { lat: 19.4326, lng: -99.1332 },
@@ -113,17 +219,26 @@ class GoogleMapsViewer {
         });
 
         this.geocoder = new google.maps.Geocoder();
-        
-        // Inicializar el servicio de Places con las nuevas APIs
         this.placesService = new google.maps.places.PlacesService(this.map);
 
-        // Manejar cambios de visibilidad de Street View
+        // Configurar eventos
         google.maps.event.addListener(this.streetView, 'visible_changed', () => {
             const isVisible = this.streetView.getVisible();
             this.streetViewRef.style.display = isVisible ? 'block' : 'none';
             this.mapRef.style.display = isVisible ? 'none' : 'block';
             this.isStreetViewVisible = isVisible;
         });
+    }
+
+    async loadAddressFromForm() {
+        try {
+            const fields = this.addressFinder.findFields();
+            const address = this.addressFinder.formatAddress(fields);
+            await this.searchAddress(address, fields);
+        } catch (error) {
+            console.error('Error al cargar la dirección:', error);
+            this.showError('No se pudo cargar la dirección del formulario.');
+        }
     }
 
     toggleStreetView() {
@@ -499,20 +614,23 @@ class GoogleMapsViewer {
     }
 
     showError(message) {
-        if (!this.mapRef) return;
-
-        this.mapRef.innerHTML = `
-            <div class="flex flex-col items-center justify-center h-full bg-gray-50 space-y-4">
-                <i class="fas fa-exclamation-triangle text-[#9d2449] text-4xl"></i>
-                <div class="text-center">
-                    <p class="text-gray-700">Error al cargar el mapa</p>
-                    <p class="text-sm text-gray-500 mt-2">${message}</p>
-                    <button @click="initMap" class="mt-4 px-4 py-2 bg-[#9d2449] text-white rounded-md hover:bg-[#8a203f] transition-colors">
-                        <i class="fas fa-sync-alt mr-2"></i>Reintentar
-                    </button>
-                </div>
-            </div>
-        `;
+        if (this.mapRef) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'p-4 bg-red-100 border-l-4 border-red-500 text-red-700';
+            errorDiv.innerHTML = `
+                <h3 class="font-bold mb-2">Error</h3>
+                <p>${message}</p>
+            `;
+            
+            // Limpiar errores anteriores
+            const previousErrors = this.mapRef.querySelectorAll('.bg-red-100');
+            previousErrors.forEach(error => error.remove());
+            
+            this.mapRef.appendChild(errorDiv);
+            
+            // Ocultar el loader si está visible
+            this.showLoading(false);
+        }
     }
 
     showLoading(show = true) {

@@ -28,29 +28,45 @@
                                 <i class="fas fa-street-view mr-1"></i>
                                 Street View
                             </button>
-                                <button type="button" 
+                            <button type="button" 
                                     @click="toggleMapType"
-                                        class="px-3 py-1 bg-[#9d2449] text-white text-sm rounded-md hover:bg-[#8a203f] transition-colors">
+                                    class="px-3 py-1 bg-[#9d2449] text-white text-sm rounded-md hover:bg-[#8a203f] transition-colors">
                                 <i class="fas fa-map mr-1"></i>
                                 Vista
-                                </button>
+                            </button>
+                            <button type="button" 
+                                    @click="reloadAddress"
+                                    class="px-3 py-1 bg-[#9d2449] text-white text-sm rounded-md hover:bg-[#8a203f] transition-colors">
+                                <i class="fas fa-sync-alt mr-1"></i>
+                                Recargar
+                            </button>
                         </div>
-                                        @endif
-                                    </div>
+                    @endif
+                </div>
                 <div class="h-[calc(100%-4rem)] rounded-lg border border-gray-200 overflow-hidden">
                     @if(strtolower($titulo) === 'domicilio y comprobante')
                         <div class="relative h-full">
                             <div x-ref="map" class="w-full h-full"></div>
                             <div x-ref="streetView" class="w-full h-full absolute top-0 left-0" style="display: none;"></div>
-                            <div x-ref="mapLoader" class="absolute inset-0 flex items-center justify-center bg-white">
+                            <div x-ref="mapLoader" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
                                 <div class="flex items-center space-x-3">
                                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#9d2449]"></div>
                                     <span class="text-gray-600">Cargando mapa...</span>
                                 </div>
                             </div>
-                            <div x-ref="locationInfo" style="display: none;">
-                                <div x-ref="locationDetails"></div>
-                                    </div>
+                            <div x-ref="mapError" class="absolute inset-0 flex items-center justify-center bg-white hidden">
+                                <div class="text-center p-4">
+                                    <i class="fas fa-exclamation-triangle text-[#9d2449] text-4xl mb-4"></i>
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-2">No se pudo cargar el mapa</h3>
+                                    <p class="text-gray-600 mb-4">Es posible que un bloqueador de anuncios esté impidiendo cargar Google Maps.</p>
+                                    <button @click="retryLoadMap" class="px-4 py-2 bg-[#9d2449] text-white rounded-md hover:bg-[#8a203f] transition-colors">
+                                        <i class="fas fa-sync-alt mr-2"></i>Reintentar
+                                    </button>
+                                </div>
+                            </div>
+                            <div x-ref="locationInfo" class="absolute bottom-4 left-4 right-4 bg-white rounded-lg shadow-lg p-4 hidden">
+                                <div x-ref="locationDetails" class="text-sm"></div>
+                            </div>
                         </div>
                     @elseif(isset($documento['id']))
                         <iframe src="{{ route('revision.ver-documento', ['tramite' => $tramiteId, 'documento' => $documento['id']]) }}" 
@@ -125,6 +141,51 @@
 
 @once
 @push('scripts')
+<script>
+    function documentViewer(titulo, documentoId) {
+        return {
+            syncScroll: true,
+            sideBySide: true,
+            zoom: 100,
+            mapViewer: null,
+
+            async init() {
+                if (titulo.toLowerCase() === 'domicilio y comprobante') {
+                    try {
+                        this.mapViewer = new GoogleMapsViewer(
+                            this.$refs.map,
+                            this.$refs.streetView,
+                            this.$refs.mapLoader,
+                            this.$refs.locationInfo,
+                            this.$refs.locationDetails
+                        );
+                        await this.mapViewer.initialize();
+                    } catch (error) {
+                        console.error('Error initializing map:', error);
+                        this.$refs.mapLoader.style.display = 'none';
+                        this.$refs.mapError.classList.remove('hidden');
+                    }
+                }
+
+                this.initScrollSync();
+            },
+
+            retryLoadMap() {
+                this.$refs.mapError.classList.add('hidden');
+                this.$refs.mapLoader.style.display = 'flex';
+                this.init();
+            },
+
+            reloadAddress() {
+                if (this.mapViewer) {
+                    this.mapViewer.loadAddressFromForm();
+                }
+            },
+
+            // ... existing methods ...
+        };
+    }
+</script>
 <script src="{{ asset('js/components/google-maps-viewer.js') }}"></script>
 @endpush 
 @endonce 

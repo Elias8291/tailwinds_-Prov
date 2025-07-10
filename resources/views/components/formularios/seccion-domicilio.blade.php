@@ -13,6 +13,13 @@
             </div>
         </div>
     </div>
+
+    <!-- Cuadro de domicilio concatenado -->
+    <div class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h3 class="text-sm font-medium text-gray-700 mb-2">Domicilio Completo:</h3>
+        <p x-text="getDomicilioConcatenado()" class="text-gray-600 leading-relaxed break-words"></p>
+    </div>
+
     @if($readonly)
         <!-- Vista de solo lectura para revisión -->
         <div class="space-y-6">
@@ -803,6 +810,50 @@ function domicilioData() {
                     }
                 }, 300);
             }, 3000);
+        },
+        getDomicilioConcatenado() {
+            let partes = [];
+            
+            // Calle y números
+            let direccion = this.nombreVialidad || '';
+            if (this.numeroExterior) {
+                direccion += ' No. ' + this.numeroExterior;
+                if (this.numeroInterior) {
+                    direccion += ' Int. ' + this.numeroInterior;
+                }
+            }
+            if (direccion) partes.push(direccion);
+            
+            // Entre calles
+            const entreCalle1 = document.getElementById('entre_calle_1')?.value;
+            const entreCalle2 = document.getElementById('entre_calle_2')?.value;
+            if (entreCalle1 && entreCalle2) {
+                partes.push(`Entre ${entreCalle1} y ${entreCalle2}`);
+            }
+            
+            // Colonia/Asentamiento
+            if (this.colonia) {
+                const asentamientoSeleccionado = this.asentamientos.find(a => a.id.toString() === this.colonia.toString());
+                if (asentamientoSeleccionado) {
+                    partes.push(asentamientoSeleccionado.nombre);
+                }
+            }
+            
+            // Municipio
+            if (this.municipio) {
+                partes.push(this.municipio);
+            }
+            
+            // Estado y CP
+            if (this.estado) {
+                let ubicacion = this.estado;
+                if (this.cp) {
+                    ubicacion += `, C.P. ${this.cp}`;
+                }
+                partes.push(ubicacion);
+            }
+            
+            return partes.length > 0 ? partes.join(', ') : 'Domicilio no especificado';
         }
     }
 }

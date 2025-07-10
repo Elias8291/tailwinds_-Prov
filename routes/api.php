@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\SectorController;
 use App\Http\Controllers\LocationDataController;
 use App\Http\Controllers\RevisionController;
 use App\Http\Controllers\Formularios\DocumentosController;
+use App\Http\Controllers\Api\GoogleMapsProxyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,3 +49,7 @@ Route::get('/tramite/{tramiteId}/constitucion', [App\Http\Controllers\DetalleTra
 // Documentos Routes
 Route::post('/documentos/{id}/aprobar', [DocumentosController::class, 'aprobar']);
 Route::post('/documentos/{id}/rechazar', [DocumentosController::class, 'rechazar']);
+
+// Google Maps Proxy
+Route::get('/google-maps/script', [GoogleMapsProxyController::class, 'getScript'])
+    ->name('api.google-maps.script');

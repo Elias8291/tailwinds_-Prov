@@ -236,7 +236,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="pagina_web" class="block text-sm font-medium text-gray-700 mb-2">Página Web</label>
+                    <label for="pagina_web" class="block text-sm font-medium text-gray-700 mb-2">Páginaa Web</label>
                     @unless($readonly)
                     <input type="url" 
                            id="pagina_web" 
