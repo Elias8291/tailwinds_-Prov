@@ -81,6 +81,7 @@
 
     // Crear círculo de área suave
     const createAreaCircle = (map, center) => {
+        const isMobile = window.innerWidth < 1024;
         return new google.maps.Circle({
             strokeColor: '#9d2449',
             strokeOpacity: 0.3,
@@ -89,7 +90,7 @@
             fillOpacity: 0.08,
             map,
             center,
-            radius: 150,
+            radius: isMobile ? 100 : 150, // Radio más pequeño en móvil
             clickable: false
         });
     };
@@ -103,35 +104,68 @@
         const address = window.tramiteAddress || '';
         const defaultLocation = { lat: 19.4326, lng: -99.1332 };
 
+        // Elegir el contenedor de mapa correcto
+        const isMobile = window.innerWidth < 1024; // lg breakpoint
+        const mapContainerId = isMobile ? 'google-map-mobile' : 'google-map-desktop';
+        const mapContainer = document.getElementById(mapContainerId);
+
+        if (!mapContainer) {
+            console.warn(`Contenedor de mapa no encontrado: #${mapContainerId}`);
+            return;
+        }
+
         // Configuración del mapa limpia y elegante
         const mapOptions = {
-            zoom: 16,
+            zoom: isMobile ? 15 : 16, // Zoom más alejado en móvil
             center: defaultLocation,
             styles: mapStyles,
             mapTypeControl: false,
             zoomControl: true,
             zoomControlOptions: {
-                position: google.maps.ControlPosition.RIGHT_BOTTOM
+                position: isMobile ? google.maps.ControlPosition.TOP_RIGHT : google.maps.ControlPosition.RIGHT_BOTTOM
             },
             scaleControl: false,
-            streetViewControl: true,
+            streetViewControl: !isMobile, // Ocultar en móvil para ahorrar espacio
             streetViewControlOptions: {
                 position: google.maps.ControlPosition.RIGHT_BOTTOM
             },
-            fullscreenControl: false,
-            gestureHandling: 'auto'
+            fullscreenControl: isMobile, // Mostrar solo en móvil
+            fullscreenControlOptions: {
+                position: google.maps.ControlPosition.TOP_LEFT
+            },
+            gestureHandling: isMobile ? 'greedy' : 'auto', // Mejor para móvil
+            restriction: isMobile ? {
+                latLngBounds: null,
+                strictBounds: false
+            } : undefined, // Sin restricciones en móvil para mejor UX
+            maxZoom: 18,
+            minZoom: 10
         };
 
-        // Crear mapas
-        const map = document.getElementById('google-map') 
-            ? new google.maps.Map(document.getElementById('google-map'), mapOptions) 
-            : null;
-            
-        const mapMobile = document.getElementById('google-map-mobile')
-            ? new google.maps.Map(document.getElementById('google-map-mobile'), mapOptions)
-            : null;
+        // Crear mapa
+        const map = new google.maps.Map(mapContainer, mapOptions);
 
-        if (!map && !mapMobile) return;
+        if (!map) return;
+
+        // Forzar redimensionamiento del mapa después de un breve delay - solo si es necesario
+        setTimeout(() => {
+            google.maps.event.trigger(map, 'resize');
+            if (address.trim()) {
+                // Re-centrar si hay una dirección específica
+                const currentCenter = map.getCenter();
+                if (currentCenter) {
+                    map.setCenter(currentCenter);
+                }
+            }
+        }, 500);
+
+        // Solo observar cambios de tamaño si no es móvil para evitar redimensionamientos innecesarios
+        if (!isMobile) {
+            const resizeObserver = new ResizeObserver(() => {
+                google.maps.event.trigger(map, 'resize');
+            });
+            resizeObserver.observe(mapContainer);
+        }
 
         // Procesar dirección si existe
         if (address.trim()) {
@@ -140,20 +174,17 @@
                     const location = results[0].geometry.location;
                     const formattedAddress = results[0].formatted_address;
                     
-                    [map, mapMobile].forEach(m => {
-                        if (m) {
-                            m.setCenter(location);
+                    map.setCenter(location);
                             
-                            // Crear marcador y círculo
-                            const { marker, infoWindow } = createMarker(m, location, formattedAddress);
-                            const circle = createAreaCircle(m, location);
+                    // Crear marcador y círculo
+                    const { marker, infoWindow } = createMarker(map, location, formattedAddress);
+                    const circle = createAreaCircle(map, location);
                             
-                            // Mostrar información automáticamente
-                            setTimeout(() => {
-                                infoWindow.open(m, marker);
-                            }, 1000);
-                        }
-                    });
+                    // Mostrar información automáticamente
+                    setTimeout(() => {
+                        infoWindow.open(map, marker);
+                    }, 1000);
+
                 } else {
                     console.warn('No se pudo encontrar la dirección:', address);
                 }
@@ -164,7 +195,10 @@
     // Cargar Google Maps cuando sea necesario
     document.addEventListener('DOMContentLoaded', () => {
         const observer = new MutationObserver((mutations, obs) => {
-            if (document.getElementById('google-map') || document.getElementById('google-map-mobile')) {
+            const mapDesktop = document.getElementById('google-map-desktop');
+            const mapMobile = document.getElementById('google-map-mobile');
+
+            if (mapDesktop || mapMobile) {
                 if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
                     const script = document.createElement('script');
                     script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCUqfgNQ2Q4AVy8OTNMfogJceDbA0FHZKs&callback=initGoogleMapsCallback&loading=async';
@@ -177,6 +211,29 @@
         });
 
         observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Observer simplificado para cuando se muestren los mapas
+        const mapVisibilityObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    const addedNodes = Array.from(mutation.addedNodes);
+                    addedNodes.forEach((node) => {
+                        if (node.nodeType === 1 && (node.id === 'google-map-mobile' || node.id === 'google-map-desktop')) {
+                            setTimeout(() => {
+                                if (!mapsInitialized) {
+                                    window.initGoogleMapsCallback && window.initGoogleMapsCallback();
+                                }
+                            }, 200);
+                        }
+                    });
+                }
+            });
+        });
+
+        mapVisibilityObserver.observe(document.body, {
             childList: true,
             subtree: true
         });

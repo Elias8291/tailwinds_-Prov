@@ -18,7 +18,7 @@
                     </a>
 
                     <!-- Separador: Gestión de Trámites - Solo si hay elementos en la sección -->
-                    @if(auth()->user()->can('tramites-solicitante.ver') || auth()->user()->can('revision-tramites.ver') || auth()->user()->can('documentos.ver') || auth()->user()->can('citas.ver'))
+                    @if(auth()->check() && (auth()->user()->can('tramites-solicitante.ver') || auth()->user()->can('revision-tramites.ver') || auth()->user()->can('documentos.ver') || auth()->user()->can('citas.ver')))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                     </div>
@@ -80,7 +80,7 @@
                     @endcan
 
                     <!-- Separador: Administración - Solo si hay elementos en la sección -->
-                    @if(auth()->user()->can('usuarios.ver') || auth()->user()->can('roles.ver') || auth()->user()->can('proveedores.ver') || auth()->user()->can('mi-estado-proveedor.ver'))
+                    @if(auth()->check() && (auth()->user()->can('usuarios.ver') || auth()->user()->can('roles.ver') || auth()->user()->can('proveedores.ver') || auth()->user()->can('mi-estado-proveedor.ver')))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                     </div>
@@ -134,7 +134,7 @@
 
 
                     <!-- Separador: Monitoreo - Solo si hay elementos en la sección -->
-                    @if(auth()->user()->can('logs.ver'))
+                    @if(auth()->check() && auth()->user()->can('logs.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                     </div>
@@ -305,7 +305,7 @@
                     </a>
 
                     <!-- Separador: Gestión de Trámites - Solo si hay elementos en la sección -->
-                    @if(auth()->user()->can('tramites-solicitante.ver') || auth()->user()->can('revision-tramites.ver') || auth()->user()->can('documentos.ver') || auth()->user()->can('citas.ver'))
+                    @if(auth()->check() && (auth()->user()->can('tramites-solicitante.ver') || auth()->user()->can('revision-tramites.ver') || auth()->user()->can('documentos.ver') || auth()->user()->can('citas.ver')))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                         <p class="mt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gestión de Trámites</p>
@@ -368,7 +368,7 @@
                     @endcan
 
                     <!-- Separador: Administración - Solo si hay elementos en la sección -->
-                    @if(auth()->user()->can('usuarios.ver') || auth()->user()->can('roles.ver') || auth()->user()->can('proveedores.ver') || auth()->user()->can('mi-estado-proveedor.ver'))
+                    @if(auth()->check() && (auth()->user()->can('usuarios.ver') || auth()->user()->can('roles.ver') || auth()->user()->can('proveedores.ver') || auth()->user()->can('mi-estado-proveedor.ver')))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                         <p class="mt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Administración</p>
@@ -423,7 +423,7 @@
 
 
                     <!-- Separador: Monitoreo - Solo si hay elementos en la sección -->
-                    @if(auth()->user()->can('logs.ver'))
+                    @if(auth()->check() && auth()->user()->can('logs.ver'))
                     <div class="px-3 py-2">
                         <div class="h-px bg-gray-200"></div>
                         <p class="mt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Monitoreo</p>

@@ -1,4 +1,9 @@
-@props(['seccion', 'tramite'])
+@props([
+    'seccion', 
+    'tramite',
+    'seccionAprobada' => 'pendiente',
+    'habilitarAprobacion' => true
+])
 
 <div x-data="{
         open: false,
@@ -166,31 +171,55 @@
         
         <div class="max-w-2xl mx-auto">
             <div class="space-y-4">
+
+                @if ($seccion['clave'] === 'documentos' && !$habilitarAprobacion)
+                <div>
+                    <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-semibold text-amber-900">Aprobación Bloqueada</p>
+                                <p class="text-xs text-amber-800 mt-1">
+                                    Si no todos los documentos están correctos, <strong>no se puede aprobar esta sección</strong>. Solo se puede <strong>rechazar</strong>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <div>
                     <label for="comentario-seccion-{{$seccion['id']}}" class="block text-sm font-semibold text-primary-dark mb-2">
                         <i class="fas fa-edit mr-1 text-primary"></i> Observaciones Generales de la Sección
                     </label>
-                    <textarea x-model="comentario" 
-                              id="comentario-seccion-{{$seccion['id']}}" 
-                              rows="3"
-                              class="w-full p-3 text-sm bg-white border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
-                              placeholder="Añadir un comentario para la sección '{{ $seccion['nombre'] }}'..."
-                              :disabled="loading"></textarea>
+                    <textarea x-model="comentario"
+                                  id="comentario-seccion-{{$seccion['id']}}"        
+                                  rows="3"
+                                  class="w-full p-3 text-sm bg-white border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
+                                  placeholder="Añadir un comentario para la sección '{{ $seccion['nombre'] }}'..."
+                                  :disabled="loading"></textarea>
                 </div>
 
                 <div class="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
-                    <button @click="rechazarSeccion()" 
+                    <button @click="rechazarSeccion()"
                             :disabled="loading"
-                            class="w-full sm:w-auto inline-flex justify-center items-center px-5 py-2 border border-primary text-sm font-bold rounded-full text-primary bg-white hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-150 disabled:opacity-50">
+                            class="w-full sm:w-auto inline-flex justify-center items-center px-5 py-2 border border-primary text-sm font-bold rounded-full text-primary bg-white hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-150 disabled:opacity-50">   
                         <i class="fas fa-times-circle mr-2"></i>
                         <span>Rechazar Sección</span>
                     </button>
-                    <button @click="aprobarSeccion()" 
-                            :disabled="loading"
-                            class="w-full sm:w-auto inline-flex justify-center items-center px-5 py-2 border border-transparent text-sm font-bold rounded-full text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-dark transition-all duration-150 disabled:opacity-50">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        <span>Aprobar Sección</span>
-                    </button>
+                    
+                    <div x-data="{ habilitado: {{ $habilitarAprobacion ? 'true' : 'false' }} }" 
+                         class="relative w-full sm:w-auto">
+                        <button @click="aprobarSeccion()"
+                                :disabled="loading || !habilitado"
+                                class="w-full inline-flex justify-center items-center px-5 py-2 border border-transparent text-sm font-bold rounded-full text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-dark transition-all duration-150"
+                                :class="{ 'opacity-50 cursor-not-allowed': !habilitado }">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <span>Aprobar Sección</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

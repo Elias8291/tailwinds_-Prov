@@ -1259,11 +1259,30 @@ class RevisionController extends Controller
             foreach ($seccionesRequeridas as $seccionId => $nombre) {
                 $revision = $revisiones->get($seccionId);
                 $estado = $revision ? $revision->estado : 'pendiente';
+                
+                // Para la sección de documentos, calcular estado basándose en documentos individuales
+                if ($seccionId === 6) {
+                    $documentos = $tramite->documentosSolicitante()->get();
+                    $documentosAprobados = $documentos->where('estado', 'Aprobado')->count();
+                    $documentosRechazados = $documentos->where('estado', 'Rechazado')->count();
+                    $totalDocumentos = $documentos->count();
+                    
+                    if ($totalDocumentos > 0) {
+                        if ($documentosRechazados > 0) {
+                            $estado = 'rechazado';
+                        } elseif ($documentosAprobados === $totalDocumentos) {
+                            $estado = 'aprobado';
+                        } else {
+                            $estado = 'pendiente';
+                        }
+                    }
+                }
+                
                 $comentario = $revision ? $revision->comentario : '';
                 $fechaRevision = $revision ? $revision->fecha_revision : null;
                 $revisor = $revision && $revision->revisor ? $revision->revisor->name : '';
                 
-                $estadoSecciones[$seccionId] = [
+                $estadoSecciones[] = [
                     'seccion_id' => $seccionId,
                     'nombre' => $nombre,
                     'estado' => $estado,
@@ -1283,7 +1302,7 @@ class RevisionController extends Controller
             
             return response()->json([
                 'success' => true,
-                'secciones' => $estadoSecciones,
+                'data' => $estadoSecciones,
                 'todas_aprobadas' => $todasAprobadas,
                 'alguna_rechazada' => $algunaRechazada,
                 'puede_aprobar_todo' => $todasAprobadas && !$algunaRechazada,

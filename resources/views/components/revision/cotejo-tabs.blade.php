@@ -9,54 +9,59 @@
         scrollbar-width: none;  /* Firefox */
     }
     
+    .mobile-viewer {
+        height: auto !important;
+        min-height: 300px !important;
+        max-height: 400px !important;
+    }
+    
     /* Mejoras para móvil */
     @media (max-width: 640px) {
         .mobile-viewer {
-            height: 50vh;
-            min-height: 300px;
-        }
-        
-        .mobile-map {
-            height: 40vh;
-            min-height: 250px;
+            height: auto !important;
+            min-height: 280px !important;
+            max-height: 350px !important;
         }
     }
     
     @media (min-width: 641px) and (max-width: 768px) {
         .mobile-viewer {
-            height: 60vh;
-            min-height: 400px;
-        }
-        
-        .mobile-map {
-            height: 50vh;
-            min-height: 300px;
+            height: auto !important;
+            min-height: 320px !important;
+            max-height: 380px !important;
         }
     }
     
-    @media (min-width: 769px) {
+    @media (min-width: 769px) and (max-width: 1023px) {
         .mobile-viewer {
-            height: 60vh;
-            min-height: 400px;
-        }
-        
-        .mobile-map {
-            height: 50vh;
-            min-height: 300px;
+            height: auto !important;
+            min-height: 350px !important;
+            max-height: 420px !important;
         }
     }
     
     /* Mejoras para pantallas muy pequeñas */
     @media (max-width: 360px) {
         .mobile-viewer {
-            height: 45vh;
-            min-height: 280px;
+            height: auto !important;
+            min-height: 250px !important;
+            max-height: 300px !important;
         }
-        
-        .mobile-map {
-            height: 35vh;
-            min-height: 220px;
-        }
+    }
+    
+    /* Asegurar que el contenedor del mapa ocupe todo el espacio disponible */
+    #google-map-desktop {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 0 0 8px 8px;
+    }
+    
+    /* Contenedor del mapa para desktop - tamaño fijo */
+    .map-container-desktop {
+        height: 400px !important;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
     }
 </style>
 
@@ -187,7 +192,7 @@
             <!-- Google Maps Viewer -->
             <template x-if="showMapInfo">
                 <div class="h-full bg-white rounded-lg shadow-inner border flex flex-col">
-                    <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-white to-gray-50 rounded-t-lg">
+                    <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-white to-gray-50 rounded-t-lg flex-shrink-0">
                         <div class="flex items-center space-x-3">
                             <div class="flex-shrink-0 w-10 h-10 bg-[#9d2449] rounded-full flex items-center justify-center shadow-md">
                                 <i class="fas fa-map-marker-alt text-white text-lg"></i>
@@ -202,8 +207,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex-grow relative">
-                        <div id="google-map" class="w-full h-full rounded-b-lg"></div>
+                    <div class="flex-grow relative overflow-hidden map-container-desktop">
+                        <div id="google-map-desktop" class="w-full h-full"></div>
                     </div>
                 </div>
             </template>
@@ -363,34 +368,40 @@
             </div>
 
             <!-- Document Content Area -->
-            <div class="p-3 sm:p-4 min-h-[350px] sm:min-h-[400px] mobile-viewer">
-                <!-- Google Maps Viewer Mobile -->
+            <div class="p-0 mobile-viewer flex flex-col">
+                <!-- Google Maps Link for Mobile -->
                 <template x-if="showMapInfo">
-                    <div class="bg-white rounded-lg shadow-sm overflow-hidden border h-full flex flex-col">
-                        <div class="p-3 sm:p-4 border-b border-gray-200 bg-gradient-to-r from-white to-gray-50">
-                            <div class="flex items-center space-x-2 sm:space-x-3">
-                                <div class="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-[#9d2449] rounded-full flex items-center justify-center shadow-md">
-                                    <i class="fas fa-map-marker-alt text-white text-xs sm:text-sm md:text-lg"></i>
+                    <div class="p-3 sm:p-4">
+                        <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-sm">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 pt-1">
+                                    <i class="fas fa-map-marked-alt text-gray-400 text-2xl"></i>
                                 </div>
-                                <div class="flex-grow min-w-0">
-                                    <h4 class="text-sm sm:text-base md:text-lg font-semibold text-gray-800">
-                                        Ubicación del Domicilio
-                                    </h4>
-                                    <p class="text-xs sm:text-sm text-gray-600 mt-1 leading-relaxed truncate">
-                                        {{ $domicilioConcatenado }}
+                                <div class="ml-4 flex-grow">
+                                    <h3 class="text-base font-semibold text-gray-800">Ver en Google Maps</h3>
+                                    <p class="mt-1 text-sm text-gray-600">
+                                        Se abrirá una nueva pestaña para revisar la ubicación.
                                     </p>
+                                    <div class="mt-3">
+                                        <p class="text-xs font-mono bg-gray-100 p-2 rounded-md border border-gray-200 text-gray-700">{{ $domicilioConcatenado }}</p>
+                                    </div>
+                                    <div class="mt-4">
+                                        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($domicilioConcatenado) }}"
+                                           target="_blank"
+                                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200">
+                                           <i class="fas fa-external-link-alt mr-2"></i>
+                                            Abrir Mapa
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="flex-grow mobile-map">
-                            <div id="google-map-mobile" class="w-full h-full"></div>
                         </div>
                     </div>
                 </template>
 
                 <!-- Document Viewer Mobile -->
                 <template x-if="activeDocument && activeDocument.ruta_archivo">
-                    <div class="bg-white rounded-lg shadow-sm border h-full flex flex-col">
+                    <div class="bg-white rounded-lg shadow-sm border h-full flex flex-col m-3 sm:m-4">
                         <div class="p-2 sm:p-3 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-lg">
                             <h4 class="text-xs sm:text-sm font-medium text-gray-700 truncate pr-2" x-text="activeDocument.nombre"></h4>
                             <a :href="`{{ route('revision.ver-documento', ['tramite' => $tramite->id, 'documento' => '0']) }}`.replace('/0', '/' + activeDocument.id) + '?inline=1'"
@@ -413,7 +424,7 @@
                 
                 <!-- No File State -->
                 <template x-if="activeDocument && !activeDocument.ruta_archivo">
-                    <div class="h-full flex items-center justify-center text-center bg-white rounded-lg shadow-inner border">
+                    <div class="h-full flex items-center justify-center text-center bg-white rounded-lg shadow-inner border m-3 sm:m-4">
                         <div class="p-4 sm:p-6">
                             <i class="fas fa-file-circle-xmark text-2xl sm:text-3xl md:text-4xl text-gray-400"></i>
                             <p class="mt-4 text-sm sm:text-base text-gray-600">No hay un archivo adjunto para este documento.</p>
@@ -424,7 +435,7 @@
                 
                 <!-- Default State -->
                 <template x-if="!activeDocument && !showMapInfo">
-                    <div class="h-full flex items-center justify-center text-center bg-white rounded-lg shadow-inner border">
+                    <div class="h-full flex items-center justify-center text-center bg-white rounded-lg shadow-inner border m-3 sm:m-4">
                         <div class="p-4 sm:p-6">
                             <i class="fas fa-hand-pointer text-2xl sm:text-3xl md:text-4xl text-gray-400"></i>
                             <p class="mt-4 text-sm sm:text-base text-gray-600">Seleccione un documento para visualizarlo.</p>
@@ -434,7 +445,7 @@
                 
                 <!-- No Documents State -->
                 @if(empty($documentos) && $seccion !== 'domicilio')
-                <div class="h-full flex items-center justify-center text-center bg-white rounded-lg shadow-inner border">
+                <div class="h-full flex items-center justify-center text-center bg-white rounded-lg shadow-inner border m-3 sm:m-4">
                     <div class="p-4 sm:p-6">
                         <i class="fas fa-folder-open text-2xl sm:text-3xl md:text-4xl text-gray-400"></i>
                         <p class="mt-4 text-sm sm:text-base text-gray-600">No hay documentos en esta sección.</p>

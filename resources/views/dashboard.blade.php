@@ -372,7 +372,7 @@
                                             </div>
                                             @endcan
 
-                                            @if(auth()->user()->can('tramites-solicitante.renovacion') || auth()->user()->can('tramites-solicitante.actualizacion'))
+                                            @if(auth()->check() && (auth()->user()->can('tramites-solicitante.renovacion') || auth()->user()->can('tramites-solicitante.actualizacion')))
                                             <div class="flex justify-center lg:justify-start">
                                                 <a href="{{ route('tramites.terminos') }}" 
                                                    class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 font-semibold rounded-lg hover:from-emerald-100 hover:to-green-100 transition-all duration-300 shadow-sm hover:shadow-md text-sm">
