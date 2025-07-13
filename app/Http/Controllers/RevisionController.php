@@ -482,51 +482,43 @@ class RevisionController extends Controller
      */
     private function obtenerDocumentos(Tramite $tramite)
     {
-        try {
-            // Obtener documentos directamente de la base de datos
-            $documentos = DocumentoSolicitante::where('tramite_id', $tramite->id)
-                ->with('documento')
-                ->get()
-                ->map(function($doc) {
-                    try {
-                        // Intentar desencriptar la ruta del archivo
-                        $rutaDesencriptada = \Illuminate\Support\Facades\Crypt::decryptString($doc->ruta_archivo);
-                        $rutaArchivo = asset('storage/' . $rutaDesencriptada);
-                    } catch (\Exception $e) {
-                        // Si no se puede desencriptar, usar la ruta directamente
-                        $rutaArchivo = asset('storage/' . $doc->ruta_archivo);
-                    }
-                    
-                    return [
-                        'id' => $doc->id,
-                        'documento_id' => $doc->documento_id,
-                        'nombre' => $doc->documento->nombre ?? 'Documento',
-                        'tipo' => $doc->documento->tipo ?? 'No especificado',
-                        'fecha_entrega' => $doc->fecha_entrega 
-                            ? \Carbon\Carbon::parse($doc->fecha_entrega)->toIso8601String() 
-                            : null,
-                        'estado' => $doc->estado ?? 'Pendiente',
-                        'version_documento' => $doc->version_documento ?? 1,
-                        'ruta_archivo' => $rutaArchivo,
-                        'observaciones' => $doc->observaciones,
-                        'documento_cotejado' => $doc->documento_cotejado ?? false
-                    ];
-                })
-                ->toArray();
-                
-            Log::info('Documentos obtenidos exitosamente:', [
-                'tramite_id' => $tramite->id,
-                'total_documentos' => count($documentos)
-            ]);
-            
-            return $documentos;
-        } catch (\Exception $e) {
-            Log::error('Error al obtener documentos:', [
-                'tramite_id' => $tramite->id,
-                'error' => $e->getMessage()
-            ]);
+        // Cargar los documentos solicitante con la relación al documento principal
+        $documentosSolicitante = $tramite->documentosSolicitante()
+                                        ->with('documento') // Asegurar que la relación 'documento' esté cargada
+                                        ->get();
+
+        if ($documentosSolicitante->isEmpty()) {
+            Log::warning('No se encontraron documentos para el trámite', ['tramite_id' => $tramite->id]);
             return [];
         }
+
+        // Mapear los resultados para la vista
+        return $documentosSolicitante->map(function ($doc) {
+            $nombreOriginal = 'document.pdf';
+            if ($doc->ruta_archivo) {
+                try {
+                    $partes = explode('/', $doc->ruta_archivo);
+                    $nombreOriginal = end($partes) ?: 'document.pdf';
+                } catch (\Exception $e) {
+                    Log::error('Error al parsear nombre de archivo', ['path' => $doc->ruta_archivo]);
+                }
+            }
+
+            // Devolver un array estructurado para la vista
+            return [
+                'id' => $doc->id,
+                'nombre' => $doc->documento->nombre ?? 'Documento sin nombre',
+                'descripcion' => $doc->documento->descripcion ?? 'No se proporcionaron detalles para este documento.', // <-- CAMBIO: Añadido
+                'estado' => $doc->estado,
+                'ruta_archivo' => $doc->ruta_archivo,
+                'observaciones' => $doc->observaciones,
+                'fecha_entrega' => $doc->fecha_entrega,
+                'fecha_subida' => $doc->fecha_entrega,
+                'nombre_original' => $nombreOriginal,
+                'comentario_revision' => $doc->observaciones, // Asumiendo que las observaciones son el comentario
+                'documento_cotejado' => $doc->documento_cotejado ?? false,
+            ];
+        })->toArray();
     }
 
     /**
@@ -1240,14 +1232,18 @@ class RevisionController extends Controller
     public function obtenerEstadoRevisiones(Tramite $tramite)
     {
         try {
+            // Cargar relaciones necesarias
+            $tramite->load(['solicitante', 'seccionesRevision.revisor', 'documentosSolicitante']);
+            
             // Determinar secciones según tipo de persona
-            $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
+            $tipoPersona = $tramite->solicitante?->tipo_persona ?? 'Física';
             $seccionesRequeridas = $tipoPersona === 'Moral' 
                 ? [1 => 'General', 2 => 'Domicilio', 3 => 'Constitución', 4 => 'Accionistas', 5 => 'Apoderado', 6 => 'Documentos']
                 : [1 => 'General', 2 => 'Domicilio', 6 => 'Documentos'];
             
             // Obtener revisiones existentes
             $revisiones = $tramite->seccionesRevision()
+                ->with('revisor')
                 ->whereIn('seccion_id', array_keys($seccionesRequeridas))
                 ->get()
                 ->keyBy('seccion_id');
@@ -1262,7 +1258,7 @@ class RevisionController extends Controller
                 
                 // Para la sección de documentos, calcular estado basándose en documentos individuales
                 if ($seccionId === 6) {
-                    $documentos = $tramite->documentosSolicitante()->get();
+                    $documentos = $tramite->documentosSolicitante;
                     $documentosAprobados = $documentos->where('estado', 'Aprobado')->count();
                     $documentosRechazados = $documentos->where('estado', 'Rechazado')->count();
                     $totalDocumentos = $documentos->count();
@@ -1279,7 +1275,7 @@ class RevisionController extends Controller
                 }
                 
                 $comentario = $revision ? $revision->comentario : '';
-                $fechaRevision = $revision ? $revision->fecha_revision : null;
+                $fechaRevision = $revision ? $revision->updated_at : null;
                 $revisor = $revision && $revision->revisor ? $revision->revisor->name : '';
                 
                 $estadoSecciones[] = [
@@ -1316,12 +1312,13 @@ class RevisionController extends Controller
         } catch (\Exception $e) {
             Log::error('Error al obtener estado de revisiones:', [
                 'tramite_id' => $tramite->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
             
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener el estado de las revisiones'
+                'message' => 'Error al obtener el estado de las revisiones: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -1639,6 +1636,13 @@ class RevisionController extends Controller
                 'message' => 'Error al acceder al documento: ' . $e->getMessage()
             ], 500);
         }
+
+        // Registrar en historial del trámite
+        $this->registrarHistorial(
+            $tramite, 
+            'Visualización de Documento', 
+            "El revisor " . (Auth::user()->name ?? 'desconocido') . " ha visualizado el documento ID: {$documentoSolicitanteId}."
+        );
     }
 
     /**
@@ -1721,6 +1725,13 @@ class RevisionController extends Controller
 
             return redirect()->back()->with('error', 'Error al aprobar el documento');
         }
+
+        // Registrar en el historial
+        $this->registrarHistorial(
+            $tramite, 
+            'Aprobación de Documento', 
+            "Documento ID {$documento->id} ('{$documento->documento->nombre}') aprobado por " . (Auth::user()->name ?? 'N/A') . " con observaciones: " . ($request->input('observaciones') ?? 'Ninguna')
+        );
     }
 
     /**
@@ -1807,6 +1818,13 @@ class RevisionController extends Controller
 
             return redirect()->back()->with('error', 'Error al rechazar el documento');
         }
+
+        // Registrar en el historial
+        $this->registrarHistorial(
+            $tramite, 
+            'Rechazo de Documento',
+            "Documento ID {$documento->id} ('{$documento->documento->nombre}') rechazado por " . (Auth::user()->name ?? 'N/A') . ". Motivo: " . $request->input('observaciones')
+        );
     }
 
     /**
@@ -2023,6 +2041,13 @@ class RevisionController extends Controller
                 'message' => 'Error al terminar la revisión digital: ' . $e->getMessage()
             ], 500);
         }
+
+        // Registrar en historial
+        $this->registrarHistorial(
+            $tramite,
+            'Revisión Digital Finalizada',
+            "La revisión digital fue finalizada por " . (Auth::user()->name ?? 'N/A') . ". Estado final: {$tramite->estado}."
+        );
     }
 
     /**
@@ -2349,5 +2374,196 @@ class RevisionController extends Controller
             'tramite' => $tramite,
             'secciones' => $secciones
         ]);
+    }
+
+    /**
+     * Enviar trámite a corrección
+     */
+    public function enviarCorreccion(Tramite $tramite)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Actualizar el estado del trámite
+            $tramite->estado = 'Para Correccion';
+            $tramite->save();
+
+            // Intentar agendar una cita automáticamente
+            try {
+                $cita = Cita::agendarCotejoAutomatico($tramite);
+                $mensajeAdicional = $cita ? 
+                    ' Se ha agendado una cita para el ' . $cita->fecha_hora->format('d/m/Y H:i') : 
+                    ' No se pudo agendar una cita automáticamente.';
+            } catch (\Exception $e) {
+                Log::error('Error al agendar cita automática: ' . $e->getMessage());
+                $mensajeAdicional = ' No se pudo agendar una cita automáticamente.';
+            }
+
+            // Registrar la acción
+            Log::info('Trámite enviado a corrección', [
+                'tramite_id' => $tramite->id,
+                'usuario' => Auth::user()->name,
+                'cita_agendada' => isset($cita)
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Trámite enviado a corrección exitosamente.' . $mensajeAdicional
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al enviar trámite a corrección: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al enviar el trámite a corrección'
+            ], 500);
+        }
+    }
+
+    /**
+     * Agendar cita y cambiar estado a Por Cotejar
+     */
+    public function agendarCitaYFinalizar(Tramite $tramite)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Actualizar el estado del trámite
+            $tramite->estado = 'Por Cotejar';
+            $tramite->save();
+
+            // Intentar agendar una cita automáticamente
+            try {
+                $cita = Cita::agendarCotejoAutomatico($tramite);
+                if (!$cita) {
+                    throw new \Exception('No se pudo agendar la cita automáticamente');
+                }
+                $mensajeAdicional = ' Se ha agendado una cita para el ' . $cita->fecha_hora->format('d/m/Y H:i');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Error al agendar cita automática: ' . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se pudo agendar la cita. Por favor, intente nuevamente.'
+                ], 500);
+            }
+
+            // Registrar la acción
+            Log::info('Trámite enviado a cotejo', [
+                'tramite_id' => $tramite->id,
+                'usuario' => Auth::user()->name,
+                'cita_id' => $cita->id
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Trámite enviado a cotejo exitosamente.' . $mensajeAdicional
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al enviar trámite a cotejo: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al enviar el trámite a cotejo'
+            ], 500);
+        }
+    }
+
+    /**
+     * Finaliza el proceso de cotejo presencial.
+     * Actualiza el estado del trámite a 'Aprobado' o 'Rechazado' según el resultado del cotejo.
+     */
+    public function finalizarCotejo(Request $request, Tramite $tramite)
+    {
+        // 1. Validar que el usuario tenga permisos
+        if (!Gate::allows('revision.realizar', $tramite)) {
+            return response()->json(['success' => false, 'message' => 'No tiene permisos para realizar esta acción.'], 403);
+        }
+
+        // 2. Validar que el trámite esté en el estado correcto ('Por Cotejar')
+        if ($tramite->estado !== 'Por Cotejar') {
+            return response()->json(['success' => false, 'message' => 'El trámite no está en el estado correcto para finalizar el cotejo.'], 422);
+        }
+        
+        // 3. Determinar el estado final basado en los documentos
+        // Se asume que si se llega aquí, todos los documentos fueron marcados (cotejados)
+        $hayRechazados = $tramite->documentosSolicitante()->where('estado', 'Rechazado')->exists();
+        $estadoFinal = $hayRechazados ? 'Rechazado' : 'Aprobado';
+
+        try {
+            DB::beginTransaction();
+            
+            // 4. Actualizar el estado del trámite
+            $tramite->estado = $estadoFinal;
+            $tramite->fecha_finalizacion = now(); // Marcar fecha de finalización
+            $tramite->save();
+            
+            // 5. Registrar en el historial
+            $this->registrarHistorial(
+                $tramite,
+                'Cotejo Presencial Finalizado',
+                "El proceso de cotejo presencial ha concluido. Estado final: {$estadoFinal}."
+            );
+
+            // 6. Crear notificación para el solicitante
+            $this->crearNotificacion(
+                $tramite->solicitante->user_id,
+                'Proceso de Cotejo Finalizado',
+                "Su trámite con folio #{$tramite->id} ha sido {$estadoFinal} después del cotejo de documentos.",
+                'info',
+                $tramite->id
+            );
+
+            // Si se aprueba, crear o actualizar el proveedor
+            if ($estadoFinal === 'Aprobado') {
+                $this->actualizarOCrearProveedor($tramite);
+            }
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => "El trámite ha sido {$estadoFinal} exitosamente."]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al finalizar el cotejo del trámite.', [
+                'tramite_id' => $tramite->id,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json(['success' => false, 'message' => 'Ocurrió un error inesperado al finalizar el proceso.'], 500);
+        }
+    }
+    
+    /**
+     * Actualiza o crea un proveedor basado en un trámite aprobado.
+     */
+    private function actualizarOCrearProveedor(Tramite $tramite)
+    {
+        $solicitante = $tramite->solicitante;
+
+        $proveedor = Proveedor::updateOrCreate(
+            ['rfc' => $solicitante->rfc], // Clave para buscar
+            [ // Datos para actualizar o crear
+                'nombre_completo' => $solicitante->nombre_completo,
+                'razon_social' => $solicitante->razon_social,
+                'tipo_persona' => $solicitante->tipo_persona,
+                'actividad_principal' => $tramite->detalleTramite->actividad_principal ?? 'No especificada',
+                'telefono' => $solicitante->telefono,
+                'email' => $solicitante->user->email,
+                'domicilio_completo' => $solicitante->direccion->calle . ', ' . $solicitante->direccion->colonia, // Simplificado
+                'estado' => 'Activo', // Se activa al ser aprobado
+                'fecha_alta' => now(),
+                'fecha_vencimiento' => now()->addYear(), // Vigencia de un año
+                'tramite_id_origen' => $tramite->id,
+            ]
+        );
+        return $proveedor;
     }
 } 

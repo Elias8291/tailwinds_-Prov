@@ -421,7 +421,7 @@ Route::middleware(['auth', 'can:tramites-solicitante.ver'])->prefix('tramites-so
 // MÓDULO DE REVISIÓN DE TRÁMITES
 // ============================================================================
 
-Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-tramites.ver'])->group(function () {
+Route::middleware(['auth', 'can:revision-tramites.ver'])->prefix('revision')->name('revision.')->group(function () {
     // Rutas básicas de revisión
     Route::get('/', [RevisionController::class, 'index'])->name('index');
     Route::get('/get-next-pv', [RevisionController::class, 'getNextPV'])->name('get-next-pv');
@@ -515,6 +515,18 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
     Route::post('/{tramite}/terminar-revision-digital', [RevisionController::class, 'terminarRevisionDigital'])
         ->middleware('can:revision-tramites.aprobar')
         ->name('terminar-revision-digital');
+        
+    // Ruta para enviar a corrección
+    Route::post('/{tramite}/enviar-correccion', [RevisionController::class, 'enviarCorreccion'])
+        ->middleware('can:revision-tramites.rechazar')
+        ->name('enviar-correccion');
+        
+    // Ruta para agendar cita y finalizar
+    Route::post('/{tramite}/agendar-cita-finalizar', [RevisionController::class, 'agendarCitaYFinalizar'])
+        ->middleware('can:revision-tramites.aprobar')
+        ->name('agendar-cita-finalizar');
+
+    Route::post('/{tramite}/finalizar-cotejo', [RevisionController::class, 'finalizarCotejo'])->name('finalizar-cotejo');
 });
 
 // Rutas de revisión

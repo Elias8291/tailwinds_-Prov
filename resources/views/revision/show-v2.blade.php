@@ -199,6 +199,12 @@
         'Actualizacion' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
         default => 'bg-gray-100 text-gray-800 border-gray-300',
     };
+
+    // Si el trámite está por cotejar, cargar la cita asociada
+    $citaParaCotejo = null;
+    if ($tramite->estado === 'Por Cotejar') {
+        $citaParaCotejo = $tramite->citas()->latest()->first();
+    }
 @endphp
 
 <!-- Contenedor principal con Alpine.js para manejar el estado del modal -->
@@ -259,9 +265,24 @@
                     <div class="min-w-0 flex-1">
                         <h2 class="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                            <span class="truncate">Revisión de Trámite</span>
+                           <div class="flex items-center gap-2">
                            <span class="px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-semibold rounded-full border {{ $tipoTramiteClasses }} self-start sm:self-auto">
                                {{ $tipoTramite }}
                            </span>
+                               @php
+                                   $estadoClasses = match($tramite->estado) {
+                                       'Aprobado' => 'bg-green-100 text-green-800 border-green-300',
+                                       'Rechazado' => 'bg-red-100 text-red-800 border-red-300',
+                                       'Por Cotejar' => 'bg-purple-100 text-purple-800 border-purple-300',
+                                       'Para Correccion' => 'bg-amber-100 text-amber-800 border-amber-300',
+                                       'En Revision' => 'bg-blue-100 text-blue-800 border-blue-300',
+                                       default => 'bg-gray-100 text-gray-800 border-gray-300'
+                                   };
+                               @endphp
+                               <span class="px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-semibold rounded-full border {{ $estadoClasses }} self-start sm:self-auto">
+                                   {{ $tramite->estado }}
+                               </span>
+                           </div>
                         </h2>
                         <p class="text-xs sm:text-sm text-gray-500 mt-1">
                             Folio del Trámite: #{{ $tramite->id }}
@@ -276,6 +297,23 @@
                 </div>
             </div>
         </div>
+
+        @if ($tramite->estado === 'Por Cotejar' && $citaParaCotejo)
+        <!-- Mensaje de Cita para Cotejo (Compacto) -->
+        <div class="bg-primary-50 border-l-4 border-primary p-4 rounded-r-lg mb-6 shadow-md flex items-center gap-4">
+            <div class="flex-shrink-0">
+                <i class="fas fa-calendar-check text-2xl text-primary"></i>
+            </div>
+            <div class="flex-grow">
+                <h4 class="font-bold text-primary-dark">Cita Agendada para Cotejo de Documentos</h4>
+                <p class="text-sm text-gray-700">
+                    El siguiente paso es la verificación física de documentos. La cita está programada para el
+                    <strong class="font-semibold">{{ \Carbon\Carbon::parse($citaParaCotejo->fecha_hora)->locale('es')->isoFormat('dddd, D [de] MMMM, YYYY') }}</strong> a las
+                    <strong class="font-semibold">{{ \Carbon\Carbon::parse($citaParaCotejo->fecha_hora)->format('h:i A') }}</strong>.
+                </p>
+            </div>
+        </div>
+        @endif
 
         <!-- Navegación de secciones en móvil -->
         <nav class="lg:hidden mb-4 sm:mb-6">
@@ -534,6 +572,7 @@
             @endforeach
         </div>
 
+        @if ($tramite->estado !== 'Por Cotejar')
         <!-- Botón de Finalización Estático -->
         <div class="mt-8 sm:mt-10 lg:mt-12 flex justify-center py-6">
             <button @click="openSummaryModal()"
@@ -542,9 +581,11 @@
                 <span>Terminar Proceso de Revisión</span>
             </button>
         </div>
+        @endif
 
     </main>
 
+    @if ($tramite->estado !== 'Por Cotejar')
     <!-- Botón de Acción Flotante (FAB) -->
     <div x-data="{ fabExpanded: false }"
          @mouseenter="fabExpanded = true"
@@ -565,6 +606,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Modal de Resumen de Revisión -->
     <div x-show="isModalOpen"
@@ -694,7 +736,7 @@
                             <span x-text="estadoGeneral === 'incompleto' ? 'Entendido y Volver' : 'Cancelar'"></span>
                         </button>
 
-                        <button @click="isModalOpen = false"
+                        <button @click="estadoGeneral === 'aprobado' ? agendarCitaYFinalizar() : enviarACorreccion()"
                                 class="w-full sm:w-auto inline-flex justify-center items-center px-5 py-2.5 text-sm font-bold text-white border border-transparent rounded-lg shadow-sm transition-all duration-300"
                                 :class="{
                                     'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-500': estadoGeneral === 'aprobado',
@@ -1072,5 +1114,171 @@
                 }, 3000);
             }
         }))
-    })
+
+        // Función para enviar a corrección
+        window.enviarACorreccion = async function() {
+            try {
+                const response = await fetch(`/revision/{{ $tramite->id }}/enviar-correccion`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+
+                const data = await response.json();
+                mostrarNotificacion(data);
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacionError();
+            }
+        };
+
+        // Función para agendar cita y finalizar
+        window.agendarCitaYFinalizar = async function() {
+            try {
+                const response = await fetch(`/revision/{{ $tramite->id }}/agendar-cita-finalizar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+
+                const data = await response.json();
+                mostrarNotificacion(data);
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacionError();
+            }
+        };
+
+        // Función para mostrar notificación
+        function mostrarNotificacion(data) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 w-96 bg-white rounded-lg shadow-xl border ${data.success ? 'border-green-100' : 'border-red-100'} transform transition-all duration-500 ease-in-out translate-x-full`;
+            notification.innerHTML = `
+                <div class="relative p-4">
+                    <div class="flex items-start">
+                        <!-- Icono -->
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-full ${data.success ? 'bg-green-100' : 'bg-red-100'}">
+                                <i class="fas ${data.success ? 'fa-check text-green-600' : 'fa-exclamation-circle text-red-600'} text-xl"></i>
+                            </div>
+                        </div>
+                        <!-- Contenido -->
+                        <div class="ml-4 w-0 flex-1">
+                            <p class="text-lg font-medium text-gray-900">
+                                ${data.success ? (data.message.includes('cotejo') ? 'Trámite Enviado a Cotejo' : 'Trámite Enviado a Corrección') : 'Error'}
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500">
+                                ${data.message}
+                            </p>
+                            <div class="mt-4">
+                                <button type="button" 
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${data.success ? 'bg-primary hover:bg-primary-dark focus:ring-primary' : 'bg-red-600 hover:bg-red-700 focus:ring-red-500'} focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                        onclick="window.location.href='/revision?success=true'">
+                                    Entendido
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Botón cerrar -->
+                        <div class="ml-4 flex-shrink-0 flex">
+                            <button class="rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animar entrada
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+                notification.classList.add('translate-x-0');
+            }, 100);
+
+            // Configurar el botón de cerrar
+            const closeButton = notification.querySelector('button');
+            closeButton.onclick = () => {
+                notification.classList.remove('translate-x-0');
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    notification.remove();
+                    if (data.success) {
+                        window.location.href = '/revision?success=true';
+                    }
+                }, 500);
+            };
+
+            // Auto cerrar después de 5 segundos
+            setTimeout(() => {
+                closeButton.click();
+            }, 5000);
+        }
+
+        // Función para mostrar notificación de error de conexión
+        function mostrarNotificacionError() {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 z-50 w-96 bg-white rounded-lg shadow-xl border border-red-100 transform transition-all duration-500 ease-in-out translate-x-full';
+            notification.innerHTML = `
+                <div class="relative p-4">
+                    <div class="flex items-start">
+                        <!-- Icono de error -->
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                                <i class="fas fa-wifi-slash text-red-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <!-- Contenido -->
+                        <div class="ml-4 w-0 flex-1">
+                            <p class="text-lg font-medium text-gray-900">
+                                Error de Conexión
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500">
+                                No se pudo conectar con el servidor. Por favor, intente nuevamente.
+                            </p>
+                            <div class="mt-4">
+                                <button type="button" 
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                    Entendido
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Botón cerrar -->
+                        <div class="ml-4 flex-shrink-0 flex">
+                            <button class="rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animar entrada
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+                notification.classList.add('translate-x-0');
+            }, 100);
+
+            // Configurar el botón de cerrar
+            const closeButton = notification.querySelector('button');
+            closeButton.onclick = () => {
+                notification.classList.remove('translate-x-0');
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            };
+
+            // Auto cerrar después de 5 segundos
+            setTimeout(() => {
+                closeButton.click();
+            }, 5000);
+        }
+    });
 </script>

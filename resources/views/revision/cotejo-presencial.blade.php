@@ -1,328 +1,508 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-[1800px] mx-auto px-8 py-6 space-y-6">
-        <!-- Header Principal -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 transform hover:scale-[1.01] transition-all duration-300 border border-gray-100">
-            <x-revision.header 
-                :tramiteId="$tramite->id"
-                :tipoTramite="$tramite->tipo_tramite"
-                :rfc="$tramite->solicitante->rfc ?? ''"
-            />
-        </div>
+<div class="bg-gray-50/50 min-h-screen" 
+     x-data="{ 
+        instructionsModalOpen: false,
+        showSummaryModal: false,
+        loading: false,
+        resumenCotejo: {
+            aprobados: 0,
+            rechazados: 0,
+            documentos: []
+        }
+     }">
+    <div class="max-w-screen-xl mx-auto py-8 px-4 sm:px-6 lg:px-8" x-data="finalizarCotejo({{ $tramite->id }})">
 
-        <!-- Alerta de Verificación -->
-        <div class="bg-[#9d2449]/10 border border-[#9d2449]/20 rounded-xl p-6">
+        <!-- Header Principal Rediseñado -->
+        <div class="relative bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 p-6 mb-8">
+            <div class="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-[#9d2449]/5 to-transparent rounded-full opacity-50"></div>
+            <div class="absolute -bottom-8 -left-8 w-40 h-40 bg-gradient-to-tr from-[#9d2449]/5 to-transparent rounded-full opacity-50"></div>
+            
+            <div class="relative z-10">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
             <div class="flex items-center space-x-4">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-shield-check text-[#9d2449] text-2xl"></i>
+                        <div class="w-12 h-12 bg-gradient-to-br from-[#9d2449] to-[#7a1d3a] rounded-xl flex items-center justify-center shadow-md ring-2 ring-white">
+                            <i class="fas fa-search-plus text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Cotejo de Documentos Físicos</h1>
+                            <p class="text-sm text-gray-500">Verificación presencial - {{ ucfirst($tramite->tipo_tramite) }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 sm:mt-0 flex-shrink-0">
+                        <span class="inline-flex items-center bg-[#9d2449]/10 text-[#9d2449] text-sm px-4 py-2 rounded-full font-bold">
+                            <span class="w-2 h-2 bg-[#9d2449] rounded-full mr-2 animate-pulse"></span>
+                            En cotejo
+                        </span>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-[#9d2449]">Verificación de Documentos Físicos</h3>
-                    <p class="text-sm text-gray-600 mt-1">
-                        Verifique cuidadosamente cada documento físico. Preste especial atención a:
-                    </p>
-                    <ul class="mt-2 space-y-1 text-sm text-gray-600">
-                        <li class="flex items-center">
-                            <i class="fas fa-check-circle text-[#9d2449] mr-2"></i>
-                            Calidad del papel y textura
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check-circle text-[#9d2449] mr-2"></i>
-                            Sellos y firmas originales
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check-circle text-[#9d2449] mr-2"></i>
-                            Elementos de seguridad (hologramas, marcas de agua)
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check-circle text-[#9d2449] mr-2"></i>
-                            Coincidencia exacta con la versión digital
-                        </li>
-                    </ul>
+                
+                <div class="mt-6 border-t border-gray-200/80 pt-4 flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <i class="fas fa-hashtag text-gray-400 w-5 text-center mr-2"></i>
+                        <strong>Folio:</strong><span class="ml-2 font-mono">#{{ $tramite->id }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-user-tie text-gray-400 w-5 text-center mr-2"></i>
+                        <strong>Solicitante:</strong><span class="ml-2 truncate">{{ $tramite->solicitante->nombre_completo ?? 'N/A' }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-id-card-alt text-gray-400 w-5 text-center mr-2"></i>
+                        <strong>RFC:</strong><span class="ml-2 truncate">{{ $tramite->solicitante->rfc ?? 'N/A' }}</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sección de Documentos para Cotejo -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-            <div x-data="{ 
-                isOpen: true,
-                estado: '{{ $revisionesExistentes[6]['estado'] ?? 'pendiente' }}'
-            }">
-                <!-- Encabezado -->
-                <div class="p-6">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <h2 class="text-xl font-bold text-gray-800">Cotejo de Documentos</h2>
-                        </div>
-                        @if(isset($revisionesExistentes[6]))
-                            <span id="estado_seccion_6" class="px-3 py-1 text-sm rounded-full flex items-center space-x-2"
-                                :class="{
-                                    'bg-green-100 text-green-800': estado === 'aprobado',
-                                    'bg-red-100 text-red-800': estado === 'rechazado',
-                                    'bg-yellow-100 text-yellow-800': estado === 'pendiente'
-                                }">
-                                <i class="fas fa-circle text-xs"></i>
-                                <span x-text="estado.charAt(0).toUpperCase() + estado.slice(1)"></span>
-                            </span>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Contenido -->
-                <div class="p-6 pt-0">
-                    <!-- Contenedor de la sección de documentos -->
-                    <div class="space-y-6">
-                        @include('components.formularios.seccion-documentos', [
-                            'title' => 'Documentos para Cotejo',
-                            'tramite' => $tramite,
-                            'mostrar_navegacion' => false,
-                            'documentos' => collect($documentos ?? [])->map(function($doc) {
+        <!-- Layout Principal -->
+        <div class="space-y-5">
+                @php
+                    $documentosParaCotejo = collect($documentos ?? [])->map(function($doc) {
                                 return [
                                     'id' => $doc['id'] ?? null,
                                     'nombre' => $doc['nombre'] ?? 'Documento sin nombre',
-                                    'descripcion' => $doc['descripcion'] ?? 'Sin descripción',
                                     'estado' => $doc['estado'] ?? 'Pendiente',
                                     'ruta_archivo' => $doc['ruta_archivo'] ?? null,
                                     'fecha_subida' => $doc['fecha_entrega'] ?? null,
-                                    'observaciones' => $doc['observaciones'] ?? null,
-                                    'nombre_original' => $doc['ruta_archivo'] ? basename($doc['ruta_archivo']) : 'archivo.pdf',
-                                    'documento_id' => $doc['documento_id'] ?? null,
-                                    'validacion_ia' => $doc['validacion_ia'] ?? null,
                                     'documento_cotejado' => $doc['documento_cotejado'] ?? false,
-                                    'comentario_revision' => $doc['comentario_revision'] ?? null
+                                'comentario_revision' => $doc['comentario_revision'] ?? null,
+                                'descripcion' => $doc['descripcion'] ?? 'No hay descripción disponible.'
                                 ];
-                            })->toArray(),
-                            'readonly' => true,
-                            'en_revision' => true,
-                            'modo_cotejo' => true
-                        ])
+                    })->toArray();
+                @endphp
+
+                @forelse ($documentosParaCotejo as $documento)
+                    @php
+                        $estado = $documento['estado'] ?? 'Pendiente';
+                        $hasFile = !empty($documento['ruta_archivo']);
+                        $isCotejado = $documento['documento_cotejado'] ?? false;
+
+                        $cardClasses = match(true) {
+                            $estado === 'Aprobado' && $isCotejado => 'bg-green-50/70 border-green-400',
+                            $estado === 'Rechazado' => 'bg-red-50/70 border-red-400',
+                            $isCotejado => 'bg-rose-50/70 border-rose-400',
+                            default => 'bg-white border-gray-300',
+                        };
+                        $iconContainerClasses = match(true) {
+                            $estado === 'Aprobado' && $isCotejado => 'bg-green-600 text-white',
+                            $estado === 'Rechazado' => 'bg-red-600 text-white',
+                            $isCotejado => 'bg-rose-600 text-white',
+                            default => 'bg-slate-500 text-white',
+                        };
+                         $badgeClasses = match(true) {
+                            $estado === 'Aprobado' && $isCotejado => 'bg-green-100 text-green-800',
+                            $estado === 'Rechazado' => 'bg-red-100 text-red-700',
+                            $isCotejado => 'bg-rose-100 text-rose-800',
+                            default => 'bg-slate-100 text-slate-700',
+                        };
+                        $estadoTexto = match(true) {
+                            $estado === 'Aprobado' && $isCotejado => 'Aprobado',
+                            $estado === 'Rechazado' => 'Rechazado',
+                            $isCotejado => 'Cotejado',
+                            default => 'Pendiente',
+                        };
+                    @endphp
+                    <div x-data="cotejoDocumento({
+                            documentoId: {{ $documento['id'] }},
+                            tramiteId: {{ $tramite->id }},
+                            comentarioInicial: '{{ e($documento['comentario_revision']) }}',
+                            esCotejado: {{ $documento['documento_cotejado'] ? 'true' : 'false' }},
+                            estadoInicial: '{{ $documento['estado'] }}'
+                        })"
+                         class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border"
+                     :class="isCotejado ? (estado === 'Aprobado' ? 'bg-green-50/70 border-green-400' : 'bg-red-50/70 border-red-400') : 'bg-white border-gray-300'">
+                        
+                    <!-- Cabecera del Documento (siempre visible) -->
+                    <div class="p-4 flex items-center gap-4">
+                            <div class="relative flex-shrink-0 h-12 w-12 flex items-center justify-center rounded-lg" :class="iconContainerClasses">
+                                <i class="fas fa-file-alt text-xl"></i>
+                                <template x-if="isCotejado">
+                                    <div class="absolute -top-1.5 -right-1.5 h-5 w-5 bg-white rounded-full flex items-center justify-center shadow">
+                                    <i class="fas text-lg" :class="estado === 'Aprobado' ? 'fa-check-circle text-green-500' : 'fa-times-circle text-red-500'"></i>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <p class="font-bold text-gray-800 truncate" title="{{ $documento['nombre'] }}">
+                                    {{ $documento['nombre'] }}
+                                </p>
+                            <p class="text-xs text-slate-500 mt-1">
+                                    @if($documento['fecha_subida'])
+                                        Subido: {{ \Carbon\Carbon::parse($documento['fecha_subida'])->format('d/m/Y') }}
+                                    @else
+                                        Sin entregar
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="flex-shrink-0 flex items-center gap-3">
+                             <span class="px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider" 
+                                  :class="isCotejado ? (estado === 'Aprobado' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') : 'bg-slate-100 text-slate-700'" 
+                                  x-text="isCotejado ? estado : 'Pendiente'">
+                            </span>
+                                @if($hasFile)
+                                <a href="{{ route('revision.ver-documento', ['tramite' => $tramite->id, 'documento' => $documento['id']]) }}?inline=1" target="_blank" class="h-9 w-9 inline-flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-200/70 hover:text-slate-800 transition-all" title="Ver Documento">
+                                        <i class="fas fa-eye text-sm"></i>
+                                    </a>
+                                @endif
+                            </div>
                     </div>
 
-                    <!-- Sección de revisión -->
-                    <x-revision.seccion-revision 
-                        :seccionId="6"
-                        :estado="$revisionesExistentes[6]['estado'] ?? 'pendiente'"
-                        :observaciones="$revisionesExistentes[6]['observaciones'] ?? ''"
-                        :tramiteId="$tramite->id"
-                        :modo_cotejo="true"
-                    />
+                    <!-- Vista Completa (antes de cotejar) -->
+                    <div x-show="!isCotejado" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                        <!-- Requisitos del Documento -->
+                        <div class="px-4 pb-4 border-t border-gray-200 pt-4">
+                            <h4 class="text-sm font-bold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-tasks mr-2 text-gray-400"></i>
+                                Requisitos del Documento
+                            </h4>
+                            <div class="text-sm text-gray-800 bg-gray-50 p-3 rounded-lg border border-gray-200/80 whitespace-pre-wrap">{{ $documento['descripcion'] }}</div>
+                                    </div>
+
+                        <!-- Panel de Acciones de Revisión -->
+                        <div class="border-t border-gray-200 bg-gray-100/60 p-4">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="comentario_{{ $documento['id'] }}" class="block text-sm font-semibold text-gray-700 mb-1">
+                                        <i class="fas fa-edit mr-1"></i> Observaciones
+                                    </label>
+                                    <textarea x-model="comentario" id="comentario_{{ $documento['id'] }}" rows="2" class="w-full p-2 text-sm bg-white border-gray-300 rounded-lg shadow-sm focus:ring-[#9d2449] focus:border-[#9d2449] transition" placeholder="Añadir observaciones (obligatorio si se rechaza)..."></textarea>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button @click="rechazar" :disabled="loading" class="group w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-bold rounded-lg text-gray-700 bg-white hover:bg-red-50 hover:border-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-150 disabled:opacity-50">
+                                            <i class="fas fa-times-circle mr-2 text-red-500 group-hover:text-red-600 transition-colors"></i>
+                                        <span x-show="!loading">Rechazar</span>
+                                        <span x-show="loading" class="animate-pulse">...</span>
+                                        </button>
+                                    <button @click="aprobar" :disabled="loading" class="group w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-bold rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 transition-all duration-150 disabled:opacity-50">
+                                            <i class="fas fa-check-circle mr-2"></i>
+                                        <span x-show="!loading">Aprobar</span>
+                                        <span x-show="loading" class="animate-pulse">...</span>
+                                        </button>
+                                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Botones de Acción del Trámite -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 p-6">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-[#9d2449]/10 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-clipboard-check text-[#9d2449] text-xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-800">Finalizar Trámite</h2>
-                        <p class="text-sm text-gray-600">Seleccione una acción para finalizar el trámite</p>
-                    </div>
+                    
+                    <!-- Vista Minimizada (cuando ya está cotejado) -->
+                    <div x-show="isCotejado" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" style="display: none;">
+                        <div class="p-4 bg-gray-50 border-t border-gray-200/80">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <i class="fas text-2xl" :class="{ 'fa-check-circle text-green-500': estado === 'Aprobado', 'fa-times-circle text-red-500': estado === 'Rechazado' }"></i>
+                                    <div class="min-w-0">
+                                        <p class="font-bold text-gray-800" x-text="`Decisión: ${estado}`"></p>
+                                        <p class="text-xs text-gray-500 italic truncate" x-show="comentario" :title="comentario" x-text="`Obs: ${comentario}`"></p>
+                                    </div>
+                                </div>
+                                <button @click="isCotejado = false" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex-shrink-0">
+                                    Editar
+                                </button>
                 </div>
             </div>
-
-            <div class="mt-6 flex items-center space-x-4">
-                @if($tramite->estado !== 'Aprobado')
-                    <button onclick="mostrarModalAprobacion()" 
-                            class="flex-1 bg-[#9d2449] hover:bg-[#7a1d3a] text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200 flex items-center justify-center space-x-2">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Aprobar Trámite</span>
-                    </button>
-
-                    <button onclick="cancelarTramite()" 
-                            class="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200 flex items-center justify-center space-x-2">
-                        <i class="fas fa-times-circle"></i>
-                        <span>Cancelar Trámite</span>
-                    </button>
-                @else
-                    <div class="flex-1 bg-green-100 text-green-800 px-6 py-3 rounded-xl text-center">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        <span>Este trámite ya ha sido aprobado</span>
+        </div>
                     </div>
-                @endif
+                @empty
+                    <div class="text-center py-16 bg-white rounded-xl shadow-sm border">
+                        <div class="mx-auto h-16 w-16 text-gray-400 mb-4 flex items-center justify-center bg-gray-100 rounded-full">
+                            <i class="fas fa-folder-open text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">Sin Documentos</h3>
+                        <p class="mt-2 text-sm text-gray-500">No hay documentos asociados a este trámite para cotejar.</p>
+                    </div>
+                @endforelse
+            </div>
+
+        <!-- Botón de Finalización Estático (al final del contenido) -->
+        <div class="mt-12 flex justify-center">
+            <button @click="finalizar" 
+                    :disabled="loading"
+                    class="w-full max-w-lg inline-flex items-center justify-center px-8 py-3 bg-primary hover:bg-primary-dark text-white text-base font-bold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-primary/50"
+                    :class="{'opacity-50 cursor-not-allowed': loading}">
+                <i class="fas mr-3 text-lg" :class="loading ? 'fa-spinner fa-spin' : 'fa-check-double'"></i>
+                <span x-show="!loading">Finalizar Proceso de Cotejo</span>
+                <span x-show="loading">Procesando...</span>
+            </button>
+        </div>
+
+        <!-- Botón de Finalización (FAB) -->
+        <div x-data="{ fabExpanded: false }"
+            @mouseenter="fabExpanded = true"
+            @mouseleave="fabExpanded = false"
+            @click="loading ? null : finalizar()"
+            class="fixed bottom-6 right-6 z-40 group"
+            :class="loading ? 'cursor-not-allowed' : 'cursor-pointer'">
+            <div class="flex items-center justify-center transition-all duration-300 ease-in-out">
+                <div class="flex items-center justify-center h-14 w-14 rounded-full shadow-lg group-hover:shadow-2xl text-white transform transition-all duration-300 ease-in-out"
+                    :class="{
+                        'bg-primary group-hover:w-64': !loading, 
+                        'bg-gray-400': loading,
+                        'w-64': fabExpanded && !loading,
+                        'w-14': !fabExpanded || loading
+                    }">
+                    
+                    <i class="fas text-xl transition-opacity duration-200"
+                        :class="{
+                            'fa-check-double': !loading,
+                            'fa-spinner fa-spin': loading,
+                            'opacity-0': fabExpanded && !loading
+                        }"></i>
+                    
+                    <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-200"
+                            :class="{
+                                'opacity-100': fabExpanded && !loading,
+                                'opacity-0': !fabExpanded || loading
+                            }">
+                        <span class="text-base font-bold whitespace-nowrap">Finalizar Proceso</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Botón de Acción Flotante (FAB) para Instrucciones -->
+    <div x-data="{ fabExpanded: false }"
+         @mouseenter="fabExpanded = true"
+         @mouseleave="fabExpanded = false"
+         @click="instructionsModalOpen = true"
+         class="fixed bottom-24 right-6 z-40 group cursor-pointer">
+        <div class="flex items-center justify-center transition-all duration-300 ease-in-out">
+            <div class="flex items-center justify-center h-14 w-14 bg-[#9d2449] rounded-full shadow-lg group-hover:shadow-2xl text-white transform transition-all duration-300 ease-in-out"
+                 :class="fabExpanded ? 'w-60' : 'w-14'">
+                
+                <i class="fas fa-book-open text-xl transition-opacity duration-200"
+                   :class="fabExpanded ? 'opacity-0' : 'opacity-100'"></i>
+                
+                <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-200"
+                     :class="fabExpanded ? 'opacity-100' : 'opacity-0'">
+                    <span class="text-base font-bold whitespace-nowrap">Ver Instrucciones</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Instrucciones -->
+    <div x-show="instructionsModalOpen" 
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/70 backdrop-blur-sm p-4">
+
+        <div @click.away="instructionsModalOpen = false"
+             class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all p-6 text-left">
+             
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Instrucciones de Cotejo</h3>
+            
+            <ul class="space-y-4 text-gray-600">
+                <li class="flex items-start">
+                    <i class="fas fa-stamp text-[#9d2449] mt-1 mr-4 text-lg"></i>
+                    <div>
+                        <strong class="font-semibold text-gray-800">Calidad y Originalidad:</strong>
+                        <p>Verifique la calidad del papel, sellos de tinta y firmas originales. Busque indicios de falsificación o alteración.</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-shield-alt text-[#9d2449] mt-1 mr-4 text-lg"></i>
+                    <div>
+                        <strong class="font-semibold text-gray-800">Elementos de Seguridad:</strong>
+                        <p>Busque elementos de seguridad como hologramas, marcas de agua, o papel seguridad. Estos son comunes en documentos oficiales.</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-copy text-[#9d2449] mt-1 mr-4 text-lg"></i>
+                    <div>
+                        <strong class="font-semibold text-gray-800">Coincidencia Exacta:</strong>
+                        <p>Asegúrese de que el documento físico coincida *exactamente* con la versión digital cargada en el sistema. Revise fechas, nombres y números.</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-tasks text-[#9d2449] mt-1 mr-4 text-lg"></i>
+                    <div>
+                        <strong class="font-semibold text-gray-800">Decisión Final:</strong>
+                        <p>Para cada documento, añada observaciones si es necesario y marque como "Aprobado" o "Rechazado" basándose en una revisión cuidadosa.</p>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="mt-6 text-right">
+                <button @click="instructionsModalOpen = false"
+                        class="px-5 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal de Resumen de Cotejo -->
+<div x-show="showSummaryModal" 
+     x-transition:enter="ease-out duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="ease-in duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/70 backdrop-blur-sm p-4">
+
+    <div @click.away="showSummaryModal = false"
+         x-show="showSummaryModal"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="relative w-full max-w-lg bg-gray-50 rounded-2xl shadow-2xl overflow-hidden transform transition-all">
+        
+        <!-- Barra de estado superior -->
+        <div class="absolute top-0 left-0 right-0 h-1.5 transition-all duration-300"
+             :class="{
+                'bg-green-500': resumenCotejo.aprobados > resumenCotejo.rechazados,
+                'bg-red-500': resumenCotejo.rechazados >= resumenCotejo.aprobados
+             }"></div>
+        
+        <!-- Contenido del Modal -->
+        <div class="relative">
+            <!-- Estado de Carga -->
+            <div x-show="loading" class="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-20">
+                <i class="fas fa-spinner fa-spin text-primary text-5xl"></i>
+            </div>
+
+            <!-- Cabecera -->
+            <div class="p-6 text-center bg-white">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-4"
+                     :class="{
+                        'bg-green-100': resumenCotejo.aprobados > resumenCotejo.rechazados,
+                        'bg-red-100': resumenCotejo.rechazados >= resumenCotejo.aprobados
+                     }">
+                    <i class="fas text-3xl" :class="{
+                        'fa-check-circle text-green-600': resumenCotejo.aprobados > resumenCotejo.rechazados,
+                        'fa-exclamation-triangle text-red-600': resumenCotejo.rechazados >= resumenCotejo.aprobados
+                    }"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800" 
+                    x-text="resumenCotejo.rechazados >= resumenCotejo.aprobados ? 'Trámite Será Cancelado' : 'Trámite Completado'">
+                </h3>
+                <p class="mt-2 text-sm text-gray-600 max-w-md mx-auto"
+                   x-text="resumenCotejo.rechazados >= resumenCotejo.aprobados ? 
+                          'Se encontraron más documentos rechazados que aprobados. El trámite será cancelado y deberá iniciarse nuevamente.' : 
+                          'Los documentos han sido cotejados exitosamente. Puede proceder a finalizar el proceso.'">
+                </p>
+            </div>
+
+            <!-- Contenido Principal del Modal -->
+            <div x-show="!loading" x-transition class="px-6 pb-6 space-y-4">
+                <!-- Resumen de conteo -->
+                <div class="p-4 border rounded-lg bg-white text-sm text-gray-600 flex justify-around items-center">
+                    <div class="text-center">
+                        <span class="font-bold text-2xl text-red-600" x-text="resumenCotejo.rechazados"></span>
+                        <p class="text-xs uppercase tracking-wide">Rechazado(s)</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="font-bold text-2xl text-green-600" x-text="resumenCotejo.aprobados"></span>
+                        <p class="text-xs uppercase tracking-wide">Aprobado(s)</p>
+                    </div>
+                </div>
+
+                <!-- Lista de Documentos -->
+                <div class="border rounded-xl bg-white p-2">
+                    <ul class="divide-y divide-gray-200 max-h-56 overflow-y-auto">
+                        <template x-for="doc in resumenCotejo.documentos" :key="doc.id">
+                            <li class="flex items-center justify-between p-3">
+                                <div class="flex items-center min-w-0">
+                                    <i class="fas mr-3" :class="{
+                                        'fa-check-circle text-green-500': doc.estado === 'Aprobado',
+                                        'fa-times-circle text-red-500': doc.estado === 'Rechazado'
+                                    }"></i>
+                                    <span class="truncate" x-text="doc.nombre"></span>
+                                </div>
+                                <span class="flex-shrink-0 text-xs font-bold rounded-full px-2.5 py-1"
+                                    :class="{
+                                        'bg-green-100 text-green-800': doc.estado === 'Aprobado',
+                                        'bg-red-100 text-red-800': doc.estado === 'Rechazado'
+                                    }"
+                                    x-text="doc.estado"></span>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Pie del Modal con Botones -->
+            <div class="p-5 bg-gray-100 border-t border-gray-200">
+                <div x-show="!loading" class="flex flex-col-reverse sm:flex-row sm:justify-end sm:items-center gap-3">
+                    <button @click="showSummaryModal = false"
+                            class="w-full sm:w-auto inline-flex justify-center px-4 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-200/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all">
+                        <span>Cancelar</span>
+                    </button>
+
+                    <button @click="confirmarFinalizacion()"
+                            class="w-full sm:w-auto inline-flex justify-center items-center px-5 py-2.5 text-sm font-bold text-white border border-transparent rounded-lg shadow-sm transition-all duration-300"
+                            :class="{
+                                'bg-green-600 hover:bg-green-700': resumenCotejo.aprobados > resumenCotejo.rechazados,
+                                'bg-red-600 hover:bg-red-700': resumenCotejo.rechazados >= resumenCotejo.aprobados
+                            }">
+                        <i class="fas mr-2" :class="{
+                            'fa-check-double': resumenCotejo.aprobados > resumenCotejo.rechazados,
+                            'fa-times': resumenCotejo.rechazados >= resumenCotejo.aprobados
+                        }"></i>
+                        <span x-text="resumenCotejo.rechazados >= resumenCotejo.aprobados ? 'Cancelar Trámite' : 'Finalizar Proceso'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+@endsection
+
     @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<style>
-    #modalAprobacion {
-        display: none;
-    }
-    
-    #modalAprobacion .fixed {
-        animation: fadeIn 0.3s ease-out;
-    }
-    
-    #modalAprobacion .inline-block {
-        animation: slideIn 0.3s ease-out;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    @keyframes slideIn {
-        from { 
-            opacity: 0;
-            transform: translate3d(0, 100%, 0);
-        }
-        to { 
-            opacity: 1;
-            transform: translate3d(0, 0, 0);
-        }
-    }
-</style>
 @endpush
 
     @push('scripts')
     <script>
-        // Crear el modal de forma dinámica solo cuando se necesite
-        let modalAprobacion = null;
+document.addEventListener('alpine:init', () => {
+    Alpine.data('cotejoDocumento', (config) => ({
+        documentoId: config.documentoId,
+        tramiteId: config.tramiteId,
+        loading: false,
+        comentario: config.comentarioInicial,
+        isCotejado: config.esCotejado,
+        estado: config.estadoInicial,
+        
+        get cardClasses() {
+            return `bg-white border-gray-300`;
+        },
+        get iconContainerClasses() {
+            return `bg-slate-500 text-white`;
+        },
+        get badgeClasses() {
+            return `bg-slate-100 text-slate-700`;
+        },
+        get estadoTexto() {
+            return this.isCotejado ? 'Cotejado' : 'Pendiente';
+        },
 
-        function crearModal() {
-            if (!modalAprobacion) {
-                modalAprobacion = document.createElement('div');
-                modalAprobacion.id = 'modalAprobacion';
-                modalAprobacion.style.display = 'none';
-                modalAprobacion.innerHTML = `
-                    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                            <!-- Overlay de fondo -->
-                            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-
-                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                                <div>
-                                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#9d2449]/10">
-                                        <i class="fas fa-check-circle text-[#9d2449] text-2xl"></i>
-                                    </div>
-                                    <div class="mt-3 text-center sm:mt-5">
-                                        <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">
-                                            Aprobar Trámite
-                                        </h3>
-                                        <div class="mt-4">
-                                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                                <div class="flex items-center justify-center">
-                                                    <div class="text-center">
-                                                        <i class="fas fa-spinner fa-spin text-[#9d2449] text-xl mb-2"></i>
-                                                        <p class="text-sm text-gray-600">
-                                                            Obteniendo número de proveedor...
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-                                    <button type="button" 
-                                            onclick="confirmarAprobacion()"
-                                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#9d2449] text-base font-medium text-white hover:bg-[#7a1d3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] sm:col-start-2 sm:text-sm">
-                                        Confirmar Aprobación
-                                    </button>
-                                    <button type="button" 
-                                            onclick="cerrarModalAprobacion()"
-                                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] sm:mt-0 sm:col-start-1 sm:text-sm">
-                                        Cancelar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(modalAprobacion);
-            }
-            return modalAprobacion;
-        }
-
-        async function mostrarModalAprobacion() {
-            try {
-                // Verificar si el trámite ya está aprobado
-                if ('{{ $tramite->estado }}' === 'Aprobado') {
-                    mostrarNotificacion('error', 'Este trámite ya ha sido aprobado');
-                    return;
-                }
-
-                // Crear el modal si no existe
-                const modal = crearModal();
-
-                // Obtener el siguiente PV antes de mostrar el modal
-                const responsePV = await fetch('/revision/get-next-pv', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (!responsePV.ok) {
-                    throw new Error('Error al obtener el siguiente número PV');
-                }
-
-                const dataPV = await responsePV.json();
-                const nextPV = dataPV.numero_pv;
-
-                // Actualizar el contenido del modal con el PV
-                const modalContent = modal.querySelector('.bg-gray-50');
-                if (modalContent) {
-                    modalContent.innerHTML = `
-                        <div class="flex items-center justify-center flex-col">
-                            <i class="fas fa-info-circle text-[#9d2449] text-xl mb-2"></i>
-                            <p class="text-sm text-gray-600 mb-2">
-                                Al aprobar el trámite se asignará el siguiente número de proveedor:
-                            </p>
-                            <p class="text-2xl font-bold text-[#9d2449] mb-2">${nextPV}</p>
-                            <p class="text-xs text-gray-500">
-                                Este número es único y será asignado permanentemente al proveedor
-                            </p>
-                        </div>
-                        <input type="hidden" id="nextPV" value="${nextPV}">
-                    `;
-                }
-
-                modal.style.display = 'block';
-            } catch (error) {
-                console.error('Error:', error);
-                mostrarNotificacion('error', 'Error al obtener el número de proveedor');
-            }
-        }
-
-        function cerrarModalAprobacion() {
-            const modal = document.getElementById('modalAprobacion');
-            if (modal) {
-                modal.style.display = 'none';
-            }
-        }
-
-        // Función para aprobar documento después del cotejo
-        async function aprobarDocumento(documentoId) {
-            const cotejado = document.getElementById(`cotejado_${documentoId}`).checked;
-            const comentario = document.getElementById(`comentario_doc_${documentoId}`).value;
-            const coincideDigital = document.getElementById(`coincide_digital_${documentoId}`).checked;
-            const coincideFisico = document.getElementById(`coincide_fisico_${documentoId}`).checked;
-
-            if (!cotejado) {
-                alert('Debe marcar el documento como cotejado físicamente antes de aprobarlo.');
+        async aprobar() {
+            await this.enviarDecision('aprobar');
+        },
+        async rechazar() {
+            if (!this.comentario.trim()) {
+                this.mostrarNotificacion('error', 'Debe proporcionar un comentario para rechazar.');
                 return;
             }
-
-            if (!coincideDigital || !coincideFisico) {
-                alert('Debe verificar que el documento coincide tanto con la versión digital como con los requisitos físicos.');
-                return;
-            }
-
+            await this.enviarDecision('rechazar');
+        },
+        async enviarDecision(decision) {
+            this.loading = true;
             try {
-                const response = await fetch(`/revision/{{ $tramite->id }}/documento/${documentoId}/aprobar`, {
+                const response = await fetch(`/revision/${this.tramiteId}/documento/${this.documentoId}/${decision}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -330,354 +510,83 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        comentario: comentario || 'Documento verificado y cotejado correctamente',
+                        observaciones: this.comentario, // Corregido: de 'comentario' a 'observaciones'
                         documento_cotejado: true,
                         cotejo_presencial: true,
-                        observaciones_cotejo: `Documento verificado físicamente. ${comentario}`,
+                        observaciones_cotejo: `Documento ${decision} en cotejo físico. ${this.comentario}`,
                         fecha_cotejo: new Date().toISOString()
                     })
                 });
-
                 const data = await response.json();
                 if (data.success) {
-                    actualizarEstadoDocumento(documentoId, 'Aprobado', comentario);
-                    mostrarNotificacion('success', 'Documento aprobado y cotejado correctamente');
+                    this.isCotejado = true;
+                    this.estado = (decision === 'aprobar') ? 'Aprobado' : 'Rechazado';
+                    this.mostrarNotificacion('success', `Documento ${this.estado.toLowerCase()} correctamente.`);
                 } else {
-                    mostrarNotificacion('error', data.message || 'Error al aprobar el documento');
+                    this.mostrarNotificacion('error', data.message || `Error al ${decision} el documento.`);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                mostrarNotificacion('error', 'Error de conexión al aprobar el documento');
+                this.mostrarNotificacion('error', 'Error de conexión al procesar la decisión.');
+            } finally {
+                this.loading = false;
             }
-        }
-
-        // Función para rechazar documento
-        async function rechazarDocumento(documentoId) {
-            const comentario = document.getElementById(`comentario_doc_${documentoId}`).value;
-            const coincideDigital = document.getElementById(`coincide_digital_${documentoId}`).checked;
-            const coincideFisico = document.getElementById(`coincide_fisico_${documentoId}`).checked;
-            
-            if (!comentario || comentario.trim().length < 10) {
-                mostrarNotificacion('error', 'Debe proporcionar un comentario detallado explicando por qué se rechaza el documento');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/revision/{{ $tramite->id }}/documento/${documentoId}/rechazar`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        comentario: comentario,
-                        documento_cotejado: false,
-                        cotejo_presencial: false,
-                        observaciones_cotejo: `Documento rechazado en cotejo físico. ${comentario}`,
-                        fecha_cotejo: new Date().toISOString()
-                    })
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    actualizarEstadoDocumento(documentoId, 'Rechazado', comentario);
-                    mostrarNotificacion('success', 'Documento rechazado correctamente');
-                } else {
-                    mostrarNotificacion('error', data.message || 'Error al rechazar el documento');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                mostrarNotificacion('error', 'Error de conexión al rechazar el documento');
-            }
-        }
-
-        // Función para mostrar notificaciones
-        function mostrarNotificacion(tipo, mensaje) {
+        },
+        mostrarNotificacion(tipo, mensaje) {
             const notificacion = document.createElement('div');
-            notificacion.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
-                tipo === 'success' ? 'bg-green-100 border border-green-200 text-green-800' : 'bg-red-100 border border-red-200 text-red-800'
+            notificacion.className = `fixed top-5 right-5 z-[100] px-4 py-3 rounded-lg shadow-xl text-white transform transition-all duration-300 ${
+                tipo === 'success' ? 'bg-green-500' : 'bg-red-500'
             }`;
-            
             notificacion.innerHTML = `
                 <div class="flex items-center">
-                    <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} mr-2"></i>
-                    <span>${mensaje}</span>
+                <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} mr-3"></i>
+                <span class="font-medium">${mensaje}</span>
                 </div>
             `;
-            
             document.body.appendChild(notificacion);
             
             setTimeout(() => {
-                notificacion.remove();
+                notificacion.style.opacity = '0';
+                notificacion.style.transform = 'translateY(-20px)';
+                setTimeout(() => notificacion.remove(), 300);
             }, 5000);
         }
+    }));
 
-        // Función para actualizar el estado visual del documento
-        function actualizarEstadoDocumento(documentoId, nuevoEstado, comentario) {
-            const documentoContainer = document.getElementById(`cotejado_${documentoId}`).closest('.bg-white');
-            
-            if (!documentoContainer) return;
+    Alpine.data('finalizarCotejo', (tramiteId) => ({
+        tramiteId: tramiteId,
+        loading: false,
+        showSummaryModal: false,
+        resumenCotejo: {
+            aprobados: 0,
+            rechazados: 0,
+            documentos: []
+        },
 
-            // Actualizar clases del contenedor
-            documentoContainer.classList.remove('border-gray-300', 'border-blue-300', 'border-red-300', 'border-green-300');
-            documentoContainer.classList.remove('bg-gray-50', 'bg-blue-50', 'bg-red-50', 'bg-green-50');
-            
-            if (nuevoEstado === 'Aprobado') {
-                documentoContainer.classList.add('border-green-300', 'bg-green-50');
-            } else if (nuevoEstado === 'Rechazado') {
-                documentoContainer.classList.add('border-red-300', 'bg-red-50');
-            }
-            
-            // Actualizar badge de estado
-            const estadoSpan = documentoContainer.querySelector('.px-3.py-1');
-            if (estadoSpan) {
-                estadoSpan.className = `px-3 py-1 ${
-                    nuevoEstado === 'Aprobado' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                } text-xs font-medium rounded-full`;
-                estadoSpan.innerHTML = `<i class="fas ${
-                    nuevoEstado === 'Aprobado' ? 'fa-check' : 'fa-times'
-                } mr-1"></i>${nuevoEstado}`;
-            }
+        finalizar() {
+            this.showSummaryModal = true;
+        },
 
-            // Actualizar controles
-            const checkbox = document.getElementById(`cotejado_${documentoId}`);
-            const textarea = document.getElementById(`comentario_doc_${documentoId}`);
-            const botonesAccion = documentoContainer.querySelectorAll('button[onclick*="aprobarDocumento"], button[onclick*="rechazarDocumento"]');
+        mostrarNotificacion(tipo, mensaje) {
+            const notificacion = document.createElement('div');
+            notificacion.className = `fixed top-5 right-5 z-[100] px-4 py-3 rounded-lg shadow-xl text-white transform transition-all duration-300 ${
+                tipo === 'success' ? 'bg-green-500' : 'bg-red-500'
+            }`;
+            notificacion.innerHTML = `
+                <div class="flex items-center">
+                <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} mr-3"></i>
+                <span class="font-medium">${mensaje}</span>
+                </div>
+            `;
+            document.body.appendChild(notificacion);
             
-            if (checkbox) checkbox.disabled = true;
-            if (textarea) {
-                textarea.value = comentario;
-                textarea.disabled = true;
-            }
-            
-            botonesAccion.forEach(boton => {
-                boton.disabled = true;
-                boton.classList.add('opacity-50', 'cursor-not-allowed');
-            });
+            setTimeout(() => {
+                notificacion.style.opacity = '0';
+                notificacion.style.transform = 'translateY(-20px)';
+                setTimeout(() => notificacion.remove(), 300);
+            }, 5000);
         }
-
-        // Agregar checkboxes de verificación al cargar la página
-        document.addEventListener('DOMContentLoaded', function() {
-            const documentos = document.querySelectorAll('[id^="cotejado_"]');
-            documentos.forEach(doc => {
-                const documentoId = doc.id.split('_')[1];
-                const container = doc.closest('.bg-white');
-                if (!container) return;
-
-                const checkboxesContainer = document.createElement('div');
-                checkboxesContainer.className = 'mt-4 space-y-2 border-t pt-4';
-                checkboxesContainer.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <input type="checkbox" id="coincide_digital_${documentoId}" class="rounded text-[#9d2449] focus:ring-[#9d2449]">
-                        <label for="coincide_digital_${documentoId}" class="text-sm text-gray-700">
-                            Coincide con la versión digital
-                        </label>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <input type="checkbox" id="coincide_fisico_${documentoId}" class="rounded text-[#9d2449] focus:ring-[#9d2449]">
-                        <label for="coincide_fisico_${documentoId}" class="text-sm text-gray-700">
-                            Cumple con los requisitos físicos (sellos, firmas, etc.)
-                        </label>
-                    </div>
-                `;
-
-                // Insertar antes del área de comentarios
-                const comentariosArea = container.querySelector('textarea');
-                if (comentariosArea) {
-                    comentariosArea.parentNode.insertBefore(checkboxesContainer, comentariosArea);
-                }
-            });
-        });
-
-        // Función para aprobar el trámite completo y generar oficio
-        async function confirmarAprobacion() {
-            try {
-                // Obtener el PV del input oculto
-                const nextPV = document.getElementById('nextPV').value;
-                if (!nextPV) {
-                    throw new Error('No se encontró el número de proveedor');
-                }
-
-                // Mostrar indicador de carga
-                const btnConfirmar = document.querySelector('button[onclick="confirmarAprobacion()"]');
-                const btnCancelar = document.querySelector('button[onclick="cerrarModalAprobacion()"]');
-                btnConfirmar.disabled = true;
-                btnCancelar.disabled = true;
-                btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...';
-
-                // Aprobar el trámite y crear el proveedor
-                const responseAprobacion = await fetch('{{ route("revision.aprobar", ["tramite" => $tramite->id]) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        estado: 'Aprobado',
-                        fecha_aprobacion: new Date().toISOString(),
-                        numero_pv: nextPV
-                    })
-                });
-
-                // Verificar si la respuesta es JSON
-                const contentType = responseAprobacion.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                    throw new Error("La respuesta del servidor no es JSON válido");
-                }
-
-                let dataAprobacion;
-                try {
-                    dataAprobacion = await responseAprobacion.json();
-                } catch (error) {
-                    console.error('Error al parsear JSON:', error);
-                    throw new Error('Error al procesar la respuesta del servidor');
-                }
-
-                if (!responseAprobacion.ok || !dataAprobacion.success) {
-                    const mensaje = dataAprobacion.message || `Error al aprobar el trámite (${responseAprobacion.status})`;
-                    console.error('Error en la respuesta:', {
-                        status: responseAprobacion.status,
-                        data: dataAprobacion
-                    });
-                    throw new Error(mensaje);
-                }
-
-                // Si la aprobación fue exitosa, generar el oficio
-                const responseOficio = await fetch('{{ route("revision.generar-oficio", ["tramite" => $tramite->id]) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        tipo_oficio: '{{ $tramite->tipo_tramite }}',
-                        proveedor_pv: nextPV
-                    })
-                });
-
-                // Verificar si la respuesta es JSON
-                const contentTypeOficio = responseOficio.headers.get("content-type");
-                if (!contentTypeOficio || !contentTypeOficio.includes("application/json")) {
-                    throw new Error("La respuesta del servidor para el oficio no es JSON válido");
-                }
-
-                let dataOficio;
-                try {
-                    dataOficio = await responseOficio.json();
-                } catch (error) {
-                    console.error('Error al parsear JSON del oficio:', error);
-                    throw new Error('Error al procesar la respuesta del servidor para el oficio');
-                }
-
-                if (!responseOficio.ok || !dataOficio.success) {
-                    const mensaje = dataOficio.message || `Error al generar oficio (${responseOficio.status})`;
-                    console.error('Error en la respuesta del oficio:', {
-                        status: responseOficio.status,
-                        data: dataOficio
-                    });
-                    throw new Error(mensaje);
-                }
-                if (dataOficio.success) {
-                    // Cerrar modal
-                    cerrarModalAprobacion();
-
-                    // Mostrar modal de éxito con Tailwind
-                    const modalExito = document.createElement('div');
-                    modalExito.className = 'fixed inset-0 z-50 overflow-y-auto';
-                    modalExito.innerHTML = `
-                        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-                            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                                <div>
-                                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-                                        <i class="fas fa-check text-green-600 text-xl"></i>
-                                    </div>
-                                    <div class="mt-3 text-center sm:mt-5">
-                                        <h3 class="text-lg leading-6 font-bold text-gray-900">
-                                            Trámite Aprobado Exitosamente
-                                        </h3>
-                                        <div class="mt-4">
-                                            <div class="bg-gray-50 rounded-lg p-4 text-left space-y-2">
-                                                <p class="text-sm text-gray-600">
-                                                    <span class="font-semibold">Número de Proveedor:</span>
-                                                    <span class="text-[#9d2449] font-bold">${dataAprobacion.proveedor_pv}</span>
-                                                </p>
-                                                <p class="text-sm text-gray-600">
-                                                    <span class="font-semibold">Número de Oficio:</span>
-                                                    <span class="text-[#9d2449] font-bold">${dataOficio.numero_oficio}</span>
-                                                </p>
-                                            </div>
-                                            <p class="mt-2 text-sm text-gray-500">
-                                                El oficio ha sido generado y guardado en el sistema.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-5 sm:mt-6">
-                                    <button type="button"
-                                            onclick="window.location.href='/revision'"
-                                            class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-[#9d2449] text-base font-medium text-white hover:bg-[#7a1d3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9d2449] sm:text-sm transition-colors duration-200">
-                                        Volver a Revisiones
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(modalExito);
-                } else {
-                    throw new Error(dataOficio.message || 'Error al generar el oficio');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                // Restaurar botones
-                const btnConfirmar = document.querySelector('button[onclick="confirmarAprobacion()"]');
-                const btnCancelar = document.querySelector('button[onclick="cerrarModalAprobacion()"]');
-                btnConfirmar.disabled = false;
-                btnCancelar.disabled = false;
-                btnConfirmar.innerHTML = 'Confirmar Aprobación';
-                // Mostrar error
-                mostrarNotificacion('error', error.message || 'Error en el proceso de aprobación');
-            }
-        }
-
-        // Función para cancelar el trámite
-        async function cancelarTramite() {
-            const motivo = prompt('Por favor, ingrese el motivo de la cancelación:');
-            if (!motivo) return;
-
-            try {
-                const response = await fetch(`/tramites/{{ $tramite->id }}/cancelar`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        motivo_cancelacion: motivo
-                    })
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    mostrarNotificacion('success', 'Trámite cancelado exitosamente');
-                    setTimeout(() => {
-                        window.location.href = '/revision';
-                    }, 2000);
-                } else {
-                    mostrarNotificacion('error', data.message || 'Error al cancelar el trámite');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                mostrarNotificacion('error', 'Error de conexión al cancelar el trámite');
-            }
-        }
+    }));
+});
     </script>
     @endpush
-@endsection 
