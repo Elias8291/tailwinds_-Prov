@@ -1587,13 +1587,19 @@ class RevisionController extends Controller
 
             // Detectar si es móvil para forzar descarga
             $userAgent = $request->header('User-Agent');
-            $esMobile = preg_match('/Mobile|Android|iPhone|iPad/', $userAgent);
+            // Mejorar detección de móviles para evitar falsos positivos
+            $esMobile = preg_match('/Mobile.*Safari|Android.*Mobile|iPhone|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i', $userAgent) 
+                        && !preg_match('/Tablet|iPad|Desktop/', $userAgent);
 
-            if ($esMobile || $request->get('download') === '1') {
-                // Forzar descarga en móviles
+            // Verificar si se solicita forzar visualización en línea o descarga
+            $forceInline = $request->get('inline') === '1';
+            $forceDownload = $request->get('download') === '1';
+            
+            if ($forceDownload || (!$forceInline && $esMobile)) {
+                // Forzar descarga en móviles o cuando se solicite explícitamente
                 return response()->download($rutaCompleta, $nombreArchivo);
             } else {
-                // Mostrar en el navegador (desktop)
+                // Mostrar en el navegador (desktop o cuando se fuerce inline)
                 return response()->file($rutaCompleta, [
                     'Content-Type' => 'application/pdf',
                     'Content-Disposition' => 'inline; filename="' . $nombreArchivo . '"'

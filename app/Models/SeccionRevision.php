@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SeccionRevision extends Model
 {
@@ -16,64 +17,66 @@ class SeccionRevision extends Model
         'seccion_id',
         'estado',
         'comentario',
-        'revisado_por',
-        'fecha_revision'
+        'revisado_por'
     ];
 
-    public function tramite()
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    /**
+     * Relación con el trámite
+     */
+    public function tramite(): BelongsTo
     {
-        return $this->belongsTo(Tramite::class);
+        return $this->belongsTo(Tramite::class, 'tramite_id');
     }
 
-    public function seccion()
+    /**
+     * Relación con la sección del trámite
+     */
+    public function seccion(): BelongsTo
     {
-        return $this->belongsTo(Seccion::class, 'seccion_id');
+        return $this->belongsTo(SeccionTramite::class, 'seccion_id');
     }
 
-    public function revisor()
+    /**
+     * Relación con el usuario que revisó
+     */
+    public function revisadoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'revisado_por');
     }
 
     /**
-     * Verifica si la sección está aprobada
+     * Scopes
      */
-    public function estaAprobada()
+    public function scopeAprobadas($query)
     {
-        return $this->estado === 'aprobado';
+        return $query->where('estado', 'aprobado');
+    }
+
+    public function scopeRechazadas($query)
+    {
+        return $query->where('estado', 'rechazado');
+    }
+
+    public function scopePendientes($query)
+    {
+        return $query->where('estado', 'pendiente');
     }
 
     /**
-     * Verifica si la sección está rechazada
+     * Accesor para obtener el estado formateado
      */
-    public function estaRechazada()
-    {
-        return $this->estado === 'rechazado';
-    }
-
-    /**
-     * Obtiene el color para mostrar en la UI según el estado
-     */
-    public function getColorEstado()
+    public function getEstadoFormateadoAttribute(): string
     {
         return match($this->estado) {
-            'aprobado' => 'green',
-            'rechazado' => 'red',
-            'pendiente' => 'yellow',
-            default => 'gray'
-        };
-    }
-
-    /**
-     * Obtiene el icono para mostrar en la UI según el estado
-     */
-    public function getIconoEstado()
-    {
-        return match($this->estado) {
-            'aprobado' => 'fas fa-check-circle',
-            'rechazado' => 'fas fa-times-circle',
-            'pendiente' => 'fas fa-clock',
-            default => 'fas fa-question-circle'
+            'aprobado' => 'Aprobado',
+            'rechazado' => 'Rechazado',
+            'pendiente' => 'Pendiente',
+            default => 'Pendiente'
         };
     }
 } 

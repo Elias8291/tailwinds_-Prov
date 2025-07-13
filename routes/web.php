@@ -31,6 +31,7 @@ use App\Http\Controllers\DiaInhabilController;
 // Controladores de Trámites
 use App\Http\Controllers\TramiteSolicitanteController;
 use App\Http\Controllers\RevisionController;
+use App\Http\Controllers\SeccionRevisionController;
 use App\Http\Controllers\TramiteNavegacionController;
 
 // Controladores de Formularios
@@ -459,14 +460,30 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
         ->name('pausar');
     
     // Rutas de acciones por sección (permisos verificados en el controlador para AJAX)
-    Route::post('/{tramite}/seccion/{seccion}/aprobar', [RevisionController::class, 'aprobarSeccion'])
+    Route::post('/{tramite}/seccion/{seccion}/aprobar', [SeccionRevisionController::class, 'aprobar'])
         ->middleware('can:revision-tramites.aprobar')
-        ->name('aprobar-seccion');
+        ->name('seccion.aprobar');
     
-    Route::post('/{tramite}/seccion/{seccion}/rechazar', [RevisionController::class, 'rechazarSeccion'])
+    Route::post('/{tramite}/seccion/{seccion}/rechazar', [SeccionRevisionController::class, 'rechazar'])
         ->middleware('can:revision-tramites.rechazar')
-        ->name('rechazar-seccion');
+        ->name('seccion.rechazar');
+
+    Route::get('/{tramite}/seccion/{seccion}/estado', [SeccionRevisionController::class, 'obtenerEstado'])
+        ->name('seccion.estado');
     
+    // Rutas para revisión de documentos individuales
+    Route::post('/{tramite}/documento/{documento}/aprobar', [DocumentoSolicitanteController::class, 'aprobar'])
+        ->middleware('can:revision-tramites.aprobar')
+        ->name('documento.aprobar');
+    
+    Route::post('/{tramite}/documento/{documento}/rechazar', [DocumentoSolicitanteController::class, 'rechazar'])
+        ->middleware('can:revision-tramites.rechazar')
+        ->name('documento.rechazar');
+    
+    Route::get('/{tramite}/documento/{documento}/estado', [DocumentoSolicitanteController::class, 'obtenerEstado'])
+        ->name('documento.estado');
+    
+
     // Ruta para agregar comentarios
     Route::post('/{tramite}/comentar', [RevisionController::class, 'agregarComentario'])
         ->middleware('can:revision-tramites.comentar')
@@ -487,13 +504,7 @@ Route::prefix('revision')->name('revision.')->middleware(['auth', 'can:revision-
     Route::get('/{tramite}/ver-documento/{documento}', [RevisionController::class, 'verDocumento'])
         ->name('ver-documento');
     
-    // Rutas para aprobar/rechazar documentos individuales
-    Route::post('/{tramite}/documento/{documento}/aprobar', [RevisionController::class, 'aprobarDocumento'])
-        ->middleware('can:revision-tramites.aprobar')
-        ->name('aprobar-documento');
-    Route::post('/{tramite}/documento/{documento}/rechazar', [RevisionController::class, 'rechazarDocumento'])
-        ->middleware('can:revision-tramites.rechazar')
-        ->name('rechazar-documento');
+
 
     // Nueva ruta para agendar citas desde revisión
     Route::post('/{tramite}/agendar-cita', [RevisionController::class, 'agendarCitaRevision'])

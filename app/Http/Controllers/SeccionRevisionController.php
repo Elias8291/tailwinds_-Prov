@@ -4,30 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\Tramite;
 use App\Models\SeccionRevision;
-use App\Models\Seccion;
-use App\Models\Proveedor;
+use App\Models\SeccionTramite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class SeccionRevisionController extends Controller
 {
     /**
-     * Aprobar una sección específica
+     * Aprobar una sección de trámite
      */
-    public function aprobarSeccion(Request $request, $tramiteId, $seccionId)
+    public function aprobar(Request $request, $tramiteId, $seccionId)
     {
+        $request->validate([
+            'comentario' => 'nullable|string|max:1000'
+        ]);
+
         try {
-            $request->validate([
-                'comentario' => 'nullable|string|max:1000'
-            ]);
+            DB::beginTransaction();
 
             $tramite = Tramite::findOrFail($tramiteId);
-            $seccion = Seccion::findOrFail($seccionId);
+            $seccion = SeccionTramite::findOrFail($seccionId);
 
             // Crear o actualizar la revisión de la sección
-            $revision = SeccionRevision::updateOrCreate(
+            $seccionRevision = SeccionRevision::updateOrCreate(
                 [
                     'tramite_id' => $tramiteId,
                     'seccion_id' => $seccionId
@@ -39,47 +39,46 @@ class SeccionRevisionController extends Controller
                 ]
             );
 
-            Log::info('Sección aprobada:', [
-                'tramite_id' => $tramiteId,
-                'seccion_id' => $seccionId,
-                'revisor' => Auth::id()
-            ]);
+            DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Sección aprobada correctamente',
-                'estado' => 'aprobado'
+                'message' => 'Sección aprobada exitosamente',
+                'data' => [
+                    'estado' => 'aprobado',
+                    'comentario' => $seccionRevision->comentario,
+                    'revisado_por' => $seccionRevision->revisadoPor?->name ?? 'Usuario',
+                    'fecha_revision' => $seccionRevision->updated_at->format('d/m/Y H:i')
+                ]
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error al aprobar sección:', [
-                'tramite_id' => $tramiteId,
-                'seccion_id' => $seccionId,
-                'error' => $e->getMessage()
-            ]);
-
+            DB::rollBack();
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Error al aprobar la sección'
+                'message' => 'Error al aprobar la sección: ' . $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Rechazar una sección específica
+     * Rechazar una sección de trámite
      */
-    public function rechazarSeccion(Request $request, $tramiteId, $seccionId)
+    public function rechazar(Request $request, $tramiteId, $seccionId)
     {
+        $request->validate([
+            'comentario' => 'required|string|max:1000'
+        ]);
+
         try {
-            $request->validate([
-                'comentario' => 'required|string|max:1000'
-            ]);
+            DB::beginTransaction();
 
             $tramite = Tramite::findOrFail($tramiteId);
-            $seccion = Seccion::findOrFail($seccionId);
+            $seccion = SeccionTramite::findOrFail($seccionId);
 
             // Crear o actualizar la revisión de la sección
-            $revision = SeccionRevision::updateOrCreate(
+            $seccionRevision = SeccionRevision::updateOrCreate(
                 [
                     'tramite_id' => $tramiteId,
                     'seccion_id' => $seccionId
@@ -91,241 +90,66 @@ class SeccionRevisionController extends Controller
                 ]
             );
 
-            Log::info('Sección rechazada:', [
-                'tramite_id' => $tramiteId,
-                'seccion_id' => $seccionId,
-                'revisor' => Auth::id(),
-                'comentario' => $request->comentario
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Sección rechazada correctamente',
-                'estado' => 'rechazado'
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error al rechazar sección:', [
-                'tramite_id' => $tramiteId,
-                'seccion_id' => $seccionId,
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al rechazar la sección'
-            ], 500);
-        }
-    }
-
-    /**
-     * Aprobar todo el trámite
-     */
-    public function aprobarTodo(Request $request, $tramiteId)
-    {
-        try {
-            DB::beginTransaction();
-
-            $tramite = Tramite::findOrFail($tramiteId);
-            $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
-            
-            // Determinar qué secciones aprobar según el tipo de persona
-            $seccionesAAprobar = $tipoPersona === 'Moral' ? [1, 2, 3, 4, 5, 6] : [1, 2, 6]; // 6 es documentos
-
-            foreach ($seccionesAAprobar as $seccionId) {
-                SeccionRevision::updateOrCreate(
-                    [
-                        'tramite_id' => $tramiteId,
-                        'seccion_id' => $seccionId
-                    ],
-                    [
-                        'estado' => 'aprobado',
-                        'comentario' => 'Aprobado en revisión completa',
-                        'revisado_por' => Auth::id()
-                    ]
-                );
-            }
-
-            // Actualizar el estado del trámite
-            $tramite->update([
-                'estado' => 'Aprobado',
-                'fecha_revision' => now(),
-                'revisado_por' => Auth::id()
-            ]);
-
-            // Crear automáticamente el proveedor
-            $proveedor = Proveedor::crearDesdeTramiite($tramite);
-
             DB::commit();
 
-            Log::info('Trámite aprobado completamente y proveedor creado:', [
-                'tramite_id' => $tramiteId,
-                'revisor' => Auth::id(),
-                'tipo_persona' => $tipoPersona,
-                'proveedor_pv' => $proveedor->pv
-            ]);
-
             return response()->json([
                 'success' => true,
-                'message' => 'Trámite aprobado completamente. Proveedor creado con código: ' . $proveedor->pv,
-                'proveedor_pv' => $proveedor->pv
+                'message' => 'Sección rechazada exitosamente',
+                'data' => [
+                    'estado' => 'rechazado',
+                    'comentario' => $seccionRevision->comentario,
+                    'revisado_por' => $seccionRevision->revisadoPor?->name ?? 'Usuario',
+                    'fecha_revision' => $seccionRevision->updated_at->format('d/m/Y H:i')
+                ]
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Error al aprobar trámite completo:', [
-                'tramite_id' => $tramiteId,
-                'error' => $e->getMessage()
-            ]);
-
             return response()->json([
                 'success' => false,
-                'message' => 'Error al aprobar el trámite completo'
+                'message' => 'Error al rechazar la sección: ' . $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Rechazar todo el trámite
+     * Obtener el estado de revisión de una sección
      */
-    public function rechazarTodo(Request $request, $tramiteId)
+    public function obtenerEstado($tramiteId, $seccionId)
     {
         try {
-            $request->validate([
-                'comentario_general' => 'required|string|max:1000'
-            ]);
+            $seccionRevision = SeccionRevision::where('tramite_id', $tramiteId)
+                ->where('seccion_id', $seccionId)
+                ->with('revisadoPor')
+                ->first();
 
-            DB::beginTransaction();
-
-            $tramite = Tramite::findOrFail($tramiteId);
-            $tipoPersona = $tramite->solicitante->tipo_persona ?? 'Física';
-            
-            // Determinar qué secciones rechazar según el tipo de persona
-            $seccionesARechazar = $tipoPersona === 'Moral' ? [1, 2, 3, 4, 5, 6] : [1, 2, 6];
-
-            foreach ($seccionesARechazar as $seccionId) {
-                SeccionRevision::updateOrCreate(
-                    [
-                        'tramite_id' => $tramiteId,
-                        'seccion_id' => $seccionId
-                    ],
-                    [
-                        'estado' => 'rechazado',
-                        'comentario' => $request->comentario_general,
-                        'revisado_por' => Auth::id()
+            if (!$seccionRevision) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'estado' => 'pendiente',
+                        'comentario' => null,
+                        'revisado_por' => null,
+                        'fecha_revision' => null
                     ]
-                );
+                ]);
             }
 
-            // Actualizar el estado del trámite
-            $tramite->update([
-                'estado' => 'Rechazado',
-                'fecha_revision' => now(),
-                'revisado_por' => Auth::id(),
-                'observaciones' => $request->comentario_general
-            ]);
-
-            DB::commit();
-
-            Log::info('Trámite rechazado completamente:', [
-                'tramite_id' => $tramiteId,
-                'revisor' => Auth::id(),
-                'comentario' => $request->comentario_general
-            ]);
-
             return response()->json([
                 'success' => true,
-                'message' => 'Trámite rechazado completamente'
+                'data' => [
+                    'estado' => $seccionRevision->estado,
+                    'comentario' => $seccionRevision->comentario,
+                    'revisado_por' => $seccionRevision->revisadoPor?->name ?? 'Usuario',
+                    'fecha_revision' => $seccionRevision->updated_at->format('d/m/Y H:i')
+                ]
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            
-            Log::error('Error al rechazar trámite completo:', [
-                'tramite_id' => $tramiteId,
-                'error' => $e->getMessage()
-            ]);
-
             return response()->json([
                 'success' => false,
-                'message' => 'Error al rechazar el trámite completo'
-            ], 500);
-        }
-    }
-
-    /**
-     * Pausar la revisión del trámite
-     */
-    public function pausarRevision(Request $request, $tramiteId)
-    {
-        try {
-            $request->validate([
-                'comentario' => 'nullable|string|max:1000'
-            ]);
-
-            $tramite = Tramite::findOrFail($tramiteId);
-
-            $tramite->update([
-                'estado' => 'Por Cotejar',
-                'observaciones' => $request->comentario ?? 'Revisión pausada para cotejo adicional'
-            ]);
-
-            Log::info('Revisión pausada:', [
-                'tramite_id' => $tramiteId,
-                'revisor' => Auth::id(),
-                'comentario' => $request->comentario
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Revisión pausada correctamente'
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error al pausar revisión:', [
-                'tramite_id' => $tramiteId,
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al pausar la revisión'
-            ], 500);
-        }
-    }
-
-    /**
-     * Obtener el estado actual de las revisiones de un trámite
-     */
-    public function obtenerEstadoRevisiones($tramiteId)
-    {
-        try {
-            $tramite = Tramite::with(['seccionesRevision.seccion'])->findOrFail($tramiteId);
-            
-            $revisiones = $tramite->seccionesRevision->mapWithKeys(function ($revision) {
-                return [$revision->seccion_id => [
-                    'estado' => $revision->estado,
-                    'comentario' => $revision->comentario,
-                    'revisor' => $revision->revisor->name ?? 'N/A',
-                    'fecha' => $revision->updated_at->format('d/m/Y H:i')
-                ]];
-            });
-
-            return response()->json([
-                'success' => true,
-                'revisiones' => $revisiones
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error al obtener estado de revisiones:', [
-                'tramite_id' => $tramiteId,
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al obtener el estado de las revisiones'
+                'message' => 'Error al obtener el estado: ' . $e->getMessage()
             ], 500);
         }
     }

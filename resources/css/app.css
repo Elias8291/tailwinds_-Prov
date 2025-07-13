@@ -7,3 +7,299 @@
         @apply font-sans;
     }
 }
+
+/* Estilos personalizados para móvil */
+@layer components {
+    /* Breakpoint personalizado para pantallas extra pequeñas */
+    .xs\:inline { display: none; }
+    @media (min-width: 475px) {
+        .xs\:inline { display: inline; }
+    }
+    
+    .xs\:block { display: none; }
+    @media (min-width: 475px) {
+        .xs\:block { display: block; }
+    }
+    
+    .xs\:flex { display: none; }
+    @media (min-width: 475px) {
+        .xs\:flex { display: flex; }
+    }
+    
+    /* Componentes de revisión móvil */
+    .mobile-document-viewer {
+        @apply bg-white rounded-lg shadow-sm border;
+        min-height: 400px;
+    }
+    
+    .mobile-document-viewer iframe {
+        @apply w-full h-full bg-white rounded-b-lg;
+        min-height: 350px;
+    }
+    
+    .mobile-map-container {
+        @apply bg-white rounded-lg shadow-sm overflow-hidden border;
+        min-height: 300px;
+    }
+    
+    .mobile-tab-button {
+        @apply flex-1 py-3 px-2 text-sm font-medium flex items-center justify-center gap-2 transition-colors;
+    }
+    
+    .mobile-tab-button.active {
+        @apply text-[#9d2449] border-b-2 border-[#9d2449] bg-white;
+    }
+    
+    .mobile-tab-button:not(.active) {
+        @apply text-gray-600 hover:text-gray-800 hover:bg-gray-100;
+    }
+    
+    .mobile-document-button {
+        @apply flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 flex flex-col items-center justify-center rounded-lg transition-all duration-300 focus:outline-none transform hover:scale-105 border-2;
+    }
+    
+    .mobile-document-button.active {
+        @apply bg-[#9d2449] text-white border-[#9d2449];
+    }
+    
+    .mobile-document-button.approved {
+        @apply bg-green-100 text-green-600 border-green-200;
+    }
+    
+    .mobile-document-button.rejected {
+        @apply bg-red-100 text-red-600 border-red-200;
+    }
+    
+    .mobile-document-button.pending {
+        @apply bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200;
+    }
+    
+    /* Navegación de secciones móvil */
+    .mobile-section-nav {
+        @apply lg:hidden mb-4 sm:mb-6;
+    }
+    
+    .mobile-section-nav-container {
+        @apply bg-white rounded-lg shadow-sm border border-gray-200 p-2;
+    }
+    
+    .mobile-section-nav-scroll {
+        @apply flex overflow-x-auto space-x-2;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .mobile-section-nav-scroll::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .mobile-section-nav-item {
+        @apply flex-shrink-0 flex items-center space-x-2 px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 hover:text-[#9d2449] hover:bg-rose-50 rounded-md transition-colors whitespace-nowrap;
+    }
+    
+    /* Header responsivo */
+    .mobile-header {
+        @apply bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40;
+    }
+    
+    .mobile-header-content {
+        @apply px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6;
+    }
+    
+    .mobile-header-wrapper {
+        @apply flex flex-col space-y-2 sm:space-y-3 lg:flex-row lg:justify-between lg:items-center lg:space-y-0;
+    }
+    
+    .mobile-header-title {
+        @apply text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate;
+    }
+    
+    .mobile-header-info {
+        @apply mt-1 flex flex-col sm:flex-row sm:items-center text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-0;
+    }
+    
+    /* Documentos móvil */
+    .mobile-document-card {
+        @apply bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border-l-4;
+    }
+    
+    .mobile-document-card.approved {
+        @apply border-green-500;
+    }
+    
+    .mobile-document-card.rejected {
+        @apply border-red-500;
+    }
+    
+    .mobile-document-card.pending {
+        @apply border-gray-400;
+    }
+    
+    .mobile-document-card-content {
+        @apply p-3 sm:p-4 lg:p-5;
+    }
+    
+    .mobile-document-card-layout {
+        @apply flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 lg:gap-5;
+    }
+    
+    .mobile-document-icon-container {
+        @apply flex items-center gap-3 sm:gap-4;
+    }
+    
+    .mobile-document-icon {
+        @apply flex-shrink-0 h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 flex items-center justify-center rounded-full;
+    }
+    
+    .mobile-document-icon.approved {
+        @apply bg-green-100 text-green-600;
+    }
+    
+    .mobile-document-icon.rejected {
+        @apply bg-red-100 text-red-600;
+    }
+    
+    .mobile-document-icon.pending {
+        @apply bg-gray-100 text-gray-500;
+    }
+    
+    .mobile-document-status {
+        @apply px-2 py-1 sm:px-3 sm:py-1 text-xs font-bold rounded-full uppercase tracking-wider;
+    }
+    
+    .mobile-document-status.approved {
+        @apply bg-green-100 text-green-800;
+    }
+    
+    .mobile-document-status.rejected {
+        @apply bg-red-100 text-red-800;
+    }
+    
+    .mobile-document-status.pending {
+        @apply bg-gray-200 text-gray-700;
+    }
+    
+    .mobile-document-info {
+        @apply flex-grow min-w-0;
+    }
+    
+    .mobile-document-title {
+        @apply font-bold text-sm sm:text-base lg:text-lg text-gray-800 truncate mb-1;
+    }
+    
+    .mobile-document-date {
+        @apply text-xs sm:text-sm text-gray-500;
+    }
+    
+    .mobile-document-action {
+        @apply flex-shrink-0 mt-2 sm:mt-0;
+    }
+    
+    .mobile-document-action-button {
+        @apply inline-flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-all;
+    }
+    
+    /* Utilidades adicionales */
+    .mobile-safe-area {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .mobile-touch-target {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Animaciones mejoradas */
+    .mobile-slide-enter {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    
+    .mobile-slide-enter-active {
+        transform: translateX(0);
+        opacity: 1;
+        transition: all 0.3s ease-out;
+    }
+    
+    .mobile-slide-exit {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .mobile-slide-exit-active {
+        transform: translateX(-100%);
+        opacity: 0;
+        transition: all 0.3s ease-in;
+    }
+    
+    /* Mejoras para formularios en móvil */
+    .mobile-form-container {
+        @apply prose max-w-none prose-sm sm:prose-base;
+    }
+    
+    .mobile-form-container input,
+    .mobile-form-container select,
+    .mobile-form-container textarea {
+        @apply text-sm sm:text-base;
+    }
+    
+    /* Estados vacíos */
+    .mobile-empty-state {
+        @apply text-center py-12 sm:py-16;
+    }
+    
+    .mobile-empty-state-icon {
+        @apply mx-auto h-16 w-16 sm:h-20 sm:w-20 text-gray-400 mb-4 flex items-center justify-center bg-gray-100 rounded-full;
+    }
+    
+    .mobile-empty-state-title {
+        @apply text-lg sm:text-xl font-medium text-gray-900;
+    }
+    
+    .mobile-empty-state-description {
+        @apply mt-2 text-sm sm:text-base text-gray-500;
+    }
+}
+
+/* Mejoras específicas para iOS */
+@supports (-webkit-touch-callout: none) {
+    .mobile-document-viewer iframe {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .mobile-section-nav-scroll {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Mejoras para modo oscuro (opcional) */
+@media (prefers-color-scheme: dark) {
+    .mobile-document-viewer {
+        @apply bg-gray-800 border-gray-700;
+    }
+    
+    .mobile-header {
+        @apply bg-gray-900 border-gray-700;
+    }
+    
+    .mobile-header-title {
+        @apply text-white;
+    }
+    
+    .mobile-header-info {
+        @apply text-gray-300;
+    }
+}
+
+/* Mejoras para accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+    .mobile-document-button,
+    .mobile-tab-button {
+        transition: none;
+    }
+    
+    .mobile-slide-enter-active,
+    .mobile-slide-exit-active {
+        transition: none;
+    }
+}

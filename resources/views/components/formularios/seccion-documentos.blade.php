@@ -73,7 +73,7 @@
                             @if(!empty($documento['ruta_archivo']))
                                 @if(request()->is('revision/*'))
                                     {{-- En contexto de revisión, usar la ruta específica de revisión --}}
-                                    <a href="{{ route('revision.ver-documento', ['tramite' => $tramite->id ?? 0, 'documento' => $documento['id']]) }}" 
+                                    <a href="{{ route('revision.ver-documento', ['tramite' => $tramite->id ?? 0, 'documento' => $documento['id']]) }}?inline=1" 
                                        target="_blank"
                                        class="text-green-600 hover:text-green-800 text-xs underline">
                                         <i class="fas fa-eye mr-1"></i>

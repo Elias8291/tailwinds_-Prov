@@ -69,7 +69,7 @@
                             </div>
                         </div>
                     @elseif(isset($documento['id']))
-                        <iframe src="{{ route('revision.ver-documento', ['tramite' => $tramiteId, 'documento' => $documento['id']]) }}" 
+                        <iframe src="{{ route('revision.ver-documento', ['tramite' => $tramiteId, 'documento' => $documento['id']]) }}?inline=1" 
                                 class="w-full h-full" 
                                 sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                                 loading="lazy"
