@@ -47,9 +47,6 @@ use App\Http\Controllers\Api\SectorController;
 use App\Http\Controllers\DocumentoMembretadoController;
 use App\Http\Controllers\MembretesController;
 
-// Controladores de IA
-// use App\Http\Controllers\AI\DocumentTrainingController;
-
 // Controladores de Estado
 use App\Http\Controllers\MiEstadoProveedorController;
 
@@ -105,12 +102,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/cerrar-sesion', [LoginController::class, 'logout'])->name('logout');
 });
 
-// RUTA DE PRUEBA PARA VALIDACIONES (solo en desarrollo)
-if (config('app.debug')) {
-    Route::middleware(['auth'])->get('/test-validation', function () {
-        return view('test-validation');
-    })->name('test.validation');
-}
+
 
 // VERIFICACIÓN DE EMAIL
 Route::get('/verificar-email/{id}/{token}', [VerificationController::class, 'verify'])
@@ -231,86 +223,7 @@ Route::middleware(['auth'])->prefix('formularios')->group(function () {
         ->name('datos-generales.test');
 });
 
-// Ruta de debug simple sin middleware para probar conectividad
-Route::post('/debug/datos-generales', function(\Illuminate\Http\Request $request) {
-    \Illuminate\Support\Facades\Log::info('=== DEBUG RUTA SIMPLE ===', [
-        'method' => $request->method(),
-        'url' => $request->url(),
-        'data' => $request->all(),
-        'headers' => $request->headers->all(),
-        'user_authenticated' => \Illuminate\Support\Facades\Auth::check(),
-        'user_id' => \Illuminate\Support\Facades\Auth::id(),
-        'session_id' => session()->getId(),
-        'csrf_token_valid' => csrf_token() === $request->input('_token')
-    ]);
-    
-    // Validar campos básicos
-    $errores = [];
-    
-    if (!$request->input('tramite_id')) {
-        $errores[] = 'tramite_id requerido';
-    }
-    
-    if (!$request->input('giro')) {
-        $errores[] = 'giro requerido';
-    }
-    
-    if (!$request->input('contacto_nombre')) {
-        $errores[] = 'contacto_nombre requerido';
-    }
-    
-    if (!$request->input('contacto_cargo')) {
-        $errores[] = 'contacto_cargo requerido';
-    }
-    
-    if (!$request->input('contacto_correo')) {
-        $errores[] = 'contacto_correo requerido';
-    }
-    
-    if (!$request->input('contacto_telefono')) {
-        $errores[] = 'contacto_telefono requerido';
-    }
-    
-    if (!$request->input('actividades_seleccionadas')) {
-        $errores[] = 'actividades_seleccionadas requerido';
-    }
-    
-    \Illuminate\Support\Facades\Log::info('Validación debug completada', [
-        'errores_encontrados' => $errores,
-        'total_errores' => count($errores)
-    ]);
-    
-    if (empty($errores)) {
-        // Si no hay errores, simular una redirección exitosa
-        \Illuminate\Support\Facades\Log::info('✅ Validación exitosa - simulando redirección');
-        
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Datos procesados correctamente',
-                'next_step' => 2,
-                'redirect_url' => '/tramites/inscripcion/' . $request->input('tramite_id')
-            ]);
-        }
-        
-        // Para formularios normales, redirigir
-        return redirect('/tramites/inscripcion/' . $request->input('tramite_id'))
-            ->with('success', 'Datos guardados correctamente');
-    } else {
-        // Si hay errores, mostrarlos
-        \Illuminate\Support\Facades\Log::warning('❌ Errores de validación encontrados', $errores);
-        
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $errores,
-                'message' => 'Errores de validación encontrados'
-            ], 422);
-        }
-        
-        return back()->withErrors($errores)->withInput();
-    }
-})->name('debug.datos-generales');
+
 
 // ============================================================================
 // MÓDULO PORTAL DEL SOLICITANTE - MIS TRÁMITES
@@ -625,11 +538,6 @@ Route::get('/provider-dashboard', function () {
 
 Route::prefix('api')->group(function () {
     
-    // API DE SECTORES Y ACTIVIDADES (comentadas para evitar conflicto con api.php)
-    // Route::get('/sectores/{sector}/actividades', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'getActividadesPorSector']);
-    // Route::get('/actividades', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'getAllActividades']);
-    // Route::get('/actividades/{actividad}', [SectorController::class, 'getActividad']);
-    
     // API DE DATOS GENERALES
     Route::get('/datos-generales/{tramite}', [\App\Http\Controllers\Formularios\DatosGeneralesController::class, 'obtenerDatos'])
         ->name('api.datos-generales.obtener');
@@ -669,90 +577,7 @@ Route::middleware(['auth'])->prefix('membretes')->group(function () {
     Route::get('/ejemplo/actualizacion', [MembretesController::class, 'ejemploActualizacion'])->name('membretes.ejemplo.actualizacion');
 });
 
-// ============================================================================
-// RUTAS DE PRUEBA PARA PÁGINAS DE ERROR (Solo en desarrollo)
-// ============================================================================
 
-// ============================================================================
-// MÓDULO DE ENTRENAMIENTO DE IA
-// ============================================================================
-
-// Route::middleware(['auth'])->prefix('ai/training')->name('ai.training.')->group(function () {
-//     
-//     // Dashboard principal del módulo de entrenamiento
-//     Route::get('/', [DocumentTrainingController::class, 'index'])->name('index');
-//     
-//     // Subida de documentos para entrenamiento
-//     Route::get('/upload', [DocumentTrainingController::class, 'uploadForm'])->name('upload');
-//     Route::post('/upload', [DocumentTrainingController::class, 'upload'])->name('upload.store');
-//     
-//     // Revisión y aprobación de documentos
-//     Route::get('/review', [DocumentTrainingController::class, 'review'])->name('review');
-//     Route::post('/approve/{trainingData}', [DocumentTrainingController::class, 'approve'])->name('approve');
-//     Route::post('/reject/{trainingData}', [DocumentTrainingController::class, 'reject'])->name('reject');
-//     
-//     // Entrenamiento de modelos
-//     Route::post('/train', [DocumentTrainingController::class, 'trainModel'])->name('train');
-//     
-//     // Ver detalles de documento de entrenamiento
-//     Route::get('/document/{trainingData}', [DocumentTrainingController::class, 'showDocument'])->name('document.show');
-//     
-//     // Servir archivos de entrenamiento
-//     Route::get('/file/{trainingData}', [DocumentTrainingController::class, 'serveTrainingFile'])->name('file.serve');
-//     
-//     // Eliminar datos de entrenamiento
-//     Route::delete('/training-data/{trainingData}', [DocumentTrainingController::class, 'deleteTrainingData'])->name('training-data.delete');
-// });
-
-// ============================================================================
-// MÓDULO DE DASHBOARD DE IA
-// ============================================================================
-
-// Route::middleware(['auth', 'can:ai.ver'])->prefix('ai')->name('ai.')->group(function () {
-//     
-//     // Dashboard principal de IA
-//     Route::get('/dashboard', [\App\Http\Controllers\AI\AiDashboardController::class, 'index'])->name('dashboard.index');
-//     
-//     // Métricas y estadísticas
-//     Route::get('/metrics', [\App\Http\Controllers\AI\AiDashboardController::class, 'getMetrics'])->name('metrics');
-//     Route::get('/system-health', [\App\Http\Controllers\AI\AiDashboardController::class, 'getSystemHealth'])->name('system-health');
-//     Route::get('/training-status', [\App\Http\Controllers\AI\AiDashboardController::class, 'getTrainingStatus'])->name('training-status');
-//     
-//     // Acciones rápidas
-//     Route::post('/quick-action', [\App\Http\Controllers\AI\AiDashboardController::class, 'quickAction'])->name('quick-action');
-// });
-
-if (config('app.debug')) {
-    
-    // Página de índice para probar errores
-    Route::get('/test-errors', function() {
-        return view('test-errors');
-    })->name('test.errors.index');
-    
-    Route::get('/test-errors/403', function() {
-        abort(403);
-    })->name('test.error.403');
-    
-    Route::get('/test-errors/404', function() {
-        abort(404);
-    })->name('test.error.404');
-    
-    Route::get('/test-errors/419', function() {
-        abort(419);
-    })->name('test.error.419');
-    
-    Route::get('/test-errors/429', function() {
-        abort(429);
-    })->name('test.error.429');
-    
-    Route::get('/test-errors/500', function() {
-        abort(500);
-    })->name('test.error.500');
-    
-    Route::get('/test-errors/503', function() {
-        abort(503);
-    })->name('test.error.503');
-}
 
 // ============================================================================
 // MÓDULO DE NOTIFICACIONES (SOLO API - SIN INTERFAZ)
@@ -775,22 +600,7 @@ Route::prefix('documentos')->name('documentos.')->middleware(['auth'])->group(fu
     Route::get('/version/{documentoVersion}', [DocumentoSolicitanteController::class, 'verVersion'])->name('ver-version');
 });
 
-// Ruta para verificar configuración PHP (solo en desarrollo)
-if (config('app.debug')) {
-    Route::get('/php-config', function() {
-        $config = [
-            'upload_max_filesize' => ini_get('upload_max_filesize'),
-            'post_max_size' => ini_get('post_max_size'),
-            'memory_limit' => ini_get('memory_limit'),
-            'max_execution_time' => ini_get('max_execution_time'),
-            'max_input_time' => ini_get('max_input_time'),
-            'max_file_uploads' => ini_get('max_file_uploads'),
-            'file_uploads' => ini_get('file_uploads') ? 'Habilitado' : 'Deshabilitado',
-        ];
-        
-        return view('php-config', compact('config'));
-    })->name('php.config');
-}
+
 
 // ============================================================================
 // MÓDULO DE MIS TRÁMITES
