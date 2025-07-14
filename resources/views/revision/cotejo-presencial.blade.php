@@ -2,17 +2,8 @@
 
 @section('content')
 <div class="bg-gray-50/50 min-h-screen" 
-     x-data="{ 
-        instructionsModalOpen: false,
-        showSummaryModal: false,
-        loading: false,
-        resumenCotejo: {
-            aprobados: 0,
-            rechazados: 0,
-            documentos: []
-        }
-     }">
-    <div class="max-w-screen-xl mx-auto py-8 px-4 sm:px-6 lg:px-8" x-data="finalizarCotejo({{ $tramite->id }})">
+     x-data="cotejoFlowManager({{ $tramite->id }})">
+    <div class="max-w-screen-xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
         <!-- Header Principal Rediseñado -->
         <div class="relative bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 p-6 mb-8">
@@ -110,8 +101,12 @@
                             esCotejado: {{ $documento['documento_cotejado'] ? 'true' : 'false' }},
                             estadoInicial: '{{ $documento['estado'] }}'
                         })"
-                         class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border"
-                     :class="isCotejado ? (estado === 'Aprobado' ? 'bg-green-50/70 border-green-400' : 'bg-red-50/70 border-red-400') : 'bg-white border-gray-300'">
+                         class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border documento-item"
+                         :data-id="{{ $documento['id'] }}"
+                         :data-nombre="'{{ e($documento['nombre']) }}'"
+                         :data-estado="estado"
+                         :data-cotejado="isCotejado"
+                         :class="isCotejado ? (estado === 'Aprobado' ? 'bg-green-50/70 border-green-400' : 'bg-red-50/70 border-red-400') : 'bg-white border-gray-300'">
                         
                     <!-- Cabecera del Documento (siempre visible) -->
                     <div class="p-4 flex items-center gap-4">
@@ -338,16 +333,49 @@
         </div>
     </div>
 
-<!-- Modal de Resumen de Cotejo -->
-<div x-show="showSummaryModal" 
-     x-transition:enter="ease-out duration-300"
-     x-transition:enter-start="opacity-0"
-     x-transition:enter-end="opacity-100"
-     x-transition:leave="ease-in duration-200"
-     x-transition:leave-start="opacity-100"
-     x-transition:leave-end="opacity-0"
-     x-cloak
-     class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/70 backdrop-blur-sm p-4">
+    <!-- Modal de Documentos Pendientes -->
+    <div x-show="documentosPendientesModal" 
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/70 backdrop-blur-sm p-4">
+
+        <div @click.away="documentosPendientesModal = false"
+             class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all p-6 text-center">
+             
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-4">
+                <i class="fas fa-exclamation-triangle text-4xl text-yellow-500"></i>
+            </div>
+            
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Atención</h3>
+            
+            <p class="text-gray-600">
+                Debe revisar y tomar una decisión (Aprobar/Rechazar) para todos los documentos antes de poder finalizar el proceso de cotejo.
+            </p>
+
+            <div class="mt-6">
+                <button @click="documentosPendientesModal = false"
+                        class="w-full px-5 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resumen de Cotejo -->
+    <div x-show="showSummaryModal" 
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/70 backdrop-blur-sm p-4">
 
     <div @click.away="showSummaryModal = false"
          x-show="showSummaryModal"
@@ -442,22 +470,25 @@
                     </button>
 
                     <button @click="confirmarFinalizacion()"
+                            :disabled="loading"
                             class="w-full sm:w-auto inline-flex justify-center items-center px-5 py-2.5 text-sm font-bold text-white border border-transparent rounded-lg shadow-sm transition-all duration-300"
                             :class="{
                                 'bg-green-600 hover:bg-green-700': resumenCotejo.aprobados > resumenCotejo.rechazados,
-                                'bg-red-600 hover:bg-red-700': resumenCotejo.rechazados >= resumenCotejo.aprobados
+                                'bg-red-600 hover:bg-red-700': resumenCotejo.rechazados >= resumenCotejo.aprobados,
+                                'opacity-50 cursor-not-allowed': loading
                             }">
                         <i class="fas mr-2" :class="{
-                            'fa-check-double': resumenCotejo.aprobados > resumenCotejo.rechazados,
-                            'fa-times': resumenCotejo.rechazados >= resumenCotejo.aprobados
+                            'fa-check-double': !loading && resumenCotejo.aprobados > resumenCotejo.rechazados,
+                            'fa-times': !loading && resumenCotejo.rechazados >= resumenCotejo.aprobados,
+                            'fa-spinner fa-spin': loading
                         }"></i>
-                        <span x-text="resumenCotejo.rechazados >= resumenCotejo.aprobados ? 'Cancelar Trámite' : 'Finalizar Proceso'"></span>
+                        <span x-show="!loading" x-text="resumenCotejo.rechazados >= resumenCotejo.aprobados ? 'Cancelar Trámite' : 'Finalizar Proceso'"></span>
+                        <span x-show="loading">Procesando...</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 @endsection
 
@@ -553,10 +584,12 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
-    Alpine.data('finalizarCotejo', (tramiteId) => ({
+    Alpine.data('cotejoFlowManager', (tramiteId) => ({
         tramiteId: tramiteId,
         loading: false,
+        instructionsModalOpen: false,
         showSummaryModal: false,
+        documentosPendientesModal: false,
         resumenCotejo: {
             aprobados: 0,
             rechazados: 0,
@@ -564,7 +597,68 @@ document.addEventListener('alpine:init', () => {
         },
 
         finalizar() {
+            let todosCotejados = true;
+            const documentosData = [];
+            let aprobados = 0;
+            let rechazados = 0;
+
+            document.querySelectorAll('.documento-item').forEach(el => {
+                if (el.dataset.cotejado !== 'true') {
+                    todosCotejados = false;
+                }
+                const estado = el.dataset.estado;
+                documentosData.push({
+                    id: el.dataset.id,
+                    nombre: el.dataset.nombre,
+                    estado: estado
+                });
+
+                if (estado === 'Aprobado') {
+                    aprobados++;
+                } else if (estado === 'Rechazado') {
+                    rechazados++;
+                }
+            });
+
+            if (!todosCotejados) {
+                this.documentosPendientesModal = true;
+                return;
+            }
+            
+            this.resumenCotejo = {
+                aprobados,
+                rechazados,
+                documentos: documentosData
+            };
             this.showSummaryModal = true;
+        },
+
+        async confirmarFinalizacion() {
+            this.loading = true;
+            try {
+                const response = await fetch(`/revision/${this.tramiteId}/finalizar-cotejo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    this.mostrarNotificacion('success', 'Proceso de cotejo finalizado correctamente. Redirigiendo...');
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url || '/revision';
+                    }, 2000);
+                } else {
+                    this.mostrarNotificacion('error', data.message || 'Error al finalizar el cotejo.');
+                    this.loading = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.mostrarNotificacion('error', 'Error de conexión al finalizar el proceso.');
+                this.loading = false;
+            }
         },
 
         mostrarNotificacion(tipo, mensaje) {
