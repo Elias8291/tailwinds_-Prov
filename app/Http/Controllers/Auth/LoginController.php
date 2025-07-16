@@ -69,9 +69,9 @@ class LoginController extends Controller
             'user_permissions' => $user->getAllPermissions()->pluck('name')->toArray()
         ]);
 
-        // Redirigir al dashboard
-        Log::info('Redirigiendo a dashboard');
-        return redirect()->intended(route('dashboard'));
+        // Redirigir al inicio (welcome)
+        Log::info('Redirigiendo a welcome');
+        return redirect()->intended(route('welcome'));
     }
 
     /** Handle user login with email verification check */
@@ -101,22 +101,18 @@ class LoginController extends Controller
                 ->with('error', 'La contraseña es incorrecta.');
         }
 
-        // Verificar si la cuenta está verificada
-        if ($user->estado !== 'activo') {
-            // Verificar si han pasado 72 horas para eliminar cuenta
-            if ($user->created_at->diffInHours(now()) > 72) {
-                $this->deleteExpiredUser($user);
-                return redirect()->route('register')
-                    ->with('error', 'Tu cuenta ha expirado y ha sido eliminada. Por favor, regístrate nuevamente.');
-            }
-
+        // Verificar si el estado es 'pendiente'
+        if ($user->estado === 'pendiente') {
             return redirect()->back()
                 ->withInput($request->only($this->username(), 'remember'))
-                ->with('verification_required', [
-                    'message' => 'Tu cuenta no ha sido verificada. Revisa tu correo electrónico y haz clic en el enlace de verificación.',
-                    'email' => $user->correo,
-                    'hours_left' => 72 - $user->created_at->diffInHours(now())
-                ]);
+                ->with('error', 'Debes confirmar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada o spam.');
+        }
+
+        // Verificar si la cuenta está verificada (correo electrónico)
+        if (is_null($user->email_verified_at)) {
+            return redirect()->back()
+                ->withInput($request->only($this->username(), 'remember'))
+                ->with('error', 'Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada o spam.');
         }
 
         // Realizar login normal si todo está correcto

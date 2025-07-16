@@ -2,41 +2,35 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Solicitante;
+use App\Models\ActividadCatalogo;
 
 class ActividadSolicitante extends Model
 {
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'actividad_solicitante';
+    use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    protected $table = 'actividad_solicitante';
+    
     protected $fillable = [
-        'tramite_id',
-        'actividad_id',
+        'solicitante_id',
+        'actividad_id'
     ];
 
     /**
-     * Get the tramite that owns the actividad solicitante.
+     * Relación: solicitante de la actividad
      */
-    public function tramite(): BelongsTo
+    public function solicitante()
     {
-        return $this->belongsTo(Tramite::class);
+        return $this->belongsTo(Solicitante::class);
     }
 
     /**
-     * Get the actividad that owns the actividad solicitante.
+     * Relación: catálogo de la actividad
      */
-    public function actividad(): BelongsTo
+    public function actividadCatalogo()
     {
-        return $this->belongsTo(Actividad::class);
+        return $this->belongsTo(ActividadCatalogo::class, 'actividad_id');
     }
 }

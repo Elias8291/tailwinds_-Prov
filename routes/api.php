@@ -9,6 +9,7 @@ use App\Http\Controllers\LocationDataController;
 use App\Http\Controllers\RevisionController;
 use App\Http\Controllers\Formularios\DocumentosController;
 use App\Http\Controllers\Api\GoogleMapsProxyController;
+use App\Http\Controllers\NotificacionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,31 +26,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// RFC Search Routes
-Route::get('/rfc-search/{rfc}', [RfcSearchController::class, 'search']);
-Route::get('/rfc-history/{rfc}', [RfcSearchController::class, 'history']);
-Route::get('/proveedor/historial', [HistorialProveedorController::class, 'buscarPorRFC']);
+// Validation Routes
+Route::controller(\App\Http\Controllers\UserController::class)->group(function () {
+    Route::get('/validate/email', 'validateEmail');
+    Route::get('/validate/rfc', 'validateRfc');
+});
 
-// Actividades Routes (orden específico a general)
-Route::get('/actividades/buscar', [SectorController::class, 'buscarActividades']);
-Route::post('/actividades/obtener-por-ids', [SectorController::class, 'obtenerPorIds']);
-Route::get('/actividades/{actividad}', [SectorController::class, 'getActividad']);
-Route::get('/actividades', [SectorController::class, 'getAllActividades']);
-
-// Sector Routes
-Route::get('/sectores/{sector}/actividades', [SectorController::class, 'getActividades']);
-
-// Location Data Routes
-Route::get('/location-data/{codigoPostal}', [LocationDataController::class, 'getLocationData']);
-
-// Tramite Routes
-Route::get('/tramite/{tramiteId}/domicilio', [App\Http\Controllers\DetalleTramiteController::class, 'getDomicilioApi']);
-Route::get('/tramite/{tramiteId}/constitucion', [App\Http\Controllers\DetalleTramiteController::class, 'getConstitucionApi']);
-
-// Documentos Routes
-Route::post('/documentos/{id}/aprobar', [DocumentosController::class, 'aprobar']);
-Route::post('/documentos/{id}/rechazar', [DocumentosController::class, 'rechazar']);
-
-// Google Maps Proxy
-Route::get('/google-maps/script', [GoogleMapsProxyController::class, 'getScript'])
-    ->name('api.google-maps.script');
+Route::middleware('auth:sanctum')->prefix('notificaciones')->controller(NotificacionController::class)->group(function () {
+    Route::get('/header', 'header');
+    Route::get('/contador', 'contador');
+    Route::post('/marcar-todas-leidas', 'marcarTodasLeidas');
+    Route::post('/{id}/marcar-leida', 'marcarComoLeida');
+});

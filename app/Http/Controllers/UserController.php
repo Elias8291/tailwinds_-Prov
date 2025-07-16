@@ -2,239 +2,78 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Auth\Events\Registered;
-use Spatie\Permission\Models\Role;
-use App\Services\SystemLogService;
+use App\Models\User;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('can:usuarios.ver')->only('index');
-        $this->middleware('can:usuarios.crear')->only(['create', 'store']);
-        $this->middleware('can:usuarios.editar')->only(['edit', 'update']);
-        $this->middleware('can:usuarios.eliminar')->only('destroy');
-    }
-
     public function index(Request $request)
     {
-        $query = User::with('roles');
+        $query = User::query();
 
-        // Aplicar filtros
-        if ($request->filled('search')) {
-            $search = $request->get('search');
-            $query->where(function($q) use ($search) {
-                $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('correo', 'like', "%{$search}%");
+        // Filtro por estado
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        // Filtro por rol (usando Spatie)
+        if ($request->filled('rol')) {
+            $query->whereHas('roles', function ($q) use ($request) {
+                $q->where('name', $request->rol);
             });
         }
 
-        if ($request->filled('status')) {
-            $status = $request->get('status');
-            if ($status === 'verified') {
-                $query->whereNotNull('fecha_verificacion_correo');
-            } elseif ($status === 'pending') {
-                $query->whereNull('fecha_verificacion_correo');
+        // Filtro por fecha de registro
+        if ($request->filled('fecha')) {
+            if ($request->fecha === 'hoy') {
+                $query->whereDate('created_at', today());
+            } elseif ($request->fecha === 'semana') {
+                $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+            } elseif ($request->fecha === 'mes') {
+                $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
             }
         }
 
-        // Ordenamiento
-        $sortBy = $request->get('sort', 'nombre');
-        $sortDirection = $request->get('direction', 'asc');
-        
-        $validSorts = ['nombre', 'correo', 'created_at'];
-        if (in_array($sortBy, $validSorts)) {
-            $query->orderBy($sortBy, $sortDirection);
-        }
-
         // Paginación
-        $perPage = $request->get('perPage', 10);
-        $users = $query->paginate($perPage)->appends($request->query());
-
-        return view('users.index', compact('users'));
-    }
-
-    public function create()
-    {
-        $roles = Role::all();
-        return view('users.create', compact('roles'));
-    }
-
-    public function store(Request $request)
-    {
-        // Debug: Ver qué datos llegan
-        Log::info('Datos del formulario:', $request->all());
-        
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,correo',
-            'rfc' => 'required|string|max:13|unique:users,rfc',
-            'password' => 'required|string|min:8|confirmed',
-            'roles' => 'required|array'
-        ], [
-            'roles.required' => 'Debe seleccionar al menos un rol.',
-        ]);
-
-        try {
-            $user = User::create([
-                'nombre' => $request->name,
-                'correo' => $request->email,
-                'rfc' => $request->rfc,
-                'password' => Hash::make($request->password),
-                'estado' => 'pendiente',
-            ]);
-
-            Log::info('Usuario creado exitosamente:', ['user_id' => $user->id]);
-
-            // Obtener los nombres de los roles basándose en los IDs
-            $roleNames = Role::whereIn('id', $request->roles)->pluck('name')->toArray();
-            $user->assignRole($roleNames);
-
-            // Log de creación de usuario
-            SystemLogService::userCreated($user->id, $user->nombre, $user->correo);
-
-        } catch (\Exception $e) {
-            Log::error('Error al crear usuario:', ['error' => $e->getMessage()]);
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Error al crear usuario: ' . $e->getMessage());
+        $perPage = $request->input('perPage', 10);
+        if ($perPage === 'all') {
+            $usuarios = $query->get();
+        } else {
+            $usuarios = $query->paginate((int) $perPage)->appends($request->all());
         }
 
-        // Trigger verification email
-        event(new Registered($user));
-
-        return redirect()->route('users.index')
-            ->with('success', __('custom.messages.success.created', ['resource' => __('custom.resources.user')]));
+        $totalUsuarios = User::count();
+        return view('users.index', compact('totalUsuarios', 'usuarios'));
     }
 
-    public function edit(User $user)
-    {
-        $roles = Role::all();
-        return view('users.edit', compact('user', 'roles'));
-    }
-
-    public function update(Request $request, User $user)
+    public function validateEmail(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,correo,'.$user->id,
-            'rfc' => 'required|string|max:13|unique:users,rfc,'.$user->id,
-            'roles' => 'required|array'
-        ], [
-            'roles.required' => 'Debe seleccionar al menos un rol.',
+            'email' => 'required|email',
         ]);
 
-        $data = [
-            'nombre' => $request->name,
-            'correo' => $request->email,
-            'rfc' => $request->rfc,
-        ];
-
-        if ($request->filled('password')) {
-            $request->validate([
-                'password' => 'required|string|min:8|confirmed',
-            ]);
-            $data['password'] = Hash::make($request->password);
+        $exists = User::where('correo', $request->email)->exists();
+        if ($exists) {
+            return ['valid' => false, 'message' => 'Este email ya está registrado'];
         }
-
-        $user->update($data);
-        
-        // Obtener los nombres de los roles basándose en los IDs
-        $roleNames = Role::whereIn('id', $request->roles)->pluck('name')->toArray();
-        $user->syncRoles($roleNames);
-
-        // Log de actualización de usuario
-        SystemLogService::userUpdated($user->id, $user->nombre, $user->correo);
-
-        return redirect()->route('users.index')
-            ->with('success', __('custom.messages.success.updated', ['resource' => __('custom.resources.user')]));
+        return ['valid' => true, 'message' => 'Email disponible'];
     }
 
-    public function destroy(User $user)
+    public function validateRfc(Request $request)
     {
-        if ($user->id === auth()->id()) {
-            return redirect()->route('users.index')
-                ->with('error', 'No puedes eliminar tu propio usuario.');
-        }
-
-        // Log de eliminación de usuario (antes de eliminar)
-        SystemLogService::userDeleted($user->id, $user->nombre, $user->correo);
-
-        $user->delete();
-
-        return redirect()->route('users.index')
-            ->with('success', __('custom.messages.success.deleted', ['resource' => __('custom.resources.user')]));
-    }
-
-    /** Create user for registration process */
-    public function createForRegistration(array $data): User
-    {
-        try {
-            $user = User::create([
-                'nombre' => $data['nombre'],
-                'correo' => $data['correo'],
-                'rfc' => $data['rfc'],
-                'password' => Hash::make($data['password']),
-                'estado' => $data['estado'] ?? 'pendiente',
-                'verification_token' => Str::random(64),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            Log::info('Usuario creado exitosamente', ['user_id' => $user->id]);
-            return $user;
-
-        } catch (\Exception $e) {
-            Log::error('Error al crear usuario', ['error' => $e->getMessage()]);
-            throw new \Exception('Error al crear el usuario: ' . $e->getMessage());
-        }
-    }
-
-    /** Update user with array data */
-    public function updateWithData(User $user, array $data): User
-    {
-        try {
-            $user->update($data);
-            Log::info('Usuario actualizado exitosamente', ['user_id' => $user->id]);
-            return $user;
-        } catch (\Exception $e) {
-            Log::error('Error al actualizar usuario', ['error' => $e->getMessage()]);
-            throw new \Exception('Error al actualizar el usuario: ' . $e->getMessage());
-        }
-    }
-
-    /** Find user by RFC */
-    public function findByRfc(string $rfc): ?User
-    {
-        return User::where('rfc', $rfc)->first();
-    }
-
-    /** Find user by email */
-    public function findByEmail(string $email): ?User
-    {
-        return User::where('correo', $email)->first();
-    }
-
-    /** Validate user registration data */
-    public function validateRegistrationData(array $data): array
-    {
-        return \Illuminate\Support\Facades\Validator::make($data, [
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,correo'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        $request->validate([
+            'rfc' => [
+                'required',
+                'regex:/^[A-ZÑ&]{3,4}[0-9]{6}[A-V1-9][A-Z0-9][0-9]$/i',
+            ],
         ], [
-            'email.required' => 'El correo electrónico es obligatorio.',
-            'email.email' => 'El correo electrónico no es válido.',
-            'email.unique' => 'El correo electrónico ya está registrado.',
-            'password.required' => 'La contraseña es obligatoria.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-            'password.confirmed' => 'Las contraseñas no coinciden.',
-        ])->validate();
+            'rfc.regex' => 'Formato de RFC inválido',
+        ]);
+
+        $exists = User::where('rfc', $request->rfc)->exists();
+        if ($exists) {
+            return ['valid' => false, 'message' => 'Este RFC ya está registrado'];
+        }
+        return ['valid' => true, 'message' => 'RFC disponible'];
     }
 } 

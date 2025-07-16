@@ -214,7 +214,7 @@ class SATScraper {
         // Información principal
         content += `
             <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-                <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#9d2449] to-[#7a1d37]">
+                <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-800 to-blue-900">
                     <h4 class="text-base font-semibold text-white flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -274,7 +274,7 @@ class SATScraper {
         if (hasAddressData) {
             content += `
                 <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#9d2449] to-[#7a1d37]">
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-800 to-blue-900">
                         <h4 class="text-base font-semibold text-white flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -361,7 +361,7 @@ class SATScraper {
         if (hasContactData) {
             content += `
                 <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#9d2449] to-[#7a1d37]">
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-800 to-blue-900">
                         <h4 class="text-base font-semibold text-white flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -408,7 +408,7 @@ class SATScraper {
         if (hasFiscalData) {
             content += `
                 <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#9d2449] to-[#7a1d37]">
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-800 to-blue-900">
                         <h4 class="text-base font-semibold text-white flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -445,7 +445,7 @@ class SATScraper {
         if (data.sections && data.sections.length > 0) {
             content += `
                 <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-[#9d2449] to-[#7a1d37]">
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-800 to-blue-900">
                         <h4 class="text-base font-semibold text-white flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>

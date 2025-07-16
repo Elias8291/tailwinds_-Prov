@@ -1,0 +1,32 @@
+
+    Directory: C:\Users\Elias\Desktop\finslResidencia\tailwinds_-Prov\database\migrations
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---       14/07/2025 09:13 a. m.           1096 0001_01_01_000000_create_users_table.php
+-a---       03/07/2025 06:32 a. m.            849 0001_01_01_000001_create_cache_table.php
+-a---       03/07/2025 06:32 a. m.           1812 0001_01_01_000002_create_jobs_table.php
+-a---       14/07/2025 09:27 a. m.            597 2025_07_14_105042_create_catalogo_paises_table.php
+-a---       14/07/2025 09:31 a. m.              1 2025_07_14_105042_create_paises_catalogo_table.php
+-a---       14/07/2025 09:31 a. m.            707 2025_07_14_105100_create_estados_catalogo_table.php
+-a---       14/07/2025 09:31 a. m.            716 2025_07_14_105114_create_municipios_catalogo_table.php
+-a---       14/07/2025 09:31 a. m.            632 2025_07_14_105157_create_sectores_catalogo_table.php
+-a---       14/07/2025 09:31 a. m.            953 2025_07_14_105606_create_actividades_catalogo_table.php
+-a---       14/07/2025 09:31 a. m.            739 2025_07_14_105622_create_secciones_catalogo_table.php
+-a---       14/07/2025 09:31 a. m.            690 2025_07_14_105637_create_documentos_catalogo_table.php
+-a---       14/07/2025 09:31 a. m.           1334 2025_07_14_105653_create_solicitantes_table.php
+-a---       14/07/2025 09:31 a. m.           1013 2025_07_14_105710_create_proveedores_table.php
+-a---       14/07/2025 09:31 a. m.           1567 2025_07_14_105726_create_domicilios_table.php
+-a---       14/07/2025 09:31 a. m.           1282 2025_07_14_105804_create_tramites_table.php
+-a---       14/07/2025 09:31 a. m.            965 2025_07_14_105821_create_secciones_tramite_table.php
+-a---       14/07/2025 09:31 a. m.            871 2025_07_14_105839_create_revisiones_seccion_table.php
+-a---       14/07/2025 09:31 a. m.           1187 2025_07_14_105854_create_documentos_solicitante_table.p
+                                                  hp
+-a---       14/07/2025 09:31 a. m.            977 2025_07_14_105915_create_documento_versiones_table.php
+-a---       14/07/2025 09:31 a. m.           1150 2025_07_14_105942_create_datos_constitutivos_table.php
+-a---       14/07/2025 09:31 a. m.           1408 2025_07_14_105959_create_representantes_legales_table.p
+                                                  hp
+-a---       14/07/2025 09:31 a. m.           1032 2025_07_14_110015_create_accionistas_table.php
+-a---       14/07/2025 09:31 a. m.            803 2025_07_14_110031_create_actividad_solicitante_table.ph
+                                                  p
+

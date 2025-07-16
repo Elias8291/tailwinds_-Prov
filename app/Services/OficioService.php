@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Oficio;
 use App\Models\Tramite;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
@@ -15,40 +14,37 @@ class OficioService
     /**
      * Generar un nuevo oficio para un trámite
      */
-    public function generarOficio(Tramite $tramite, string $tipoOficio): ?Oficio
+    public function generarOficio(Tramite $tramite, string $tipoOficio): array
     {
         try {
             // Generar número de oficio
-            $numeroOficio = Oficio::generarNumeroOficio();
+            $numeroOficio = $this->generarNumeroOficio();
 
             // Generar el PDF
             $pdf = $this->generarPDF($tramite, $tipoOficio, $numeroOficio);
 
-            // Guardar el archivo
+            // Guardar el archivo temporalmente
             $rutaArchivo = $this->guardarArchivo($pdf, $tramite, $numeroOficio);
 
             // Generar hash del archivo
-            $hashArchivo = Oficio::generarHashArchivo($pdf->output());
-
-            // Crear registro en la base de datos
-            $oficio = Oficio::create([
-                'tramite_id' => $tramite->id,
-                'numero_oficio' => $numeroOficio,
-                'tipo_oficio' => $tipoOficio,
-                'ruta_archivo' => $rutaArchivo,
-                'hash_archivo' => $hashArchivo,
-                'estado' => 'generado',
-                'generado_por' => Auth::id()
-            ]);
+            $hashArchivo = hash('sha256', $pdf->output());
 
             Log::info('Oficio generado exitosamente', [
-                'oficio_id' => $oficio->id,
                 'tramite_id' => $tramite->id,
                 'tipo' => $tipoOficio,
                 'numero' => $numeroOficio
             ]);
 
-            return $oficio;
+            return [
+                'pdf' => $pdf,
+                'numero_oficio' => $numeroOficio,
+                'ruta_archivo' => $rutaArchivo,
+                'hash_archivo' => $hashArchivo,
+                'tipo_oficio' => $tipoOficio,
+                'tramite_id' => $tramite->id,
+                'generado_por' => Auth::id(),
+                'fecha_generacion' => now()
+            ];
 
         } catch (\Exception $e) {
             Log::error('Error al generar oficio:', [
@@ -57,8 +53,19 @@ class OficioService
                 'error' => $e->getMessage()
             ]);
 
-            return null;
+            return [];
         }
+    }
+
+    /**
+     * Generar número de oficio
+     */
+    protected function generarNumeroOficio(): string
+    {
+        $año = date('Y');
+        $consecutivo = rand(1000, 9999); // Generar número aleatorio ya que no guardamos en BD
+        
+        return sprintf('OFICIO-PV-%s-%04d', $año, $consecutivo);
     }
 
     /**
@@ -89,7 +96,7 @@ class OficioService
     }
 
     /**
-     * Guardar el archivo PDF
+     * Guardar el archivo PDF temporalmente
      */
     protected function guardarArchivo($pdf, Tramite $tramite, string $numeroOficio): string
     {
@@ -102,51 +109,32 @@ class OficioService
     }
 
     /**
-     * Verificar la integridad de un oficio
+     * Descargar oficio directamente
      */
-    public function verificarIntegridad(Oficio $oficio): bool
+    public function descargarOficio(Tramite $tramite, string $tipoOficio): \Symfony\Component\HttpFoundation\Response
     {
-        return $oficio->verificarHash();
+        $oficioData = $this->generarOficio($tramite, $tipoOficio);
+        
+        if (empty($oficioData)) {
+            abort(500, 'Error al generar el oficio');
+        }
+
+        $nombreArchivo = str_replace(['/', '\\', ' '], '_', $oficioData['numero_oficio']) . '.pdf';
+        
+        return $oficioData['pdf']->download($nombreArchivo);
     }
 
     /**
-     * Actualizar el estado de un oficio
+     * Mostrar oficio en el navegador
      */
-    public function actualizarEstado(Oficio $oficio, string $nuevoEstado, ?string $observaciones = null): bool
+    public function mostrarOficio(Tramite $tramite, string $tipoOficio): \Symfony\Component\HttpFoundation\Response
     {
-        try {
-            $oficio->update([
-                'estado' => $nuevoEstado,
-                'observaciones' => $observaciones
-            ]);
-
-            Log::info('Estado de oficio actualizado', [
-                'oficio_id' => $oficio->id,
-                'estado_anterior' => $oficio->getOriginal('estado'),
-                'nuevo_estado' => $nuevoEstado
-            ]);
-
-            return true;
-
-        } catch (\Exception $e) {
-            Log::error('Error al actualizar estado de oficio:', [
-                'oficio_id' => $oficio->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return false;
-        }
-    }
-
-    /**
-     * Obtener la ruta de descarga de un oficio
-     */
-    public function obtenerRutaDescarga(Oficio $oficio): ?string
-    {
-        if (!Storage::exists($oficio->ruta_archivo)) {
-            return null;
+        $oficioData = $this->generarOficio($tramite, $tipoOficio);
+        
+        if (empty($oficioData)) {
+            abort(500, 'Error al generar el oficio');
         }
 
-        return $oficio->getRutaCompleta();
+        return $oficioData['pdf']->stream();
     }
 } 

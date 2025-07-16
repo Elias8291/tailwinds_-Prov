@@ -2,32 +2,33 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\DocumentoSolicitante;
 
 class DocumentoVersion extends Model
 {
     use HasFactory;
 
     protected $table = 'documento_versiones';
-
+    
     protected $fillable = [
         'documento_solicitante_id',
-        'version',
-        'ruta_archivo',
+        'path_archivo',
+        'hash_archivo',
         'fecha_subida',
-        'observaciones'
+        'comentarios_subida'
     ];
 
     protected $casts = [
-        'fecha_subida' => 'date'
+        'fecha_subida' => 'datetime',
     ];
 
     /**
-     * Obtiene el documento solicitante asociado.
+     * Relación: documento solicitante de la versión
      */
     public function documentoSolicitante()
     {
         return $this->belongsTo(DocumentoSolicitante::class, 'documento_solicitante_id');
     }
-} 
+}

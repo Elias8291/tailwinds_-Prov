@@ -4,51 +4,47 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Tramite;
+use App\Models\SeccionCatalogo;
+use App\Models\RevisionSeccion;
 
 class SeccionTramite extends Model
 {
     use HasFactory;
 
-    protected $table = 'seccion_tramite';
-
+    protected $table = 'secciones_tramite';
+    
     protected $fillable = [
-        'nombre',
-        'slug',
-        'descripcion',
-        'orden'
+        'tramite_id',
+        'seccion_id',
+        'estado'
     ];
 
     protected $casts = [
-        'es_requerido' => 'boolean',
-        'orden' => 'integer'
+        'estado' => 'string',
     ];
 
     /**
-     * Relación muchos-a-muchos con Documento
+     * Relación: trámite de la sección
      */
-    public function documentos()
+    public function tramite()
     {
-        return $this->belongsToMany(Documento::class, 'documento_seccion', 'seccion_id', 'documento_id')
-                    ->withTimestamps();
+        return $this->belongsTo(Tramite::class);
     }
 
     /**
-     * Obtiene los trámites que tienen esta sección
+     * Relación: catálogo de la sección
      */
-    public function tramites()
+    public function seccionCatalogo()
     {
-        return $this->belongsToMany(Tramite::class, 'seccion_tramite_tramite')
-                    ->withPivot(['estado', 'comentarios'])
-                    ->withTimestamps();
+        return $this->belongsTo(SeccionCatalogo::class, 'seccion_id');
     }
 
-    public function progresoTramites()
+    /**
+     * Relación: revisiones de la sección
+     */
+    public function revisiones()
     {
-        return $this->hasMany(ProgresoTramite::class, 'seccion_id');
+        return $this->hasMany(RevisionSeccion::class);
     }
-
-    public function revisionesSecciones()
-    {
-        return $this->hasMany(SeccionRevision::class, 'seccion_id');
-    }
-} 
+}

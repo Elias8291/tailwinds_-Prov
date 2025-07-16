@@ -4,42 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Solicitante;
 
 class Accionista extends Model
 {
     use HasFactory;
 
-    protected $table = 'accionista';
-
+    protected $table = 'accionistas';
+    
     protected $fillable = [
+        'solicitante_id',
         'nombre',
         'apellido_paterno',
         'apellido_materno',
+        'rfc',
+        'porcentaje_participacion'
+    ];
+
+    protected $casts = [
+        'porcentaje_participacion' => 'decimal:2',
     ];
 
     /**
-     * Relación con AccionistaSolicitante
+     * Relación: solicitante del accionista
      */
-    public function accionistaSolicitantes()
+    public function solicitante()
     {
-        return $this->hasMany(AccionistaSolicitante::class, 'accionista_id');
+        return $this->belongsTo(Solicitante::class);
     }
-
-    /**
-     * Relación con Tramites a través de AccionistaSolicitante
-     */
-    public function tramites()
-    {
-        return $this->belongsToMany(Tramite::class, 'accionista_solicitante', 'accionista_id', 'tramite_id')
-            ->withPivot('porcentaje_participacion')
-            ->withTimestamps();
-    }
-
-    /**
-     * Obtener el nombre completo del accionista
-     */
-    public function getNombreCompletoAttribute()
-    {
-        return trim($this->nombre . ' ' . $this->apellido_paterno . ' ' . $this->apellido_materno);
-    }
-} 
+}

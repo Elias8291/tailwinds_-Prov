@@ -62,25 +62,23 @@
 
     <!-- Mensajes de Estado -->
     @if(session('error') || $errors->any())
-    <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded-lg mb-3">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <svg class="h-4 w-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        <div class="flex justify-center mb-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-100 border border-red-200 shadow-sm animate-fadeInUp">
+                <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-            </div>
-            <div class="ml-3">
-                @if(session('error'))
-                    <p class="text-sm text-red-700">{{ session('error') }}</p>
-                @endif
-                @if($errors->any())
-                    @foreach($errors->all() as $error)
-                        <p class="text-sm text-red-700">{{ $error }}</p>
-                    @endforeach
-                @endif
+                <span class="text-xs text-red-700 font-medium">
+                    @if(session('error'))
+                        {{ session('error') }}
+                    @endif
+                    @if($errors->any())
+                        @foreach($errors->all() as $error)
+                            {{ $error }}
+                        @endforeach
+                    @endif
+                </span>
             </div>
         </div>
-    </div>
     @endif
 
     <!-- Campos de inicio de sesión -->

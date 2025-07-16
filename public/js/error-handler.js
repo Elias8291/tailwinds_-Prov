@@ -222,5 +222,4 @@
         initPrelineUISecure();
     }
     
-    console.log('✅ Error Handler Global inicializado');
 })(); 

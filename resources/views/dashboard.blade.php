@@ -183,7 +183,7 @@
                         <h3 class="text-lg font-bold text-gray-800 mb-1">Trámites en Proceso</h3>
                         <p class="text-sm text-gray-500">Solicitudes por aprobar</p>
                         <div class="mt-4 pt-4 border-t border-gray-100/50">
-                            <a href="{{ route('revision.index') }}" class="group inline-flex items-center text-amber-600 hover:text-amber-800 text-sm font-semibold transition-colors">
+                            <a class="group inline-flex items-center text-amber-600 hover:text-amber-800 text-sm font-semibold transition-colors">
                                 <span>Revisar trámites</span>
                                 <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                             </a>
@@ -198,7 +198,7 @@
                                 <i class="fas fa-building text-white text-lg"></i>
                             </div>
                             <div class="text-right">
-                                <p class="text-3xl font-bold text-gray-800">{{ $totalProveedores ?? 0 }}</p>
+                                <p class="text-3xl font-bold text-gray-800"></p>
                                 <span class="inline-block px-3 py-1 text-xs font-medium text-emerald-600 bg-emerald-50 rounded-full mt-1">
                                     Activos en el padrón
                                 </span>
@@ -207,7 +207,7 @@
                         <h3 class="text-lg font-bold text-gray-800 mb-1">Proveedores Registrados</h3>
                         <p class="text-sm text-gray-500">Base de datos completa</p>
                         <div class="mt-4 pt-4 border-t border-gray-100/50">
-                            <a href="{{ route('proveedores.index') }}" class="group inline-flex items-center text-emerald-600 hover:text-emerald-800 text-sm font-semibold transition-colors">
+                            <a  class="group inline-flex items-center text-emerald-600 hover:text-emerald-800 text-sm font-semibold transition-colors">
                                 <span>Gestionar proveedores</span>
                                 <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                             </a>
@@ -231,7 +231,7 @@
                         <h3 class="text-lg font-bold text-gray-800 mb-1">Sistema de Citas</h3>
                         <p class="text-sm text-gray-500">Agenda digitalizada</p>
                         <div class="mt-4 pt-4 border-t border-gray-100/50">
-                            <a href="{{ route('citas.index') }}" class="group inline-flex items-center text-rose-600 hover:text-rose-800 text-sm font-semibold transition-colors">
+                            <a class="group inline-flex items-center text-rose-600 hover:text-rose-800 text-sm font-semibold transition-colors">
                                 <span>Ver calendario</span>
                                 <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                             </a>
@@ -256,7 +256,7 @@
                             </div>
                             <div class="divide-y divide-gray-100/50">
                                 <!-- Mis Trámites -->
-                                <a href="{{ route('tramites.solicitante.index') }}" class="group block p-6 hover:bg-gray-50/50 transition-colors">
+                                <a class="group block p-6 hover:bg-gray-50/50 transition-colors">
                                     <div class="flex items-center space-x-4">
                                         <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
                                             <i class="fas fa-file-lines text-white text-lg"></i>
@@ -275,7 +275,7 @@
                                 <!-- Estado del Proveedor (Solo para Solicitantes, versión simplificada) -->
                                 @if(!auth()->user()->hasRole('Proveedor'))
                                 @can('mi-estado-proveedor.ver')
-                                <a href="{{ route('mi-estado-proveedor.index') }}" class="group block p-6 hover:bg-gray-50/50 transition-colors">
+                                <a class="group block p-6 hover:bg-gray-50/50 transition-colors">
                                     <div class="flex items-center space-x-4">
                                         <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
                                             <i class="fas fa-chart-line text-white text-lg"></i>
@@ -294,7 +294,7 @@
                                 @endif
 
                                 <!-- Citas -->
-                                <a href="{{ route('citas.index') }}" class="group block p-6 hover:bg-gray-50/50 transition-colors">
+                                <a  class="group block p-6 hover:bg-gray-50/50 transition-colors">
                                     <div class="flex items-center space-x-4">
                                         <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
                                             <i class="fas fa-calendar-check text-white text-lg"></i>
@@ -347,7 +347,7 @@
                                             <div class="relative">
                                                 <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-500 rounded-2xl blur opacity-20 transition duration-300"></div>
                                                 
-                                                <a href="{{ route('mi-estado-proveedor.index') }}" 
+                                                <a 
                                                    class="glow-button relative group inline-flex items-center justify-center w-full lg:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-500 text-white font-bold rounded-xl hover:from-green-500 hover:via-emerald-500 hover:to-green-500 transition-all duration-300 transform hover:scale-102 shadow-xl hover:shadow-2xl">
                                                     <div class="flex items-center space-x-3">
                                                         <div class="relative">
@@ -374,7 +374,7 @@
 
                                             @if(auth()->check() && (auth()->user()->can('tramites-solicitante.renovacion') || auth()->user()->can('tramites-solicitante.actualizacion')))
                                             <div class="flex justify-center lg:justify-start">
-                                                <a href="{{ route('tramites.terminos') }}" 
+                                                <a  
                                                    class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 font-semibold rounded-lg hover:from-emerald-100 hover:to-green-100 transition-all duration-300 shadow-sm hover:shadow-md text-sm">
                                                     <i class="fas fa-sync-alt text-emerald-600 mr-2 text-xs"></i>
                                                     <span>Renovar/Actualizar</span>
@@ -434,7 +434,7 @@
                                                     <!-- Efecto de resplandor animado -->
                                                     <div class="absolute -inset-1 bg-gradient-to-r from-[#9d2449] via-pink-500 to-[#be185d] rounded-xl blur opacity-20 group-hover:opacity-40 transition-all duration-500 animate-pulse"></div>
                                                     
-                                                    <a href="{{ route('tramites.terminos') }}" 
+                                                    <a 
                                                        class="relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#9d2449] via-[#be185d] to-[#9d2449] text-white font-bold rounded-xl hover:from-[#be185d] hover:via-pink-500 hover:to-[#9d2449] transition-all duration-500 transform hover:scale-110 hover:rotate-1 shadow-lg hover:shadow-xl overflow-hidden">
                                                         
                                                         <!-- Efecto shimmer -->

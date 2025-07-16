@@ -11,19 +11,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Solicitante;
+use App\Models\Tramite;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-class User extends Authenticatable implements CanResetPassword
+class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
-    use HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
 
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-  protected $fillable = [
+    protected $fillable = [
         'nombre',
         'correo',
         'rfc',
@@ -35,21 +32,11 @@ class User extends Authenticatable implements CanResetPassword
         'updated_at',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'fecha_verificacion_correo' => 'datetime',
@@ -57,16 +44,19 @@ class User extends Authenticatable implements CanResetPassword
         'password' => 'hashed',
     ];
 
-    /** Get the solicitante record associated with the user */
-    public function solicitante()
+    public function sendPasswordResetNotification($token)
     {
-        return $this->hasOne(Solicitante::class, 'usuario_id');
+        Mail::to($this->correo)->send(new ResetPassword($token, $this->correo));
     }
 
-    /** Get all solicitantes records associated with the user */
-    public function solicitantes()
+    public function getEmailForPasswordReset()
     {
-        return $this->hasMany(Solicitante::class, 'usuario_id');
+        return $this->correo;
+    }
+
+    public function getEmailAttribute()
+    {
+        return $this->correo;
     }
 
     public function getNameAttribute()
@@ -74,44 +64,47 @@ class User extends Authenticatable implements CanResetPassword
         return $this->nombre;
     }
 
-    /**
-     * Send the password reset notification.
-     *
-     * @param  string  $token
-     * @return void
-     */
-    public function sendPasswordResetNotification($token)
-    {
-        Mail::to($this->correo)->send(new ResetPassword($token, $this->correo));
-    }
-
-    /**
-     * Get the email address for password resets.
-     *
-     * @return string
-     */
-    public function getEmailForPasswordReset()
+    public function getEmailForVerification()
     {
         return $this->correo;
     }
 
     /**
-     * Get the email attribute (maps to correo for compatibility)
-     * 
-     * @return string
+     * Relación: notificaciones del usuario
      */
-    public function getEmailAttribute()
+    public function notificaciones(): HasMany
     {
-        return $this->correo;
+        return $this->hasMany(\App\Models\Notificacion::class, 'user_id');
     }
 
     /**
-     * Get the citas associated with the user
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * Relación: solicitante del usuario
      */
-    public function citas()
+    public function solicitante()
     {
-        return $this->hasMany(Cita::class);
+        return $this->hasOne(\App\Models\Solicitante::class, 'user_id');
+    }
+
+    /**
+     * Relación: trámites del usuario a través de solicitante
+     */
+    public function tramites()
+    {
+        return $this->hasManyThrough(
+            \App\Models\Tramite::class,
+            \App\Models\Solicitante::class,
+            'user_id', // Foreign key on solicitantes table...
+            'solicitante_id', // Foreign key on tramites table...
+            'id', // Local key on users table...
+            'id' // Local key on solicitantes table...
+        );
+    }
+
+    /**
+     * Relación: revisiones realizadas por el usuario
+     */
+    public function revisiones()
+    {
+        return $this->hasMany(\App\Models\RevisionSeccion::class, 'revisor_id');
     }
 }

@@ -169,8 +169,7 @@ class QRHandler {
 
             
             const content = this.scraper.generateModalContent(this.lastScannedData);
-            
-            // Actualizar contenido del modal
+        
             const satDataContent = document.getElementById('satDataContent');
             if (satDataContent) {
                 satDataContent.innerHTML = content;
@@ -202,19 +201,19 @@ class QRHandler {
         return `
             <div class="space-y-6">
                 <!-- Información General -->
-                <div class="bg-white rounded-xl p-6 border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Información General</h3>
+                <div class="bg-white rounded-xl p-6 border border-blue-100">
+                    <h3 class="text-lg font-bold text-blue-800 mb-4">Información General</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <p class="text-sm text-gray-500">RFC</p>
+                            <p class="text-sm text-blue-700 font-semibold">RFC</p>
                             <p class="text-base font-medium text-gray-900">${details.rfc || 'No disponible'}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Tipo de Persona</p>
+                            <p class="text-sm text-blue-700 font-semibold">Tipo de Persona</p>
                             <p class="text-base font-medium text-gray-900">${details.tipoPersona || 'No especificado'}</p>
                         </div>
                         <div class="col-span-2">
-                            <p class="text-sm text-gray-500">${details.tipoPersona === 'Moral' ? 'Razón Social' : 'Nombre Completo'}</p>
+                            <p class="text-sm text-blue-700 font-semibold">${details.tipoPersona === 'Moral' ? 'Razón Social' : 'Nombre Completo'}</p>
                             <p class="text-base font-medium text-gray-900">
                                 ${details.tipoPersona === 'Moral' ? 
                                     (details.razonSocial || 'No disponible') : 
@@ -225,34 +224,34 @@ class QRHandler {
                 </div>
 
                 <!-- Domicilio Fiscal -->
-                <div class="bg-white rounded-xl p-6 border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Domicilio Fiscal</h3>
+                <div class="bg-white rounded-xl p-6 border border-blue-100">
+                    <h3 class="text-lg font-bold text-blue-800 mb-4">Domicilio Fiscal</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="col-span-2">
-                            <p class="text-sm text-gray-500">Dirección</p>
+                            <p class="text-sm text-blue-700 font-semibold">Dirección</p>
                             <p class="text-base font-medium text-gray-900">${details.direccion || 'No disponible'}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Código Postal</p>
+                            <p class="text-sm text-blue-700 font-semibold">Código Postal</p>
                             <p class="text-base font-medium text-gray-900">${details.codigoPostal || 'No disponible'}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Entidad Federativa</p>
+                            <p class="text-sm text-blue-700 font-semibold">Entidad Federativa</p>
                             <p class="text-base font-medium text-gray-900">${details.entidadFederativa || 'No disponible'}</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Información Adicional -->
-                <div class="bg-white rounded-xl p-6 border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Información Adicional</h3>
+                <div class="bg-white rounded-xl p-6 border border-blue-100">
+                    <h3 class="text-lg font-bold text-blue-800 mb-4">Información Adicional</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <p class="text-sm text-gray-500">Estatus</p>
+                            <p class="text-sm text-blue-700 font-semibold">Estatus</p>
                             <p class="text-base font-medium text-gray-900">${details.estatus || 'No disponible'}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Fecha de Registro</p>
+                            <p class="text-sm text-blue-700 font-semibold">Fecha de Registro</p>
                             <p class="text-base font-medium text-gray-900">${details.fechaRegistro || 'No disponible'}</p>
                         </div>
                     </div>
@@ -262,7 +261,6 @@ class QRHandler {
     }
 }
 
-// Hacer la clase disponible globalmente para navegadores legacy
 if (typeof window !== 'undefined') {
     window.QRHandler = QRHandler;
 } 
